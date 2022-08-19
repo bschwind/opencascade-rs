@@ -1,10 +1,12 @@
 #[cxx::bridge]
 pub mod ffi {
     unsafe extern "C++" {
-        // include!("cxx-demo/include/blobstore.h");
+        // https://github.com/dtolnay/cxx/issues/280
+        include!("opencascade-sys/OCCT/src/gp/gp_Pnt.hxx");
+        include!("opencascade-sys/include/wrapper.hxx");
 
-        type BlobstoreClient;
-
-        pub fn new_blobstore_client() -> UniquePtr<BlobstoreClient>;
+        type gp_Pnt;
+        pub fn make_gp_Pnt() -> UniquePtr<gp_Pnt>;
+        pub fn Y(&self) -> f64;
     }
 }
