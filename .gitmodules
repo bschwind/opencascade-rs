@@ -1,0 +1,3 @@
+[submodule "crates/opencascade-sys/OCCT"]
+	path = crates/opencascade-sys/OCCT
+	url = https://github.com/Open-Cascade-SAS/OCCT.git
