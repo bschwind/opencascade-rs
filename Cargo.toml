@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "crates/opencascade-sys",
+]
+
+resolver = "2"
