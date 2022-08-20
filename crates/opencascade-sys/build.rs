@@ -4,6 +4,7 @@ fn main() {
     println!("cargo:rustc-link-search=native={}", dst.join("lib").display());
     println!("cargo:rustc-link-lib=static=TKMath");
     println!("cargo:rustc-link-lib=static=TKernel");
+    println!("cargo:rustc-link-lib=static=TKGeomBase");
 
     let _build = cxx_build::bridge("src/lib.rs")
         .cpp(true)
