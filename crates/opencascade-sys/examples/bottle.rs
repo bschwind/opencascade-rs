@@ -1,4 +1,4 @@
-use opencascade_sys::ffi::{new_arc_of_circle, new_point, new_segment};
+use opencascade_sys::ffi::{make_edge, new_arc_of_circle, new_point, new_segment};
 
 // All dimensions are in millimeters.
 pub fn main() {
@@ -13,8 +13,12 @@ pub fn main() {
     let point_4 = new_point(width / 2.0, thickness / 4.0, 0.0);
     let point_5 = new_point(width / 2.0, 0.0, 0.0);
 
-    // Define the
+    // Define the arcs and segments of the profile.
     let segment_1 = new_segment(&point_1, &point_2);
     let segment_2 = new_segment(&point_4, &point_5);
     let arc = new_arc_of_circle(&point_2, &point_3, &point_4);
+
+    let edge_1 = make_edge(&segment_1);
+    let edge_2 = make_edge(&arc);
+    let edge_2 = make_edge(&segment_2);
 }
