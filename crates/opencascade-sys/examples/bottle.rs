@@ -22,18 +22,17 @@ pub fn main() {
     let segment_2 = GC_MakeSegment_point_point(&point_4, &point_5);
     let arc = GC_MakeArcOfCircle_point_point_point(&point_2, &point_3, &point_4);
 
-    let segment_1_value = GC_MakeSegment_Value(&segment_1);
-    let geom_curve_1 = new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&segment_1_value);
-    let edge_1 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(&geom_curve_1);
+    let edge_1 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+        &new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&GC_MakeSegment_Value(&segment_1)),
+    );
 
-    let segment_2_value = GC_MakeSegment_Value(&segment_2);
-    let geom_curve_2 = new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&segment_2_value);
-    let edge_2 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(&geom_curve_2);
+    let edge_2 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+        &new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&GC_MakeSegment_Value(&segment_2)),
+    );
 
-    let arc_value = GC_MakeArcOfCircle_Value(&arc);
-    let arc_curve = new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&arc_value);
-    let edge_3 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(&arc_curve);
+    let edge_3 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+        &new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&GC_MakeArcOfCircle_Value(&arc)),
+    );
 
-    // let edge_2 = make_edge(&arc);
-    // let edge_2 = make_edge(&segment_2);
+    let wire = ();
 }

@@ -55,3 +55,11 @@ std::unique_ptr<TopoDS_Edge> make_edge(const Geom_TrimmedCurve &geom_curve) {
 std::unique_ptr<BRepBuilderAPI_MakeEdge> BRepBuilderAPI_MakeEdge_HandleGeomCurve(const HandleGeomCurve &geom_curve) {
   return std::unique_ptr<BRepBuilderAPI_MakeEdge>(new BRepBuilderAPI_MakeEdge(geom_curve));
 }
+
+// std::unique_ptr<TopoDS_Edge> BRepBuilderAPI_MakeEdge_Edge(const BRepBuilderAPI_MakeEdge& make_edge) {
+//   return std::unique_ptr<TopoDS_Edge>(make_edge.Edge());
+// }
+
+// TopoDS_Edge& BRepBuilderAPI_MakeEdge_Edge(BRepBuilderAPI_MakeEdge& make_edge) {
+//   return &make_edge.Edge();
+// }

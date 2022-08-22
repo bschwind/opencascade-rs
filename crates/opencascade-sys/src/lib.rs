@@ -60,8 +60,18 @@ pub mod ffi {
 
         // BRepBuilder
         type BRepBuilderAPI_MakeEdge;
+        type TopoDS_Vertex;
         pub fn BRepBuilderAPI_MakeEdge_HandleGeomCurve(
             geom_curve_handle: &HandleGeomCurve,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
+        pub fn Vertex1(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Vertex;
+        pub fn Edge(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Edge;
+        // pub fn BRepBuilderAPI_MakeEdge_Edge(make_edge: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Edge;
+        // pub fn BRepBuilderAPI_MakeEdge_Edge(
+        //     make_edge: &BRepBuilderAPI_MakeEdge,
+        // ) -> UniquePtr<TopoDS_Edge>;
+
+        // type BRepBuilderAPI_MakeWire;
+        // pub fn BRepBuilderAPI_MakeWire_edge_edge_edge();
     }
 }
