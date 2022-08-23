@@ -4,16 +4,6 @@ pub mod ffi {
         // https://github.com/dtolnay/cxx/issues/280
 
         // OCCT Includes
-        include!("opencascade-sys/OCCT/src/gp/gp_Pnt.hxx");
-        include!("opencascade-sys/OCCT/src/gp/gp.hxx");
-        include!("opencascade-sys/OCCT/src/GC/GC_MakeSegment.hxx");
-        include!("opencascade-sys/OCCT/src/GC/GC_MakeArcOfCircle.hxx");
-        include!("opencascade-sys/OCCT/src/Geom/Geom_TrimmedCurve.hxx");
-        include!("opencascade-sys/OCCT/src/Standard/Standard_Handle.hxx");
-        include!("opencascade-sys/OCCT/src/TopoDS/TopoDS_Edge.hxx");
-        include!("opencascade-sys/OCCT/src/BRepBuilderAPI/BRepBuilderAPI_MakeEdge.hxx");
-        include!("opencascade-sys/OCCT/src/BRepBuilderAPI/BRepBuilderAPI_MakeWire.hxx");
-
         include!("opencascade-sys/include/wrapper.hxx");
 
         // Handles
