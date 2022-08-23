@@ -56,10 +56,11 @@ std::unique_ptr<BRepBuilderAPI_MakeEdge> BRepBuilderAPI_MakeEdge_HandleGeomCurve
   return std::unique_ptr<BRepBuilderAPI_MakeEdge>(new BRepBuilderAPI_MakeEdge(geom_curve));
 }
 
-// std::unique_ptr<TopoDS_Edge> BRepBuilderAPI_MakeEdge_Edge(const BRepBuilderAPI_MakeEdge& make_edge) {
-//   return std::unique_ptr<TopoDS_Edge>(make_edge.Edge());
-// }
+std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge_edge(const TopoDS_Edge& edge_1, const TopoDS_Edge& edge_2, const TopoDS_Edge& edge_3) {
+  return std::unique_ptr<BRepBuilderAPI_MakeWire>(new BRepBuilderAPI_MakeWire(edge_1, edge_2, edge_3));
+}
 
-// TopoDS_Edge& BRepBuilderAPI_MakeEdge_Edge(BRepBuilderAPI_MakeEdge& make_edge) {
-//   return &make_edge.Edge();
-// }
+// Geometric processing
+const gp_Ax1& gp_OX() {
+  return gp::OX();
+}

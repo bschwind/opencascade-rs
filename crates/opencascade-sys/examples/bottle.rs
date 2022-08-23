@@ -1,7 +1,8 @@
 use opencascade_sys::ffi::{
-    new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point,
-    BRepBuilderAPI_MakeEdge_HandleGeomCurve, GC_MakeArcOfCircle_Value,
-    GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value, GC_MakeSegment_point_point,
+    gp_OX, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point,
+    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeWire_edge_edge_edge,
+    GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value,
+    GC_MakeSegment_point_point,
 };
 
 // All dimensions are in millimeters.
@@ -22,17 +23,23 @@ pub fn main() {
     let segment_2 = GC_MakeSegment_point_point(&point_4, &point_5);
     let arc = GC_MakeArcOfCircle_point_point_point(&point_2, &point_3, &point_4);
 
-    let edge_1 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+    let mut edge_1 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(
         &new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&GC_MakeSegment_Value(&segment_1)),
     );
 
-    let edge_2 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+    let mut edge_2 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(
         &new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&GC_MakeSegment_Value(&segment_2)),
     );
 
-    let edge_3 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+    let mut edge_3 = BRepBuilderAPI_MakeEdge_HandleGeomCurve(
         &new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&GC_MakeArcOfCircle_Value(&arc)),
     );
 
-    let wire = ();
+    let wire = BRepBuilderAPI_MakeWire_edge_edge_edge(
+        edge_1.pin_mut().Edge(),
+        edge_2.pin_mut().Edge(),
+        edge_3.pin_mut().Edge(),
+    );
+
+    let x_axis = gp_OX();
 }

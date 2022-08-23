@@ -5,12 +5,14 @@ pub mod ffi {
 
         // OCCT Includes
         include!("opencascade-sys/OCCT/src/gp/gp_Pnt.hxx");
+        include!("opencascade-sys/OCCT/src/gp/gp.hxx");
         include!("opencascade-sys/OCCT/src/GC/GC_MakeSegment.hxx");
         include!("opencascade-sys/OCCT/src/GC/GC_MakeArcOfCircle.hxx");
         include!("opencascade-sys/OCCT/src/Geom/Geom_TrimmedCurve.hxx");
         include!("opencascade-sys/OCCT/src/Standard/Standard_Handle.hxx");
         include!("opencascade-sys/OCCT/src/TopoDS/TopoDS_Edge.hxx");
         include!("opencascade-sys/OCCT/src/BRepBuilderAPI/BRepBuilderAPI_MakeEdge.hxx");
+        include!("opencascade-sys/OCCT/src/BRepBuilderAPI/BRepBuilderAPI_MakeWire.hxx");
 
         include!("opencascade-sys/include/wrapper.hxx");
 
@@ -65,13 +67,17 @@ pub mod ffi {
             geom_curve_handle: &HandleGeomCurve,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
         pub fn Vertex1(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Vertex;
-        pub fn Edge(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Edge;
-        // pub fn BRepBuilderAPI_MakeEdge_Edge(make_edge: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Edge;
-        // pub fn BRepBuilderAPI_MakeEdge_Edge(
-        //     make_edge: &BRepBuilderAPI_MakeEdge,
-        // ) -> UniquePtr<TopoDS_Edge>;
+        pub fn Edge(self: Pin<&mut BRepBuilderAPI_MakeEdge>) -> &TopoDS_Edge;
 
-        // type BRepBuilderAPI_MakeWire;
-        // pub fn BRepBuilderAPI_MakeWire_edge_edge_edge();
+        type BRepBuilderAPI_MakeWire;
+        pub fn BRepBuilderAPI_MakeWire_edge_edge_edge(
+            edge_1: &TopoDS_Edge,
+            edge_2: &TopoDS_Edge,
+            edge_3: &TopoDS_Edge,
+        ) -> UniquePtr<BRepBuilderAPI_MakeWire>;
+
+        // Geometric processor
+        type gp_Ax1;
+        pub fn gp_OX() -> &'static gp_Ax1;
     }
 }
