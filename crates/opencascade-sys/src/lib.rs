@@ -26,7 +26,6 @@ pub mod ffi {
         // Segments
         type GC_MakeSegment;
         pub fn GC_MakeSegment_point_point(p1: &gp_Pnt, p2: &gp_Pnt) -> UniquePtr<GC_MakeSegment>;
-        pub fn new_segment(p1: &gp_Pnt, p2: &gp_Pnt) -> UniquePtr<Geom_TrimmedCurve>;
         pub fn GC_MakeSegment_Value(arc: &GC_MakeSegment) -> UniquePtr<HandleGeomTrimmedCurve>;
 
         // Arcs
@@ -36,11 +35,6 @@ pub mod ffi {
             p2: &gp_Pnt,
             p3: &gp_Pnt,
         ) -> UniquePtr<GC_MakeArcOfCircle>;
-        pub fn new_arc_of_circle(
-            p1: &gp_Pnt,
-            p2: &gp_Pnt,
-            p3: &gp_Pnt,
-        ) -> UniquePtr<Geom_TrimmedCurve>;
         pub fn GC_MakeArcOfCircle_Value(
             arc: &GC_MakeArcOfCircle,
         ) -> UniquePtr<HandleGeomTrimmedCurve>;
@@ -48,7 +42,6 @@ pub mod ffi {
         // Shapes
         type TopoDS_Shape;
         type TopoDS_Edge;
-        pub fn make_edge(geom_curve: &Geom_TrimmedCurve) -> UniquePtr<TopoDS_Edge>;
 
         // BRepBuilder
         type BRepBuilderAPI_MakeEdge;
