@@ -33,6 +33,10 @@ std::unique_ptr<BRepBuilderAPI_MakeEdge> BRepBuilderAPI_MakeEdge_HandleGeomCurve
   return std::unique_ptr<BRepBuilderAPI_MakeEdge>(new BRepBuilderAPI_MakeEdge(geom_curve));
 }
 
+std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_ctor() {
+  return std::unique_ptr<BRepBuilderAPI_MakeWire>(new BRepBuilderAPI_MakeWire());
+}
+
 std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge_edge(const TopoDS_Edge& edge_1, const TopoDS_Edge& edge_2, const TopoDS_Edge& edge_3) {
   return std::unique_ptr<BRepBuilderAPI_MakeWire>(new BRepBuilderAPI_MakeWire(edge_1, edge_2, edge_3));
 }
@@ -40,4 +44,18 @@ std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge_edge(
 // Geometric processing
 const gp_Ax1& gp_OX() {
   return gp::OX();
+}
+
+// Shape stuff
+const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape) {
+  return TopoDS::Wire(shape);
+}
+
+// Transforms
+std::unique_ptr<gp_Trsf> new_transform() {
+  return std::unique_ptr<gp_Trsf>(new gp_Trsf());
+}
+
+std::unique_ptr<BRepBuilderAPI_Transform> BRepBuilderAPI_Transform_ctor(const TopoDS_Shape& shape, const gp_Trsf& transform, const Standard_Boolean copy) {
+  return std::unique_ptr<BRepBuilderAPI_Transform>(new BRepBuilderAPI_Transform(shape, transform, copy));
 }

@@ -1,11 +1,15 @@
 #include <gp_Pnt.hxx>
+#include <gp_Trsf.hxx>
 #include <gp.hxx>
 #include <GC_MakeSegment.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Shape.hxx>
 #include <TopoDS_Edge.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 
 // Handles
 typedef opencascade::handle<Geom_Curve> HandleGeomCurve;
@@ -26,7 +30,16 @@ std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeArcOfCircle_Value(const GC_MakeAr
 
 // BRepBuilderAPI stuff
 std::unique_ptr<BRepBuilderAPI_MakeEdge> BRepBuilderAPI_MakeEdge_HandleGeomCurve(const HandleGeomCurve& geom_curve);
+std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_ctor();
 std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge_edge(const TopoDS_Edge& edge_1, const TopoDS_Edge& edge_2, const TopoDS_Edge& edge_3);
 
 // Geometric processor
 const gp_Ax1& gp_OX();
+
+// Shape stuff
+const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape);
+
+// Transforms
+std::unique_ptr<gp_Trsf> new_transform();
+
+std::unique_ptr<BRepBuilderAPI_Transform> BRepBuilderAPI_Transform_ctor(const TopoDS_Shape& shape, const gp_Trsf& transform, const Standard_Boolean copy);

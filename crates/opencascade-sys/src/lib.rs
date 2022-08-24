@@ -42,6 +42,9 @@ pub mod ffi {
         // Shapes
         type TopoDS_Shape;
         type TopoDS_Edge;
+        type TopoDS_Wire;
+
+        pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
 
         // BRepBuilder
         type BRepBuilderAPI_MakeEdge;
@@ -53,14 +56,38 @@ pub mod ffi {
         pub fn Edge(self: Pin<&mut BRepBuilderAPI_MakeEdge>) -> &TopoDS_Edge;
 
         type BRepBuilderAPI_MakeWire;
+        pub fn BRepBuilderAPI_MakeWire_ctor() -> UniquePtr<BRepBuilderAPI_MakeWire>;
         pub fn BRepBuilderAPI_MakeWire_edge_edge_edge(
             edge_1: &TopoDS_Edge,
             edge_2: &TopoDS_Edge,
             edge_3: &TopoDS_Edge,
         ) -> UniquePtr<BRepBuilderAPI_MakeWire>;
+        pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Shape;
+        pub fn Wire(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Wire;
+
+        #[rust_name = "add_edge"]
+        pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, edge: &TopoDS_Edge);
+
+        #[rust_name = "add_wire"]
+        pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, wire: &TopoDS_Wire);
 
         // Geometric processor
         type gp_Ax1;
         pub fn gp_OX() -> &'static gp_Ax1;
+
+        // Transforms
+        type gp_Trsf;
+        pub fn new_transform() -> UniquePtr<gp_Trsf>;
+
+        #[rust_name = "set_mirror_axis"]
+        pub fn SetMirror(self: Pin<&mut gp_Trsf>, axis: &gp_Ax1);
+
+        type BRepBuilderAPI_Transform;
+        pub fn BRepBuilderAPI_Transform_ctor(
+            shape: &TopoDS_Shape,
+            transform: &gp_Trsf,
+            copy: bool,
+        ) -> UniquePtr<BRepBuilderAPI_Transform>;
+        pub fn Shape(self: Pin<&mut BRepBuilderAPI_Transform>) -> &TopoDS_Shape;
     }
 }

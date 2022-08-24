@@ -5,6 +5,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKMath");
     println!("cargo:rustc-link-lib=static=TKernel");
     println!("cargo:rustc-link-lib=static=TKGeomBase");
+    println!("cargo:rustc-link-lib=static=TKG2d");
     println!("cargo:rustc-link-lib=static=TKG3d");
     println!("cargo:rustc-link-lib=static=TKTopAlgo");
     println!("cargo:rustc-link-lib=static=TKGeomAlgo");

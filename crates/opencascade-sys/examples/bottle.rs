@@ -1,8 +1,9 @@
 use opencascade_sys::ffi::{
-    gp_OX, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point,
-    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeWire_edge_edge_edge,
+    gp_OX, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point, new_transform,
+    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeWire_ctor,
+    BRepBuilderAPI_MakeWire_edge_edge_edge, BRepBuilderAPI_Transform_ctor,
     GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value,
-    GC_MakeSegment_point_point,
+    GC_MakeSegment_point_point, TopoDS_cast_to_wire,
 };
 
 // All dimensions are in millimeters.
@@ -35,11 +36,26 @@ pub fn main() {
         &new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&GC_MakeArcOfCircle_Value(&arc)),
     );
 
-    let wire = BRepBuilderAPI_MakeWire_edge_edge_edge(
+    let mut wire = BRepBuilderAPI_MakeWire_edge_edge_edge(
         edge_1.pin_mut().Edge(),
         edge_2.pin_mut().Edge(),
         edge_3.pin_mut().Edge(),
     );
 
     let x_axis = gp_OX();
+
+    let mut transform = new_transform();
+    transform.pin_mut().set_mirror_axis(&x_axis);
+
+    // We're calling Shape() here instead of Wire(), hope that's okay.
+    let mut brep_transform =
+        BRepBuilderAPI_Transform_ctor(wire.pin_mut().Shape(), &transform, false);
+    let mirrored_shape = brep_transform.pin_mut().Shape();
+    let mirrored_wire = TopoDS_cast_to_wire(&mirrored_shape);
+
+    let mut make_wire = BRepBuilderAPI_MakeWire_ctor();
+    make_wire.pin_mut().add_wire(wire.pin_mut().Wire());
+    make_wire.pin_mut().add_wire(mirrored_wire);
+
+    let wire_profile = make_wire.pin_mut().Wire();
 }
