@@ -23,6 +23,9 @@ pub mod ffi {
         pub fn Y(self: &gp_Pnt) -> f64;
         pub fn Distance(self: &gp_Pnt, other: &gp_Pnt) -> f64;
 
+        type gp_Vec;
+        pub fn new_vec(x: f64, y: f64, z: f64) -> UniquePtr<gp_Vec>;
+
         // Segments
         type GC_MakeSegment;
         pub fn GC_MakeSegment_point_point(p1: &gp_Pnt, p2: &gp_Pnt) -> UniquePtr<GC_MakeSegment>;
@@ -64,6 +67,21 @@ pub mod ffi {
         ) -> UniquePtr<BRepBuilderAPI_MakeWire>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Shape;
         pub fn Wire(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Wire;
+
+        type BRepBuilderAPI_MakeFace;
+        pub fn BRepBuilderAPI_MakeFace_wire(
+            wire: &TopoDS_Wire,
+            only_plane: bool,
+        ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
+        pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeFace>) -> &TopoDS_Shape;
+
+        type BRepPrimAPI_MakePrism;
+        pub fn BRepPrimAPI_MakePrism_ctor(
+            shape: &TopoDS_Shape,
+            vec: &gp_Vec,
+            copy: bool,
+            canonize: bool,
+        ) -> UniquePtr<BRepPrimAPI_MakePrism>;
 
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, edge: &TopoDS_Edge);

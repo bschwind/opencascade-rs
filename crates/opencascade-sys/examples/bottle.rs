@@ -1,9 +1,10 @@
 use opencascade_sys::ffi::{
-    gp_OX, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point, new_transform,
-    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeWire_ctor,
-    BRepBuilderAPI_MakeWire_edge_edge_edge, BRepBuilderAPI_Transform_ctor,
-    GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value,
-    GC_MakeSegment_point_point, TopoDS_cast_to_wire,
+    gp_OX, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point, new_transform, new_vec,
+    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
+    BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_MakeWire_edge_edge_edge,
+    BRepBuilderAPI_Transform_ctor, BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value,
+    GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value, GC_MakeSegment_point_point,
+    TopoDS_cast_to_wire,
 };
 
 // All dimensions are in millimeters.
@@ -58,4 +59,9 @@ pub fn main() {
     make_wire.pin_mut().add_wire(mirrored_wire);
 
     let wire_profile = make_wire.pin_mut().Wire();
+
+    let mut face_profile = BRepBuilderAPI_MakeFace_wire(&wire_profile, false);
+    let prism_vec = new_vec(0.0, 0.0, height);
+    // We're calling Shape here instead of Face(), hope that's also okay.
+    let body = BRepPrimAPI_MakePrism_ctor(face_profile.pin_mut().Shape(), &prism_vec, false, true);
 }

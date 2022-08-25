@@ -11,6 +11,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKGeomAlgo");
     println!("cargo:rustc-link-lib=static=TKGeomBase");
     println!("cargo:rustc-link-lib=static=TKBRep");
+    println!("cargo:rustc-link-lib=static=TKPrim");
 
     let _build = cxx_build::bridge("src/lib.rs")
         .cpp(true)

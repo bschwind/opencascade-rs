@@ -10,6 +10,10 @@ std::unique_ptr<gp_Pnt> new_point(double x, double y, double z) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(x, y, z));
 }
 
+std::unique_ptr<gp_Vec> new_vec(double x, double y, double z) {
+  return std::unique_ptr<gp_Vec>(new gp_Vec(x, y, z));
+}
+
 // Segment Stuff
 std::unique_ptr<GC_MakeSegment> GC_MakeSegment_point_point(const gp_Pnt& p1, const gp_Pnt& p2) {
   return std::unique_ptr<GC_MakeSegment>(new GC_MakeSegment(p1, p2));
@@ -39,6 +43,14 @@ std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_ctor() {
 
 std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge_edge(const TopoDS_Edge& edge_1, const TopoDS_Edge& edge_2, const TopoDS_Edge& edge_3) {
   return std::unique_ptr<BRepBuilderAPI_MakeWire>(new BRepBuilderAPI_MakeWire(edge_1, edge_2, edge_3));
+}
+
+std::unique_ptr<BRepBuilderAPI_MakeFace> BRepBuilderAPI_MakeFace_wire(const TopoDS_Wire& wire, const Standard_Boolean only_plane) {
+  return std::unique_ptr<BRepBuilderAPI_MakeFace>(new BRepBuilderAPI_MakeFace(wire, only_plane));
+}
+
+std::unique_ptr<BRepPrimAPI_MakePrism> BRepPrimAPI_MakePrism_ctor(const TopoDS_Shape& shape, const gp_Vec& vec, const Standard_Boolean copy, const Standard_Boolean canonize) {
+  return std::unique_ptr<BRepPrimAPI_MakePrism>(new BRepPrimAPI_MakePrism(shape, vec, copy, canonize));
 }
 
 // Geometric processing
