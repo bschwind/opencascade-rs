@@ -49,6 +49,8 @@ pub mod ffi {
 
         pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
 
+        pub fn IsNull(self: &TopoDS_Shape) -> bool;
+
         // BRepBuilder
         type BRepBuilderAPI_MakeEdge;
         type TopoDS_Vertex;
@@ -67,6 +69,7 @@ pub mod ffi {
         ) -> UniquePtr<BRepBuilderAPI_MakeWire>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Shape;
         pub fn Wire(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Wire;
+        pub fn IsDone(self: &BRepBuilderAPI_MakeWire) -> bool;
 
         type BRepBuilderAPI_MakeFace;
         pub fn BRepBuilderAPI_MakeFace_wire(
@@ -74,6 +77,7 @@ pub mod ffi {
             only_plane: bool,
         ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeFace>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepBuilderAPI_MakeFace) -> bool;
 
         type BRepPrimAPI_MakePrism;
         pub fn BRepPrimAPI_MakePrism_ctor(
@@ -82,6 +86,8 @@ pub mod ffi {
             copy: bool,
             canonize: bool,
         ) -> UniquePtr<BRepPrimAPI_MakePrism>;
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepPrimAPI_MakePrism) -> bool;
 
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, edge: &TopoDS_Edge);
@@ -107,5 +113,23 @@ pub mod ffi {
             copy: bool,
         ) -> UniquePtr<BRepBuilderAPI_Transform>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_Transform>) -> &TopoDS_Shape;
+
+        // Data export
+        type StlAPI_Writer;
+        pub fn StlAPI_Writer_ctor() -> UniquePtr<StlAPI_Writer>;
+        // pub fn Write(self: Pin<&mut StlAPI_Writer>, shape: &TopoDS_Shape, filename: &c_char) -> bool;
+        pub fn write_stl(
+            writer: Pin<&mut StlAPI_Writer>,
+            shape: &TopoDS_Shape,
+            filename: String,
+        ) -> bool;
+
+        // Triangulation
+        type BRepMesh_IncrementalMesh;
+        pub fn BRepMesh_IncrementalMesh_ctor(
+            shape: &TopoDS_Shape,
+            deflection: f64,
+        ) -> UniquePtr<BRepMesh_IncrementalMesh>;
+        pub fn Shape(self: &BRepMesh_IncrementalMesh) -> &TopoDS_Shape;
     }
 }

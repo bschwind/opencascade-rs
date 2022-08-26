@@ -1,3 +1,4 @@
+#include "rust/cxx.h"
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
 #include <gp.hxx>
@@ -12,7 +13,9 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <StlAPI_Writer.hxx>
 
 // Handles
 typedef opencascade::handle<Geom_Curve> HandleGeomCurve;
@@ -51,3 +54,10 @@ const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape);
 std::unique_ptr<gp_Trsf> new_transform();
 
 std::unique_ptr<BRepBuilderAPI_Transform> BRepBuilderAPI_Transform_ctor(const TopoDS_Shape& shape, const gp_Trsf& transform, const Standard_Boolean copy);
+
+// Data export
+std::unique_ptr<StlAPI_Writer> StlAPI_Writer_ctor();
+bool write_stl(StlAPI_Writer& writer, const TopoDS_Shape& theShape, rust::String theFileName);
+
+// Triangulation
+std::unique_ptr<BRepMesh_IncrementalMesh> BRepMesh_IncrementalMesh_ctor(const TopoDS_Shape& shape, double deflection);

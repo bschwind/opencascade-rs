@@ -71,3 +71,17 @@ std::unique_ptr<gp_Trsf> new_transform() {
 std::unique_ptr<BRepBuilderAPI_Transform> BRepBuilderAPI_Transform_ctor(const TopoDS_Shape& shape, const gp_Trsf& transform, const Standard_Boolean copy) {
   return std::unique_ptr<BRepBuilderAPI_Transform>(new BRepBuilderAPI_Transform(shape, transform, copy));
 }
+
+// Data export
+std::unique_ptr<StlAPI_Writer> StlAPI_Writer_ctor() {
+  return std::unique_ptr<StlAPI_Writer>(new StlAPI_Writer());
+}
+
+bool write_stl(StlAPI_Writer& writer, const TopoDS_Shape& theShape, rust::String theFileName) {
+  return writer.Write(theShape, theFileName.c_str());
+}
+
+// Triangulation
+std::unique_ptr<BRepMesh_IncrementalMesh> BRepMesh_IncrementalMesh_ctor(const TopoDS_Shape& shape, double deflection) {
+  return std::unique_ptr<BRepMesh_IncrementalMesh>(new BRepMesh_IncrementalMesh(shape, deflection));
+}
