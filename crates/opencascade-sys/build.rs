@@ -15,6 +15,9 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKSTL");
     println!("cargo:rustc-link-lib=static=TKMesh");
     println!("cargo:rustc-link-lib=static=TKShHealing");
+    println!("cargo:rustc-link-lib=static=TKFillet");
+    println!("cargo:rustc-link-lib=static=TKBool");
+    println!("cargo:rustc-link-lib=static=TKBO");
 
     let _build = cxx_build::bridge("src/lib.rs")
         .cpp(true)

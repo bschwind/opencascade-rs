@@ -1,5 +1,18 @@
 #[cxx::bridge]
 pub mod ffi {
+    #[repr(u32)]
+    pub enum TopAbs_ShapeEnum {
+        TopAbs_COMPOUND,
+        TopAbs_COMPSOLID,
+        TopAbs_SOLID,
+        TopAbs_SHELL,
+        TopAbs_FACE,
+        TopAbs_WIRE,
+        TopAbs_EDGE,
+        TopAbs_VERTEX,
+        TopAbs_SHAPE,
+    }
+
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -48,6 +61,7 @@ pub mod ffi {
         type TopoDS_Wire;
 
         pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
+        pub fn TopoDS_cast_to_edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
 
         pub fn IsNull(self: &TopoDS_Shape) -> bool;
 
@@ -95,6 +109,15 @@ pub mod ffi {
         #[rust_name = "add_wire"]
         pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, wire: &TopoDS_Wire);
 
+        // Fillets
+        type BRepFilletAPI_MakeFillet;
+        pub fn BRepFilletAPI_MakeFillet_ctor(
+            shape: &TopoDS_Shape,
+        ) -> UniquePtr<BRepFilletAPI_MakeFillet>;
+        #[rust_name = "add_edge"]
+        pub fn Add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
+        pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
+
         // Geometric processor
         type gp_Ax1;
         pub fn gp_OX() -> &'static gp_Ax1;
@@ -113,6 +136,17 @@ pub mod ffi {
             copy: bool,
         ) -> UniquePtr<BRepBuilderAPI_Transform>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_Transform>) -> &TopoDS_Shape;
+
+        // Topology Explorer
+        type TopExp_Explorer;
+        type TopAbs_ShapeEnum;
+        pub fn TopExp_Explorer_ctor(
+            shape: &TopoDS_Shape,
+            to_find: TopAbs_ShapeEnum,
+        ) -> UniquePtr<TopExp_Explorer>;
+        pub fn More(self: &TopExp_Explorer) -> bool;
+        pub fn Next(self: Pin<&mut TopExp_Explorer>);
+        pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
 
         // Data export
         type StlAPI_Writer;

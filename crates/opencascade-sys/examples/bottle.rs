@@ -2,9 +2,10 @@ use opencascade_sys::ffi::{
     gp_OX, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point, new_transform, new_vec,
     write_stl, BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
     BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_MakeWire_edge_edge_edge,
-    BRepBuilderAPI_Transform_ctor, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakePrism_ctor,
-    GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value,
-    GC_MakeSegment_point_point, StlAPI_Writer_ctor, TopoDS_cast_to_wire,
+    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
+    BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
+    GC_MakeSegment_Value, GC_MakeSegment_point_point, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
+    TopExp_Explorer_ctor, TopoDS_cast_to_edge, TopoDS_cast_to_wire,
 };
 
 // All dimensions are in millimeters.
@@ -66,9 +67,19 @@ pub fn main() {
     let mut body =
         BRepPrimAPI_MakePrism_ctor(face_profile.pin_mut().Shape(), &prism_vec, false, true);
 
+    let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(&body.pin_mut().Shape());
+    let mut edge_explorer =
+        TopExp_Explorer_ctor(&body.pin_mut().Shape(), TopAbs_ShapeEnum::TopAbs_EDGE);
+
+    while edge_explorer.More() {
+        let edge = TopoDS_cast_to_edge(edge_explorer.Current());
+        make_fillet.pin_mut().add_edge(thickness / 12.0, edge);
+        edge_explorer.pin_mut().Next();
+    }
+
     let mut stl_writer = StlAPI_Writer_ctor();
 
-    let mut body_shape = body.pin_mut().Shape();
+    let body_shape = make_fillet.pin_mut().Shape();
 
     let triangulation = BRepMesh_IncrementalMesh_ctor(body_shape, 0.001);
 

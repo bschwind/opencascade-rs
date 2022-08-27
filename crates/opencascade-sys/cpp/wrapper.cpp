@@ -53,6 +53,10 @@ std::unique_ptr<BRepPrimAPI_MakePrism> BRepPrimAPI_MakePrism_ctor(const TopoDS_S
   return std::unique_ptr<BRepPrimAPI_MakePrism>(new BRepPrimAPI_MakePrism(shape, vec, copy, canonize));
 }
 
+std::unique_ptr<BRepFilletAPI_MakeFillet> BRepFilletAPI_MakeFillet_ctor(const TopoDS_Shape& shape) {
+  return std::unique_ptr<BRepFilletAPI_MakeFillet>(new BRepFilletAPI_MakeFillet(shape));
+}
+
 // Geometric processing
 const gp_Ax1& gp_OX() {
   return gp::OX();
@@ -63,6 +67,10 @@ const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape) {
   return TopoDS::Wire(shape);
 }
 
+const TopoDS_Edge& TopoDS_cast_to_edge(const TopoDS_Shape& shape) {
+  return TopoDS::Edge(shape);
+}
+
 // Transforms
 std::unique_ptr<gp_Trsf> new_transform() {
   return std::unique_ptr<gp_Trsf>(new gp_Trsf());
@@ -70,6 +78,11 @@ std::unique_ptr<gp_Trsf> new_transform() {
 
 std::unique_ptr<BRepBuilderAPI_Transform> BRepBuilderAPI_Transform_ctor(const TopoDS_Shape& shape, const gp_Trsf& transform, const Standard_Boolean copy) {
   return std::unique_ptr<BRepBuilderAPI_Transform>(new BRepBuilderAPI_Transform(shape, transform, copy));
+}
+
+// Topology Explorer
+std::unique_ptr<TopExp_Explorer> TopExp_Explorer_ctor(const TopoDS_Shape& shape, const TopAbs_ShapeEnum to_find) {
+  return std::unique_ptr<TopExp_Explorer>(new TopExp_Explorer(shape, to_find));
 }
 
 // Data export
