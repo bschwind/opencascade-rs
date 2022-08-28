@@ -93,6 +93,7 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeFace>) -> &TopoDS_Shape;
         pub fn IsDone(self: &BRepBuilderAPI_MakeFace) -> bool;
 
+        // Primitives
         type BRepPrimAPI_MakePrism;
         pub fn BRepPrimAPI_MakePrism_ctor(
             shape: &TopoDS_Shape,
@@ -109,6 +110,14 @@ pub mod ffi {
         #[rust_name = "add_wire"]
         pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, wire: &TopoDS_Wire);
 
+        type BRepPrimAPI_MakeCylinder;
+        pub fn BRepPrimAPI_MakeCylinder_ctor(
+            coord_system: &gp_Ax2,
+            radius: f64,
+            height: f64,
+        ) -> UniquePtr<BRepPrimAPI_MakeCylinder>;
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCylinder>) -> &TopoDS_Shape;
+
         // Fillets
         type BRepFilletAPI_MakeFillet;
         pub fn BRepFilletAPI_MakeFillet_ctor(
@@ -118,9 +127,22 @@ pub mod ffi {
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
 
+        // Boolean Operations
+        type BRepAlgoAPI_Fuse;
+        pub fn BRepAlgoAPI_Fuse_ctor(
+            shape_1: &TopoDS_Shape,
+            shape_2: &TopoDS_Shape,
+        ) -> UniquePtr<BRepAlgoAPI_Fuse>;
+        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
+
         // Geometric processor
         type gp_Ax1;
+        type gp_Ax2;
+        type gp_Dir;
         pub fn gp_OX() -> &'static gp_Ax1;
+        pub fn gp_DZ() -> &'static gp_Dir;
+
+        pub fn gp_Ax2_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
 
         // Transforms
         type gp_Trsf;

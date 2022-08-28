@@ -1,11 +1,13 @@
 use opencascade_sys::ffi::{
-    gp_OX, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point, new_transform, new_vec,
-    write_stl, BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
+    gp_Ax2_ctor, gp_DZ, gp_OX, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point,
+    new_transform, new_vec, write_stl, BRepAlgoAPI_Fuse_ctor,
+    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
     BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_MakeWire_edge_edge_edge,
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
-    BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
-    GC_MakeSegment_Value, GC_MakeSegment_point_point, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
-    TopExp_Explorer_ctor, TopoDS_cast_to_edge, TopoDS_cast_to_wire,
+    BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value,
+    GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value, GC_MakeSegment_point_point,
+    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_cast_to_edge,
+    TopoDS_cast_to_wire,
 };
 
 // All dimensions are in millimeters.
@@ -81,8 +83,22 @@ pub fn main() {
 
     let body_shape = make_fillet.pin_mut().Shape();
 
-    let triangulation = BRepMesh_IncrementalMesh_ctor(body_shape, 0.001);
+    // Make the bottle neck
+    let neck_location = new_point(0.0, 0.0, height);
+    let neck_axis = gp_DZ();
+    let neck_coord_system = gp_Ax2_ctor(&neck_location, &neck_axis);
 
+    let neck_radius = thickness / 4.0;
+    let neck_height = height / 10.0;
+
+    let mut cylinder = BRepPrimAPI_MakeCylinder_ctor(&neck_coord_system, neck_radius, neck_height);
+    let cylinder_shape = cylinder.pin_mut().Shape();
+
+    let mut fuse_neck = BRepAlgoAPI_Fuse_ctor(&body_shape, &cylinder_shape);
+    let body_shape = fuse_neck.pin_mut().Shape();
+
+    // Export to an STL file
+    let triangulation = BRepMesh_IncrementalMesh_ctor(body_shape, 0.1);
     let success = write_stl(stl_writer.pin_mut(), triangulation.Shape(), "output.stl".to_owned());
 
     println!("Done! Success = {}", success);
