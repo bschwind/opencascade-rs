@@ -90,6 +90,10 @@ const TopoDS_Edge& TopoDS_cast_to_edge(const TopoDS_Shape& shape) {
   return TopoDS::Edge(shape);
 }
 
+const TopoDS_Face& TopoDS_cast_to_face(const TopoDS_Shape& shape) {
+  return TopoDS::Face(shape);
+}
+
 // Transforms
 std::unique_ptr<gp_Trsf> new_transform() {
   return std::unique_ptr<gp_Trsf>(new gp_Trsf());
@@ -102,6 +106,10 @@ std::unique_ptr<BRepBuilderAPI_Transform> BRepBuilderAPI_Transform_ctor(const To
 // Topology Explorer
 std::unique_ptr<TopExp_Explorer> TopExp_Explorer_ctor(const TopoDS_Shape& shape, const TopAbs_ShapeEnum to_find) {
   return std::unique_ptr<TopExp_Explorer>(new TopExp_Explorer(shape, to_find));
+}
+
+std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face& face) {
+  return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(BRep_Tool::Surface(face)));
 }
 
 // Data export

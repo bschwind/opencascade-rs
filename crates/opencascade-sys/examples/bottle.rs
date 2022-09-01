@@ -4,10 +4,10 @@ use opencascade_sys::ffi::{
     BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
     BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_MakeWire_edge_edge_edge,
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
-    BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value,
-    GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value, GC_MakeSegment_point_point,
-    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_cast_to_edge,
-    TopoDS_cast_to_wire,
+    BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
+    GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value,
+    GC_MakeSegment_point_point, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
+    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
 };
 
 // All dimensions are in millimeters.
@@ -96,6 +96,14 @@ pub fn main() {
 
     let mut fuse_neck = BRepAlgoAPI_Fuse_ctor(&body_shape, &cylinder_shape);
     let body_shape = fuse_neck.pin_mut().Shape();
+
+    // Make the bottle hollow
+    let mut face_explorer = TopExp_Explorer_ctor(&body_shape, TopAbs_ShapeEnum::TopAbs_FACE);
+    while face_explorer.More() {
+        let face = TopoDS_cast_to_face(face_explorer.Current());
+        let surface = BRep_Tool_Surface(&face);
+        face_explorer.pin_mut().Next();
+    }
 
     // Export to an STL file
     let triangulation = BRepMesh_IncrementalMesh_ctor(body_shape, 0.1);

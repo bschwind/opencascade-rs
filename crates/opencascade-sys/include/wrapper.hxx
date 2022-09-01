@@ -7,9 +7,11 @@
 #include <GC_MakeSegment.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <Geom_Surface.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp_Explorer.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
@@ -26,6 +28,7 @@
 // Handles
 typedef opencascade::handle<Geom_Curve> HandleGeomCurve;
 typedef opencascade::handle<Geom_TrimmedCurve> HandleGeomTrimmedCurve;
+typedef opencascade::handle<Geom_Surface> HandleGeomSurface;
 
 std::unique_ptr<HandleGeomCurve> new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(const HandleGeomTrimmedCurve& trimmed_curve);
 
@@ -67,6 +70,7 @@ std::unique_ptr<gp_Ax2> gp_Ax2_ctor(const gp_Pnt& origin, const gp_Dir& main_dir
 // Shape stuff
 const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape);
 const TopoDS_Edge& TopoDS_cast_to_edge(const TopoDS_Shape& shape);
+const TopoDS_Face& TopoDS_cast_to_face(const TopoDS_Shape& shape);
 
 // Transforms
 std::unique_ptr<gp_Trsf> new_transform();
@@ -75,6 +79,7 @@ std::unique_ptr<BRepBuilderAPI_Transform> BRepBuilderAPI_Transform_ctor(const To
 
 // Topology Explorer
 std::unique_ptr<TopExp_Explorer> TopExp_Explorer_ctor(const TopoDS_Shape& shape, const TopAbs_ShapeEnum to_find);
+std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face& face);
 
 // Data export
 std::unique_ptr<StlAPI_Writer> StlAPI_Writer_ctor();

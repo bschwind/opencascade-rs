@@ -22,6 +22,7 @@ pub mod ffi {
         // Handles
         type HandleGeomCurve;
         type HandleGeomTrimmedCurve;
+        type HandleGeomSurface;
 
         pub fn new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
             trimmed_curve_handle: &HandleGeomTrimmedCurve,
@@ -59,9 +60,11 @@ pub mod ffi {
         type TopoDS_Shape;
         type TopoDS_Edge;
         type TopoDS_Wire;
+        type TopoDS_Face;
 
         pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
         pub fn TopoDS_cast_to_edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
+        pub fn TopoDS_cast_to_face(shape: &TopoDS_Shape) -> &TopoDS_Face;
 
         pub fn IsNull(self: &TopoDS_Shape) -> bool;
 
@@ -169,6 +172,8 @@ pub mod ffi {
         pub fn More(self: &TopExp_Explorer) -> bool;
         pub fn Next(self: Pin<&mut TopExp_Explorer>);
         pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
+
+        pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<HandleGeomSurface>;
 
         // Data export
         type StlAPI_Writer;
