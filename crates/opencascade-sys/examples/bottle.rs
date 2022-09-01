@@ -1,13 +1,14 @@
 use opencascade_sys::ffi::{
-    gp_Ax2_ctor, gp_DZ, gp_OX, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point,
-    new_transform, new_vec, write_stl, BRepAlgoAPI_Fuse_ctor,
+    gp_Ax2_ctor, gp_DZ, gp_OX, handle_geom_plane_location,
+    new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_HandleGeomPlane_from_HandleGeomSurface,
+    new_point, new_transform, new_vec, type_name, write_stl, BRepAlgoAPI_Fuse_ctor,
     BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
     BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_MakeWire_edge_edge_edge,
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
-    BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
+    BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, DynamicType,
     GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value,
     GC_MakeSegment_point_point, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
-    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
+    TopoDS_Face, TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
 };
 
 // All dimensions are in millimeters.
@@ -99,9 +100,26 @@ pub fn main() {
 
     // Make the bottle hollow
     let mut face_explorer = TopExp_Explorer_ctor(&body_shape, TopAbs_ShapeEnum::TopAbs_FACE);
+    let mut z_max = -1.0;
+    let mut top_face: Option<&TopoDS_Face> = None;
+
     while face_explorer.More() {
         let face = TopoDS_cast_to_face(face_explorer.Current());
         let surface = BRep_Tool_Surface(&face);
+        let dynamic_type = DynamicType(&surface);
+        let name = type_name(&dynamic_type);
+
+        if name == "Geom_Plane" {
+            let plane_handle = new_HandleGeomPlane_from_HandleGeomSurface(&surface);
+            let plane_location = handle_geom_plane_location(&plane_handle);
+
+            let plane_z = plane_location.Z();
+            if plane_z > z_max {
+                z_max = plane_z;
+                top_face = Some(face);
+            }
+        }
+
         face_explorer.pin_mut().Next();
     }
 

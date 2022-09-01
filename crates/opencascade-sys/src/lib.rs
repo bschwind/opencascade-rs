@@ -20,21 +20,34 @@ pub mod ffi {
         include!("opencascade-sys/include/wrapper.hxx");
 
         // Handles
+        type HandleStandardType;
         type HandleGeomCurve;
         type HandleGeomTrimmedCurve;
         type HandleGeomSurface;
+        type HandleGeomPlane;
+
+        pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
+        pub fn type_name(handle: &HandleStandardType) -> String;
 
         pub fn new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
             trimmed_curve_handle: &HandleGeomTrimmedCurve,
         ) -> UniquePtr<HandleGeomCurve>;
 
+        pub fn new_HandleGeomPlane_from_HandleGeomSurface(
+            geom_surface_handle: &HandleGeomSurface,
+        ) -> UniquePtr<HandleGeomPlane>;
+
         // Geometry
         type Geom_TrimmedCurve;
+
+        pub fn handle_geom_plane_location(plane: &HandleGeomPlane) -> &gp_Pnt;
 
         // Points
         type gp_Pnt;
         pub fn new_point(x: f64, y: f64, z: f64) -> UniquePtr<gp_Pnt>;
+        pub fn X(self: &gp_Pnt) -> f64;
         pub fn Y(self: &gp_Pnt) -> f64;
+        pub fn Z(self: &gp_Pnt) -> f64;
         pub fn Distance(self: &gp_Pnt, other: &gp_Pnt) -> f64;
 
         type gp_Vec;

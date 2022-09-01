@@ -19,7 +19,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKBool");
     println!("cargo:rustc-link-lib=static=TKBO");
 
-    let _build = cxx_build::bridge("src/lib.rs")
+    cxx_build::bridge("src/lib.rs")
         .cpp(true)
         .flag_if_supported("-std=c++11")
         .include(format!("{}", dst.join("include").join("opencascade").display()))

@@ -1,8 +1,27 @@
 #include <wrapper.hxx>
 
 // Handle stuff
+
+const HandleStandardType& DynamicType(const HandleGeomSurface& surface) {
+  return surface->DynamicType();
+}
+
+rust::String type_name(const HandleStandardType& handle) {
+  return std::string(handle->Name());
+}
+
 std::unique_ptr<HandleGeomCurve> new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(const HandleGeomTrimmedCurve& trimmed_curve) {
   return std::unique_ptr<HandleGeomCurve>(new opencascade::handle<Geom_Curve>(trimmed_curve));
+}
+
+std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurface(const HandleGeomSurface& surface) {
+  HandleGeomPlane plane_handle = opencascade::handle<Geom_Plane>::DownCast(surface);
+  return std::unique_ptr<HandleGeomPlane>(new opencascade::handle<Geom_Plane>(plane_handle));
+}
+
+// Geometry
+const gp_Pnt& handle_geom_plane_location(const HandleGeomPlane& plane) {
+  return plane->Location();
 }
 
 // Point stuff

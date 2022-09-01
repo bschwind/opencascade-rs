@@ -8,6 +8,7 @@
 #include <GC_MakeArcOfCircle.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom_Surface.hxx>
+#include <Geom_Plane.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Edge.hxx>
@@ -24,13 +25,24 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <StlAPI_Writer.hxx>
+#include <Standard_Type.hxx>
 
 // Handles
+typedef opencascade::handle<Standard_Type> HandleStandardType;
 typedef opencascade::handle<Geom_Curve> HandleGeomCurve;
 typedef opencascade::handle<Geom_TrimmedCurve> HandleGeomTrimmedCurve;
 typedef opencascade::handle<Geom_Surface> HandleGeomSurface;
+typedef opencascade::handle<Geom_Plane> HandleGeomPlane;
+
+const HandleStandardType& DynamicType(const HandleGeomSurface& surface);
+rust::String type_name(const HandleStandardType& handle);
+
+// Geometry
+const gp_Pnt& handle_geom_plane_location(const HandleGeomPlane& plane);
+
 
 std::unique_ptr<HandleGeomCurve> new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(const HandleGeomTrimmedCurve& trimmed_curve);
+std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurface(const HandleGeomSurface& surface);
 
 // Point stuff
 std::unique_ptr<gp_Pnt> new_point(double x, double y, double z);
