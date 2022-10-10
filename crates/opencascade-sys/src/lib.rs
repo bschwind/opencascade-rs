@@ -37,6 +37,11 @@ pub mod ffi {
             geom_surface_handle: &HandleGeomSurface,
         ) -> UniquePtr<HandleGeomPlane>;
 
+        // Collections
+        type TopTools_ListOfShape;
+        pub fn new_list_of_shape() -> UniquePtr<TopTools_ListOfShape>;
+        pub fn shape_list_append_face(list: Pin<&mut TopTools_ListOfShape>, face: &TopoDS_Face);
+
         // Geometry
         type Geom_TrimmedCurve;
 

@@ -19,6 +19,15 @@ std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurface(cons
   return std::unique_ptr<HandleGeomPlane>(new opencascade::handle<Geom_Plane>(plane_handle));
 }
 
+// Collections
+std::unique_ptr<TopTools_ListOfShape> new_list_of_shape() {
+  return std::unique_ptr<TopTools_ListOfShape>(new TopTools_ListOfShape());
+}
+
+void shape_list_append_face(TopTools_ListOfShape& list, const TopoDS_Face& face) {
+  list.Append(face);
+}
+
 // Geometry
 const gp_Pnt& handle_geom_plane_location(const HandleGeomPlane& plane) {
   return plane->Location();

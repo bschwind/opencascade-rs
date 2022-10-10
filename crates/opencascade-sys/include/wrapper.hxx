@@ -37,6 +37,10 @@ typedef opencascade::handle<Geom_Plane> HandleGeomPlane;
 const HandleStandardType& DynamicType(const HandleGeomSurface& surface);
 rust::String type_name(const HandleStandardType& handle);
 
+// Collections
+std::unique_ptr<TopTools_ListOfShape> new_list_of_shape();
+void shape_list_append_face(TopTools_ListOfShape& list, const TopoDS_Face& face);
+
 // Geometry
 const gp_Pnt& handle_geom_plane_location(const HandleGeomPlane& plane);
 
