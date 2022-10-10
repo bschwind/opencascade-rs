@@ -118,8 +118,8 @@ const TopoDS_Edge& TopoDS_cast_to_edge(const TopoDS_Shape& shape) {
   return TopoDS::Edge(shape);
 }
 
-const TopoDS_Face& TopoDS_cast_to_face(const TopoDS_Shape& shape) {
-  return TopoDS::Face(shape);
+std::unique_ptr<TopoDS_Face> TopoDS_cast_to_face(const TopoDS_Shape& shape) {
+  return std::unique_ptr<TopoDS_Face>(new TopoDS_Face(TopoDS::Face(shape)));
 }
 
 // Transforms
@@ -138,6 +138,10 @@ std::unique_ptr<TopExp_Explorer> TopExp_Explorer_ctor(const TopoDS_Shape& shape,
 
 std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face& face) {
   return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(BRep_Tool::Surface(face)));
+}
+
+std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer& explorer) {
+  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(explorer.Current()));
 }
 
 // Data export

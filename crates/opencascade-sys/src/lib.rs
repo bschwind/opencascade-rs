@@ -82,9 +82,10 @@ pub mod ffi {
 
         pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
         pub fn TopoDS_cast_to_edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
-        pub fn TopoDS_cast_to_face(shape: &TopoDS_Shape) -> &TopoDS_Face;
+        pub fn TopoDS_cast_to_face<'a>(shape: &'a TopoDS_Shape) -> UniquePtr<TopoDS_Face>;
 
         pub fn IsNull(self: &TopoDS_Shape) -> bool;
+        pub fn IsEqual(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
 
         // BRepBuilder
         type BRepBuilderAPI_MakeEdge;
@@ -189,6 +190,7 @@ pub mod ffi {
         ) -> UniquePtr<TopExp_Explorer>;
         pub fn More(self: &TopExp_Explorer) -> bool;
         pub fn Next(self: Pin<&mut TopExp_Explorer>);
+        pub fn ExplorerCurrentShape(explorer: &TopExp_Explorer) -> UniquePtr<TopoDS_Shape>;
         pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
 
         pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<HandleGeomSurface>;

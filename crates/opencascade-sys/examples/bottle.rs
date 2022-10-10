@@ -7,10 +7,11 @@ use opencascade_sys::ffi::{
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_MakeWire_edge_edge_edge, BRepBuilderAPI_Transform_ctor,
     BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeCylinder_ctor,
-    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, DynamicType, GC_MakeArcOfCircle_Value,
-    GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value, GC_MakeSegment_point_point,
-    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer, TopExp_Explorer_ctor, TopoDS_Face,
-    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
+    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, DynamicType, ExplorerCurrentShape,
+    GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value,
+    GC_MakeSegment_point_point, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer,
+    TopExp_Explorer_ctor, TopoDS_Face, TopoDS_cast_to_edge, TopoDS_cast_to_face,
+    TopoDS_cast_to_wire,
 };
 
 // All dimensions are in millimeters.
@@ -103,12 +104,12 @@ pub fn main() {
     // Make the bottle hollow
     let mut face_explorer = TopExp_Explorer_ctor(&body_shape, TopAbs_ShapeEnum::TopAbs_FACE);
     let mut z_max = -1.0;
-    let mut top_face: Option<&TopoDS_Face> = None;
-
-    let explorer = TopoExplorer { topo_explorer: &mut face_explorer };
+    let mut top_face: Option<UniquePtr<TopoDS_Face>> = None;
 
     while face_explorer.More() {
-        let face = TopoDS_cast_to_face(face_explorer.Current());
+        let shape = ExplorerCurrentShape(&face_explorer);
+        let face = TopoDS_cast_to_face(&shape);
+
         let surface = BRep_Tool_Surface(&face);
         let dynamic_type = DynamicType(&surface);
         let name = type_name(&dynamic_type);
@@ -127,32 +128,14 @@ pub fn main() {
         face_explorer.pin_mut().Next();
     }
 
-    // let top_face = top_face.unwrap();
+    let top_face = top_face.unwrap();
 
-    // let mut faces_to_remove = new_list_of_shape();
-    // shape_list_append_face(faces_to_remove.pin_mut(), &top_face);
+    let mut faces_to_remove = new_list_of_shape();
+    shape_list_append_face(faces_to_remove.pin_mut(), &top_face);
 
     // Export to an STL file
     let triangulation = BRepMesh_IncrementalMesh_ctor(body_shape, 0.1);
     let success = write_stl(stl_writer.pin_mut(), triangulation.Shape(), "output.stl".to_owned());
 
     println!("Done! Success = {}", success);
-}
-
-struct TopoExplorer<'a> {
-    topo_explorer: &'a mut UniquePtr<TopExp_Explorer>,
-}
-
-impl<'a> Iterator for TopoExplorer<'a> {
-    type Item = &'a TopoDS_Face;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.topo_explorer.More() {
-            let face = TopoDS_cast_to_face(self.topo_explorer.Current());
-
-            Some(face)
-        } else {
-            None
-        }
-    }
 }

@@ -86,7 +86,7 @@ std::unique_ptr<gp_Ax2> gp_Ax2_ctor(const gp_Pnt& origin, const gp_Dir& main_dir
 // Shape stuff
 const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape);
 const TopoDS_Edge& TopoDS_cast_to_edge(const TopoDS_Shape& shape);
-const TopoDS_Face& TopoDS_cast_to_face(const TopoDS_Shape& shape);
+std::unique_ptr<TopoDS_Face> TopoDS_cast_to_face(const TopoDS_Shape& shape);
 
 // Transforms
 std::unique_ptr<gp_Trsf> new_transform();
@@ -96,6 +96,7 @@ std::unique_ptr<BRepBuilderAPI_Transform> BRepBuilderAPI_Transform_ctor(const To
 // Topology Explorer
 std::unique_ptr<TopExp_Explorer> TopExp_Explorer_ctor(const TopoDS_Shape& shape, const TopAbs_ShapeEnum to_find);
 std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face& face);
+std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer& explorer);
 
 // Data export
 std::unique_ptr<StlAPI_Writer> StlAPI_Writer_ctor();
