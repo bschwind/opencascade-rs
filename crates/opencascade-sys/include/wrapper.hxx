@@ -24,6 +24,7 @@
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
+#include <BRepOffsetAPI_MakeThickSolid.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Type.hxx>
 
@@ -76,6 +77,16 @@ std::unique_ptr<BRepAlgoAPI_Fuse> BRepAlgoAPI_Fuse_ctor(const TopoDS_Shape& shap
 
 // Fillets
 std::unique_ptr<BRepFilletAPI_MakeFillet> BRepFilletAPI_MakeFillet_ctor(const TopoDS_Shape& shape);
+
+// Solids
+std::unique_ptr<BRepOffsetAPI_MakeThickSolid> BRepOffsetAPI_MakeThickSolid_ctor();
+void MakeThickSolidByJoin(
+    BRepOffsetAPI_MakeThickSolid& make_thick_solid,
+    const TopoDS_Shape& S,
+    const TopTools_ListOfShape& ClosingFaces,
+    const Standard_Real Offset,
+    const Standard_Real Tol
+);
 
 // Geometric processor
 const gp_Ax1& gp_OX();

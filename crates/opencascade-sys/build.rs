@@ -18,6 +18,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKFillet");
     println!("cargo:rustc-link-lib=static=TKBool");
     println!("cargo:rustc-link-lib=static=TKBO");
+    println!("cargo:rustc-link-lib=static=TKOffset");
 
     cxx_build::bridge("src/lib.rs")
         .cpp(true)

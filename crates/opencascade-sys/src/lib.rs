@@ -149,6 +149,18 @@ pub mod ffi {
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
 
+        // Solids
+        type BRepOffsetAPI_MakeThickSolid;
+        pub fn BRepOffsetAPI_MakeThickSolid_ctor() -> UniquePtr<BRepOffsetAPI_MakeThickSolid>;
+        pub fn MakeThickSolidByJoin(
+            make_thick_solid: Pin<&mut BRepOffsetAPI_MakeThickSolid>,
+            shape: &TopoDS_Shape,
+            closing_faces: &TopTools_ListOfShape,
+            offset: f64,
+            tolerance: f64,
+        );
+        pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeThickSolid>) -> &TopoDS_Shape;
+
         // Boolean Operations
         type BRepAlgoAPI_Fuse;
         pub fn BRepAlgoAPI_Fuse_ctor(

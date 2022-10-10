@@ -96,6 +96,21 @@ std::unique_ptr<BRepFilletAPI_MakeFillet> BRepFilletAPI_MakeFillet_ctor(const To
   return std::unique_ptr<BRepFilletAPI_MakeFillet>(new BRepFilletAPI_MakeFillet(shape));
 }
 
+// Solids
+std::unique_ptr<BRepOffsetAPI_MakeThickSolid> BRepOffsetAPI_MakeThickSolid_ctor() {
+  return std::unique_ptr<BRepOffsetAPI_MakeThickSolid>(new BRepOffsetAPI_MakeThickSolid());
+}
+
+void MakeThickSolidByJoin(
+    BRepOffsetAPI_MakeThickSolid& make_thick_solid,
+    const TopoDS_Shape& shape,
+    const TopTools_ListOfShape& closing_faces,
+    const Standard_Real offset,
+    const Standard_Real tolerance
+) {
+  make_thick_solid.MakeThickSolidByJoin(shape, closing_faces, offset, tolerance);
+}
+
 // Geometric processing
 const gp_Ax1& gp_OX() {
   return gp::OX();

@@ -6,12 +6,12 @@ use opencascade_sys::ffi::{
     write_stl, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_MakeWire_edge_edge_edge, BRepBuilderAPI_Transform_ctor,
-    BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeCylinder_ctor,
-    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, DynamicType, ExplorerCurrentShape,
-    GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value,
-    GC_MakeSegment_point_point, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer,
-    TopExp_Explorer_ctor, TopoDS_Face, TopoDS_cast_to_edge, TopoDS_cast_to_face,
-    TopoDS_cast_to_wire,
+    BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
+    BRepOffsetAPI_MakeThickSolid_ctor, BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor,
+    BRep_Tool_Surface, DynamicType, ExplorerCurrentShape, GC_MakeArcOfCircle_Value,
+    GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value, GC_MakeSegment_point_point,
+    MakeThickSolidByJoin, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Face,
+    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
 };
 
 // All dimensions are in millimeters.
@@ -132,6 +132,17 @@ pub fn main() {
 
     let mut faces_to_remove = new_list_of_shape();
     shape_list_append_face(faces_to_remove.pin_mut(), &top_face);
+
+    let mut solid_maker = BRepOffsetAPI_MakeThickSolid_ctor();
+    MakeThickSolidByJoin(
+        solid_maker.pin_mut(),
+        &body_shape,
+        &faces_to_remove,
+        -thickness / 20.0,
+        1.0e-3,
+    );
+
+    let body_shape = solid_maker.pin_mut().Shape();
 
     // Export to an STL file
     let triangulation = BRepMesh_IncrementalMesh_ctor(body_shape, 0.1);
