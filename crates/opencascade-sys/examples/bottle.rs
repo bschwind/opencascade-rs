@@ -1,15 +1,17 @@
 use cxx::UniquePtr;
 use opencascade_sys::ffi::{
-    gp_Ax2_ctor, gp_DZ, gp_OX, handle_geom_plane_location,
+    ellipse_to_HandleGeom2d_Curve, ellipse_value, gp_Ax2_ctor, gp_Ax2d_ctor, gp_Ax3_from_gp_Ax2,
+    gp_DZ, gp_Dir2d_ctor, gp_OX, handle_geom_plane_location,
     new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_HandleGeomPlane_from_HandleGeomSurface,
-    new_list_of_shape, new_point, new_transform, new_vec, shape_list_append_face, type_name,
-    write_stl, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
+    new_list_of_shape, new_point, new_point_2d, new_transform, new_vec, shape_list_append_face,
+    type_name, write_stl, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_MakeWire_edge_edge_edge, BRepBuilderAPI_Transform_ctor,
     BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
     BRepOffsetAPI_MakeThickSolid_ctor, BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor,
     BRep_Tool_Surface, DynamicType, ExplorerCurrentShape, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value, GC_MakeSegment_point_point,
+    Geom2d_Ellipse_ctor, Geom2d_TrimmedCurve_ctor, Geom_CylindricalSurface_ctor,
     MakeThickSolidByJoin, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Face,
     TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
 };
@@ -138,11 +140,33 @@ pub fn main() {
         solid_maker.pin_mut(),
         &body_shape,
         &faces_to_remove,
-        -thickness / 20.0,
+        -thickness / 50.0,
         1.0e-3,
     );
 
     let body_shape = solid_maker.pin_mut().Shape();
+
+    // Create the threading
+    let cylinder_axis = gp_Ax3_from_gp_Ax2(&neck_coord_system);
+    let cylinder_1 = Geom_CylindricalSurface_ctor(&cylinder_axis, neck_radius * 0.99);
+    let cylinder_2 = Geom_CylindricalSurface_ctor(&cylinder_axis, neck_radius * 1.05);
+
+    let a_pnt = new_point_2d(std::f64::consts::TAU, neck_height / 2.0);
+    let a_dir = gp_Dir2d_ctor(std::f64::consts::TAU, neck_height / 4.0);
+    let thread_axis = gp_Ax2d_ctor(&a_pnt, &a_dir);
+
+    let a_major = std::f64::consts::TAU;
+    let a_minor = neck_height / 10.0;
+
+    let ellipse_1 = Geom2d_Ellipse_ctor(&thread_axis, a_major, a_minor);
+    let ellipse_1_handle = ellipse_to_HandleGeom2d_Curve(&ellipse_1);
+    let ellipse_2 = Geom2d_Ellipse_ctor(&thread_axis, a_major, a_minor / 4.0);
+    let ellipse_2_handle = ellipse_to_HandleGeom2d_Curve(&ellipse_2);
+    let arc_1 = Geom2d_TrimmedCurve_ctor(&ellipse_1_handle, 0.0, std::f64::consts::PI);
+    let arc_2 = Geom2d_TrimmedCurve_ctor(&ellipse_2_handle, 0.0, std::f64::consts::PI);
+
+    let ellipse_point_1 = ellipse_value(&ellipse_1, 0.0);
+    let ellipse_point_2 = ellipse_value(&ellipse_1, std::f64::consts::PI);
 
     // Export to an STL file
     let triangulation = BRepMesh_IncrementalMesh_ctor(body_shape, 0.1);

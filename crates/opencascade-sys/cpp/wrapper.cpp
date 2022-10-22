@@ -33,9 +33,33 @@ const gp_Pnt& handle_geom_plane_location(const HandleGeomPlane& plane) {
   return plane->Location();
 }
 
+std::unique_ptr<Geom_CylindricalSurface> Geom_CylindricalSurface_ctor(const gp_Ax3& axis, double radius) {
+  return std::unique_ptr<Geom_CylindricalSurface>(new Geom_CylindricalSurface(axis, radius));
+}
+
+std::unique_ptr<HandleGeom2d_Ellipse> Geom2d_Ellipse_ctor(const gp_Ax2d& axis, double major_radius, double minor_radius) {
+  return std::unique_ptr<HandleGeom2d_Ellipse>(new opencascade::handle<Geom2d_Ellipse>(new Geom2d_Ellipse(axis, major_radius, minor_radius)));
+}
+
+std::unique_ptr<HandleGeom2d_Curve> ellipse_to_HandleGeom2d_Curve(const HandleGeom2d_Ellipse& ellipse_handle) {
+  return std::unique_ptr<HandleGeom2d_Curve>(new opencascade::handle<Geom2d_Curve>(ellipse_handle));
+}
+
+std::unique_ptr<HandleGeom2d_TrimmedCurve> Geom2d_TrimmedCurve_ctor(const HandleGeom2d_Curve& curve, double u1, double u2) {
+  return std::unique_ptr<HandleGeom2d_TrimmedCurve>(new opencascade::handle<Geom2d_TrimmedCurve>(new Geom2d_TrimmedCurve(curve, u1, u2)));
+}
+
+std::unique_ptr<gp_Pnt2d> ellipse_value(const HandleGeom2d_Ellipse& ellipse, double u) {
+  return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(ellipse->Value(u)));
+}
+
 // Point stuff
 std::unique_ptr<gp_Pnt> new_point(double x, double y, double z) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(x, y, z));
+}
+
+std::unique_ptr<gp_Pnt2d> new_point_2d(double x, double y) {
+  return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(x, y));
 }
 
 std::unique_ptr<gp_Vec> new_vec(double x, double y, double z) {
@@ -122,6 +146,18 @@ const gp_Dir& gp_DZ() {
 
 std::unique_ptr<gp_Ax2> gp_Ax2_ctor(const gp_Pnt& origin, const gp_Dir& main_dir) {
   return std::unique_ptr<gp_Ax2>(new gp_Ax2(origin, main_dir));
+}
+
+std::unique_ptr<gp_Ax3> gp_Ax3_from_gp_Ax2(const gp_Ax2& axis) {
+  return std::unique_ptr<gp_Ax3>(new gp_Ax3(axis));
+}
+
+std::unique_ptr<gp_Dir2d> gp_Dir2d_ctor(double x, double y) {
+  return std::unique_ptr<gp_Dir2d>(new gp_Dir2d(x, y));
+}
+
+std::unique_ptr<gp_Ax2d> gp_Ax2d_ctor(const gp_Pnt2d& point, const gp_Dir2d& dir) {
+  return std::unique_ptr<gp_Ax2d>(new gp_Ax2d(point, dir));
 }
 
 // Shape stuff

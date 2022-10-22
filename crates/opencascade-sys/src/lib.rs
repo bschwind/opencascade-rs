@@ -25,6 +25,9 @@ pub mod ffi {
         type HandleGeomTrimmedCurve;
         type HandleGeomSurface;
         type HandleGeomPlane;
+        type HandleGeom2d_Curve;
+        type HandleGeom2d_Ellipse;
+        type HandleGeom2d_TrimmedCurve;
 
         pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
@@ -44,16 +47,45 @@ pub mod ffi {
 
         // Geometry
         type Geom_TrimmedCurve;
+        type Geom_CylindricalSurface;
+        type Geom2d_Ellipse;
+        type Geom2d_Curve;
+        type Geom2d_TrimmedCurve;
 
         pub fn handle_geom_plane_location(plane: &HandleGeomPlane) -> &gp_Pnt;
 
+        // TODO - return a Handle?
+        pub fn Geom_CylindricalSurface_ctor(
+            axis: &gp_Ax3,
+            radius: f64,
+        ) -> UniquePtr<Geom_CylindricalSurface>;
+        pub fn Geom2d_Ellipse_ctor(
+            axis: &gp_Ax2d,
+            major_radius: f64,
+            minor_radius: f64,
+        ) -> UniquePtr<HandleGeom2d_Ellipse>;
+        pub fn ellipse_to_HandleGeom2d_Curve(
+            ellipse: &HandleGeom2d_Ellipse,
+        ) -> UniquePtr<HandleGeom2d_Curve>;
+        pub fn Geom2d_TrimmedCurve_ctor(
+            curve_handle: &HandleGeom2d_Curve,
+            u1: f64,
+            u2: f64,
+        ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
+
+        pub fn ellipse_value(ellipse: &HandleGeom2d_Ellipse, u: f64) -> UniquePtr<gp_Pnt2d>;
+
         // Points
         type gp_Pnt;
+        type gp_Pnt2d;
+
         pub fn new_point(x: f64, y: f64, z: f64) -> UniquePtr<gp_Pnt>;
         pub fn X(self: &gp_Pnt) -> f64;
         pub fn Y(self: &gp_Pnt) -> f64;
         pub fn Z(self: &gp_Pnt) -> f64;
         pub fn Distance(self: &gp_Pnt, other: &gp_Pnt) -> f64;
+
+        pub fn new_point_2d(x: f64, y: f64) -> UniquePtr<gp_Pnt2d>;
 
         type gp_Vec;
         pub fn new_vec(x: f64, y: f64, z: f64) -> UniquePtr<gp_Vec>;
@@ -172,11 +204,17 @@ pub mod ffi {
         // Geometric processor
         type gp_Ax1;
         type gp_Ax2;
+        type gp_Ax3;
         type gp_Dir;
+        type gp_Dir2d;
+        type gp_Ax2d;
         pub fn gp_OX() -> &'static gp_Ax1;
         pub fn gp_DZ() -> &'static gp_Dir;
 
         pub fn gp_Ax2_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
+        pub fn gp_Ax3_from_gp_Ax2(axis: &gp_Ax2) -> UniquePtr<gp_Ax3>;
+        pub fn gp_Dir2d_ctor(x: f64, y: f64) -> UniquePtr<gp_Dir2d>;
+        pub fn gp_Ax2d_ctor(point: &gp_Pnt2d, dir: &gp_Dir2d) -> UniquePtr<gp_Ax2d>;
 
         // Transforms
         type gp_Trsf;

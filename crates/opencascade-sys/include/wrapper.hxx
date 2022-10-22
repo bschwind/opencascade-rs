@@ -1,14 +1,18 @@
 #include "rust/cxx.h"
 #include <gp_Ax2.hxx>
+#include <gp_Ax3.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
 #include <gp.hxx>
 #include <gp_Vec.hxx>
 #include <GC_MakeSegment.hxx>
 #include <GC_MakeArcOfCircle.hxx>
+#include <Geom_CylindricalSurface.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_Plane.hxx>
+#include <Geom2d_Ellipse.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Edge.hxx>
@@ -34,6 +38,9 @@ typedef opencascade::handle<Geom_Curve> HandleGeomCurve;
 typedef opencascade::handle<Geom_TrimmedCurve> HandleGeomTrimmedCurve;
 typedef opencascade::handle<Geom_Surface> HandleGeomSurface;
 typedef opencascade::handle<Geom_Plane> HandleGeomPlane;
+typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
+typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
+typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 
 const HandleStandardType& DynamicType(const HandleGeomSurface& surface);
 rust::String type_name(const HandleStandardType& handle);
@@ -44,6 +51,11 @@ void shape_list_append_face(TopTools_ListOfShape& list, const TopoDS_Face& face)
 
 // Geometry
 const gp_Pnt& handle_geom_plane_location(const HandleGeomPlane& plane);
+std::unique_ptr<Geom_CylindricalSurface> Geom_CylindricalSurface_ctor(const gp_Ax3& axis, double radius);
+std::unique_ptr<HandleGeom2d_Ellipse> Geom2d_Ellipse_ctor(const gp_Ax2d& axis, double major_radius, double minor_radius);
+std::unique_ptr<HandleGeom2d_Curve> ellipse_to_HandleGeom2d_Curve(const HandleGeom2d_Ellipse& ellipse_handle);
+std::unique_ptr<HandleGeom2d_TrimmedCurve> Geom2d_TrimmedCurve_ctor(const HandleGeom2d_Curve& curve, double u1, double u2);
+std::unique_ptr<gp_Pnt2d> ellipse_value(const HandleGeom2d_Ellipse& ellipse, double u);
 
 
 std::unique_ptr<HandleGeomCurve> new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(const HandleGeomTrimmedCurve& trimmed_curve);
@@ -51,6 +63,7 @@ std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurface(cons
 
 // Point stuff
 std::unique_ptr<gp_Pnt> new_point(double x, double y, double z);
+std::unique_ptr<gp_Pnt2d> new_point_2d(double x, double y);
 std::unique_ptr<gp_Vec> new_vec(double x, double y, double z);
 
 // Line segment stuff
@@ -93,6 +106,9 @@ const gp_Ax1& gp_OX();
 const gp_Dir& gp_DZ();
 
 std::unique_ptr<gp_Ax2> gp_Ax2_ctor(const gp_Pnt& origin, const gp_Dir& main_dir);
+std::unique_ptr<gp_Ax3> gp_Ax3_from_gp_Ax2(const gp_Ax2& axis);
+std::unique_ptr<gp_Dir2d> gp_Dir2d_ctor(double x, double y);
+std::unique_ptr<gp_Ax2d> gp_Ax2d_ctor(const gp_Pnt2d& point, const gp_Dir2d& dir);
 
 // Shape stuff
 const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape);
