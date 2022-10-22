@@ -33,8 +33,12 @@ const gp_Pnt& handle_geom_plane_location(const HandleGeomPlane& plane) {
   return plane->Location();
 }
 
-std::unique_ptr<Geom_CylindricalSurface> Geom_CylindricalSurface_ctor(const gp_Ax3& axis, double radius) {
-  return std::unique_ptr<Geom_CylindricalSurface>(new Geom_CylindricalSurface(axis, radius));
+std::unique_ptr<HandleGeom_CylindricalSurface> Geom_CylindricalSurface_ctor(const gp_Ax3& axis, double radius) {
+  return std::unique_ptr<HandleGeom_CylindricalSurface>(new opencascade::handle<Geom_CylindricalSurface>(new Geom_CylindricalSurface(axis, radius)));
+}
+
+std::unique_ptr<HandleGeomSurface> cylinder_to_surface(const HandleGeom_CylindricalSurface& cylinder_handle) {
+  return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(cylinder_handle));
 }
 
 std::unique_ptr<HandleGeom2d_Ellipse> Geom2d_Ellipse_ctor(const gp_Ax2d& axis, double major_radius, double minor_radius) {
@@ -47,6 +51,10 @@ std::unique_ptr<HandleGeom2d_Curve> ellipse_to_HandleGeom2d_Curve(const HandleGe
 
 std::unique_ptr<HandleGeom2d_TrimmedCurve> Geom2d_TrimmedCurve_ctor(const HandleGeom2d_Curve& curve, double u1, double u2) {
   return std::unique_ptr<HandleGeom2d_TrimmedCurve>(new opencascade::handle<Geom2d_TrimmedCurve>(new Geom2d_TrimmedCurve(curve, u1, u2)));
+}
+
+std::unique_ptr<HandleGeom2d_Curve> HandleGeom2d_TrimmedCurve_to_curve(const HandleGeom2d_TrimmedCurve& trimmed_curve) {
+  return std::unique_ptr<HandleGeom2d_Curve>(new opencascade::handle<Geom2d_Curve>(trimmed_curve));
 }
 
 std::unique_ptr<gp_Pnt2d> ellipse_value(const HandleGeom2d_Ellipse& ellipse, double u) {
@@ -75,6 +83,10 @@ std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeSegment_Value(const GC_MakeSegmen
   return std::unique_ptr<HandleGeomTrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(segment.Value()));
 }
 
+std::unique_ptr<HandleGeom2d_TrimmedCurve> GCE2d_MakeSegment_point_point(const gp_Pnt2d& p1, const gp_Pnt2d& p2) {
+  return std::unique_ptr<HandleGeom2d_TrimmedCurve>(new opencascade::handle<Geom2d_TrimmedCurve>(GCE2d_MakeSegment(p1, p2)));
+}
+
 // Arc stuff
 std::unique_ptr<GC_MakeArcOfCircle> GC_MakeArcOfCircle_point_point_point(const gp_Pnt& p1, const gp_Pnt& p2, const gp_Pnt& p3) {
   return std::unique_ptr<GC_MakeArcOfCircle>(new GC_MakeArcOfCircle(p1, p2, p3));
@@ -87,6 +99,10 @@ std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeArcOfCircle_Value(const GC_MakeAr
 // BRepBuilderAPI stuff
 std::unique_ptr<BRepBuilderAPI_MakeEdge> BRepBuilderAPI_MakeEdge_HandleGeomCurve(const HandleGeomCurve &geom_curve) {
   return std::unique_ptr<BRepBuilderAPI_MakeEdge>(new BRepBuilderAPI_MakeEdge(geom_curve));
+}
+
+std::unique_ptr<BRepBuilderAPI_MakeEdge> BRepBuilderAPI_MakeEdge_CurveSurface2d(const HandleGeom2d_Curve& curve_handle, const HandleGeomSurface& surface_handle) {
+  return std::unique_ptr<BRepBuilderAPI_MakeEdge>(new BRepBuilderAPI_MakeEdge(curve_handle, surface_handle));
 }
 
 std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_ctor() {

@@ -28,6 +28,7 @@ pub mod ffi {
         type HandleGeom2d_Curve;
         type HandleGeom2d_Ellipse;
         type HandleGeom2d_TrimmedCurve;
+        type HandleGeom_CylindricalSurface;
 
         pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
@@ -58,7 +59,11 @@ pub mod ffi {
         pub fn Geom_CylindricalSurface_ctor(
             axis: &gp_Ax3,
             radius: f64,
-        ) -> UniquePtr<Geom_CylindricalSurface>;
+        ) -> UniquePtr<HandleGeom_CylindricalSurface>;
+        pub fn cylinder_to_surface(
+            cylinder_handle: &HandleGeom_CylindricalSurface,
+        ) -> UniquePtr<HandleGeomSurface>;
+
         pub fn Geom2d_Ellipse_ctor(
             axis: &gp_Ax2d,
             major_radius: f64,
@@ -72,6 +77,9 @@ pub mod ffi {
             u1: f64,
             u2: f64,
         ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
+        pub fn HandleGeom2d_TrimmedCurve_to_curve(
+            trimmed_curve: &HandleGeom2d_TrimmedCurve,
+        ) -> UniquePtr<HandleGeom2d_Curve>;
 
         pub fn ellipse_value(ellipse: &HandleGeom2d_Ellipse, u: f64) -> UniquePtr<gp_Pnt2d>;
 
@@ -92,8 +100,13 @@ pub mod ffi {
 
         // Segments
         type GC_MakeSegment;
+        type GCE2d_MakeSegment;
         pub fn GC_MakeSegment_point_point(p1: &gp_Pnt, p2: &gp_Pnt) -> UniquePtr<GC_MakeSegment>;
         pub fn GC_MakeSegment_Value(arc: &GC_MakeSegment) -> UniquePtr<HandleGeomTrimmedCurve>;
+        pub fn GCE2d_MakeSegment_point_point(
+            p1: &gp_Pnt2d,
+            p2: &gp_Pnt2d,
+        ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
 
         // Arcs
         type GC_MakeArcOfCircle;
@@ -124,6 +137,10 @@ pub mod ffi {
         type TopoDS_Vertex;
         pub fn BRepBuilderAPI_MakeEdge_HandleGeomCurve(
             geom_curve_handle: &HandleGeomCurve,
+        ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
+        pub fn BRepBuilderAPI_MakeEdge_CurveSurface2d(
+            curve_handle: &HandleGeom2d_Curve,
+            surface_handle: &HandleGeomSurface,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
         pub fn Vertex1(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Vertex;
         pub fn Edge(self: Pin<&mut BRepBuilderAPI_MakeEdge>) -> &TopoDS_Edge;
