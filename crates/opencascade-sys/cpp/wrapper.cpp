@@ -113,6 +113,10 @@ std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge_edge(
   return std::unique_ptr<BRepBuilderAPI_MakeWire>(new BRepBuilderAPI_MakeWire(edge_1, edge_2, edge_3));
 }
 
+std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge(const TopoDS_Edge& edge_1, const TopoDS_Edge& edge_2) {
+  return std::unique_ptr<BRepBuilderAPI_MakeWire>(new BRepBuilderAPI_MakeWire(edge_1, edge_2));
+}
+
 std::unique_ptr<BRepBuilderAPI_MakeFace> BRepBuilderAPI_MakeFace_wire(const TopoDS_Wire& wire, const Standard_Boolean only_plane) {
   return std::unique_ptr<BRepBuilderAPI_MakeFace>(new BRepBuilderAPI_MakeFace(wire, only_plane));
 }
@@ -124,6 +128,11 @@ std::unique_ptr<BRepPrimAPI_MakePrism> BRepPrimAPI_MakePrism_ctor(const TopoDS_S
 
 std::unique_ptr<BRepPrimAPI_MakeCylinder> BRepPrimAPI_MakeCylinder_ctor(const gp_Ax2& coord_system, const Standard_Real radius, const Standard_Real height) {
   return std::unique_ptr<BRepPrimAPI_MakeCylinder>(new BRepPrimAPI_MakeCylinder(coord_system, radius, height));
+}
+
+// BRepLib
+bool BRepLibBuildCurves3d(const TopoDS_Shape& shape) {
+  return BRepLib::BuildCurves3d(shape);
 }
 
 // Boolean operations
@@ -149,6 +158,11 @@ void MakeThickSolidByJoin(
     const Standard_Real tolerance
 ) {
   make_thick_solid.MakeThickSolidByJoin(shape, closing_faces, offset, tolerance);
+}
+
+// Lofting
+std::unique_ptr<BRepOffsetAPI_ThruSections> BRepOffsetAPI_ThruSections_ctor(bool is_solid) {
+  return std::unique_ptr<BRepOffsetAPI_ThruSections>(new BRepOffsetAPI_ThruSections(is_solid));
 }
 
 // Geometric processing
@@ -187,6 +201,23 @@ const TopoDS_Edge& TopoDS_cast_to_edge(const TopoDS_Shape& shape) {
 
 std::unique_ptr<TopoDS_Face> TopoDS_cast_to_face(const TopoDS_Shape& shape) {
   return std::unique_ptr<TopoDS_Face>(new TopoDS_Face(TopoDS::Face(shape)));
+}
+
+// Compound shapes
+std::unique_ptr<TopoDS_Shape> TopoDS_Compound_as_shape(std::unique_ptr<TopoDS_Compound> compound) {
+  return compound;
+}
+
+std::unique_ptr<TopoDS_Compound> TopoDS_Compound_ctor() {
+  return std::unique_ptr<TopoDS_Compound>(new TopoDS_Compound());
+}
+
+std::unique_ptr<BRep_Builder> BRep_Builder_ctor() {
+  return std::unique_ptr<BRep_Builder>(new BRep_Builder());
+}
+
+const TopoDS_Builder& BRep_Builder_upcast_to_topods_builder(const BRep_Builder& builder) {
+  return builder;
 }
 
 // Transforms

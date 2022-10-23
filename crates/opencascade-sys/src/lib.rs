@@ -132,6 +132,20 @@ pub mod ffi {
         pub fn IsNull(self: &TopoDS_Shape) -> bool;
         pub fn IsEqual(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
 
+        // Compound Shapes
+        type TopoDS_Compound;
+        pub fn TopoDS_Compound_as_shape(
+            compound: UniquePtr<TopoDS_Compound>,
+        ) -> UniquePtr<TopoDS_Shape>;
+
+        type BRep_Builder;
+        type TopoDS_Builder;
+        pub fn TopoDS_Compound_ctor() -> UniquePtr<TopoDS_Compound>;
+        pub fn BRep_Builder_ctor() -> UniquePtr<BRep_Builder>;
+        pub fn BRep_Builder_upcast_to_topods_builder(builder: &BRep_Builder) -> &TopoDS_Builder;
+        pub fn MakeCompound(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Compound>);
+        pub fn Add(self: &TopoDS_Builder, shape: Pin<&mut TopoDS_Shape>, compound: &TopoDS_Shape);
+
         // BRepBuilder
         type BRepBuilderAPI_MakeEdge;
         type TopoDS_Vertex;
@@ -147,6 +161,10 @@ pub mod ffi {
 
         type BRepBuilderAPI_MakeWire;
         pub fn BRepBuilderAPI_MakeWire_ctor() -> UniquePtr<BRepBuilderAPI_MakeWire>;
+        pub fn BRepBuilderAPI_MakeWire_edge_edge(
+            edge_1: &TopoDS_Edge,
+            edge_2: &TopoDS_Edge,
+        ) -> UniquePtr<BRepBuilderAPI_MakeWire>;
         pub fn BRepBuilderAPI_MakeWire_edge_edge_edge(
             edge_1: &TopoDS_Edge,
             edge_2: &TopoDS_Edge,
@@ -189,6 +207,9 @@ pub mod ffi {
         ) -> UniquePtr<BRepPrimAPI_MakeCylinder>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCylinder>) -> &TopoDS_Shape;
 
+        // BRepLib
+        pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
+
         // Fillets
         type BRepFilletAPI_MakeFillet;
         pub fn BRepFilletAPI_MakeFillet_ctor(
@@ -209,6 +230,15 @@ pub mod ffi {
             tolerance: f64,
         );
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeThickSolid>) -> &TopoDS_Shape;
+
+        // Lofting
+        type BRepOffsetAPI_ThruSections;
+        pub fn BRepOffsetAPI_ThruSections_ctor(
+            is_solid: bool,
+        ) -> UniquePtr<BRepOffsetAPI_ThruSections>;
+        pub fn AddWire(self: Pin<&mut BRepOffsetAPI_ThruSections>, wire: &TopoDS_Wire);
+        pub fn CheckCompatibility(self: Pin<&mut BRepOffsetAPI_ThruSections>, check: bool);
+        pub fn Shape(self: Pin<&mut BRepOffsetAPI_ThruSections>) -> &TopoDS_Shape;
 
         // Boolean Operations
         type BRepAlgoAPI_Fuse;

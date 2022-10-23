@@ -26,10 +26,12 @@
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
+#include <BRepLib.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
+#include <BRepOffsetAPI_ThruSections.hxx>
 #include <StlAPI_Writer.hxx>
 #include <Standard_Type.hxx>
 
@@ -83,6 +85,7 @@ std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeArcOfCircle_Value(const GC_MakeAr
 std::unique_ptr<BRepBuilderAPI_MakeEdge> BRepBuilderAPI_MakeEdge_HandleGeomCurve(const HandleGeomCurve& geom_curve);
 std::unique_ptr<BRepBuilderAPI_MakeEdge> BRepBuilderAPI_MakeEdge_CurveSurface2d(const HandleGeom2d_Curve& curve_handle, const HandleGeomSurface& surface_handle);
 std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_ctor();
+std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge(const TopoDS_Edge& edge_1, const TopoDS_Edge& edge_2);
 std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge_edge(const TopoDS_Edge& edge_1, const TopoDS_Edge& edge_2, const TopoDS_Edge& edge_3);
 
 std::unique_ptr<BRepBuilderAPI_MakeFace> BRepBuilderAPI_MakeFace_wire(const TopoDS_Wire& wire, const Standard_Boolean only_plane);
@@ -90,6 +93,9 @@ std::unique_ptr<BRepBuilderAPI_MakeFace> BRepBuilderAPI_MakeFace_wire(const Topo
 // Primitives
 std::unique_ptr<BRepPrimAPI_MakePrism> BRepPrimAPI_MakePrism_ctor(const TopoDS_Shape& shape, const gp_Vec& vec, const Standard_Boolean copy, const Standard_Boolean canonize);
 std::unique_ptr<BRepPrimAPI_MakeCylinder> BRepPrimAPI_MakeCylinder_ctor(const gp_Ax2& coord_system, const Standard_Real radius, const Standard_Real height);
+
+// BRepLib
+bool BRepLibBuildCurves3d(const TopoDS_Shape& shape);
 
 // Boolean operations
 std::unique_ptr<BRepAlgoAPI_Fuse> BRepAlgoAPI_Fuse_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2);
@@ -107,6 +113,9 @@ void MakeThickSolidByJoin(
     const Standard_Real Tol
 );
 
+// Lofting
+std::unique_ptr<BRepOffsetAPI_ThruSections> BRepOffsetAPI_ThruSections_ctor(bool is_solid);
+
 // Geometric processor
 const gp_Ax1& gp_OX();
 const gp_Dir& gp_DZ();
@@ -120,6 +129,12 @@ std::unique_ptr<gp_Ax2d> gp_Ax2d_ctor(const gp_Pnt2d& point, const gp_Dir2d& dir
 const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape);
 const TopoDS_Edge& TopoDS_cast_to_edge(const TopoDS_Shape& shape);
 std::unique_ptr<TopoDS_Face> TopoDS_cast_to_face(const TopoDS_Shape& shape);
+
+// Compound Shapes
+std::unique_ptr<TopoDS_Shape> TopoDS_Compound_as_shape(std::unique_ptr<TopoDS_Compound> compound);
+std::unique_ptr<TopoDS_Compound> TopoDS_Compound_ctor();
+std::unique_ptr<BRep_Builder> BRep_Builder_ctor();
+const TopoDS_Builder& BRep_Builder_upcast_to_topods_builder(const BRep_Builder& builder);
 
 // Transforms
 std::unique_ptr<gp_Trsf> new_transform();

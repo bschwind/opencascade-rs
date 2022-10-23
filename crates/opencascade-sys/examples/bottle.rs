@@ -6,14 +6,17 @@ use opencascade_sys::ffi::{
     new_list_of_shape, new_point, new_point_2d, new_transform, new_vec, shape_list_append_face,
     type_name, write_stl, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_CurveSurface2d,
     BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
-    BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_MakeWire_edge_edge_edge,
-    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
-    BRepOffsetAPI_MakeThickSolid_ctor, BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor,
-    BRep_Tool_Surface, DynamicType, ExplorerCurrentShape, GCE2d_MakeSegment_point_point,
-    GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value,
-    GC_MakeSegment_point_point, Geom2d_Ellipse_ctor, Geom2d_TrimmedCurve_ctor,
-    Geom_CylindricalSurface_ctor, HandleGeom2d_TrimmedCurve_to_curve, MakeThickSolidByJoin,
-    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Face, TopoDS_cast_to_edge,
+    BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_MakeWire_edge_edge,
+    BRepBuilderAPI_MakeWire_edge_edge_edge, BRepBuilderAPI_Transform_ctor,
+    BRepFilletAPI_MakeFillet_ctor, BRepLibBuildCurves3d, BRepMesh_IncrementalMesh_ctor,
+    BRepOffsetAPI_MakeThickSolid_ctor, BRepOffsetAPI_ThruSections_ctor,
+    BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Builder_ctor,
+    BRep_Builder_upcast_to_topods_builder, BRep_Tool_Surface, DynamicType, ExplorerCurrentShape,
+    GCE2d_MakeSegment_point_point, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
+    GC_MakeSegment_Value, GC_MakeSegment_point_point, Geom2d_Ellipse_ctor,
+    Geom2d_TrimmedCurve_ctor, Geom_CylindricalSurface_ctor, HandleGeom2d_TrimmedCurve_to_curve,
+    MakeThickSolidByJoin, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
+    TopoDS_Compound_as_shape, TopoDS_Compound_ctor, TopoDS_Face, TopoDS_cast_to_edge,
     TopoDS_cast_to_face, TopoDS_cast_to_wire,
 };
 
@@ -175,13 +178,48 @@ pub fn main() {
     let thread_segment = GCE2d_MakeSegment_point_point(&ellipse_point_1, &ellipse_point_2);
     let thread_segment = HandleGeom2d_TrimmedCurve_to_curve(&thread_segment);
 
-    let edge_1_on_surface_1 = BRepBuilderAPI_MakeEdge_CurveSurface2d(&arc_1, &cylinder_1);
-    let edge_2_on_surface_1 = BRepBuilderAPI_MakeEdge_CurveSurface2d(&thread_segment, &cylinder_1);
-    let edge_1_on_surface_2 = BRepBuilderAPI_MakeEdge_CurveSurface2d(&arc_2, &cylinder_2);
-    let edge_2_on_surface_2 = BRepBuilderAPI_MakeEdge_CurveSurface2d(&thread_segment, &cylinder_2);
+    let mut edge_1_on_surface_1 = BRepBuilderAPI_MakeEdge_CurveSurface2d(&arc_1, &cylinder_1);
+    let mut edge_2_on_surface_1 =
+        BRepBuilderAPI_MakeEdge_CurveSurface2d(&thread_segment, &cylinder_1);
+    let mut edge_1_on_surface_2 = BRepBuilderAPI_MakeEdge_CurveSurface2d(&arc_2, &cylinder_2);
+    let mut edge_2_on_surface_2 =
+        BRepBuilderAPI_MakeEdge_CurveSurface2d(&thread_segment, &cylinder_2);
+
+    let mut threading_wire_1 = BRepBuilderAPI_MakeWire_edge_edge(
+        edge_1_on_surface_1.pin_mut().Edge(),
+        edge_2_on_surface_1.pin_mut().Edge(),
+    );
+    let mut threading_wire_2 = BRepBuilderAPI_MakeWire_edge_edge(
+        edge_1_on_surface_2.pin_mut().Edge(),
+        edge_2_on_surface_2.pin_mut().Edge(),
+    );
+
+    // TODO - does calling Shape() work here instead of Wire()?
+    BRepLibBuildCurves3d(threading_wire_1.pin_mut().Shape());
+    BRepLibBuildCurves3d(threading_wire_2.pin_mut().Shape());
+
+    let is_solid = true;
+    let mut threading_loft = BRepOffsetAPI_ThruSections_ctor(is_solid);
+    threading_loft.pin_mut().AddWire(threading_wire_1.pin_mut().Wire());
+    threading_loft.pin_mut().AddWire(threading_wire_2.pin_mut().Wire());
+    threading_loft.pin_mut().CheckCompatibility(false);
+
+    let threading_shape = threading_loft.pin_mut().Shape();
+
+    // Build the resulting compound
+    let mut compound = TopoDS_Compound_ctor();
+    let builder = BRep_Builder_ctor();
+    let builder = BRep_Builder_upcast_to_topods_builder(&builder);
+    builder.MakeCompound(compound.pin_mut());
+
+    let mut compound_shape = TopoDS_Compound_as_shape(compound);
+    builder.Add(compound_shape.pin_mut(), &body_shape);
+    builder.Add(compound_shape.pin_mut(), &threading_shape);
+
+    let final_shape = compound_shape;
 
     // Export to an STL file
-    let triangulation = BRepMesh_IncrementalMesh_ctor(body_shape, 0.1);
+    let triangulation = BRepMesh_IncrementalMesh_ctor(&final_shape, 0.01);
     let success = write_stl(stl_writer.pin_mut(), triangulation.Shape(), "output.stl".to_owned());
 
     println!("Done! Success = {}", success);
