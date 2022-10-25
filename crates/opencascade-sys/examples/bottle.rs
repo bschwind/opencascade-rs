@@ -89,8 +89,6 @@ pub fn main() {
         edge_explorer.pin_mut().Next();
     }
 
-    let mut stl_writer = StlAPI_Writer_ctor();
-
     let body_shape = make_fillet.pin_mut().Shape();
 
     // Make the bottle neck
@@ -219,8 +217,9 @@ pub fn main() {
     let final_shape = compound_shape;
 
     // Export to an STL file
+    let mut stl_writer = StlAPI_Writer_ctor();
     let triangulation = BRepMesh_IncrementalMesh_ctor(&final_shape, 0.01);
-    let success = write_stl(stl_writer.pin_mut(), triangulation.Shape(), "output.stl".to_owned());
+    let success = write_stl(stl_writer.pin_mut(), triangulation.Shape(), "bottle.stl".to_owned());
 
     println!("Done! Success = {}", success);
 }

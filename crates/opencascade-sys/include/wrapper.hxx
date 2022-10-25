@@ -29,6 +29,7 @@
 #include <BRepLib.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
@@ -48,6 +49,9 @@ typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurfa
 
 const HandleStandardType& DynamicType(const HandleGeomSurface& surface);
 rust::String type_name(const HandleStandardType& handle);
+
+// General Shape Stuff
+std::unique_ptr<TopoDS_Shape> new_shape(const TopoDS_Shape& shape);
 
 // Collections
 std::unique_ptr<TopTools_ListOfShape> new_list_of_shape();
@@ -93,6 +97,7 @@ std::unique_ptr<BRepBuilderAPI_MakeFace> BRepBuilderAPI_MakeFace_wire(const Topo
 // Primitives
 std::unique_ptr<BRepPrimAPI_MakePrism> BRepPrimAPI_MakePrism_ctor(const TopoDS_Shape& shape, const gp_Vec& vec, const Standard_Boolean copy, const Standard_Boolean canonize);
 std::unique_ptr<BRepPrimAPI_MakeCylinder> BRepPrimAPI_MakeCylinder_ctor(const gp_Ax2& coord_system, const Standard_Real radius, const Standard_Real height);
+std::unique_ptr<BRepPrimAPI_MakeBox> BRepPrimAPI_MakeBox_ctor(const gp_Pnt& point, double dx, double dy, double dz);
 
 // BRepLib
 bool BRepLibBuildCurves3d(const TopoDS_Shape& shape);

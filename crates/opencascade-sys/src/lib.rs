@@ -41,6 +41,11 @@ pub mod ffi {
             geom_surface_handle: &HandleGeomSurface,
         ) -> UniquePtr<HandleGeomPlane>;
 
+        // General Shape Stuff
+        /// Takes a shape reference (typically one returned from a shape builder API) and puts
+        /// it in a unique_ptr.
+        pub fn new_shape(shape: &TopoDS_Shape) -> UniquePtr<TopoDS_Shape>;
+
         // Collections
         type TopTools_ListOfShape;
         pub fn new_list_of_shape() -> UniquePtr<TopTools_ListOfShape>;
@@ -206,6 +211,15 @@ pub mod ffi {
             height: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeCylinder>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCylinder>) -> &TopoDS_Shape;
+
+        type BRepPrimAPI_MakeBox;
+        pub fn BRepPrimAPI_MakeBox_ctor(
+            point: &gp_Pnt,
+            dx: f64,
+            dy: f64,
+            dz: f64,
+        ) -> UniquePtr<BRepPrimAPI_MakeBox>;
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeBox>) -> &TopoDS_Shape;
 
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;

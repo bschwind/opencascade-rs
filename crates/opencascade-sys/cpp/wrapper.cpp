@@ -19,6 +19,11 @@ std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurface(cons
   return std::unique_ptr<HandleGeomPlane>(new opencascade::handle<Geom_Plane>(plane_handle));
 }
 
+// General Shape Stuff
+std::unique_ptr<TopoDS_Shape> new_shape(const TopoDS_Shape& shape) {
+  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(shape));
+}
+
 // Collections
 std::unique_ptr<TopTools_ListOfShape> new_list_of_shape() {
   return std::unique_ptr<TopTools_ListOfShape>(new TopTools_ListOfShape());
@@ -128,6 +133,10 @@ std::unique_ptr<BRepPrimAPI_MakePrism> BRepPrimAPI_MakePrism_ctor(const TopoDS_S
 
 std::unique_ptr<BRepPrimAPI_MakeCylinder> BRepPrimAPI_MakeCylinder_ctor(const gp_Ax2& coord_system, const Standard_Real radius, const Standard_Real height) {
   return std::unique_ptr<BRepPrimAPI_MakeCylinder>(new BRepPrimAPI_MakeCylinder(coord_system, radius, height));
+}
+
+std::unique_ptr<BRepPrimAPI_MakeBox> BRepPrimAPI_MakeBox_ctor(const gp_Pnt& point, double dx, double dy, double dz) {
+  return std::unique_ptr<BRepPrimAPI_MakeBox>(new BRepPrimAPI_MakeBox(point, dx, dy, dz));
 }
 
 // BRepLib
