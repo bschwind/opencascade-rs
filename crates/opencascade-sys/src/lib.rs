@@ -233,6 +233,15 @@ pub mod ffi {
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
 
+        // Chamfers
+        type BRepFilletAPI_MakeChamfer;
+        pub fn BRepFilletAPI_MakeChamfer_ctor(
+            shape: &TopoDS_Shape,
+        ) -> UniquePtr<BRepFilletAPI_MakeChamfer>;
+        #[rust_name = "add_edge"]
+        pub fn Add(self: Pin<&mut BRepFilletAPI_MakeChamfer>, distance: f64, edge: &TopoDS_Edge);
+        pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeChamfer>) -> &TopoDS_Shape;
+
         // Solids
         type BRepOffsetAPI_MakeThickSolid;
         pub fn BRepOffsetAPI_MakeThickSolid_ctor() -> UniquePtr<BRepOffsetAPI_MakeThickSolid>;

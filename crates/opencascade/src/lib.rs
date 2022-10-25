@@ -1,8 +1,8 @@
 use cxx::UniquePtr;
 use opencascade_sys::ffi::{
-    new_point, new_shape, write_stl, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
-    BRepPrimAPI_MakeBox_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
-    TopoDS_Shape, TopoDS_cast_to_edge,
+    new_point, new_shape, write_stl, BRepFilletAPI_MakeChamfer_ctor, BRepFilletAPI_MakeFillet_ctor,
+    BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
+    TopExp_Explorer_ctor, TopoDS_Shape, TopoDS_cast_to_edge,
 };
 use std::path::Path;
 
@@ -42,6 +42,21 @@ impl Shape {
         }
 
         let filleted_shape = make_fillet.pin_mut().Shape();
+
+        self.shape = new_shape(filleted_shape);
+    }
+
+    pub fn chamfer_edges(&mut self, distance: f64) {
+        let mut make_chamfer = BRepFilletAPI_MakeChamfer_ctor(&self.shape);
+        let mut edge_explorer = TopExp_Explorer_ctor(&self.shape, TopAbs_ShapeEnum::TopAbs_EDGE);
+
+        while edge_explorer.More() {
+            let edge = TopoDS_cast_to_edge(edge_explorer.Current());
+            make_chamfer.pin_mut().add_edge(distance, edge);
+            edge_explorer.pin_mut().Next();
+        }
+
+        let filleted_shape = make_chamfer.pin_mut().Shape();
 
         self.shape = new_shape(filleted_shape);
     }

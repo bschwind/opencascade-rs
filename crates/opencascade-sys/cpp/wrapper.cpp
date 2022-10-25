@@ -154,6 +154,11 @@ std::unique_ptr<BRepFilletAPI_MakeFillet> BRepFilletAPI_MakeFillet_ctor(const To
   return std::unique_ptr<BRepFilletAPI_MakeFillet>(new BRepFilletAPI_MakeFillet(shape));
 }
 
+// Chamfers
+std::unique_ptr<BRepFilletAPI_MakeChamfer> BRepFilletAPI_MakeChamfer_ctor(const TopoDS_Shape& shape) {
+  return std::unique_ptr<BRepFilletAPI_MakeChamfer>(new BRepFilletAPI_MakeChamfer(shape));
+}
+
 // Solids
 std::unique_ptr<BRepOffsetAPI_MakeThickSolid> BRepOffsetAPI_MakeThickSolid_ctor() {
   return std::unique_ptr<BRepOffsetAPI_MakeThickSolid>(new BRepOffsetAPI_MakeThickSolid());

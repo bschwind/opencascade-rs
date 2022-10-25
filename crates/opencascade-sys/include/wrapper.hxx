@@ -25,6 +25,7 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepFilletAPI_MakeChamfer.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 #include <BRepLib.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
@@ -107,6 +108,9 @@ std::unique_ptr<BRepAlgoAPI_Fuse> BRepAlgoAPI_Fuse_ctor(const TopoDS_Shape& shap
 
 // Fillets
 std::unique_ptr<BRepFilletAPI_MakeFillet> BRepFilletAPI_MakeFillet_ctor(const TopoDS_Shape& shape);
+
+// Chamfers
+std::unique_ptr<BRepFilletAPI_MakeChamfer> BRepFilletAPI_MakeChamfer_ctor(const TopoDS_Shape& shape);
 
 // Solids
 std::unique_ptr<BRepOffsetAPI_MakeThickSolid> BRepOffsetAPI_MakeThickSolid_ctor();
