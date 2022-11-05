@@ -279,6 +279,8 @@ pub mod ffi {
         type gp_Dir2d;
         type gp_Ax2d;
         pub fn gp_OX() -> &'static gp_Ax1;
+        pub fn gp_OY() -> &'static gp_Ax1;
+        pub fn gp_OZ() -> &'static gp_Ax1;
         pub fn gp_DZ() -> &'static gp_Dir;
 
         pub fn gp_Ax2_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
@@ -292,6 +294,9 @@ pub mod ffi {
 
         #[rust_name = "set_mirror_axis"]
         pub fn SetMirror(self: Pin<&mut gp_Trsf>, axis: &gp_Ax1);
+        pub fn SetRotation (self: Pin<&mut gp_Trsf>, axis: &gp_Ax1, angle: f64);
+        pub fn SetScale(self: Pin<&mut gp_Trsf>, point: &gp_Pnt, scale: f64);
+        pub fn SetTranslation(self: Pin<&mut gp_Trsf>, point1: &gp_Pnt, point2: &gp_Pnt);
 
         type BRepBuilderAPI_Transform;
         pub fn BRepBuilderAPI_Transform_ctor(
