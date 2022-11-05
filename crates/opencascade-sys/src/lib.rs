@@ -271,6 +271,13 @@ pub mod ffi {
         ) -> UniquePtr<BRepAlgoAPI_Fuse>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
 
+        type BRepAlgoAPI_Cut;
+        pub fn BRepAlgoAPI_Cut_ctor(
+            shape_1: &TopoDS_Shape,
+            shape_2: &TopoDS_Shape,
+        ) -> UniquePtr<BRepAlgoAPI_Cut>;
+        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
+
         // Geometric processor
         type gp_Ax1;
         type gp_Ax2;
