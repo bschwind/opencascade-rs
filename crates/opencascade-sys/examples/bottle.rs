@@ -59,13 +59,13 @@ pub fn main() {
     let x_axis = gp_OX();
 
     let mut transform = new_transform();
-    transform.pin_mut().set_mirror_axis(&x_axis);
+    transform.pin_mut().set_mirror_axis(x_axis);
 
     // We're calling Shape() here instead of Wire(), hope that's okay.
     let mut brep_transform =
         BRepBuilderAPI_Transform_ctor(wire.pin_mut().Shape(), &transform, false);
     let mirrored_shape = brep_transform.pin_mut().Shape();
-    let mirrored_wire = TopoDS_cast_to_wire(&mirrored_shape);
+    let mirrored_wire = TopoDS_cast_to_wire(mirrored_shape);
 
     let mut make_wire = BRepBuilderAPI_MakeWire_ctor();
     make_wire.pin_mut().add_wire(wire.pin_mut().Wire());
@@ -73,15 +73,15 @@ pub fn main() {
 
     let wire_profile = make_wire.pin_mut().Wire();
 
-    let mut face_profile = BRepBuilderAPI_MakeFace_wire(&wire_profile, false);
+    let mut face_profile = BRepBuilderAPI_MakeFace_wire(wire_profile, false);
     let prism_vec = new_vec(0.0, 0.0, height);
     // We're calling Shape here instead of Face(), hope that's also okay.
     let mut body =
         BRepPrimAPI_MakePrism_ctor(face_profile.pin_mut().Shape(), &prism_vec, false, true);
 
-    let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(&body.pin_mut().Shape());
+    let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(body.pin_mut().Shape());
     let mut edge_explorer =
-        TopExp_Explorer_ctor(&body.pin_mut().Shape(), TopAbs_ShapeEnum::TopAbs_EDGE);
+        TopExp_Explorer_ctor(body.pin_mut().Shape(), TopAbs_ShapeEnum::TopAbs_EDGE);
 
     while edge_explorer.More() {
         let edge = TopoDS_cast_to_edge(edge_explorer.Current());
@@ -94,7 +94,7 @@ pub fn main() {
     // Make the bottle neck
     let neck_location = new_point(0.0, 0.0, height);
     let neck_axis = gp_DZ();
-    let neck_coord_system = gp_Ax2_ctor(&neck_location, &neck_axis);
+    let neck_coord_system = gp_Ax2_ctor(&neck_location, neck_axis);
 
     let neck_radius = thickness / 4.0;
     let neck_height = height / 10.0;
@@ -102,11 +102,11 @@ pub fn main() {
     let mut cylinder = BRepPrimAPI_MakeCylinder_ctor(&neck_coord_system, neck_radius, neck_height);
     let cylinder_shape = cylinder.pin_mut().Shape();
 
-    let mut fuse_neck = BRepAlgoAPI_Fuse_ctor(&body_shape, &cylinder_shape);
+    let mut fuse_neck = BRepAlgoAPI_Fuse_ctor(body_shape, cylinder_shape);
     let body_shape = fuse_neck.pin_mut().Shape();
 
     // Make the bottle hollow
-    let mut face_explorer = TopExp_Explorer_ctor(&body_shape, TopAbs_ShapeEnum::TopAbs_FACE);
+    let mut face_explorer = TopExp_Explorer_ctor(body_shape, TopAbs_ShapeEnum::TopAbs_FACE);
     let mut z_max = -1.0;
     let mut top_face: Option<UniquePtr<TopoDS_Face>> = None;
 
@@ -116,7 +116,7 @@ pub fn main() {
 
         let surface = BRep_Tool_Surface(&face);
         let dynamic_type = DynamicType(&surface);
-        let name = type_name(&dynamic_type);
+        let name = type_name(dynamic_type);
 
         if name == "Geom_Plane" {
             let plane_handle = new_HandleGeomPlane_from_HandleGeomSurface(&surface);
@@ -140,7 +140,7 @@ pub fn main() {
     let mut solid_maker = BRepOffsetAPI_MakeThickSolid_ctor();
     MakeThickSolidByJoin(
         solid_maker.pin_mut(),
-        &body_shape,
+        body_shape,
         &faces_to_remove,
         -thickness / 50.0,
         1.0e-3,
@@ -211,8 +211,8 @@ pub fn main() {
     builder.MakeCompound(compound.pin_mut());
 
     let mut compound_shape = TopoDS_Compound_as_shape(compound);
-    builder.Add(compound_shape.pin_mut(), &body_shape);
-    builder.Add(compound_shape.pin_mut(), &threading_shape);
+    builder.Add(compound_shape.pin_mut(), body_shape);
+    builder.Add(compound_shape.pin_mut(), threading_shape);
 
     let final_shape = compound_shape;
 
