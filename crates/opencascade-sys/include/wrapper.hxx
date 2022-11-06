@@ -129,6 +129,8 @@ std::unique_ptr<BRepOffsetAPI_ThruSections> BRepOffsetAPI_ThruSections_ctor(bool
 
 // Geometric processor
 const gp_Ax1& gp_OX();
+const gp_Ax1& gp_OY();
+const gp_Ax1& gp_OZ();
 const gp_Dir& gp_DZ();
 
 std::unique_ptr<gp_Ax2> gp_Ax2_ctor(const gp_Pnt& origin, const gp_Dir& main_dir);

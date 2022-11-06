@@ -187,6 +187,12 @@ std::unique_ptr<BRepOffsetAPI_ThruSections> BRepOffsetAPI_ThruSections_ctor(bool
 const gp_Ax1& gp_OX() {
   return gp::OX();
 }
+const gp_Ax1& gp_OY() {
+    return gp::OY();
+}
+const gp_Ax1& gp_OZ() {
+    return gp::OZ();
+}
 
 const gp_Dir& gp_DZ() {
   return gp::DZ();
