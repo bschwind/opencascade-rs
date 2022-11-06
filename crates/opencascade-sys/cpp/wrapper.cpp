@@ -149,6 +149,10 @@ std::unique_ptr<BRepAlgoAPI_Fuse> BRepAlgoAPI_Fuse_ctor(const TopoDS_Shape& shap
   return std::unique_ptr<BRepAlgoAPI_Fuse>(new BRepAlgoAPI_Fuse(shape_1, shape_2));
 }
 
+std::unique_ptr<BRepAlgoAPI_Cut> BRepAlgoAPI_Cut_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2){
+  return std::unique_ptr<BRepAlgoAPI_Cut>(new BRepAlgoAPI_Cut(shape_1, shape_2));
+}
+
 // Fillets
 std::unique_ptr<BRepFilletAPI_MakeFillet> BRepFilletAPI_MakeFillet_ctor(const TopoDS_Shape& shape) {
   return std::unique_ptr<BRepFilletAPI_MakeFillet>(new BRepFilletAPI_MakeFillet(shape));
@@ -182,6 +186,12 @@ std::unique_ptr<BRepOffsetAPI_ThruSections> BRepOffsetAPI_ThruSections_ctor(bool
 // Geometric processing
 const gp_Ax1& gp_OX() {
   return gp::OX();
+}
+const gp_Ax1& gp_OY() {
+    return gp::OY();
+}
+const gp_Ax1& gp_OZ() {
+    return gp::OZ();
 }
 
 const gp_Dir& gp_DZ() {
