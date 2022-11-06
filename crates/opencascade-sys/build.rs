@@ -1,5 +1,8 @@
 fn main() {
-    let dst = cmake::Config::new("OCCT").define("BUILD_LIBRARY_TYPE", "Static").build();
+    let dst = cmake::Config::new("OCCT")
+        .define("BUILD_LIBRARY_TYPE", "Static")
+        .define("BUILD_MODULE_Draw", "FALSE")
+        .build();
 
     println!("cargo:rustc-link-search=native={}", dst.join("lib").display());
     println!("cargo:rustc-link-lib=static=TKMath");
