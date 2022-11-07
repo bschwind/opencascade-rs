@@ -222,9 +222,7 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeBox>) -> &TopoDS_Shape;
 
         type BRepPrimAPI_MakeSphere;
-        pub fn BRepPrimAPI_MakeSphere_ctor(
-            r: f64
-        ) -> UniquePtr<BRepPrimAPI_MakeSphere>;
+        pub fn BRepPrimAPI_MakeSphere_ctor(r: f64) -> UniquePtr<BRepPrimAPI_MakeSphere>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeSphere>) -> &TopoDS_Shape;
 
         // BRepLib
