@@ -17,6 +17,8 @@ jobs:
           override: true
           components: clippy
       - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
