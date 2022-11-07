@@ -221,6 +221,12 @@ pub mod ffi {
         ) -> UniquePtr<BRepPrimAPI_MakeBox>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeBox>) -> &TopoDS_Shape;
 
+        type BRepPrimAPI_MakeSphere;
+        pub fn BRepPrimAPI_MakeSphere_ctor(
+            r: f64
+        ) -> UniquePtr<BRepPrimAPI_MakeSphere>;
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeSphere>) -> &TopoDS_Shape;
+
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
 
@@ -277,6 +283,13 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Cut>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
+
+        type BRepAlgoAPI_Section;
+        pub fn BRepAlgoAPI_Section_ctor(
+            shape_1: &TopoDS_Shape,
+            shape_2: &TopoDS_Shape,
+        ) -> UniquePtr<BRepAlgoAPI_Section>;
+        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopoDS_Shape;
 
         // Geometric processor
         type gp_Ax1;

@@ -22,6 +22,7 @@
 #include <TopExp_Explorer.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
+#include <BRepAlgoAPI_Section.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
@@ -32,6 +33,7 @@
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
+#include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
@@ -100,6 +102,7 @@ std::unique_ptr<BRepBuilderAPI_MakeFace> BRepBuilderAPI_MakeFace_wire(const Topo
 std::unique_ptr<BRepPrimAPI_MakePrism> BRepPrimAPI_MakePrism_ctor(const TopoDS_Shape& shape, const gp_Vec& vec, const Standard_Boolean copy, const Standard_Boolean canonize);
 std::unique_ptr<BRepPrimAPI_MakeCylinder> BRepPrimAPI_MakeCylinder_ctor(const gp_Ax2& coord_system, const Standard_Real radius, const Standard_Real height);
 std::unique_ptr<BRepPrimAPI_MakeBox> BRepPrimAPI_MakeBox_ctor(const gp_Pnt& point, double dx, double dy, double dz);
+std::unique_ptr<BRepPrimAPI_MakeSphere> BRepPrimAPI_MakeSphere_ctor(double r);
 
 // BRepLib
 bool BRepLibBuildCurves3d(const TopoDS_Shape& shape);
@@ -107,6 +110,7 @@ bool BRepLibBuildCurves3d(const TopoDS_Shape& shape);
 // Boolean operations
 std::unique_ptr<BRepAlgoAPI_Fuse> BRepAlgoAPI_Fuse_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2);
 std::unique_ptr<BRepAlgoAPI_Cut> BRepAlgoAPI_Cut_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2);
+std::unique_ptr<BRepAlgoAPI_Section> BRepAlgoAPI_Section_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2);
 
 // Fillets
 std::unique_ptr<BRepFilletAPI_MakeFillet> BRepFilletAPI_MakeFillet_ctor(const TopoDS_Shape& shape);

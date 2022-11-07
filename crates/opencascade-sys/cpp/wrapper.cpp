@@ -139,6 +139,10 @@ std::unique_ptr<BRepPrimAPI_MakeBox> BRepPrimAPI_MakeBox_ctor(const gp_Pnt& poin
   return std::unique_ptr<BRepPrimAPI_MakeBox>(new BRepPrimAPI_MakeBox(point, dx, dy, dz));
 }
 
+std::unique_ptr<BRepPrimAPI_MakeSphere> BRepPrimAPI_MakeSphere_ctor(double r) {
+  return std::unique_ptr<BRepPrimAPI_MakeSphere>(new BRepPrimAPI_MakeSphere(r));
+}
+
 // BRepLib
 bool BRepLibBuildCurves3d(const TopoDS_Shape& shape) {
   return BRepLib::BuildCurves3d(shape);
@@ -151,6 +155,10 @@ std::unique_ptr<BRepAlgoAPI_Fuse> BRepAlgoAPI_Fuse_ctor(const TopoDS_Shape& shap
 
 std::unique_ptr<BRepAlgoAPI_Cut> BRepAlgoAPI_Cut_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2){
   return std::unique_ptr<BRepAlgoAPI_Cut>(new BRepAlgoAPI_Cut(shape_1, shape_2));
+}
+
+std::unique_ptr<BRepAlgoAPI_Section> BRepAlgoAPI_Section_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2){
+  return std::unique_ptr<BRepAlgoAPI_Section>(new BRepAlgoAPI_Section(shape_1, shape_2));
 }
 
 // Fillets
