@@ -198,6 +198,16 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
         pub fn IsDone(self: &BRepPrimAPI_MakePrism) -> bool;
 
+        type BRepPrimAPI_MakeRevol;
+        pub fn BRepPrimAPI_MakeRevol_ctor(
+            shape: &TopoDS_Shape,
+            axis: &gp_Ax1,
+            angle: f64,
+            copy: bool,
+        ) -> UniquePtr<BRepPrimAPI_MakeRevol>;
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeRevol>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepPrimAPI_MakeRevol) -> bool;
+
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, edge: &TopoDS_Edge);
 

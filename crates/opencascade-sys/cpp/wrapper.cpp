@@ -131,6 +131,10 @@ std::unique_ptr<BRepPrimAPI_MakePrism> BRepPrimAPI_MakePrism_ctor(const TopoDS_S
   return std::unique_ptr<BRepPrimAPI_MakePrism>(new BRepPrimAPI_MakePrism(shape, vec, copy, canonize));
 }
 
+std::unique_ptr<BRepPrimAPI_MakeRevol> BRepPrimAPI_MakeRevol_ctor(const TopoDS_Shape& shape, const gp_Ax1& axis, const Standard_Real angle, const Standard_Boolean copy){
+  return std::unique_ptr<BRepPrimAPI_MakeRevol>(new BRepPrimAPI_MakeRevol(shape, axis, angle, copy));
+}
+
 std::unique_ptr<BRepPrimAPI_MakeCylinder> BRepPrimAPI_MakeCylinder_ctor(const gp_Ax2& coord_system, const Standard_Real radius, const Standard_Real height) {
   return std::unique_ptr<BRepPrimAPI_MakeCylinder>(new BRepPrimAPI_MakeCylinder(coord_system, radius, height));
 }
