@@ -15,6 +15,7 @@ fn main() {
         .build();
 
     println!("cargo:rustc-link-search=native={}", dst.join("lib").display());
+    println!("cargo:rustc-link-search=native={}", dst.join("win64/gcc/lib").display());
     println!("cargo:rustc-link-lib=static=TKMath");
     println!("cargo:rustc-link-lib=static=TKernel");
     println!("cargo:rustc-link-lib=static=TKGeomBase");
@@ -36,6 +37,8 @@ fn main() {
     cxx_build::bridge("src/lib.rs")
         .cpp(true)
         .flag_if_supported("-std=c++11")
+        .define("_USE_MATH_DEFINES", "TRUE")
+        .include(format!("{}", dst.join("inc").display()))
         .include(format!("{}", dst.join("include").join("opencascade").display()))
         .include("include")
         .file("cpp/wrapper.cpp")
