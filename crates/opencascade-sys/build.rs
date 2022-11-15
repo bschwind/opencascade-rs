@@ -35,7 +35,7 @@ fn main() {
 
     cxx_build::bridge("src/lib.rs")
         .cpp(true)
-        .flag_if_supported("-std=c++14")
+        .flag_if_supported("-std=c++11")
         .include(format!("{}", dst.join("include").join("opencascade").display()))
         .include("include")
         .file("cpp/wrapper.cpp")

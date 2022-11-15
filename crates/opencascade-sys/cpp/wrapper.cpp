@@ -11,7 +11,7 @@ rust::String type_name(const HandleStandardType& handle) {
 }
 
 std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve& curve, const Standard_Real U) {
-  return std::make_unique<gp_Pnt>(curve->Value(U));
+  return make_unique<gp_Pnt>(curve->Value(U));
 }
 
 std::unique_ptr<HandleGeomCurve> new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(const HandleGeomTrimmedCurve& trimmed_curve) {
@@ -279,7 +279,7 @@ std::unique_ptr<HandleGeomCurve> BRep_Tool_Curve(const TopoDS_Edge& edge, Standa
 }
 
 std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex& vertex) {
-  return std::make_unique<gp_Pnt>(BRep_Tool::Pnt(vertex));
+  return make_unique<gp_Pnt>(BRep_Tool::Pnt(vertex));
 }
 
 std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer& explorer) {
