@@ -339,7 +339,11 @@ pub mod ffi {
         pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
 
         pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<HandleGeomSurface>;
-        pub fn BRep_Tool_Curve(edge: &TopoDS_Edge, first: &mut f64, last: &mut f64) -> UniquePtr<HandleGeomCurve>;
+        pub fn BRep_Tool_Curve(
+            edge: &TopoDS_Edge,
+            first: &mut f64,
+            last: &mut f64,
+        ) -> UniquePtr<HandleGeomCurve>;
         pub fn BRep_Tool_Pnt(vertex: &TopoDS_Vertex) -> UniquePtr<gp_Pnt>;
 
         // Data export
