@@ -14,7 +14,8 @@ fn main() {
         .define("USE_FFMPEG", "FALSE")
         .build();
 
-    println!("cargo:rustc-link-search=native={}", dst.join("lib").display());
+    println!("cargo:rustc-link-search=native={}", dst.join("win64/gcc/lib").display()); // needed for windows builds
+    println!("cargo:rustc-link-search=native={}", dst.join("lib").display()); // needed for windows builds
     println!("cargo:rustc-link-lib=static=TKMath");
     println!("cargo:rustc-link-lib=static=TKernel");
     println!("cargo:rustc-link-lib=static=TKGeomBase");
@@ -35,7 +36,8 @@ fn main() {
 
     cxx_build::bridge("src/lib.rs")
         .cpp(true)
-        .flag_if_supported("-std=c++11")
+        .flag_if_supported("-std=c++14")
+        .include(format!("{}", dst.join("inc").display())) // needed for windows builds
         .include(format!("{}", dst.join("include").join("opencascade").display()))
         .include("include")
         .file("cpp/wrapper.cpp")
