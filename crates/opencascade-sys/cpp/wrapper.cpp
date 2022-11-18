@@ -10,6 +10,10 @@ rust::String type_name(const HandleStandardType& handle) {
   return std::string(handle->Name());
 }
 
+std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve& curve, const Standard_Real U) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
+}
+
 std::unique_ptr<HandleGeomCurve> new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(const HandleGeomTrimmedCurve& trimmed_curve) {
   return std::unique_ptr<HandleGeomCurve>(new opencascade::handle<Geom_Curve>(trimmed_curve));
 }
@@ -272,6 +276,14 @@ std::unique_ptr<TopExp_Explorer> TopExp_Explorer_ctor(const TopoDS_Shape& shape,
 
 std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face& face) {
   return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(BRep_Tool::Surface(face)));
+}
+
+std::unique_ptr<HandleGeomCurve> BRep_Tool_Curve(const TopoDS_Edge& edge, Standard_Real& first, Standard_Real& last) {
+  return std::unique_ptr<HandleGeomCurve>(new opencascade::handle<Geom_Curve>(BRep_Tool::Curve(edge, first, last)));
+}
+
+std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex& vertex) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(BRep_Tool::Pnt(vertex)));
 }
 
 std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer& explorer) {

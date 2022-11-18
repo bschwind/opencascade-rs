@@ -55,6 +55,8 @@ typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurfa
 const HandleStandardType& DynamicType(const HandleGeomSurface& surface);
 rust::String type_name(const HandleStandardType& handle);
 
+std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve& curve, const Standard_Real U);
+
 // General Shape Stuff
 std::unique_ptr<TopoDS_Shape> new_shape(const TopoDS_Shape& shape);
 
@@ -163,6 +165,8 @@ std::unique_ptr<BRepBuilderAPI_Transform> BRepBuilderAPI_Transform_ctor(const To
 // Topology Explorer
 std::unique_ptr<TopExp_Explorer> TopExp_Explorer_ctor(const TopoDS_Shape& shape, const TopAbs_ShapeEnum to_find);
 std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face& face);
+std::unique_ptr<HandleGeomCurve> BRep_Tool_Curve(const TopoDS_Edge& edge, Standard_Real& first, Standard_Real& last);
+std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex& vertex);
 std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer& explorer);
 
 // Data export
