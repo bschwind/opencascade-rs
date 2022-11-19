@@ -1,8 +1,8 @@
 use cxx::UniquePtr;
 use opencascade_sys::ffi::{
-    new_point, new_shape, write_stl, BRepFilletAPI_MakeChamfer_ctor, BRepFilletAPI_MakeFillet_ctor,
-    BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
-    TopExp_Explorer_ctor, TopoDS_Shape, TopoDS_cast_to_edge,
+    new_point, new_shape, write_stl, BRepAlgoAPI_Cut_ctor, BRepFilletAPI_MakeChamfer_ctor,
+    BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor,
+    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Shape, TopoDS_cast_to_edge,
 };
 use std::path::Path;
 
@@ -11,9 +11,10 @@ pub struct Shape {
 }
 
 impl Shape {
-    pub fn make_box() -> Self {
+    /// Make a box with a corner at (0,0,0) and with size (x,y,z)
+    pub fn make_box(x: f64, y: f64, z: f64) -> Self {
         let point = new_point(0.0, 0.0, 0.0);
-        let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, 1.0, 1.0, 1.0);
+        let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, x, y, z);
         let shape = new_shape(my_box.pin_mut().Shape());
 
         Self { shape }
@@ -59,5 +60,12 @@ impl Shape {
         let filleted_shape = make_chamfer.pin_mut().Shape();
 
         self.shape = new_shape(filleted_shape);
+    }
+
+    pub fn subtract(&mut self, other: &Shape) {
+        let mut cut_operation = BRepAlgoAPI_Cut_ctor(&self.shape, &other.shape);
+
+        let cut_shape = cut_operation.pin_mut().Shape();
+        self.shape = new_shape(cut_shape);
     }
 }
