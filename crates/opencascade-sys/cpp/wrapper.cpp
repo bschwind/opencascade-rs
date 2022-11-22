@@ -165,6 +165,10 @@ std::unique_ptr<BRepAlgoAPI_Cut> BRepAlgoAPI_Cut_ctor(const TopoDS_Shape& shape_
   return std::unique_ptr<BRepAlgoAPI_Cut>(new BRepAlgoAPI_Cut(shape_1, shape_2));
 }
 
+std::unique_ptr<BRepAlgoAPI_Common> BRepAlgoAPI_Common_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2){
+  return std::unique_ptr<BRepAlgoAPI_Common>(new BRepAlgoAPI_Common(shape_1, shape_2));
+}
+
 std::unique_ptr<BRepAlgoAPI_Section> BRepAlgoAPI_Section_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2){
   return std::unique_ptr<BRepAlgoAPI_Section>(new BRepAlgoAPI_Section(shape_1, shape_2));
 }

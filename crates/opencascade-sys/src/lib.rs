@@ -294,6 +294,13 @@ pub mod ffi {
         ) -> UniquePtr<BRepAlgoAPI_Cut>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
 
+        type BRepAlgoAPI_Common;
+        pub fn BRepAlgoAPI_Common_ctor(
+            shape_1: &TopoDS_Shape,
+            shape_2: &TopoDS_Shape,
+        ) -> UniquePtr<BRepAlgoAPI_Common>;
+        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopoDS_Shape;
+
         type BRepAlgoAPI_Section;
         pub fn BRepAlgoAPI_Section_ctor(
             shape_1: &TopoDS_Shape,
