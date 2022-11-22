@@ -132,6 +132,7 @@ pub mod ffi {
         type TopoDS_Wire;
         type TopoDS_Face;
 
+        pub fn TopoDS_cast_to_vertex(shape: &TopoDS_Shape) -> &TopoDS_Vertex;
         pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
         pub fn TopoDS_cast_to_edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
         pub fn TopoDS_cast_to_face(shape: &TopoDS_Shape) -> UniquePtr<TopoDS_Face>;

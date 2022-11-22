@@ -231,6 +231,10 @@ std::unique_ptr<gp_Ax2d> gp_Ax2d_ctor(const gp_Pnt2d& point, const gp_Dir2d& dir
 }
 
 // Shape stuff
+const TopoDS_Vertex& TopoDS_cast_to_vertex(const TopoDS_Shape& shape) {
+  return TopoDS::Vertex(shape);
+}
+
 const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape) {
   return TopoDS::Wire(shape);
 }
