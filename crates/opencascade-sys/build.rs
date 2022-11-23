@@ -1,4 +1,7 @@
 fn main() {
+    let target = std::env::var("TARGET").expect("No TARGET environment variable defined");
+    let is_windows = target.to_lowercase().contains("windows");
+
     let dst = cmake::Config::new("OCCT")
         .define("BUILD_LIBRARY_TYPE", "Static")
         .define("BUILD_MODULE_Draw", "FALSE")
@@ -34,6 +37,10 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKBool");
     println!("cargo:rustc-link-lib=static=TKBO");
     println!("cargo:rustc-link-lib=static=TKOffset");
+
+    if is_windows {
+        println!("cargo:rustc-link-lib=dylib=user32");
+    }
 
     cxx_build::bridge("src/lib.rs")
         .cpp(true)
