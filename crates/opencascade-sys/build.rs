@@ -43,7 +43,7 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=user32");
         occ_convert_define = Some("TRUE");
     }
- 
+
     cxx_build::bridge("src/lib.rs")
         .cpp(true)
         .flag_if_supported("-std=c++11")
