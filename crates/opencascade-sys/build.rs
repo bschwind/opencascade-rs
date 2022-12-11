@@ -16,7 +16,7 @@ fn main() {
         .define("USE_OPENVR", "FALSE")
         .define("USE_FFMPEG", "FALSE")
         .define("INSTALL_DIR_LIB", "lib")
-        .define("INSTALL_DIR_INCLUDE", "inc")
+        .define("INSTALL_DIR_INCLUDE", "include")
         .build();
 
     println!("cargo:rustc-link-search=native={}", dst.join("lib").display());
@@ -38,15 +38,18 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKBO");
     println!("cargo:rustc-link-lib=static=TKOffset");
 
+    let mut occ_convert_define = None;
     if is_windows {
         println!("cargo:rustc-link-lib=dylib=user32");
+        occ_convert_define = Some("TRUE");
     }
-
+ 
     cxx_build::bridge("src/lib.rs")
         .cpp(true)
         .flag_if_supported("-std=c++11")
         .define("_USE_MATH_DEFINES", "TRUE")
-        .include(format!("{}", dst.join("inc").display()))
+        .define("OCC_CONVERT_SIGNALS", occ_convert_define)
+        .include(format!("{}", dst.join("include").display()))
         .include("include")
         .file("cpp/wrapper.cpp")
         .compile("wrapper");
