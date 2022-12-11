@@ -41,7 +41,7 @@ fn main() {
     let mut occ_convert_define = None;
     if is_windows {
         println!("cargo:rustc-link-lib=dylib=user32");
-        occ_convert_define = Some("TRUE");
+        occ_convert_define = Some("FALSE");
     }
 
     cxx_build::bridge("src/lib.rs")
