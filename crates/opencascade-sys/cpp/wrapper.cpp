@@ -10,6 +10,10 @@ rust::String type_name(const HandleStandardType& handle) {
   return std::string(handle->Name());
 }
 
+std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve& curve, const Standard_Real U) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
+}
+
 std::unique_ptr<HandleGeomCurve> new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(const HandleGeomTrimmedCurve& trimmed_curve) {
   return std::unique_ptr<HandleGeomCurve>(new opencascade::handle<Geom_Curve>(trimmed_curve));
 }
@@ -131,12 +135,20 @@ std::unique_ptr<BRepPrimAPI_MakePrism> BRepPrimAPI_MakePrism_ctor(const TopoDS_S
   return std::unique_ptr<BRepPrimAPI_MakePrism>(new BRepPrimAPI_MakePrism(shape, vec, copy, canonize));
 }
 
+std::unique_ptr<BRepPrimAPI_MakeRevol> BRepPrimAPI_MakeRevol_ctor(const TopoDS_Shape& shape, const gp_Ax1& axis, const Standard_Real angle, const Standard_Boolean copy){
+  return std::unique_ptr<BRepPrimAPI_MakeRevol>(new BRepPrimAPI_MakeRevol(shape, axis, angle, copy));
+}
+
 std::unique_ptr<BRepPrimAPI_MakeCylinder> BRepPrimAPI_MakeCylinder_ctor(const gp_Ax2& coord_system, const Standard_Real radius, const Standard_Real height) {
   return std::unique_ptr<BRepPrimAPI_MakeCylinder>(new BRepPrimAPI_MakeCylinder(coord_system, radius, height));
 }
 
 std::unique_ptr<BRepPrimAPI_MakeBox> BRepPrimAPI_MakeBox_ctor(const gp_Pnt& point, double dx, double dy, double dz) {
   return std::unique_ptr<BRepPrimAPI_MakeBox>(new BRepPrimAPI_MakeBox(point, dx, dy, dz));
+}
+
+std::unique_ptr<BRepPrimAPI_MakeSphere> BRepPrimAPI_MakeSphere_ctor(double r) {
+  return std::unique_ptr<BRepPrimAPI_MakeSphere>(new BRepPrimAPI_MakeSphere(r));
 }
 
 // BRepLib
@@ -151,6 +163,14 @@ std::unique_ptr<BRepAlgoAPI_Fuse> BRepAlgoAPI_Fuse_ctor(const TopoDS_Shape& shap
 
 std::unique_ptr<BRepAlgoAPI_Cut> BRepAlgoAPI_Cut_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2){
   return std::unique_ptr<BRepAlgoAPI_Cut>(new BRepAlgoAPI_Cut(shape_1, shape_2));
+}
+
+std::unique_ptr<BRepAlgoAPI_Common> BRepAlgoAPI_Common_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2){
+  return std::unique_ptr<BRepAlgoAPI_Common>(new BRepAlgoAPI_Common(shape_1, shape_2));
+}
+
+std::unique_ptr<BRepAlgoAPI_Section> BRepAlgoAPI_Section_ctor(const TopoDS_Shape& shape_1, const TopoDS_Shape& shape_2){
+  return std::unique_ptr<BRepAlgoAPI_Section>(new BRepAlgoAPI_Section(shape_1, shape_2));
 }
 
 // Fillets
@@ -215,6 +235,10 @@ std::unique_ptr<gp_Ax2d> gp_Ax2d_ctor(const gp_Pnt2d& point, const gp_Dir2d& dir
 }
 
 // Shape stuff
+const TopoDS_Vertex& TopoDS_cast_to_vertex(const TopoDS_Shape& shape) {
+  return TopoDS::Vertex(shape);
+}
+
 const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape) {
   return TopoDS::Wire(shape);
 }
@@ -260,6 +284,14 @@ std::unique_ptr<TopExp_Explorer> TopExp_Explorer_ctor(const TopoDS_Shape& shape,
 
 std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face& face) {
   return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(BRep_Tool::Surface(face)));
+}
+
+std::unique_ptr<HandleGeomCurve> BRep_Tool_Curve(const TopoDS_Edge& edge, Standard_Real& first, Standard_Real& last) {
+  return std::unique_ptr<HandleGeomCurve>(new opencascade::handle<Geom_Curve>(BRep_Tool::Curve(edge, first, last)));
+}
+
+std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex& vertex) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(BRep_Tool::Pnt(vertex)));
 }
 
 std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer& explorer) {

@@ -41,6 +41,8 @@ pub mod ffi {
             geom_surface_handle: &HandleGeomSurface,
         ) -> UniquePtr<HandleGeomPlane>;
 
+        pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
+
         // General Shape Stuff
         /// Takes a shape reference (typically one returned from a shape builder API) and puts
         /// it in a unique_ptr.
@@ -130,6 +132,7 @@ pub mod ffi {
         type TopoDS_Wire;
         type TopoDS_Face;
 
+        pub fn TopoDS_cast_to_vertex(shape: &TopoDS_Shape) -> &TopoDS_Vertex;
         pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
         pub fn TopoDS_cast_to_edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
         pub fn TopoDS_cast_to_face(shape: &TopoDS_Shape) -> UniquePtr<TopoDS_Face>;
@@ -198,6 +201,16 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
         pub fn IsDone(self: &BRepPrimAPI_MakePrism) -> bool;
 
+        type BRepPrimAPI_MakeRevol;
+        pub fn BRepPrimAPI_MakeRevol_ctor(
+            shape: &TopoDS_Shape,
+            axis: &gp_Ax1,
+            angle: f64,
+            copy: bool,
+        ) -> UniquePtr<BRepPrimAPI_MakeRevol>;
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeRevol>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepPrimAPI_MakeRevol) -> bool;
+
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, edge: &TopoDS_Edge);
 
@@ -220,6 +233,10 @@ pub mod ffi {
             dz: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeBox>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeBox>) -> &TopoDS_Shape;
+
+        type BRepPrimAPI_MakeSphere;
+        pub fn BRepPrimAPI_MakeSphere_ctor(r: f64) -> UniquePtr<BRepPrimAPI_MakeSphere>;
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeSphere>) -> &TopoDS_Shape;
 
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
@@ -278,6 +295,20 @@ pub mod ffi {
         ) -> UniquePtr<BRepAlgoAPI_Cut>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
 
+        type BRepAlgoAPI_Common;
+        pub fn BRepAlgoAPI_Common_ctor(
+            shape_1: &TopoDS_Shape,
+            shape_2: &TopoDS_Shape,
+        ) -> UniquePtr<BRepAlgoAPI_Common>;
+        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopoDS_Shape;
+
+        type BRepAlgoAPI_Section;
+        pub fn BRepAlgoAPI_Section_ctor(
+            shape_1: &TopoDS_Shape,
+            shape_2: &TopoDS_Shape,
+        ) -> UniquePtr<BRepAlgoAPI_Section>;
+        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopoDS_Shape;
+
         // Geometric processor
         type gp_Ax1;
         type gp_Ax2;
@@ -326,6 +357,12 @@ pub mod ffi {
         pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
 
         pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<HandleGeomSurface>;
+        pub fn BRep_Tool_Curve(
+            edge: &TopoDS_Edge,
+            first: &mut f64,
+            last: &mut f64,
+        ) -> UniquePtr<HandleGeomCurve>;
+        pub fn BRep_Tool_Pnt(vertex: &TopoDS_Vertex) -> UniquePtr<gp_Pnt>;
 
         // Data export
         type StlAPI_Writer;
