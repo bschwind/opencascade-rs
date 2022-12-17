@@ -43,16 +43,16 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=user32");
     }
 
-    let mut occ_convert_define = None;
+    let mut build = cxx_build::bridge("src/lib.rs");
+
     if is_windows_gnu {
-        occ_convert_define = Some("TRUE");
+        build.define("OCC_CONVERT_SIGNALS", "TRUE");
     }
 
-    cxx_build::bridge("src/lib.rs")
+    build
         .cpp(true)
         .flag_if_supported("-std=c++11")
         .define("_USE_MATH_DEFINES", "TRUE")
-        .define("OCC_CONVERT_SIGNALS", occ_convert_define)
         .include(format!("{}", dst.join("include").display()))
         .include("include")
         .file("cpp/wrapper.cpp")
