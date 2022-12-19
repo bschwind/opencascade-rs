@@ -1,4 +1,8 @@
 fn main() {
+    let target = std::env::var("TARGET").expect("No TARGET environment variable defined");
+    let is_windows = target.to_lowercase().contains("windows");
+    let is_windows_gnu = target.to_lowercase().contains("windows-gnu");
+
     let dst = cmake::Config::new("OCCT")
         .define("BUILD_LIBRARY_TYPE", "Static")
         .define("BUILD_MODULE_Draw", "FALSE")
@@ -12,6 +16,8 @@ fn main() {
         .define("USE_FREEIMAGE", "FALSE")
         .define("USE_OPENVR", "FALSE")
         .define("USE_FFMPEG", "FALSE")
+        .define("INSTALL_DIR_LIB", "lib")
+        .define("INSTALL_DIR_INCLUDE", "include")
         .build();
 
     println!("cargo:rustc-link-search=native={}", dst.join("lib").display());
@@ -33,10 +39,21 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKBO");
     println!("cargo:rustc-link-lib=static=TKOffset");
 
-    cxx_build::bridge("src/lib.rs")
+    if is_windows {
+        println!("cargo:rustc-link-lib=dylib=user32");
+    }
+
+    let mut build = cxx_build::bridge("src/lib.rs");
+
+    if is_windows_gnu {
+        build.define("OCC_CONVERT_SIGNALS", "TRUE");
+    }
+
+    build
         .cpp(true)
         .flag_if_supported("-std=c++11")
-        .include(format!("{}", dst.join("include").join("opencascade").display()))
+        .define("_USE_MATH_DEFINES", "TRUE")
+        .include(format!("{}", dst.join("include").display()))
         .include("include")
         .file("cpp/wrapper.cpp")
         .compile("wrapper");
