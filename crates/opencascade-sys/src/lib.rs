@@ -41,6 +41,16 @@ pub mod ffi {
             geom_surface_handle: &HandleGeomSurface,
         ) -> UniquePtr<HandleGeomPlane>;
 
+        pub fn IsNull(self: &HandleStandardType) -> bool;
+        pub fn IsNull(self: &HandleGeomCurve) -> bool;
+        pub fn IsNull(self: &HandleGeomTrimmedCurve) -> bool;
+        pub fn IsNull(self: &HandleGeomSurface) -> bool;
+        pub fn IsNull(self: &HandleGeomPlane) -> bool;
+        pub fn IsNull(self: &HandleGeom2d_Curve) -> bool;
+        pub fn IsNull(self: &HandleGeom2d_Ellipse) -> bool;
+        pub fn IsNull(self: &HandleGeom2d_TrimmedCurve) -> bool;
+        pub fn IsNull(self: &HandleGeom_CylindricalSurface) -> bool;
+
         pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
 
         // General Shape Stuff
