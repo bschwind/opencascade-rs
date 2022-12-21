@@ -52,6 +52,7 @@ typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
 typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
 typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
+typedef opencascade::handle<Poly_Triangulation> Handle_Poly_Triangulation;
 
 const HandleStandardType& DynamicType(const HandleGeomSurface& surface);
 rust::String type_name(const HandleStandardType& handle);
@@ -170,6 +171,7 @@ std::unique_ptr<TopExp_Explorer> TopExp_Explorer_ctor(const TopoDS_Shape& shape,
 std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face& face);
 std::unique_ptr<HandleGeomCurve> BRep_Tool_Curve(const TopoDS_Edge& edge, Standard_Real& first, Standard_Real& last);
 std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex& vertex);
+std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face& face, TopLoc_Location& location);
 std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer& explorer);
 
 // Data export
@@ -177,4 +179,8 @@ std::unique_ptr<StlAPI_Writer> StlAPI_Writer_ctor();
 bool write_stl(StlAPI_Writer& writer, const TopoDS_Shape& theShape, rust::String theFileName);
 
 // Triangulation
+std::unique_ptr<TopLoc_Location> TopLoc_Location_ctor();
 std::unique_ptr<BRepMesh_IncrementalMesh> BRepMesh_IncrementalMesh_ctor(const TopoDS_Shape& shape, double deflection);
+
+std::unique_ptr<gp_Dir> Poly_Triangulation_Normal(const Poly_Triangulation& triangulation, const Standard_Integer index);
+std::unique_ptr<gp_Pnt> Poly_Triangulation_Node(const Poly_Triangulation& triangulation, const Standard_Integer index);

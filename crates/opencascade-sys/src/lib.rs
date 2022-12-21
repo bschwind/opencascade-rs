@@ -321,6 +321,10 @@ pub mod ffi {
         pub fn gp_OZ() -> &'static gp_Ax1;
         pub fn gp_DZ() -> &'static gp_Dir;
 
+        pub fn X(self: &gp_Dir) -> f64;
+        pub fn Y(self: &gp_Dir) -> f64;
+        pub fn Z(self: &gp_Dir) -> f64;
+
         pub fn gp_Ax2_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
         pub fn gp_Ax3_from_gp_Ax2(axis: &gp_Ax2) -> UniquePtr<gp_Ax3>;
         pub fn gp_Dir2d_ctor(x: f64, y: f64) -> UniquePtr<gp_Dir2d>;
@@ -363,6 +367,10 @@ pub mod ffi {
             last: &mut f64,
         ) -> UniquePtr<HandleGeomCurve>;
         pub fn BRep_Tool_Pnt(vertex: &TopoDS_Vertex) -> UniquePtr<gp_Pnt>;
+        pub fn BRep_Tool_Triangulation(
+            face: &TopoDS_Face,
+            location: Pin<&mut TopLoc_Location>,
+        ) -> UniquePtr<Handle_Poly_Triangulation>;
 
         // Data export
         type StlAPI_Writer;
@@ -381,5 +389,29 @@ pub mod ffi {
             deflection: f64,
         ) -> UniquePtr<BRepMesh_IncrementalMesh>;
         pub fn Shape(self: &BRepMesh_IncrementalMesh) -> &TopoDS_Shape;
+
+        type TopLoc_Location;
+        pub fn TopLoc_Location_ctor() -> UniquePtr<TopLoc_Location>;
+
+        type Handle_Poly_Triangulation;
+        pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
+        pub unsafe fn get(self: &Handle_Poly_Triangulation) -> *mut Poly_Triangulation;
+
+        type Poly_Triangulation;
+        pub fn NbNodes(self: &Poly_Triangulation) -> i32;
+        pub fn NbTriangles(self: &Poly_Triangulation) -> i32;
+        pub fn HasNormals(self: &Poly_Triangulation) -> bool;
+        pub fn Triangle(self: &Poly_Triangulation, index: i32) -> &Poly_Triangle;
+        pub fn Poly_Triangulation_Normal(
+            triangulation: &Poly_Triangulation,
+            index: i32,
+        ) -> UniquePtr<gp_Dir>;
+        pub fn Poly_Triangulation_Node(
+            triangulation: &Poly_Triangulation,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt>;
+
+        type Poly_Triangle;
+        pub fn Value(self: &Poly_Triangle, index: i32) -> i32;
     }
 }

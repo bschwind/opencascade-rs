@@ -294,6 +294,10 @@ std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex& vertex) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(BRep_Tool::Pnt(vertex)));
 }
 
+std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face& face, TopLoc_Location& location) {
+  return std::unique_ptr<Handle_Poly_Triangulation>(new opencascade::handle<Poly_Triangulation>(BRep_Tool::Triangulation(face, location)));
+}
+
 std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer& explorer) {
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(explorer.Current()));
 }
@@ -308,6 +312,17 @@ bool write_stl(StlAPI_Writer& writer, const TopoDS_Shape& theShape, rust::String
 }
 
 // Triangulation
+std::unique_ptr<TopLoc_Location> TopLoc_Location_ctor(){
+  return std::unique_ptr<TopLoc_Location>(new TopLoc_Location());
+}
+
 std::unique_ptr<BRepMesh_IncrementalMesh> BRepMesh_IncrementalMesh_ctor(const TopoDS_Shape& shape, double deflection) {
   return std::unique_ptr<BRepMesh_IncrementalMesh>(new BRepMesh_IncrementalMesh(shape, deflection));
+}
+
+std::unique_ptr<gp_Dir> Poly_Triangulation_Normal(const Poly_Triangulation& triangulation, const Standard_Integer index) {
+  return std::unique_ptr<gp_Dir>(new gp_Dir(triangulation.Normal(index)));
+}
+std::unique_ptr<gp_Pnt> Poly_Triangulation_Node(const Poly_Triangulation& triangulation, const Standard_Integer index) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(triangulation.Node(index)));
 }
