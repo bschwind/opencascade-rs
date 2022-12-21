@@ -224,6 +224,7 @@ pub mod ffi {
             height: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeCylinder>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCylinder>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepPrimAPI_MakeCylinder) -> bool;
 
         type BRepPrimAPI_MakeBox;
         pub fn BRepPrimAPI_MakeBox_ctor(
@@ -233,10 +234,12 @@ pub mod ffi {
             dz: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeBox>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeBox>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepPrimAPI_MakeBox) -> bool;
 
         type BRepPrimAPI_MakeSphere;
         pub fn BRepPrimAPI_MakeSphere_ctor(r: f64) -> UniquePtr<BRepPrimAPI_MakeSphere>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeSphere>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepPrimAPI_MakeSphere) -> bool;
 
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
@@ -249,6 +252,7 @@ pub mod ffi {
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepFilletAPI_MakeFillet) -> bool;
 
         // Chamfers
         type BRepFilletAPI_MakeChamfer;
@@ -258,6 +262,7 @@ pub mod ffi {
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeChamfer>, distance: f64, edge: &TopoDS_Edge);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeChamfer>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepFilletAPI_MakeChamfer) -> bool;
 
         // Solids
         type BRepOffsetAPI_MakeThickSolid;
@@ -270,6 +275,7 @@ pub mod ffi {
             tolerance: f64,
         );
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeThickSolid>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepOffsetAPI_MakeThickSolid) -> bool;
 
         // Lofting
         type BRepOffsetAPI_ThruSections;
@@ -279,6 +285,7 @@ pub mod ffi {
         pub fn AddWire(self: Pin<&mut BRepOffsetAPI_ThruSections>, wire: &TopoDS_Wire);
         pub fn CheckCompatibility(self: Pin<&mut BRepOffsetAPI_ThruSections>, check: bool);
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_ThruSections>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepOffsetAPI_ThruSections) -> bool;
 
         // Boolean Operations
         type BRepAlgoAPI_Fuse;
@@ -287,6 +294,7 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Fuse>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepAlgoAPI_Fuse) -> bool;
 
         type BRepAlgoAPI_Cut;
         pub fn BRepAlgoAPI_Cut_ctor(
@@ -294,6 +302,7 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Cut>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepAlgoAPI_Cut) -> bool;
 
         type BRepAlgoAPI_Common;
         pub fn BRepAlgoAPI_Common_ctor(
@@ -301,6 +310,7 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Common>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepAlgoAPI_Common) -> bool;
 
         type BRepAlgoAPI_Section;
         pub fn BRepAlgoAPI_Section_ctor(
@@ -308,6 +318,7 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Section>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepAlgoAPI_Section) -> bool;
 
         // Geometric processor
         type gp_Ax1;
@@ -343,6 +354,7 @@ pub mod ffi {
             copy: bool,
         ) -> UniquePtr<BRepBuilderAPI_Transform>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_Transform>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepBuilderAPI_Transform) -> bool;
 
         // Topology Explorer
         type TopExp_Explorer;
@@ -381,5 +393,6 @@ pub mod ffi {
             deflection: f64,
         ) -> UniquePtr<BRepMesh_IncrementalMesh>;
         pub fn Shape(self: &BRepMesh_IncrementalMesh) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepMesh_IncrementalMesh) -> bool;
     }
 }
