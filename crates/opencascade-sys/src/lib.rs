@@ -19,6 +19,10 @@ pub mod ffi {
         // OCCT Includes
         include!("opencascade-sys/include/wrapper.hxx");
 
+        // Runtime
+        type Message_ProgressRange;
+        pub fn Message_ProgressRange_ctor() -> UniquePtr<Message_ProgressRange>;
+
         // Handles
         type HandleStandardType;
         type HandleGeomCurve;
@@ -190,6 +194,7 @@ pub mod ffi {
         ) -> UniquePtr<BRepBuilderAPI_MakeWire>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Shape;
         pub fn Wire(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Wire;
+        pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeWire>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepBuilderAPI_MakeWire) -> bool;
 
         type BRepBuilderAPI_MakeFace;
@@ -198,6 +203,7 @@ pub mod ffi {
             only_plane: bool,
         ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeFace>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeFace>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepBuilderAPI_MakeFace) -> bool;
 
         // Primitives
@@ -209,6 +215,7 @@ pub mod ffi {
             canonize: bool,
         ) -> UniquePtr<BRepPrimAPI_MakePrism>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepPrimAPI_MakePrism>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakePrism) -> bool;
 
         type BRepPrimAPI_MakeRevol;
@@ -219,6 +226,7 @@ pub mod ffi {
             copy: bool,
         ) -> UniquePtr<BRepPrimAPI_MakeRevol>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeRevol>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeRevol>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakeRevol) -> bool;
 
         #[rust_name = "add_edge"]
@@ -234,6 +242,7 @@ pub mod ffi {
             height: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeCylinder>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCylinder>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeCylinder>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakeCylinder) -> bool;
 
         type BRepPrimAPI_MakeBox;
@@ -244,11 +253,13 @@ pub mod ffi {
             dz: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeBox>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeBox>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeBox>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakeBox) -> bool;
 
         type BRepPrimAPI_MakeSphere;
         pub fn BRepPrimAPI_MakeSphere_ctor(r: f64) -> UniquePtr<BRepPrimAPI_MakeSphere>;
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeSphere>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeSphere>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakeSphere) -> bool;
 
         // BRepLib
@@ -262,6 +273,7 @@ pub mod ffi {
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepFilletAPI_MakeFillet) -> bool;
 
         // Chamfers
@@ -272,6 +284,7 @@ pub mod ffi {
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeChamfer>, distance: f64, edge: &TopoDS_Edge);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeChamfer>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeChamfer>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepFilletAPI_MakeChamfer) -> bool;
 
         // Solids
@@ -285,6 +298,10 @@ pub mod ffi {
             tolerance: f64,
         );
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeThickSolid>) -> &TopoDS_Shape;
+        pub fn Build(
+            self: Pin<&mut BRepOffsetAPI_MakeThickSolid>,
+            progress: &Message_ProgressRange,
+        );
         pub fn IsDone(self: &BRepOffsetAPI_MakeThickSolid) -> bool;
 
         // Lofting
@@ -295,6 +312,7 @@ pub mod ffi {
         pub fn AddWire(self: Pin<&mut BRepOffsetAPI_ThruSections>, wire: &TopoDS_Wire);
         pub fn CheckCompatibility(self: Pin<&mut BRepOffsetAPI_ThruSections>, check: bool);
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_ThruSections>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepOffsetAPI_ThruSections>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepOffsetAPI_ThruSections) -> bool;
 
         // Boolean Operations
@@ -304,6 +322,7 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Fuse>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepAlgoAPI_Fuse>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Fuse) -> bool;
 
         type BRepAlgoAPI_Cut;
@@ -312,6 +331,7 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Cut>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepAlgoAPI_Cut>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Cut) -> bool;
 
         type BRepAlgoAPI_Common;
@@ -320,6 +340,7 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Common>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepAlgoAPI_Common>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Common) -> bool;
 
         type BRepAlgoAPI_Section;
@@ -328,6 +349,7 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Section>;
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepAlgoAPI_Section>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Section) -> bool;
 
         // Geometric processor
@@ -364,6 +386,7 @@ pub mod ffi {
             copy: bool,
         ) -> UniquePtr<BRepBuilderAPI_Transform>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_Transform>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepBuilderAPI_Transform>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepBuilderAPI_Transform) -> bool;
 
         // Topology Explorer

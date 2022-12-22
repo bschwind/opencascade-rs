@@ -1,5 +1,11 @@
 #include <wrapper.hxx>
 
+// Runtime
+
+std::unique_ptr<Message_ProgressRange> Message_ProgressRange_ctor(){
+  return std::unique_ptr<Message_ProgressRange>(new Message_ProgressRange());
+}
+
 // Handle stuff
 
 const HandleStandardType& DynamicType(const HandleGeomSurface& surface) {
