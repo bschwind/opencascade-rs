@@ -13,6 +13,14 @@ pub mod ffi {
         TopAbs_SHAPE,
     }
 
+    #[repr(u32)]
+    pub enum TopAbs_Orientation {
+        TopAbs_FORWARD,
+        TopAbs_REVERSED,
+        TopAbs_INTERNAL,
+        TopAbs_EXTERNAL,
+    }
+
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -153,6 +161,10 @@ pub mod ffi {
 
         pub fn IsNull(self: &TopoDS_Shape) -> bool;
         pub fn IsEqual(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
+
+        type TopAbs_Orientation;
+        pub fn Orientation(self: &TopoDS_Shape) -> TopAbs_Orientation;
+        pub fn Orientation(self: &TopoDS_Face) -> TopAbs_Orientation;
 
         // Compound Shapes
         type TopoDS_Compound;
