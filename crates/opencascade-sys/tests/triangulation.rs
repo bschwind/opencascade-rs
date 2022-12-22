@@ -28,7 +28,7 @@ fn it_can_access_mesh_triangulation() {
 
                 for corner_index in 1..=3 {
                     let _point =
-                        Poly_Triangulation_Node(&triangulation, triangle.Value(corner_index));
+                        Poly_Triangulation_Node(triangulation, triangle.Value(corner_index));
                     triangle_corners += 1;
                 }
             }
