@@ -443,6 +443,9 @@ pub mod ffi {
 
         type Handle_Poly_Triangulation;
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
+        /// # Safety
+        /// Since this handle may be null, this is only safe if IsNull has been checked.
+        /// The handle must also outlive the reference returned.
         pub unsafe fn get(self: &Handle_Poly_Triangulation) -> *mut Poly_Triangulation;
 
         type Poly_Triangulation;
