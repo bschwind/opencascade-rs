@@ -180,6 +180,8 @@ pub mod ffi {
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
         pub fn Vertex1(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Vertex;
         pub fn Edge(self: Pin<&mut BRepBuilderAPI_MakeEdge>) -> &TopoDS_Edge;
+        pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeEdge>, progress: &Message_ProgressRange);
+        pub fn IsDone(self: &BRepBuilderAPI_MakeEdge) -> bool;
 
         type BRepBuilderAPI_MakeWire;
         pub fn BRepBuilderAPI_MakeWire_ctor() -> UniquePtr<BRepBuilderAPI_MakeWire>;
