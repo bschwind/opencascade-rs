@@ -114,7 +114,7 @@ pub fn main() {
         let shape = ExplorerCurrentShape(&face_explorer);
         let face = TopoDS_cast_to_face(&shape);
 
-        let surface = BRep_Tool_Surface(&face);
+        let surface = BRep_Tool_Surface(face);
         let dynamic_type = DynamicType(&surface);
         let name = type_name(dynamic_type);
 
