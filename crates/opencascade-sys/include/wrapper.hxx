@@ -58,9 +58,6 @@ rust::String type_name(const HandleStandardType& handle);
 
 std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve& curve, const Standard_Real U);
 
-// General Shape Stuff
-std::unique_ptr<TopoDS_Shape> new_shape(const TopoDS_Shape& shape);
-
 // Collections
 std::unique_ptr<TopTools_ListOfShape> new_list_of_shape();
 void shape_list_append_face(TopTools_ListOfShape& list, const TopoDS_Face& face);
@@ -152,7 +149,13 @@ std::unique_ptr<gp_Ax2d> gp_Ax2d_ctor(const gp_Pnt2d& point, const gp_Dir2d& dir
 const TopoDS_Vertex& TopoDS_cast_to_vertex(const TopoDS_Shape& shape);
 const TopoDS_Wire& TopoDS_cast_to_wire(const TopoDS_Shape& shape);
 const TopoDS_Edge& TopoDS_cast_to_edge(const TopoDS_Shape& shape);
-std::unique_ptr<TopoDS_Face> TopoDS_cast_to_face(const TopoDS_Shape& shape);
+const TopoDS_Face& TopoDS_cast_to_face(const TopoDS_Shape& shape);
+
+std::unique_ptr<TopoDS_Shape> TopoDS_Shape_to_owned(const TopoDS_Shape& shape);
+std::unique_ptr<TopoDS_Vertex> TopoDS_Vertex_to_owned(const TopoDS_Vertex& vertex);
+std::unique_ptr<TopoDS_Wire> TopoDS_Wire_to_owned(const TopoDS_Wire& wire);
+std::unique_ptr<TopoDS_Edge> TopoDS_Edge_to_owned(const TopoDS_Edge& edge);
+std::unique_ptr<TopoDS_Face> TopoDS_Face_to_owned(const TopoDS_Face& face);
 
 // Compound Shapes
 std::unique_ptr<TopoDS_Shape> TopoDS_Compound_as_shape(std::unique_ptr<TopoDS_Compound> compound);
