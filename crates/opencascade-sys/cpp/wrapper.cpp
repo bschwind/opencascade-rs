@@ -246,28 +246,23 @@ const TopoDS_Face& TopoDS_cast_to_face(const TopoDS_Shape& shape) {
   return TopoDS::Face(shape);
 }
 
-std::unique_ptr<TopoDS_Shape> TopoDS_Shape_to_owned(const TopoDS_Shape& shape)
-{
+std::unique_ptr<TopoDS_Shape> TopoDS_Shape_to_owned(const TopoDS_Shape& shape) {
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(shape));
 }
 
-std::unique_ptr<TopoDS_Vertex> TopoDS_Vertex_to_owned(const TopoDS_Vertex& vertex)
-{
+std::unique_ptr<TopoDS_Vertex> TopoDS_Vertex_to_owned(const TopoDS_Vertex& vertex) {
   return std::unique_ptr<TopoDS_Vertex>(new TopoDS_Vertex(vertex));
 }
 
-std::unique_ptr<TopoDS_Wire> TopoDS_Wire_to_owned(const TopoDS_Wire& wire)
-{
+std::unique_ptr<TopoDS_Wire> TopoDS_Wire_to_owned(const TopoDS_Wire& wire) {
   return std::unique_ptr<TopoDS_Wire>(new TopoDS_Wire(wire));
 }
 
-std::unique_ptr<TopoDS_Edge> TopoDS_Edge_to_owned(const TopoDS_Edge& edge)
-{
+std::unique_ptr<TopoDS_Edge> TopoDS_Edge_to_owned(const TopoDS_Edge& edge) {
   return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(edge));
 }
 
-std::unique_ptr<TopoDS_Face> TopoDS_Face_to_owned(const TopoDS_Face& face)
-{
+std::unique_ptr<TopoDS_Face> TopoDS_Face_to_owned(const TopoDS_Face& face) {
   return std::unique_ptr<TopoDS_Face>(new TopoDS_Face(face));
 }
 
