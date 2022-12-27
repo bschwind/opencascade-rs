@@ -58,6 +58,9 @@ rust::String type_name(const HandleStandardType& handle);
 
 std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve& curve, const Standard_Real U);
 
+// Runtime
+std::unique_ptr<Message_ProgressRange> Message_ProgressRange_ctor();
+
 // General Shape Stuff
 std::unique_ptr<TopoDS_Shape> new_shape(const TopoDS_Shape& shape);
 
