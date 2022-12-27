@@ -55,12 +55,10 @@ fn main() {
         .define("_USE_MATH_DEFINES", "TRUE")
         .include(format!("{}", dst.join("include").display()))
         .include("include")
-        .file("cpp/wrapper.cpp")
         .compile("wrapper");
 
     println!("cargo:rustc-link-lib=static=wrapper");
 
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=include/wrapper.hxx");
-    println!("cargo:rerun-if-changed=cpp/wrapper.cpp");
 }

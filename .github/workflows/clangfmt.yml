@@ -1,0 +1,14 @@
+on: [push, pull_request]
+
+name: Clang Format
+
+jobs:
+  fmt:
+    name: Clang Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: jidicula/clang-format-action@v4.9.0
+        with:
+          clang-format-version: '14'
+          check-path: crates/opencascade-sys/include
