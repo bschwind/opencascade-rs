@@ -1,11 +1,14 @@
 use cxx::UniquePtr;
+use glam::DVec3;
 use opencascade_sys::ffi::{
-    new_point, write_stl, BRepAlgoAPI_Cut_ctor, BRepFilletAPI_MakeChamfer_ctor,
-    BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor,
-    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Shape,
-    TopoDS_Shape_to_owned, TopoDS_cast_to_edge,
+    new_point, new_shape, write_stl, BRepAlgoAPI_Common_ctor, BRepAlgoAPI_Cut_ctor,
+    BRepAlgoAPI_Fuse_ctor, BRepFilletAPI_MakeChamfer_ctor, BRepFilletAPI_MakeFillet_ctor,
+    BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
+    TopExp_Explorer_ctor, TopoDS_Shape, TopoDS_Shape_to_owned, TopoDS_cast_to_edge,
 };
 use std::path::Path;
+
+pub use glam;
 
 pub struct Shape {
     shape: UniquePtr<TopoDS_Shape>,
@@ -17,6 +20,20 @@ impl Shape {
         let point = new_point(0.0, 0.0, 0.0);
         let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, x, y, z);
         let shape = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
+
+        Self { shape }
+    }
+
+    /// Make a box with one corner at p1, and the opposite corner
+    /// at p2.
+    pub fn make_box_point_point(p1: DVec3, p2: DVec3) -> Self {
+        let min_corner = p1.min(p2);
+        let max_corner = p1.max(p2);
+
+        let point = new_point(min_corner.x, min_corner.y, min_corner.z);
+        let diff = max_corner - min_corner;
+        let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
+        let shape = new_shape(my_box.pin_mut().Shape());
 
         Self { shape }
     }
@@ -68,5 +85,19 @@ impl Shape {
 
         let cut_shape = cut_operation.pin_mut().Shape();
         self.shape = TopoDS_Shape_to_owned(cut_shape);
+    }
+
+    pub fn union(&mut self, other: &Shape) {
+        let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.shape, &other.shape);
+
+        let cut_shape = fuse_operation.pin_mut().Shape();
+        self.shape = new_shape(cut_shape);
+    }
+
+    pub fn intersect(&mut self, other: &Shape) {
+        let mut common_operation = BRepAlgoAPI_Common_ctor(&self.shape, &other.shape);
+
+        let cut_shape = common_operation.pin_mut().Shape();
+        self.shape = new_shape(cut_shape);
     }
 }
