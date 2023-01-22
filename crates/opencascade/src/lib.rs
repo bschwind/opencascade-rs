@@ -1,10 +1,11 @@
 use cxx::UniquePtr;
 use glam::DVec3;
 use opencascade_sys::ffi::{
-    new_point, new_shape, write_stl, BRepAlgoAPI_Common_ctor, BRepAlgoAPI_Cut_ctor,
-    BRepAlgoAPI_Fuse_ctor, BRepFilletAPI_MakeChamfer_ctor, BRepFilletAPI_MakeFillet_ctor,
-    BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
-    TopExp_Explorer_ctor, TopoDS_Shape, TopoDS_Shape_to_owned, TopoDS_cast_to_edge,
+    gp_Ax2_ctor, gp_DZ, new_point, new_shape, write_stl, BRepAlgoAPI_Common_ctor,
+    BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor, BRepFilletAPI_MakeChamfer_ctor,
+    BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor,
+    BRepPrimAPI_MakeCylinder_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
+    TopoDS_Shape, TopoDS_Shape_to_owned, TopoDS_cast_to_edge,
 };
 use std::path::Path;
 
@@ -34,6 +35,18 @@ impl Shape {
         let diff = max_corner - min_corner;
         let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
         let shape = new_shape(my_box.pin_mut().Shape());
+
+        Self { shape }
+    }
+
+    /// Make a cylinder with its bottom at point p, with radius r and height h.
+    pub fn make_cylinder(p: DVec3, r: f64, h: f64) -> Self {
+        let point = new_point(p.x, p.y, p.z);
+        let cylinder_axis = gp_DZ();
+        let cylinder_coord_system = gp_Ax2_ctor(&point, cylinder_axis);
+
+        let mut cylinder = BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
+        let shape = new_shape(cylinder.pin_mut().Shape());
 
         Self { shape }
     }

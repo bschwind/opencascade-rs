@@ -57,6 +57,63 @@ struct SupportPost {
     direction: PostDirection,
 }
 
+impl SupportPost {
+    fn shape(&self) -> Shape {
+        let bottom_z = CASE_FLOOR_Z;
+        let top_z = TOP_PLATE_BOTTOM_Z;
+
+        let pos = DVec3::from((self.pos, CASE_FLOOR_Z));
+        let mut cylinder = Shape::make_cylinder(pos, SUPPORT_POST_RADIUS, top_z - bottom_z);
+
+        let box_part = match self.direction {
+            PostDirection::Up => {
+                let corner_1 = DVec3::new(
+                    pos.x - SUPPORT_POST_RADIUS,
+                    pos.y - SUPPORT_POST_DIST_FROM_EDGE,
+                    bottom_z,
+                );
+                let corner_2 = DVec3::new(pos.x + SUPPORT_POST_RADIUS, pos.y, top_z);
+
+                Shape::make_box_point_point(corner_1, corner_2)
+            },
+            PostDirection::Down => {
+                let corner_1 = DVec3::new(pos.x - SUPPORT_POST_RADIUS, pos.y, bottom_z);
+                let corner_2 = DVec3::new(
+                    pos.x + SUPPORT_POST_RADIUS,
+                    pos.y + SUPPORT_POST_DIST_FROM_EDGE,
+                    top_z,
+                );
+
+                Shape::make_box_point_point(corner_1, corner_2)
+            },
+            PostDirection::Left => {
+                let corner_1 = DVec3::new(
+                    pos.x - SUPPORT_POST_DIST_FROM_EDGE,
+                    pos.y - SUPPORT_POST_RADIUS,
+                    bottom_z,
+                );
+                let corner_2 = DVec3::new(pos.x, pos.y + SUPPORT_POST_RADIUS, top_z);
+
+                Shape::make_box_point_point(corner_1, corner_2)
+            },
+            PostDirection::Right => {
+                let corner_1 = DVec3::new(pos.x, pos.y - SUPPORT_POST_RADIUS, bottom_z);
+                let corner_2 = DVec3::new(
+                    pos.x + SUPPORT_POST_DIST_FROM_EDGE,
+                    pos.y + SUPPORT_POST_RADIUS,
+                    top_z,
+                );
+
+                Shape::make_box_point_point(corner_1, corner_2)
+            },
+        };
+
+        cylinder.union(&box_part);
+
+        cylinder
+    }
+}
+
 const SUPPORT_POSTS: &[SupportPost] = &[
     SupportPost {
         pos: DVec2::new(117.7, SUPPORT_POST_DIST_FROM_EDGE),
@@ -131,6 +188,10 @@ fn main() {
     outer_box.union(&top_shelf);
     outer_box.union(&bottom_shelf);
     outer_box.subtract(&usb_cutout);
+
+    for support_post in SUPPORT_POSTS {
+        outer_box.union(&support_post.shape());
+    }
 
     // outer_box.fillet_edges(1.0);
 
