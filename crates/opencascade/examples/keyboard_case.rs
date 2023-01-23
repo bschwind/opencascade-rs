@@ -193,6 +193,10 @@ fn main() {
         outer_box.union(&support_post.shape());
     }
 
+    let usb_overhang = pcb_usb_overhang();
+
+    outer_box.subtract(&usb_overhang);
+
     // outer_box.fillet_edges(1.0);
 
     outer_box.write_stl("keyboard_case.stl");
@@ -242,4 +246,18 @@ fn usb_connector_cutout() -> Shape {
 
     shape.fillet_edges(1.0);
     shape
+}
+
+// This is the little trapezoidal PCB shape which helps the USB C connector
+// extend forward into the case.
+fn pcb_usb_overhang() -> Shape {
+    Shape::extrude_polygon(
+        &[
+            DVec3::new(19.05, 0.0, PCB_BOTTOM_Z),
+            DVec3::new(21.431, -2.381, PCB_BOTTOM_Z),
+            DVec3::new(30.596, -2.381, PCB_BOTTOM_Z),
+            DVec3::new(33.337, 0.0, PCB_BOTTOM_Z),
+        ],
+        PCB_THICKNESS + 0.5,
+    )
 }
