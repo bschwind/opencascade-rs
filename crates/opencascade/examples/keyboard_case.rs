@@ -2,8 +2,9 @@ use glam::{DVec2, DVec3};
 use opencascade::Shape;
 
 // All units are in millimeters.
-// The top/bottom/left/right conventions relate to 2D rectangles in screen
-// coordinates. Values with "_Z" in their name refer to the Z coordinate.
+// The top/bottom/left/right conventions relate to 2D rectangles in
+// cartesian coordinates (positive Y axis points up). Values with "_Z"
+// in their name refer to the Z coordinate.
 const PCB_THICKNESS: f64 = 1.6;
 const PCB_WIDTH: f64 = 285.75;
 const PCB_HEIGHT: f64 = 114.3;
@@ -13,9 +14,9 @@ const TOP_PLATE_THICKNESS: f64 = 1.6;
 const CASE_WALL_THICKNESS: f64 = 3.0;
 const CASE_LIP_HEIGHT: f64 = 1.0;
 
-const CASE_TOP: f64 = PCB_TOP - CASE_WALL_THICKNESS;
+const CASE_TOP: f64 = PCB_TOP + CASE_WALL_THICKNESS;
 const CASE_TOP_Z: f64 = TOP_PLATE_TOP_Z + CASE_LIP_HEIGHT;
-const CASE_BOTTOM: f64 = PCB_BOTTOM + CASE_WALL_THICKNESS;
+const CASE_BOTTOM: f64 = PCB_BOTTOM - CASE_WALL_THICKNESS;
 const CASE_LEFT: f64 = PCB_LEFT - CASE_WALL_THICKNESS;
 const CASE_RIGHT: f64 = PCB_RIGHT + CASE_WALL_THICKNESS;
 const CASE_FLOOR_Z: f64 = PCB_BOTTOM_Z - PCB_SHELF_HEIGHT;
@@ -24,12 +25,12 @@ const CASE_BOTTOM_Z: f64 = CASE_FLOOR_Z - CASE_WALL_THICKNESS;
 // The origin point for this board is the top left corner
 // of the PCB, on the top surface. The PCB rests on this
 // shelf. Positive X values go to the right, positive Y
-// values go down (like screen coordinates).
+// values go up.
 const ORIGIN: DVec3 = DVec3::new(0.0, 0.0, 0.0);
 
 const PCB_TOP: f64 = ORIGIN.y;
 const PCB_TOP_Z: f64 = ORIGIN.z;
-const PCB_BOTTOM: f64 = PCB_TOP + PCB_HEIGHT;
+const PCB_BOTTOM: f64 = PCB_TOP - PCB_HEIGHT;
 const PCB_BOTTOM_Z: f64 = PCB_TOP_Z - PCB_THICKNESS;
 const PCB_LEFT: f64 = ORIGIN.x;
 const PCB_RIGHT: f64 = PCB_LEFT + PCB_WIDTH;
@@ -69,7 +70,7 @@ impl SupportPost {
             PostDirection::Up => {
                 let corner_1 = DVec3::new(
                     pos.x - SUPPORT_POST_RADIUS,
-                    pos.y - SUPPORT_POST_DIST_FROM_EDGE,
+                    pos.y + SUPPORT_POST_DIST_FROM_EDGE,
                     bottom_z,
                 );
                 let corner_2 = DVec3::new(pos.x + SUPPORT_POST_RADIUS, pos.y, top_z);
@@ -80,7 +81,7 @@ impl SupportPost {
                 let corner_1 = DVec3::new(pos.x - SUPPORT_POST_RADIUS, pos.y, bottom_z);
                 let corner_2 = DVec3::new(
                     pos.x + SUPPORT_POST_RADIUS,
-                    pos.y + SUPPORT_POST_DIST_FROM_EDGE,
+                    pos.y - SUPPORT_POST_DIST_FROM_EDGE,
                     top_z,
                 );
 
@@ -116,27 +117,27 @@ impl SupportPost {
 
 const SUPPORT_POSTS: &[SupportPost] = &[
     SupportPost {
-        pos: DVec2::new(117.7, SUPPORT_POST_DIST_FROM_EDGE),
+        pos: DVec2::new(117.7, PCB_TOP - SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Up,
     },
     SupportPost {
-        pos: DVec2::new(204.75, SUPPORT_POST_DIST_FROM_EDGE),
+        pos: DVec2::new(204.75, PCB_TOP - SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Up,
     },
     SupportPost {
-        pos: DVec2::new(SUPPORT_POST_DIST_FROM_EDGE, 57.15),
+        pos: DVec2::new(PCB_LEFT + SUPPORT_POST_DIST_FROM_EDGE, -57.15),
         direction: PostDirection::Left,
     },
     SupportPost {
-        pos: DVec2::new(PCB_RIGHT - SUPPORT_POST_DIST_FROM_EDGE, 57.15),
+        pos: DVec2::new(PCB_RIGHT - SUPPORT_POST_DIST_FROM_EDGE, -57.15),
         direction: PostDirection::Right,
     },
     SupportPost {
-        pos: DVec2::new(80.95, PCB_HEIGHT - SUPPORT_POST_DIST_FROM_EDGE),
+        pos: DVec2::new(80.95, PCB_BOTTOM + SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Down,
     },
     SupportPost {
-        pos: DVec2::new(200.05, PCB_HEIGHT - SUPPORT_POST_DIST_FROM_EDGE),
+        pos: DVec2::new(200.05, PCB_BOTTOM + SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Down,
     },
 ];
@@ -147,10 +148,10 @@ const SUPPORT_POSTS: &[SupportPost] = &[
 const BOTTOM_CUTOUT_RADIUS: f64 = 2.1;
 
 const FEET_CUTOUTS: &[DVec2] = &[
-    DVec2::new(19.05, 18.25),
-    DVec2::new(266.65, 18.25),
-    DVec2::new(19.05, 96.45),
-    DVec2::new(266.65, 96.45),
+    DVec2::new(19.05, -18.25),
+    DVec2::new(266.65, -18.25),
+    DVec2::new(19.05, -96.45),
+    DVec2::new(266.65, -96.45),
 ];
 
 // USB C Connector Cutout
@@ -161,8 +162,8 @@ const USB_DEPTH: f64 = 3.26;
 
 const USB_LEFT: f64 = 21.724;
 const USB_RIGHT: f64 = USB_LEFT + USB_WIDTH;
-const USB_TOP: f64 = -3.04;
-const USB_BOTTOM: f64 = USB_TOP + USB_HEIGHT;
+const USB_TOP: f64 = 3.04;
+const USB_BOTTOM: f64 = USB_TOP - USB_HEIGHT;
 
 // Keep out zones for space bar stabilizer
 const STABILIZER_SCREW_KEEPOUT_WIDTH: f64 = 8.0;
@@ -175,7 +176,7 @@ const STABILIZER_KEEPOUTS: &[f64] = &[87.0, 187.24];
 // Pinholes for BOOT + reset buttons
 const PINHOLE_BUTTON_RADIUS: f64 = 1.1;
 
-const PINHOLE_LOCATIONS: &[DVec2] = &[DVec2::new(35.85, 53.95), DVec2::new(8.425, 86.075)];
+const PINHOLE_LOCATIONS: &[DVec2] = &[DVec2::new(35.85, -53.95), DVec2::new(8.425, -86.075)];
 
 fn main() {
     let mut outer_box = case_outer_box();
@@ -218,13 +219,13 @@ fn case_inner_box() -> Shape {
 
 fn pcb_top_shelf() -> Shape {
     let corner_1 = DVec3::new(PCB_LEFT, PCB_TOP, CASE_FLOOR_Z);
-    let corner_2 = DVec3::new(PCB_RIGHT, PCB_SHELF_THICKNESS_TOP, PCB_BOTTOM_Z);
+    let corner_2 = DVec3::new(PCB_RIGHT, PCB_TOP - PCB_SHELF_THICKNESS_TOP, PCB_BOTTOM_Z);
 
     Shape::make_box_point_point(corner_1, corner_2)
 }
 
 fn pcb_bottom_shelf() -> Shape {
-    let corner_1 = DVec3::new(PCB_LEFT, PCB_BOTTOM - PCB_SHELF_THICKNESS_BOTTOM, CASE_FLOOR_Z);
+    let corner_1 = DVec3::new(PCB_LEFT, PCB_BOTTOM + PCB_SHELF_THICKNESS_BOTTOM, CASE_FLOOR_Z);
     let corner_2 = DVec3::new(PCB_RIGHT, PCB_BOTTOM, CASE_FLOOR_Z + PCB_SHELF_HEIGHT);
 
     let mut bottom_shelf = Shape::make_box_point_point(corner_1, corner_2);
@@ -247,12 +248,12 @@ fn pcb_bottom_shelf() -> Shape {
 fn usb_connector_cutout() -> Shape {
     let corner_1 = DVec3::new(
         USB_LEFT - USB_CUTOUT_PADDING,
-        CASE_TOP - USB_CUTOUT_PADDING,
+        CASE_TOP + USB_CUTOUT_PADDING,
         PCB_BOTTOM_Z - USB_DEPTH - USB_CUTOUT_PADDING,
     );
     let corner_2 = DVec3::new(
         USB_RIGHT + USB_CUTOUT_PADDING,
-        USB_BOTTOM + USB_CUTOUT_PADDING,
+        USB_BOTTOM - USB_CUTOUT_PADDING,
         PCB_BOTTOM_Z + USB_CUTOUT_PADDING,
     );
 
@@ -268,8 +269,8 @@ fn pcb_usb_overhang() -> Shape {
     Shape::extrude_polygon(
         &[
             DVec3::new(19.05, 0.0, PCB_BOTTOM_Z),
-            DVec3::new(21.431, -2.381, PCB_BOTTOM_Z),
-            DVec3::new(30.596, -2.381, PCB_BOTTOM_Z),
+            DVec3::new(21.431, 2.381, PCB_BOTTOM_Z),
+            DVec3::new(30.596, 2.381, PCB_BOTTOM_Z),
             DVec3::new(33.337, 0.0, PCB_BOTTOM_Z),
         ],
         PCB_THICKNESS + 0.5,
