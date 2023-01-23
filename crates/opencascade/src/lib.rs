@@ -1,8 +1,9 @@
 use cxx::UniquePtr;
 use opencascade_sys::ffi::{
-    new_point, new_shape, write_stl, BRepAlgoAPI_Cut_ctor, BRepFilletAPI_MakeChamfer_ctor,
+    new_point, write_stl, BRepAlgoAPI_Cut_ctor, BRepFilletAPI_MakeChamfer_ctor,
     BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor,
-    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Shape, TopoDS_cast_to_edge,
+    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Shape,
+    TopoDS_Shape_to_owned, TopoDS_cast_to_edge,
 };
 use std::path::Path;
 
@@ -15,7 +16,7 @@ impl Shape {
     pub fn make_box(x: f64, y: f64, z: f64) -> Self {
         let point = new_point(0.0, 0.0, 0.0);
         let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, x, y, z);
-        let shape = new_shape(my_box.pin_mut().Shape());
+        let shape = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
 
         Self { shape }
     }
@@ -44,7 +45,7 @@ impl Shape {
 
         let filleted_shape = make_fillet.pin_mut().Shape();
 
-        self.shape = new_shape(filleted_shape);
+        self.shape = TopoDS_Shape_to_owned(filleted_shape);
     }
 
     pub fn chamfer_edges(&mut self, distance: f64) {
@@ -59,13 +60,13 @@ impl Shape {
 
         let filleted_shape = make_chamfer.pin_mut().Shape();
 
-        self.shape = new_shape(filleted_shape);
+        self.shape = TopoDS_Shape_to_owned(filleted_shape);
     }
 
     pub fn subtract(&mut self, other: &Shape) {
         let mut cut_operation = BRepAlgoAPI_Cut_ctor(&self.shape, &other.shape);
 
         let cut_shape = cut_operation.pin_mut().Shape();
-        self.shape = new_shape(cut_shape);
+        self.shape = TopoDS_Shape_to_owned(cut_shape);
     }
 }
