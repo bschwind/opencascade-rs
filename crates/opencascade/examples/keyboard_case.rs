@@ -227,7 +227,21 @@ fn pcb_bottom_shelf() -> Shape {
     let corner_1 = DVec3::new(PCB_LEFT, PCB_BOTTOM - PCB_SHELF_THICKNESS_BOTTOM, CASE_FLOOR_Z);
     let corner_2 = DVec3::new(PCB_RIGHT, PCB_BOTTOM, CASE_FLOOR_Z + PCB_SHELF_HEIGHT);
 
-    Shape::make_box_point_point(corner_1, corner_2)
+    let mut bottom_shelf = Shape::make_box_point_point(corner_1, corner_2);
+
+    // Cut out gaps for the space bar stabilizer.
+
+    for keepout_left in STABILIZER_KEEPOUTS {
+        let corner_1 = DVec3::new(*keepout_left, corner_1.y, corner_1.z);
+        let corner_2 =
+            DVec3::new(keepout_left + STABILIZER_SCREW_KEEPOUT_WIDTH, corner_2.y, corner_2.z);
+
+        let cutout_box = Shape::make_box_point_point(corner_1, corner_2);
+
+        bottom_shelf.subtract(&cutout_box);
+    }
+
+    bottom_shelf
 }
 
 fn usb_connector_cutout() -> Shape {
