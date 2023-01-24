@@ -1,14 +1,14 @@
 use cxx::UniquePtr;
 use glam::DVec3;
 use opencascade_sys::ffi::{
-    gp_Ax2_ctor, gp_DZ, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point, new_shape,
-    new_vec, write_stl, BRepAlgoAPI_Common_ctor, BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor,
-    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeWire,
-    BRepBuilderAPI_MakeWire_ctor, BRepFilletAPI_MakeChamfer_ctor, BRepFilletAPI_MakeFillet_ctor,
-    BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor, BRepPrimAPI_MakeCylinder_ctor,
-    BRepPrimAPI_MakePrism_ctor, GC_MakeSegment_Value, GC_MakeSegment_point_point,
-    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Shape,
-    TopoDS_Shape_to_owned, TopoDS_cast_to_edge,
+    gp_Ax1_ctor, gp_Ax2_ctor, gp_DZ, gp_Dir_ctor, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve,
+    new_point, new_shape, new_vec, write_stl, BRepAlgoAPI_Common_ctor, BRepAlgoAPI_Cut_ctor,
+    BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
+    BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeWire_ctor, BRepFeat_MakeCylindricalHole_ctor,
+    BRepFilletAPI_MakeChamfer_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
+    BRepPrimAPI_MakeBox_ctor, BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor,
+    GC_MakeSegment_Value, GC_MakeSegment_point_point, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
+    TopExp_Explorer_ctor, TopoDS_Shape, TopoDS_Shape_to_owned, TopoDS_cast_to_edge,
 };
 use std::path::Path;
 
@@ -92,6 +92,31 @@ impl Shape {
         let shape = new_shape(extrusion.pin_mut().Shape());
 
         Self { shape }
+    }
+
+    /// Drills a cylindrical hole starting at point p, pointing down the Z axis
+    /// (this will later change to be an arbitrary axis).
+    pub fn drill_hole(&mut self, p: DVec3, dir: DVec3, radius: f64) {
+        let point = new_point(p.x, p.y, p.z);
+        let dir = gp_Dir_ctor(dir.x, dir.y, dir.z);
+
+        let hole_axis = gp_Ax1_ctor(&point, &dir);
+
+        // let cylinder_axis = gp_DZ();
+        // let cylinder_coord_system = gp_Ax2_ctor(&point, cylinder_axis);
+
+        let mut make_hole = BRepFeat_MakeCylindricalHole_ctor();
+        make_hole.pin_mut().Init(&self.shape, &hole_axis);
+
+        make_hole.pin_mut().Perform(radius);
+        make_hole.pin_mut().Build();
+
+        // let mut cylinder = BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
+        // let shape = new_shape(cylinder.pin_mut().Shape());
+
+        // Self { shape }
+
+        self.shape = new_shape(make_hole.pin_mut().Shape());
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) {

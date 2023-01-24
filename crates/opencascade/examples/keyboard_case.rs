@@ -198,6 +198,20 @@ fn main() {
 
     outer_box.subtract(&usb_overhang);
 
+    for feet_cutout in FEET_CUTOUTS {
+        let pos = DVec3::from((*feet_cutout, CASE_FLOOR_Z));
+        let dir = DVec3::new(0.0, 0.0, -1.0);
+
+        outer_box.drill_hole(pos, dir, BOTTOM_CUTOUT_RADIUS);
+    }
+
+    for pinhole_pos in PINHOLE_LOCATIONS {
+        let pos = DVec3::from((*pinhole_pos, CASE_FLOOR_Z));
+        let dir = DVec3::new(0.0, 0.0, -1.0);
+
+        outer_box.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
+    }
+
     // outer_box.fillet_edges(1.0);
 
     outer_box.write_stl("keyboard_case.stl");

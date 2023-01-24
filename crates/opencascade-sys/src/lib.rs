@@ -467,10 +467,16 @@ pub mod ffi {
         pub fn Z(self: &gp_Dir) -> f64;
 
         #[cxx_name = "construct_unique"]
+        pub fn gp_Ax1_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax1>;
+
+        #[cxx_name = "construct_unique"]
         pub fn gp_Ax2_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
 
         #[cxx_name = "construct_unique"]
         pub fn gp_Ax3_from_gp_Ax2(axis: &gp_Ax2) -> UniquePtr<gp_Ax3>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn gp_Dir_ctor(x: f64, y: f64, z: f64) -> UniquePtr<gp_Dir>;
 
         #[cxx_name = "construct_unique"]
         pub fn gp_Dir2d_ctor(x: f64, y: f64) -> UniquePtr<gp_Dir2d>;
@@ -529,6 +535,18 @@ pub mod ffi {
             face: &TopoDS_Face,
             location: Pin<&mut TopLoc_Location>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
+
+        // BRepFeat
+        type BRepFeat_MakeCylindricalHole;
+        pub fn BRepFeat_MakeCylindricalHole_ctor() -> UniquePtr<BRepFeat_MakeCylindricalHole>;
+        pub fn Init(
+            self: Pin<&mut BRepFeat_MakeCylindricalHole>,
+            shape: &TopoDS_Shape,
+            axis: &gp_Ax1,
+        );
+        pub fn Perform(self: Pin<&mut BRepFeat_MakeCylindricalHole>, radius: f64);
+        pub fn Build(self: Pin<&mut BRepFeat_MakeCylindricalHole>);
+        pub fn Shape(self: &BRepFeat_MakeCylindricalHole) -> &TopoDS_Shape;
 
         // Data export
         type StlAPI_Writer;
