@@ -10,6 +10,12 @@ const PCB_WIDTH: f64 = 285.75;
 const PCB_HEIGHT: f64 = 114.3;
 const TOP_PLATE_THICKNESS: f64 = 1.6;
 
+// The origin point for this board is the top left corner
+// of the PCB, on the top surface. The PCB rests on this
+// shelf. Positive X values go to the right, positive Y
+// values go up.
+const ORIGIN: DVec3 = DVec3::new(0.0, 0.0, 0.0);
+
 // Case
 const CASE_WALL_THICKNESS: f64 = 3.0;
 const CASE_LIP_HEIGHT: f64 = 1.0;
@@ -22,12 +28,7 @@ const CASE_RIGHT: f64 = PCB_RIGHT + CASE_WALL_THICKNESS;
 const CASE_FLOOR_Z: f64 = PCB_BOTTOM_Z - PCB_SHELF_HEIGHT;
 const CASE_BOTTOM_Z: f64 = CASE_FLOOR_Z - CASE_WALL_THICKNESS;
 
-// The origin point for this board is the top left corner
-// of the PCB, on the top surface. The PCB rests on this
-// shelf. Positive X values go to the right, positive Y
-// values go up.
-const ORIGIN: DVec3 = DVec3::new(0.0, 0.0, 0.0);
-
+// PCB
 const PCB_TOP: f64 = ORIGIN.y;
 const PCB_TOP_Z: f64 = ORIGIN.z;
 const PCB_BOTTOM: f64 = PCB_TOP - PCB_HEIGHT;
@@ -35,9 +36,11 @@ const PCB_BOTTOM_Z: f64 = PCB_TOP_Z - PCB_THICKNESS;
 const PCB_LEFT: f64 = ORIGIN.x;
 const PCB_RIGHT: f64 = PCB_LEFT + PCB_WIDTH;
 
+// Top Plate
 const TOP_PLATE_BOTTOM_Z: f64 = 3.4;
 const TOP_PLATE_TOP_Z: f64 = TOP_PLATE_BOTTOM_Z + TOP_PLATE_THICKNESS;
 
+// PCB Shelf
 const PCB_SHELF_THICKNESS_TOP: f64 = 2.75;
 const PCB_SHELF_THICKNESS_BOTTOM: f64 = 4.0;
 const PCB_SHELF_HEIGHT: f64 = 4.0;
@@ -178,45 +181,6 @@ const PINHOLE_BUTTON_RADIUS: f64 = 1.1;
 
 const PINHOLE_LOCATIONS: &[DVec2] = &[DVec2::new(35.85, -53.95), DVec2::new(8.425, -86.075)];
 
-fn main() {
-    let mut outer_box = case_outer_box();
-    let inner_box = case_inner_box();
-    let top_shelf = pcb_top_shelf();
-    let bottom_shelf = pcb_bottom_shelf();
-    let usb_cutout = usb_connector_cutout();
-
-    outer_box.subtract(&inner_box);
-    outer_box.union(&top_shelf);
-    outer_box.union(&bottom_shelf);
-    outer_box.subtract(&usb_cutout);
-
-    for support_post in SUPPORT_POSTS {
-        outer_box.union(&support_post.shape());
-    }
-
-    let usb_overhang = pcb_usb_overhang();
-
-    outer_box.subtract(&usb_overhang);
-
-    for feet_cutout in FEET_CUTOUTS {
-        let pos = DVec3::from((*feet_cutout, CASE_FLOOR_Z));
-        let dir = DVec3::new(0.0, 0.0, -1.0);
-
-        outer_box.drill_hole(pos, dir, BOTTOM_CUTOUT_RADIUS);
-    }
-
-    for pinhole_pos in PINHOLE_LOCATIONS {
-        let pos = DVec3::from((*pinhole_pos, CASE_FLOOR_Z));
-        let dir = DVec3::new(0.0, 0.0, -1.0);
-
-        outer_box.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
-    }
-
-    // outer_box.fillet_edges(1.0);
-
-    outer_box.write_stl("keyboard_case.stl");
-}
-
 fn case_outer_box() -> Shape {
     let corner_1 = DVec3::new(CASE_LEFT, CASE_TOP, CASE_BOTTOM_Z);
     let corner_2 = DVec3::new(CASE_RIGHT, CASE_BOTTOM, CASE_TOP_Z);
@@ -273,7 +237,7 @@ fn usb_connector_cutout() -> Shape {
 
     let mut shape = Shape::make_box_point_point(corner_1, corner_2);
 
-    shape.fillet_edges(1.0);
+    shape.fillet_edges(2.0);
     shape
 }
 
@@ -289,4 +253,43 @@ fn pcb_usb_overhang() -> Shape {
         ],
         PCB_THICKNESS + 0.5,
     )
+}
+
+fn main() {
+    let mut outer_box = case_outer_box();
+    let inner_box = case_inner_box();
+    let top_shelf = pcb_top_shelf();
+    let bottom_shelf = pcb_bottom_shelf();
+    let usb_cutout = usb_connector_cutout();
+
+    outer_box.subtract(&inner_box);
+    outer_box.fillet_edges(1.3);
+
+    outer_box.union(&top_shelf);
+    outer_box.union(&bottom_shelf);
+    outer_box.subtract(&usb_cutout);
+
+    for support_post in SUPPORT_POSTS {
+        outer_box.union(&support_post.shape());
+    }
+
+    let usb_overhang = pcb_usb_overhang();
+
+    outer_box.subtract(&usb_overhang);
+
+    for feet_cutout in FEET_CUTOUTS {
+        let pos = DVec3::from((*feet_cutout, CASE_FLOOR_Z));
+        let dir = DVec3::new(0.0, 0.0, -1.0);
+
+        outer_box.drill_hole(pos, dir, BOTTOM_CUTOUT_RADIUS);
+    }
+
+    for pinhole_pos in PINHOLE_LOCATIONS {
+        let pos = DVec3::from((*pinhole_pos, CASE_FLOOR_Z));
+        let dir = DVec3::new(0.0, 0.0, -1.0);
+
+        outer_box.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
+    }
+
+    outer_box.write_stl("keyboard_case.stl");
 }
