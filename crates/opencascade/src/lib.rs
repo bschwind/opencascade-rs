@@ -30,7 +30,7 @@ impl Shape {
             path.as_ref().to_string_lossy().to_string(),
         );
 
-        println!("Done! Success = {}", success);
+        println!("Done! Success = {success}");
     }
 
     pub fn fillet_edges(&mut self, radius: f64) {
