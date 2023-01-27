@@ -9,4 +9,4 @@ repository = "https://github.com/bschwind/opencascade-rs"
 
 [dependencies]
 cxx = "1"
-opencascade-sys = { path = "../opencascade-sys" }
+opencascade-sys = { version = "0.1", path = "../opencascade-sys" }
