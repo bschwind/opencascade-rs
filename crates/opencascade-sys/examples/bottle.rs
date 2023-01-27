@@ -221,5 +221,5 @@ pub fn main() {
     let triangulation = BRepMesh_IncrementalMesh_ctor(&final_shape, 0.01);
     let success = write_stl(stl_writer.pin_mut(), triangulation.Shape(), "bottle.stl".to_owned());
 
-    println!("Done! Success = {}", success);
+    println!("Done! Success = {success}");
 }
