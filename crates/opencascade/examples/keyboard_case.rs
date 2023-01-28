@@ -120,7 +120,7 @@ impl SupportPost {
 
 const SUPPORT_POSTS: &[SupportPost] = &[
     SupportPost {
-        pos: DVec2::new(117.7, PCB_TOP - SUPPORT_POST_DIST_FROM_EDGE),
+        pos: DVec2::new(119.075, PCB_TOP - SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Up,
     },
     SupportPost {
