@@ -74,10 +74,6 @@ inline std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurfa
 }
 
 // Collections
-inline std::unique_ptr<TopTools_ListOfShape> new_list_of_shape() {
-  return std::unique_ptr<TopTools_ListOfShape>(new TopTools_ListOfShape());
-}
-
 inline void shape_list_append_face(TopTools_ListOfShape &list, const TopoDS_Face &face) { list.Append(face); }
 
 // Geometry
@@ -115,19 +111,6 @@ HandleGeom2d_TrimmedCurve_to_curve(const HandleGeom2d_TrimmedCurve &trimmed_curv
 
 inline std::unique_ptr<gp_Pnt2d> ellipse_value(const HandleGeom2d_Ellipse &ellipse, double u) {
   return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(ellipse->Value(u)));
-}
-
-// Point stuff
-inline std::unique_ptr<gp_Pnt> new_point(double x, double y, double z) {
-  return std::unique_ptr<gp_Pnt>(new gp_Pnt(x, y, z));
-}
-
-inline std::unique_ptr<gp_Pnt2d> new_point_2d(double x, double y) {
-  return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(x, y));
-}
-
-inline std::unique_ptr<gp_Vec> new_vec(double x, double y, double z) {
-  return std::unique_ptr<gp_Vec>(new gp_Vec(x, y, z));
 }
 
 // Segment Stuff
@@ -199,13 +182,6 @@ inline std::unique_ptr<TopoDS_Shape> TopoDS_Compound_as_shape(std::unique_ptr<To
 inline const TopoDS_Builder &BRep_Builder_upcast_to_topods_builder(const BRep_Builder &builder) { return builder; }
 
 // Transforms
-inline std::unique_ptr<gp_Trsf> new_transform() { return std::unique_ptr<gp_Trsf>(new gp_Trsf()); }
-
-inline std::unique_ptr<BRepBuilderAPI_Transform>
-BRepBuilderAPI_Transform_ctor(const TopoDS_Shape &shape, const gp_Trsf &transform, const Standard_Boolean copy) {
-  return std::unique_ptr<BRepBuilderAPI_Transform>(new BRepBuilderAPI_Transform(shape, transform, copy));
-}
-
 inline std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face &face) {
   return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(BRep_Tool::Surface(face)));
 }
