@@ -60,18 +60,12 @@ typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
 
 // Handle stuff
-
 inline const HandleStandardType &DynamicType(const HandleGeomSurface &surface) { return surface->DynamicType(); }
 
 inline rust::String type_name(const HandleStandardType &handle) { return std::string(handle->Name()); }
 
 inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve &curve, const Standard_Real U) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
-}
-
-inline std::unique_ptr<HandleGeomCurve>
-new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(const HandleGeomTrimmedCurve &trimmed_curve) {
-  return std::unique_ptr<HandleGeomCurve>(new opencascade::handle<Geom_Curve>(trimmed_curve));
 }
 
 inline std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurface(const HandleGeomSurface &surface) {
@@ -137,10 +131,6 @@ inline std::unique_ptr<gp_Vec> new_vec(double x, double y, double z) {
 }
 
 // Segment Stuff
-inline std::unique_ptr<GC_MakeSegment> GC_MakeSegment_point_point(const gp_Pnt &p1, const gp_Pnt &p2) {
-  return std::unique_ptr<GC_MakeSegment>(new GC_MakeSegment(p1, p2));
-}
-
 inline std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeSegment_Value(const GC_MakeSegment &segment) {
   return std::unique_ptr<HandleGeomTrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(segment.Value()));
 }
@@ -152,41 +142,8 @@ inline std::unique_ptr<HandleGeom2d_TrimmedCurve> GCE2d_MakeSegment_point_point(
 }
 
 // Arc stuff
-inline std::unique_ptr<GC_MakeArcOfCircle> GC_MakeArcOfCircle_point_point_point(const gp_Pnt &p1, const gp_Pnt &p2,
-                                                                                const gp_Pnt &p3) {
-  return std::unique_ptr<GC_MakeArcOfCircle>(new GC_MakeArcOfCircle(p1, p2, p3));
-}
-
 inline std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeArcOfCircle_Value(const GC_MakeArcOfCircle &arc) {
   return std::unique_ptr<HandleGeomTrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(arc.Value()));
-}
-
-// BRepBuilderAPI stuff
-inline std::unique_ptr<BRepBuilderAPI_MakeEdge>
-BRepBuilderAPI_MakeEdge_HandleGeomCurve(const HandleGeomCurve &geom_curve) {
-  return std::unique_ptr<BRepBuilderAPI_MakeEdge>(new BRepBuilderAPI_MakeEdge(geom_curve));
-}
-
-inline std::unique_ptr<BRepBuilderAPI_MakeEdge>
-BRepBuilderAPI_MakeEdge_CurveSurface2d(const HandleGeom2d_Curve &curve_handle,
-                                       const HandleGeomSurface &surface_handle) {
-  return std::unique_ptr<BRepBuilderAPI_MakeEdge>(new BRepBuilderAPI_MakeEdge(curve_handle, surface_handle));
-}
-
-inline std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge_edge(const TopoDS_Edge &edge_1,
-                                                                                       const TopoDS_Edge &edge_2,
-                                                                                       const TopoDS_Edge &edge_3) {
-  return std::unique_ptr<BRepBuilderAPI_MakeWire>(new BRepBuilderAPI_MakeWire(edge_1, edge_2, edge_3));
-}
-
-inline std::unique_ptr<BRepBuilderAPI_MakeWire> BRepBuilderAPI_MakeWire_edge_edge(const TopoDS_Edge &edge_1,
-                                                                                  const TopoDS_Edge &edge_2) {
-  return std::unique_ptr<BRepBuilderAPI_MakeWire>(new BRepBuilderAPI_MakeWire(edge_1, edge_2));
-}
-
-inline std::unique_ptr<BRepBuilderAPI_MakeFace> BRepBuilderAPI_MakeFace_wire(const TopoDS_Wire &wire,
-                                                                             const Standard_Boolean only_plane) {
-  return std::unique_ptr<BRepBuilderAPI_MakeFace>(new BRepBuilderAPI_MakeFace(wire, only_plane));
 }
 
 // BRepLib
@@ -204,10 +161,6 @@ inline const gp_Ax1 &gp_OY() { return gp::OY(); }
 inline const gp_Ax1 &gp_OZ() { return gp::OZ(); }
 
 inline const gp_Dir &gp_DZ() { return gp::DZ(); }
-
-inline std::unique_ptr<gp_Ax3> gp_Ax3_from_gp_Ax2(const gp_Ax2 &axis) {
-  return std::unique_ptr<gp_Ax3>(new gp_Ax3(axis));
-}
 
 // Shape stuff
 inline const TopoDS_Vertex &TopoDS_cast_to_vertex(const TopoDS_Shape &shape) { return TopoDS::Vertex(shape); }

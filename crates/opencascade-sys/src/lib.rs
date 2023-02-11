@@ -39,7 +39,8 @@ pub mod ffi {
         pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
 
-        pub fn new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
+        #[rust_name = "new_HandleGeomCurve_from_HandleGeom_TrimmedCurve"]
+        pub fn construct_unique(
             trimmed_curve_handle: &HandleGeomTrimmedCurve,
         ) -> UniquePtr<HandleGeomCurve>;
 
@@ -75,7 +76,6 @@ pub mod ffi {
 
         pub fn handle_geom_plane_location(plane: &HandleGeomPlane) -> &gp_Pnt;
 
-        // TODO - return a Handle?
         pub fn Geom_CylindricalSurface_ctor(
             axis: &gp_Ax3,
             radius: f64,
@@ -126,7 +126,10 @@ pub mod ffi {
         // Segments
         type GC_MakeSegment;
         type GCE2d_MakeSegment;
-        pub fn GC_MakeSegment_point_point(p1: &gp_Pnt, p2: &gp_Pnt) -> UniquePtr<GC_MakeSegment>;
+
+        #[rust_name = "GC_MakeSegment_point_point"]
+        pub fn construct_unique(p1: &gp_Pnt, p2: &gp_Pnt) -> UniquePtr<GC_MakeSegment>;
+
         pub fn GC_MakeSegment_Value(arc: &GC_MakeSegment) -> UniquePtr<HandleGeomTrimmedCurve>;
         pub fn GCE2d_MakeSegment_point_point(
             p1: &gp_Pnt2d,
@@ -135,11 +138,14 @@ pub mod ffi {
 
         // Arcs
         type GC_MakeArcOfCircle;
-        pub fn GC_MakeArcOfCircle_point_point_point(
+
+        #[rust_name = "GC_MakeArcOfCircle_point_point_point"]
+        pub fn construct_unique(
             p1: &gp_Pnt,
             p2: &gp_Pnt,
             p3: &gp_Pnt,
         ) -> UniquePtr<GC_MakeArcOfCircle>;
+
         pub fn GC_MakeArcOfCircle_Value(
             arc: &GC_MakeArcOfCircle,
         ) -> UniquePtr<HandleGeomTrimmedCurve>;
@@ -186,13 +192,18 @@ pub mod ffi {
         // BRepBuilder
         type BRepBuilderAPI_MakeEdge;
         type TopoDS_Vertex;
-        pub fn BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+
+        #[rust_name = "BRepBuilderAPI_MakeEdge_HandleGeomCurve"]
+        pub fn construct_unique(
             geom_curve_handle: &HandleGeomCurve,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
-        pub fn BRepBuilderAPI_MakeEdge_CurveSurface2d(
+
+        #[rust_name = "BRepBuilderAPI_MakeEdge_CurveSurface2d"]
+        pub fn construct_unique(
             curve_handle: &HandleGeom2d_Curve,
             surface_handle: &HandleGeomSurface,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
+
         pub fn Vertex1(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Vertex;
         pub fn Edge(self: Pin<&mut BRepBuilderAPI_MakeEdge>) -> &TopoDS_Edge;
         pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeEdge>, progress: &Message_ProgressRange);
@@ -203,25 +214,32 @@ pub mod ffi {
         #[rust_name = "BRepBuilderAPI_MakeWire_ctor"]
         pub fn construct_unique() -> UniquePtr<BRepBuilderAPI_MakeWire>;
 
-        pub fn BRepBuilderAPI_MakeWire_edge_edge(
+        #[rust_name = "BRepBuilderAPI_MakeWire_edge_edge"]
+        pub fn construct_unique(
             edge_1: &TopoDS_Edge,
             edge_2: &TopoDS_Edge,
         ) -> UniquePtr<BRepBuilderAPI_MakeWire>;
-        pub fn BRepBuilderAPI_MakeWire_edge_edge_edge(
+
+        #[rust_name = "BRepBuilderAPI_MakeWire_edge_edge_edge"]
+        pub fn construct_unique(
             edge_1: &TopoDS_Edge,
             edge_2: &TopoDS_Edge,
             edge_3: &TopoDS_Edge,
         ) -> UniquePtr<BRepBuilderAPI_MakeWire>;
+
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Shape;
         pub fn Wire(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Wire;
         pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeWire>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepBuilderAPI_MakeWire) -> bool;
 
         type BRepBuilderAPI_MakeFace;
-        pub fn BRepBuilderAPI_MakeFace_wire(
+
+        #[rust_name = "BRepBuilderAPI_MakeFace_wire"]
+        pub fn construct_unique(
             wire: &TopoDS_Wire,
             only_plane: bool,
         ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
+
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeFace>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeFace>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepBuilderAPI_MakeFace) -> bool;
@@ -420,7 +438,8 @@ pub mod ffi {
         #[rust_name = "gp_Ax2_ctor"]
         pub fn construct_unique(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
 
-        pub fn gp_Ax3_from_gp_Ax2(axis: &gp_Ax2) -> UniquePtr<gp_Ax3>;
+        #[rust_name = "gp_Ax3_from_gp_Ax2"]
+        pub fn construct_unique(axis: &gp_Ax2) -> UniquePtr<gp_Ax3>;
 
         #[rust_name = "gp_Dir2d_ctor"]
         pub fn construct_unique(x: f64, y: f64) -> UniquePtr<gp_Dir2d>;
