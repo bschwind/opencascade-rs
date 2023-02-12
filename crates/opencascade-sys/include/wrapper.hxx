@@ -44,7 +44,6 @@
 
 // Generic template constructor
 template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
-  // return T(args...);
   return std::unique_ptr<T>(new T(args...));
 }
 
@@ -153,26 +152,6 @@ inline const TopoDS_Wire &TopoDS_cast_to_wire(const TopoDS_Shape &shape) { retur
 inline const TopoDS_Edge &TopoDS_cast_to_edge(const TopoDS_Shape &shape) { return TopoDS::Edge(shape); }
 
 inline const TopoDS_Face &TopoDS_cast_to_face(const TopoDS_Shape &shape) { return TopoDS::Face(shape); }
-
-inline std::unique_ptr<TopoDS_Shape> TopoDS_Shape_to_owned(const TopoDS_Shape &shape) {
-  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(shape));
-}
-
-inline std::unique_ptr<TopoDS_Vertex> TopoDS_Vertex_to_owned(const TopoDS_Vertex &vertex) {
-  return std::unique_ptr<TopoDS_Vertex>(new TopoDS_Vertex(vertex));
-}
-
-inline std::unique_ptr<TopoDS_Wire> TopoDS_Wire_to_owned(const TopoDS_Wire &wire) {
-  return std::unique_ptr<TopoDS_Wire>(new TopoDS_Wire(wire));
-}
-
-inline std::unique_ptr<TopoDS_Edge> TopoDS_Edge_to_owned(const TopoDS_Edge &edge) {
-  return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(edge));
-}
-
-inline std::unique_ptr<TopoDS_Face> TopoDS_Face_to_owned(const TopoDS_Face &face) {
-  return std::unique_ptr<TopoDS_Face>(new TopoDS_Face(face));
-}
 
 // Compound shapes
 inline std::unique_ptr<TopoDS_Shape> TopoDS_Compound_as_shape(std::unique_ptr<TopoDS_Compound> compound) {

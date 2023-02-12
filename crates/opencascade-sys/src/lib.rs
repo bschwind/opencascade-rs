@@ -161,11 +161,20 @@ pub mod ffi {
         pub fn TopoDS_cast_to_edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
         pub fn TopoDS_cast_to_face(shape: &TopoDS_Shape) -> &TopoDS_Face;
 
-        pub fn TopoDS_Shape_to_owned(shape: &TopoDS_Shape) -> UniquePtr<TopoDS_Shape>;
-        pub fn TopoDS_Vertex_to_owned(shape: &TopoDS_Vertex) -> UniquePtr<TopoDS_Vertex>;
-        pub fn TopoDS_Wire_to_owned(shape: &TopoDS_Wire) -> UniquePtr<TopoDS_Wire>;
-        pub fn TopoDS_Edge_to_owned(shape: &TopoDS_Edge) -> UniquePtr<TopoDS_Edge>;
-        pub fn TopoDS_Face_to_owned(shape: &TopoDS_Face) -> UniquePtr<TopoDS_Face>;
+        #[rust_name = "TopoDS_Shape_to_owned"]
+        pub fn construct_unique(shape: &TopoDS_Shape) -> UniquePtr<TopoDS_Shape>;
+
+        #[rust_name = "TopoDS_Vertex_to_owned"]
+        pub fn construct_unique(shape: &TopoDS_Vertex) -> UniquePtr<TopoDS_Vertex>;
+
+        #[rust_name = "TopoDS_Wire_to_owned"]
+        pub fn construct_unique(shape: &TopoDS_Wire) -> UniquePtr<TopoDS_Wire>;
+
+        #[rust_name = "TopoDS_Edge_to_owned"]
+        pub fn construct_unique(shape: &TopoDS_Edge) -> UniquePtr<TopoDS_Edge>;
+
+        #[rust_name = "TopoDS_Face_to_owned"]
+        pub fn construct_unique(shape: &TopoDS_Face) -> UniquePtr<TopoDS_Face>;
 
         pub fn IsNull(self: &TopoDS_Shape) -> bool;
         pub fn IsEqual(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
