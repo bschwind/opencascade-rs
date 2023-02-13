@@ -60,6 +60,13 @@ typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurfa
 typedef opencascade::handle<Poly_Triangulation> Handle_Poly_Triangulation;
 
 // Handle stuff
+template <typename T> const T &handle_try_deref(const opencascade::handle<T> &handle) {
+  if (handle.IsNull()) {
+    throw std::runtime_error("null handle dereference");
+  }
+  return *handle;
+}
+
 inline const HandleStandardType &DynamicType(const HandleGeomSurface &surface) { return surface->DynamicType(); }
 
 inline rust::String type_name(const HandleStandardType &handle) { return std::string(handle->Name()); }
@@ -188,4 +195,14 @@ inline std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer 
 // Data export
 inline bool write_stl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::String theFileName) {
   return writer.Write(theShape, theFileName.c_str());
+}
+
+inline std::unique_ptr<gp_Dir> Poly_Triangulation_Normal(const Poly_Triangulation &triangulation,
+                                                         const Standard_Integer index) {
+  return std::unique_ptr<gp_Dir>(new gp_Dir(triangulation.Normal(index)));
+}
+
+inline std::unique_ptr<gp_Pnt> Poly_Triangulation_Node(const Poly_Triangulation &triangulation,
+                                                       const Standard_Integer index) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(triangulation.Node(index)));
 }

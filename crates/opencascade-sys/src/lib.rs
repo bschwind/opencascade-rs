@@ -556,11 +556,15 @@ pub mod ffi {
         pub fn IsDone(self: &BRepMesh_IncrementalMesh) -> bool;
 
         type TopLoc_Location;
+        #[cxx_name = "construct_unique"]
         pub fn TopLoc_Location_ctor() -> UniquePtr<TopLoc_Location>;
 
         type Handle_Poly_Triangulation;
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
-        pub fn get(self: &Handle_Poly_Triangulation) -> *mut Poly_Triangulation;
+        #[cxx_name = "handle_try_deref"]
+        pub fn Handle_Poly_Triangulation_Get(
+            handle: &Handle_Poly_Triangulation,
+        ) -> Result<&Poly_Triangulation>;
 
         type Poly_Triangulation;
         pub fn NbNodes(self: &Poly_Triangulation) -> i32;
