@@ -16,8 +16,8 @@ use opencascade_sys::ffi::{
     GC_MakeSegment_Value, GC_MakeSegment_point_point, Geom2d_Ellipse_ctor,
     Geom2d_TrimmedCurve_ctor, Geom_CylindricalSurface_ctor, HandleGeom2d_TrimmedCurve_to_curve,
     MakeThickSolidByJoin, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
-    TopoDS_Compound_as_shape, TopoDS_Compound_ctor, TopoDS_Face, TopoDS_cast_to_edge,
-    TopoDS_cast_to_face, TopoDS_cast_to_wire,
+    TopoDS_Compound_as_shape, TopoDS_Compound_ctor, TopoDS_Face, TopoDS_Face_to_owned,
+    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
 };
 
 // All dimensions are in millimeters.
@@ -114,7 +114,7 @@ pub fn main() {
         let shape = ExplorerCurrentShape(&face_explorer);
         let face = TopoDS_cast_to_face(&shape);
 
-        let surface = BRep_Tool_Surface(&face);
+        let surface = BRep_Tool_Surface(face);
         let dynamic_type = DynamicType(&surface);
         let name = type_name(dynamic_type);
 
@@ -125,7 +125,7 @@ pub fn main() {
             let plane_z = plane_location.Z();
             if plane_z > z_max {
                 z_max = plane_z;
-                top_face = Some(face);
+                top_face = Some(TopoDS_Face_to_owned(face));
             }
         }
 
@@ -221,5 +221,5 @@ pub fn main() {
     let triangulation = BRepMesh_IncrementalMesh_ctor(&final_shape, 0.01);
     let success = write_stl(stl_writer.pin_mut(), triangulation.Shape(), "bottle.stl".to_owned());
 
-    println!("Done! Success = {}", success);
+    println!("Done! Success = {success}");
 }
