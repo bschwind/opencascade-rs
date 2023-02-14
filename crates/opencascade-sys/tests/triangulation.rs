@@ -19,7 +19,7 @@ fn it_can_access_mesh_triangulation() {
         let face = TopoDS_cast_to_face(edge_explorer.Current());
         let mut location = TopLoc_Location_ctor();
 
-        let triangulation_handle = BRep_Tool_Triangulation(&face, location.pin_mut());
+        let triangulation_handle = BRep_Tool_Triangulation(face, location.pin_mut());
         if let Ok(triangulation) = Handle_Poly_Triangulation_Get(&triangulation_handle) {
             for index in 0..triangulation.NbTriangles() {
                 let triangle = triangulation.Triangle(index + 1);
