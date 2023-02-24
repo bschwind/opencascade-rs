@@ -59,8 +59,16 @@ typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
 typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
 typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
+typedef opencascade::handle<Poly_Triangulation> Handle_Poly_Triangulation;
 
 // Handle stuff
+template <typename T> const T &handle_try_deref(const opencascade::handle<T> &handle) {
+  if (handle.IsNull()) {
+    throw std::runtime_error("null handle dereference");
+  }
+  return *handle;
+}
+
 inline const HandleStandardType &DynamicType(const HandleGeomSurface &surface) { return surface->DynamicType(); }
 
 inline rust::String type_name(const HandleStandardType &handle) { return std::string(handle->Name()); }
@@ -176,6 +184,12 @@ inline std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex &vertex) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(BRep_Tool::Pnt(vertex)));
 }
 
+inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
+                                                                          TopLoc_Location &location) {
+  return std::unique_ptr<Handle_Poly_Triangulation>(
+      new opencascade::handle<Poly_Triangulation>(BRep_Tool::Triangulation(face, location)));
+}
+
 inline std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer &explorer) {
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(explorer.Current()));
 }
@@ -183,6 +197,16 @@ inline std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer 
 // Data export
 inline bool write_stl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::String theFileName) {
   return writer.Write(theShape, theFileName.c_str());
+}
+
+inline std::unique_ptr<gp_Dir> Poly_Triangulation_Normal(const Poly_Triangulation &triangulation,
+                                                         const Standard_Integer index) {
+  return std::unique_ptr<gp_Dir>(new gp_Dir(triangulation.Normal(index)));
+}
+
+inline std::unique_ptr<gp_Pnt> Poly_Triangulation_Node(const Poly_Triangulation &triangulation,
+                                                       const Standard_Integer index) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(triangulation.Node(index)));
 }
 
 // Shape Properties
