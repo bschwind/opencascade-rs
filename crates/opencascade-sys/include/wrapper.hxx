@@ -9,6 +9,7 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
+#include <BRepGProp.hxx>
 #include <BRepLib.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
@@ -21,6 +22,7 @@
 #include <GCE2d_MakeSegment.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <GC_MakeSegment.hxx>
+#include <GProp_GProps.hxx>
 #include <Geom2d_Ellipse.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom_CylindricalSurface.hxx>
@@ -205,4 +207,21 @@ inline std::unique_ptr<gp_Dir> Poly_Triangulation_Normal(const Poly_Triangulatio
 inline std::unique_ptr<gp_Pnt> Poly_Triangulation_Node(const Poly_Triangulation &triangulation,
                                                        const Standard_Integer index) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(triangulation.Node(index)));
+}
+
+// Shape Properties
+inline std::unique_ptr<gp_Pnt> GProp_GProps_CentreOfMass(const GProp_GProps &props) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(props.CentreOfMass()));
+}
+
+inline void BRepGProp_LinearProperties(const TopoDS_Shape &shape, GProp_GProps &props) {
+  BRepGProp::LinearProperties(shape, props);
+}
+
+inline void BRepGProp_SurfaceProperties(const TopoDS_Shape &shape, GProp_GProps &props) {
+  BRepGProp::SurfaceProperties(shape, props);
+}
+
+inline void BRepGProp_VolumeProperties(const TopoDS_Shape &shape, GProp_GProps &props) {
+  BRepGProp::VolumeProperties(shape, props);
 }
