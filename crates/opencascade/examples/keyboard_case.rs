@@ -299,5 +299,16 @@ fn main() {
         outer_box.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
     }
 
+    // For exporting to smaller 3D printers
+    // let corner_1 = DVec3::new(CASE_LEFT, CASE_BOTTOM, CASE_BOTTOM_Z);
+    // let corner_2 = DVec3::new(CASE_RIGHT / 2.0, CASE_TOP, CASE_TOP_Z);
+    // let left_half = Shape::make_box_point_point(corner_1, corner_2);
+
+    // let corner_1 = DVec3::new(CASE_RIGHT / 2.0, CASE_BOTTOM, CASE_BOTTOM_Z);
+    // let corner_2 = DVec3::new(CASE_RIGHT, CASE_TOP, CASE_TOP_Z);
+    // let right_half = Shape::make_box_point_point(corner_1, corner_2);
+
+    // outer_box.intersect(&right_half);
+
     outer_box.write_stl("keyboard_case.stl");
 }
