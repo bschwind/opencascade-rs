@@ -47,6 +47,9 @@ const PCB_SHELF_HEIGHT: f64 = 4.0;
 
 // Top plate support post locations
 const SUPPORT_POST_RADIUS: f64 = 2.25;
+
+// http://www.metrication.com/engineering/threads.html
+const SUPPORT_POST_DRILL_RADIUS: f64 = 0.8;
 const SUPPORT_POST_DIST_FROM_EDGE: f64 = 2.5;
 
 enum PostDirection {
@@ -68,6 +71,7 @@ impl SupportPost {
 
         let pos = DVec3::from((self.pos, CASE_FLOOR_Z));
         let mut cylinder = Shape::make_cylinder(pos, SUPPORT_POST_RADIUS, top_z - bottom_z);
+        let m2_drill_hole = Shape::make_cylinder(pos, SUPPORT_POST_DRILL_RADIUS, top_z - bottom_z);
 
         let box_part = match self.direction {
             PostDirection::Up => {
@@ -113,6 +117,7 @@ impl SupportPost {
         };
 
         cylinder.union(&box_part);
+        cylinder.subtract(&m2_drill_hole);
 
         cylinder
     }
