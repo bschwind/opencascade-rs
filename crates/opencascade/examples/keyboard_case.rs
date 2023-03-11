@@ -10,6 +10,9 @@ const PCB_WIDTH: f64 = 285.75;
 const PCB_HEIGHT: f64 = 114.3;
 const TOP_PLATE_THICKNESS: f64 = 1.6;
 
+// "Inflate" the PCB dimensions by this much to create an easier fit.
+const PCB_DIMENSION_TOLERANCE: f64 = 0.2;
+
 // The origin point for this board is the top left corner
 // of the PCB, on the top surface. The PCB rests on this
 // shelf. Positive X values go to the right, positive Y
@@ -29,12 +32,12 @@ const CASE_FLOOR_Z: f64 = PCB_BOTTOM_Z - PCB_SHELF_HEIGHT;
 const CASE_BOTTOM_Z: f64 = CASE_FLOOR_Z - CASE_WALL_THICKNESS;
 
 // PCB
-const PCB_TOP: f64 = ORIGIN.y;
+const PCB_TOP: f64 = ORIGIN.y + PCB_DIMENSION_TOLERANCE;
 const PCB_TOP_Z: f64 = ORIGIN.z;
-const PCB_BOTTOM: f64 = PCB_TOP - PCB_HEIGHT;
+const PCB_BOTTOM: f64 = PCB_TOP - PCB_HEIGHT - PCB_DIMENSION_TOLERANCE;
 const PCB_BOTTOM_Z: f64 = PCB_TOP_Z - PCB_THICKNESS;
-const PCB_LEFT: f64 = ORIGIN.x;
-const PCB_RIGHT: f64 = PCB_LEFT + PCB_WIDTH;
+const PCB_LEFT: f64 = ORIGIN.x - PCB_DIMENSION_TOLERANCE;
+const PCB_RIGHT: f64 = PCB_LEFT + PCB_WIDTH + PCB_DIMENSION_TOLERANCE;
 
 // Top Plate
 const TOP_PLATE_BOTTOM_Z: f64 = 3.4;
