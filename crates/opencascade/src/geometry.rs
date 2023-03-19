@@ -1,8 +1,8 @@
 use cxx::UniquePtr;
 use glam::f64::{dvec3, DAffine3, DVec3};
 use opencascade_sys::ffi::{
-    new_point, new_shape, write_stl, BRepAlgoAPI_Fuse_ctor, BRepMesh_IncrementalMesh_ctor,
-    BRepPrimAPI_MakeBox_ctor, StlAPI_Writer_ctor, TopoDS_Shape,
+    new_point, write_stl, BRepAlgoAPI_Fuse_ctor, BRepMesh_IncrementalMesh_ctor,
+    BRepPrimAPI_MakeBox_ctor, StlAPI_Writer_ctor, TopoDS_Shape, TopoDS_Shape_to_owned,
 };
 use std::{collections::HashMap, path::Path};
 
@@ -193,7 +193,7 @@ impl Workspace {
             let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&acc, &shape);
 
             let cut_shape = fuse_operation.pin_mut().Shape();
-            new_shape(cut_shape)
+            TopoDS_Shape_to_owned(cut_shape)
         });
 
         if let Some(output_shape) = result_shape {
@@ -270,7 +270,7 @@ impl Rect {
         let point = new_point(min_corner.x, min_corner.y, min_corner.z);
         let diff = max_corner - min_corner;
         let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
-        let shape = new_shape(my_box.pin_mut().Shape());
+        let shape = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
 
         Solid { shape }
     }
