@@ -1,4 +1,3 @@
-use crate::Shape;
 use cxx::UniquePtr;
 use glam::f64::{dvec3, DAffine3, DVec3};
 use opencascade_sys::ffi::{
@@ -38,6 +37,10 @@ pub enum Plane {
 }
 
 impl Plane {
+    pub fn transform_point(&self, point: DVec3) -> DVec3 {
+        self.transform().transform_point3(point)
+    }
+
     pub fn transform(&self) -> DAffine3 {
         match self {
             Self::XY => DAffine3::from_cols(
@@ -118,24 +121,18 @@ impl Plane {
                     dvec3(0.0, 0.0, 0.0),
                 )
             },
-            Self::Right => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::Top => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
+            Self::Right => DAffine3::from_cols(
+                dvec3(0.0, 0.0, -1.0),
+                dvec3(0.0, 1.0, 0.0),
+                dvec3(1.0, 0.0, 0.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
+            Self::Top => DAffine3::from_cols(
+                dvec3(1.0, 0.0, 0.0),
+                dvec3(0.0, 0.0, -1.0),
+                dvec3(0.0, 1.0, 0.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
             Self::Bottom => {
                 // TODO - fix this
                 DAffine3::from_cols(
@@ -256,6 +253,9 @@ impl Rect {
     pub fn extrude(self, amount: f64) -> Solid {
         let p1 = dvec3(0.0, 0.0, 0.0);
         let p2 = dvec3(self.width, self.height, amount);
+
+        let p1 = self.plane.transform_point(p1);
+        let p2 = self.plane.transform_point(p2);
 
         let min_corner = p1.min(p2);
         let max_corner = p1.max(p2);
