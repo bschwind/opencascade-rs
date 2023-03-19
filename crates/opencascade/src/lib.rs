@@ -2,7 +2,7 @@ use cxx::UniquePtr;
 use glam::DVec3;
 use opencascade_sys::ffi::{
     gp_Ax1_ctor, gp_Ax2_ctor, gp_DZ, gp_Dir_ctor, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve,
-    new_point, new_shape, new_vec, write_stl, BRepAlgoAPI_Common_ctor, BRepAlgoAPI_Cut_ctor,
+    new_point, new_vec, write_stl, BRepAlgoAPI_Common_ctor, BRepAlgoAPI_Cut_ctor,
     BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
     BRepBuilderAPI_MakeWire, BRepBuilderAPI_MakeWire_ctor, BRepFeat_MakeCylindricalHole_ctor,
     BRepFilletAPI_MakeChamfer_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
@@ -37,7 +37,7 @@ impl Shape {
         let point = new_point(min_corner.x, min_corner.y, min_corner.z);
         let diff = max_corner - min_corner;
         let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
-        let shape = new_shape(my_box.pin_mut().Shape());
+        let shape = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
 
         Self { shape }
     }
@@ -49,7 +49,7 @@ impl Shape {
         let cylinder_coord_system = gp_Ax2_ctor(&point, cylinder_axis);
 
         let mut cylinder = BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
-        let shape = new_shape(cylinder.pin_mut().Shape());
+        let shape = TopoDS_Shape_to_owned(cylinder.pin_mut().Shape());
 
         Self { shape }
     }
@@ -89,7 +89,7 @@ impl Shape {
         let mut extrusion =
             BRepPrimAPI_MakePrism_ctor(face_profile.pin_mut().Shape(), &prism_vec, false, true);
 
-        let shape = new_shape(extrusion.pin_mut().Shape());
+        let shape = TopoDS_Shape_to_owned(extrusion.pin_mut().Shape());
 
         Self { shape }
     }
@@ -112,11 +112,11 @@ impl Shape {
         make_hole.pin_mut().Build();
 
         // let mut cylinder = BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
-        // let shape = new_shape(cylinder.pin_mut().Shape());
+        // let shape = TopoDS_Shape_to_owned(cylinder.pin_mut().Shape());
 
         // Self { shape }
 
-        self.shape = new_shape(make_hole.pin_mut().Shape());
+        self.shape = TopoDS_Shape_to_owned(make_hole.pin_mut().Shape());
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) {
@@ -172,13 +172,13 @@ impl Shape {
         let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.shape, &other.shape);
 
         let cut_shape = fuse_operation.pin_mut().Shape();
-        self.shape = new_shape(cut_shape);
+        self.shape = TopoDS_Shape_to_owned(cut_shape);
     }
 
     pub fn intersect(&mut self, other: &Shape) {
         let mut common_operation = BRepAlgoAPI_Common_ctor(&self.shape, &other.shape);
 
         let cut_shape = common_operation.pin_mut().Shape();
-        self.shape = new_shape(cut_shape);
+        self.shape = TopoDS_Shape_to_owned(cut_shape);
     }
 }
