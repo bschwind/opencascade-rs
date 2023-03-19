@@ -15,6 +15,7 @@ use std::path::Path;
 pub use glam;
 
 pub mod geometry;
+pub mod primitives;
 
 pub struct Shape {
     shape: UniquePtr<TopoDS_Shape>,
