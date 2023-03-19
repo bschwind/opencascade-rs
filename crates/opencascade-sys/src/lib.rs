@@ -159,10 +159,13 @@ pub mod ffi {
         ) -> UniquePtr<HandleGeomTrimmedCurve>;
 
         // Shapes
-        type TopoDS_Shape;
+        type TopoDS_Vertex;
         type TopoDS_Edge;
         type TopoDS_Wire;
         type TopoDS_Face;
+        type TopoDS_Shell;
+        type TopoDS_Solid;
+        type TopoDS_Shape;
 
         pub fn TopoDS_cast_to_vertex(shape: &TopoDS_Shape) -> &TopoDS_Vertex;
         pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
@@ -170,19 +173,25 @@ pub mod ffi {
         pub fn TopoDS_cast_to_face(shape: &TopoDS_Shape) -> &TopoDS_Face;
 
         #[cxx_name = "construct_unique"]
-        pub fn TopoDS_Shape_to_owned(shape: &TopoDS_Shape) -> UniquePtr<TopoDS_Shape>;
-
-        #[cxx_name = "construct_unique"]
         pub fn TopoDS_Vertex_to_owned(shape: &TopoDS_Vertex) -> UniquePtr<TopoDS_Vertex>;
-
-        #[cxx_name = "construct_unique"]
-        pub fn TopoDS_Wire_to_owned(shape: &TopoDS_Wire) -> UniquePtr<TopoDS_Wire>;
 
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Edge_to_owned(shape: &TopoDS_Edge) -> UniquePtr<TopoDS_Edge>;
 
         #[cxx_name = "construct_unique"]
+        pub fn TopoDS_Wire_to_owned(shape: &TopoDS_Wire) -> UniquePtr<TopoDS_Wire>;
+
+        #[cxx_name = "construct_unique"]
         pub fn TopoDS_Face_to_owned(shape: &TopoDS_Face) -> UniquePtr<TopoDS_Face>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn TopoDS_Shell_to_owned(shape: &TopoDS_Shell) -> UniquePtr<TopoDS_Shell>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn TopoDS_Solid_to_owned(shape: &TopoDS_Solid) -> UniquePtr<TopoDS_Solid>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn TopoDS_Shape_to_owned(shape: &TopoDS_Shape) -> UniquePtr<TopoDS_Shape>;
 
         pub fn IsNull(self: &TopoDS_Shape) -> bool;
         pub fn IsEqual(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
@@ -211,8 +220,15 @@ pub mod ffi {
         pub fn Add(self: &TopoDS_Builder, shape: Pin<&mut TopoDS_Shape>, compound: &TopoDS_Shape);
 
         // BRepBuilder
+        type BRepBuilderAPI_MakeVertex;
+        #[cxx_name = "construct_unique"]
+        pub fn BRepBuilderAPI_MakeVertex_gp_Pnt(
+            point: &gp_Pnt,
+        ) -> UniquePtr<BRepBuilderAPI_MakeVertex>;
+
+        pub fn Vertex(self: Pin<&mut BRepBuilderAPI_MakeVertex>) -> &TopoDS_Vertex;
+
         type BRepBuilderAPI_MakeEdge;
-        type TopoDS_Vertex;
 
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeEdge_HandleGeomCurve(
