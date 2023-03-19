@@ -9,12 +9,19 @@ use std::{collections::HashMap, path::Path};
 #[derive(Debug)]
 pub enum TaggedItem {
     Vertex,
+    VertexSet,
     Edge,
+    EdgeSet,
     Wire,
+    WireSet,
     Face,
+    FaceSet,
     Shell,
+    ShellSet,
     Solid,
+    SolidSet,
     Shape,
+    ShapeSet,
 }
 
 pub trait Taggable {}
@@ -154,7 +161,7 @@ impl Plane {
 }
 
 pub struct Workspace {
-    tagged_items: HashMap<Box<dyn Taggable>, TaggedItem>,
+    tagged_items: HashMap<String, TaggedItem>, // TODO - replace without a "stringly" typed key
     shapes: Vec<UniquePtr<TopoDS_Shape>>,
 }
 
