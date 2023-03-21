@@ -11,6 +11,7 @@
 #include <BRepFeat_MakeCylindricalHole.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
+#include <BRepFilletAPI_MakeFillet2d.hxx>
 #include <BRepGProp.hxx>
 #include <BRepLib.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
@@ -21,6 +22,7 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
+#include <BRepTools.hxx>
 #include <GCE2d_MakeSegment.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <GC_MakeSegment.hxx>
@@ -259,4 +261,19 @@ inline void BRepGProp_SurfaceProperties(const TopoDS_Shape &shape, GProp_GProps 
 
 inline void BRepGProp_VolumeProperties(const TopoDS_Shape &shape, GProp_GProps &props) {
   BRepGProp::VolumeProperties(shape, props);
+}
+
+// Fillets
+inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Vertex &vertex, Standard_Real radius) {
+  return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddFillet(vertex, radius)));
+}
+
+// BRepTools
+inline std::unique_ptr<TopoDS_Wire> outer_wire(const TopoDS_Face &face) {
+  return std::unique_ptr<TopoDS_Wire>(new TopoDS_Wire(BRepTools::OuterWire(face)));
+}
+
+// Collections
+inline void map_shapes(const TopoDS_Shape& S, const TopAbs_ShapeEnum T, TopTools_IndexedMapOfShape& M) {
+  TopExp::MapShapes(S, T, M);
 }

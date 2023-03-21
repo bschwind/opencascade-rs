@@ -76,6 +76,19 @@ pub mod ffi {
         pub fn new_list_of_shape() -> UniquePtr<TopTools_ListOfShape>;
         pub fn shape_list_append_face(list: Pin<&mut TopTools_ListOfShape>, face: &TopoDS_Face);
 
+        type TopTools_IndexedMapOfShape;
+
+        #[cxx_name = "construct_unique"]
+        pub fn new_indexed_map_of_shape() -> UniquePtr<TopTools_IndexedMapOfShape>;
+        pub fn Extent(self: &TopTools_IndexedMapOfShape) -> i32;
+        pub fn FindKey(self: &TopTools_IndexedMapOfShape, index: i32) -> &TopoDS_Shape;
+
+        pub fn map_shapes(
+            shape: &TopoDS_Shape,
+            shape_type: TopAbs_ShapeEnum,
+            shape_map: Pin<&mut TopTools_IndexedMapOfShape>,
+        );
+
         // Geometry
         type Geom_TrimmedCurve;
         type Geom_CylindricalSurface;
@@ -388,6 +401,22 @@ pub mod ffi {
         pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepFilletAPI_MakeFillet) -> bool;
 
+        type BRepFilletAPI_MakeFillet2d;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepFilletAPI_MakeFillet2d_ctor(
+            face: &TopoDS_Face,
+        ) -> UniquePtr<BRepFilletAPI_MakeFillet2d>;
+
+        pub fn BRepFilletAPI_MakeFillet2d_add_fillet(
+            make_fillet: Pin<&mut BRepFilletAPI_MakeFillet2d>,
+            vertex: &TopoDS_Vertex,
+            radius: f64,
+        ) -> UniquePtr<TopoDS_Edge>;
+        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet2d>, progress: &Message_ProgressRange);
+        pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet2d>) -> &TopoDS_Shape;
+        pub fn IsDone(self: &BRepFilletAPI_MakeFillet2d) -> bool;
+
         // Chamfers
         type BRepFilletAPI_MakeChamfer;
 
@@ -649,5 +678,8 @@ pub mod ffi {
         pub fn BRepGProp_LinearProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
         pub fn BRepGProp_SurfaceProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
         pub fn BRepGProp_VolumeProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
+
+        // BRepTools
+        pub fn outer_wire(face: &TopoDS_Face) -> UniquePtr<TopoDS_Wire>;
     }
 }

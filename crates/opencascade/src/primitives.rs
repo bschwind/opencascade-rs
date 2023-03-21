@@ -1,16 +1,20 @@
 use cxx::UniquePtr;
-use glam::DVec3;
+use glam::{dvec3, DVec3};
 use opencascade_sys::ffi::{
     cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape, gp_Ax1_ctor, gp_Dir, gp_Dir_ctor,
-    gp_Pnt, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point, new_transform, new_vec,
-    write_stl, BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
+    gp_Pnt, map_shapes, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape,
+    new_point, new_transform, new_vec, outer_wire, write_stl,
+    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
-    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
+    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
+    BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
     BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
-    StlAPI_Writer_ctor, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
-    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
-    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
-    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_solid, TopoDS_cast_to_wire,
+    Message_ProgressRange_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
+    TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face,
+    TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned,
+    TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire, TopoDS_Wire_to_owned,
+    TopoDS_cast_to_compound, TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex,
+    TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -122,6 +126,52 @@ impl Wire {
         Self { inner }
     }
 
+    pub fn rect(width: f64, height: f64) -> Self {
+        let half_width = width / 2.0;
+        let half_height = height / 2.0;
+
+        let p1 = dvec3(-half_width, half_height, 0.0);
+        let p2 = dvec3(half_width, half_height, 0.0);
+        let p3 = dvec3(half_width, -half_height, 0.0);
+        let p4 = dvec3(-half_width, -half_height, 0.0);
+
+        let top = Edge::segment(p1, p2);
+        let right = Edge::segment(p2, p3);
+        let bottom = Edge::segment(p3, p4);
+        let left = Edge::segment(p4, p1);
+
+        Self::from_edges([&top, &right, &bottom, &left].into_iter())
+    }
+
+    pub fn fillet(&mut self, radius: f64) {
+        // Create a face from this wire
+        let face = Face::from_wire(self);
+        // use BRepFilletAPI_MakeFillet2d
+        let mut make_fillet = BRepFilletAPI_MakeFillet2d_ctor(&face.inner);
+
+        // add all vertices from the face
+        let face_shape = cast_face_to_shape(&face.inner);
+
+        // We use a shape map here to avoid duplicates.
+        let mut shape_map = new_indexed_map_of_shape();
+        map_shapes(face_shape, TopAbs_ShapeEnum::TopAbs_VERTEX, shape_map.pin_mut());
+
+        for i in 1..=shape_map.Extent() {
+            let vertex = TopoDS_cast_to_vertex(shape_map.FindKey(i));
+            BRepFilletAPI_MakeFillet2d_add_fillet(make_fillet.pin_mut(), vertex, radius);
+        }
+
+        make_fillet.pin_mut().Build(&Message_ProgressRange_ctor());
+
+        let result_shape = make_fillet.pin_mut().Shape();
+        // convert back to a wire with BRepTools::OuterWire
+
+        let result_face = TopoDS_cast_to_face(result_shape);
+        let wire = outer_wire(result_face);
+
+        self.inner = wire;
+    }
+
     // Create a closure-based API
     pub fn freeform() {}
 }
@@ -177,8 +227,6 @@ impl Solid {
         make_fillet.pin_mut().add_edge(radius, &edge.inner);
 
         let filleted_shape = make_fillet.pin_mut().Shape();
-
-        println!("{:?}", filleted_shape.ShapeType());
 
         let compund = TopoDS_cast_to_compound(filleted_shape);
         let inner = TopoDS_Compound_to_owned(compund);
