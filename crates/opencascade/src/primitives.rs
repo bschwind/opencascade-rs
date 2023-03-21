@@ -5,11 +5,12 @@ use opencascade_sys::ffi::{
     gp_Pnt, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_point, new_transform, new_vec,
     write_stl, BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
-    BRepBuilderAPI_Transform_ctor, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakePrism_ctor,
-    GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point, StlAPI_Writer_ctor,
-    TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape,
-    TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned,
-    TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_solid, TopoDS_cast_to_wire,
+    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
+    BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
+    StlAPI_Writer_ctor, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
+    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
+    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
+    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_solid, TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -165,6 +166,26 @@ pub struct Solid {
 }
 
 impl Solid {
+    // TODO(bschwind) - Do some cool stuff from this link:
+    // https://neweopencascade.wordpress.com/2018/10/17/lets-talk-about-fillets/
+    // Key takeaway: Use the `SectionEdges` function to retrieve edges that were
+    // the result of combining two shapes.
+    pub fn fillet_edge(&self, radius: f64, edge: &Edge) -> Compound {
+        let inner_shape = cast_solid_to_shape(&self.inner);
+
+        let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(inner_shape);
+        make_fillet.pin_mut().add_edge(radius, &edge.inner);
+
+        let filleted_shape = make_fillet.pin_mut().Shape();
+
+        println!("{:?}", filleted_shape.ShapeType());
+
+        let compund = TopoDS_cast_to_compound(filleted_shape);
+        let inner = TopoDS_Compound_to_owned(compund);
+
+        Compound { inner }
+    }
+
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), ()> {
         let inner_shape = cast_solid_to_shape(&self.inner);
 
@@ -182,6 +203,10 @@ impl Solid {
             Err(()) // TODO(bschwind) - Make an error type
         }
     }
+}
+
+pub struct Compound {
+    inner: UniquePtr<TopoDS_Compound>,
 }
 
 pub struct Shape {
