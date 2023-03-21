@@ -189,6 +189,12 @@ inline const TopoDS_Edge &TopoDS_cast_to_edge(const TopoDS_Shape &shape) { retur
 
 inline const TopoDS_Face &TopoDS_cast_to_face(const TopoDS_Shape &shape) { return TopoDS::Face(shape); }
 
+inline const TopoDS_Solid &TopoDS_cast_to_solid(const TopoDS_Shape &shape) { return TopoDS::Solid(shape); }
+
+inline const TopoDS_Shape &cast_wire_to_shape(const TopoDS_Wire &wire) { return wire; }
+inline const TopoDS_Shape &cast_face_to_shape(const TopoDS_Face &face) { return face; }
+inline const TopoDS_Shape &cast_solid_to_shape(const TopoDS_Solid &solid) { return solid; }
+
 // Compound shapes
 inline std::unique_ptr<TopoDS_Shape> TopoDS_Compound_as_shape(std::unique_ptr<TopoDS_Compound> compound) {
   return compound;

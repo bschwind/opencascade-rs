@@ -167,10 +167,15 @@ pub mod ffi {
         type TopoDS_Solid;
         type TopoDS_Shape;
 
+        pub fn cast_wire_to_shape(wire: &TopoDS_Wire) -> &TopoDS_Shape;
+        pub fn cast_face_to_shape(wire: &TopoDS_Face) -> &TopoDS_Shape;
+        pub fn cast_solid_to_shape(wire: &TopoDS_Solid) -> &TopoDS_Shape;
+
         pub fn TopoDS_cast_to_vertex(shape: &TopoDS_Shape) -> &TopoDS_Vertex;
         pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
         pub fn TopoDS_cast_to_edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
         pub fn TopoDS_cast_to_face(shape: &TopoDS_Shape) -> &TopoDS_Face;
+        pub fn TopoDS_cast_to_solid(shape: &TopoDS_Shape) -> &TopoDS_Solid;
 
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Vertex_to_owned(shape: &TopoDS_Vertex) -> UniquePtr<TopoDS_Vertex>;
@@ -236,6 +241,12 @@ pub mod ffi {
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
 
         #[cxx_name = "construct_unique"]
+        pub fn BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt(
+            p1: &gp_Pnt,
+            p2: &gp_Pnt,
+        ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
+
+        #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeEdge_CurveSurface2d(
             curve_handle: &HandleGeom2d_Curve,
             surface_handle: &HandleGeomSurface,
@@ -277,6 +288,7 @@ pub mod ffi {
             only_plane: bool,
         ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
 
+        pub fn Face(self: &BRepBuilderAPI_MakeFace) -> &TopoDS_Face;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeFace>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeFace>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepBuilderAPI_MakeFace) -> bool;
