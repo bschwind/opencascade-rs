@@ -264,7 +264,9 @@ inline void BRepGProp_VolumeProperties(const TopoDS_Shape &shape, GProp_GProps &
 }
 
 // Fillets
-inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Vertex &vertex, Standard_Real radius) {
+inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFilletAPI_MakeFillet2d &make_fillet,
+                                                                          const TopoDS_Vertex &vertex,
+                                                                          Standard_Real radius) {
   return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddFillet(vertex, radius)));
 }
 
@@ -274,6 +276,6 @@ inline std::unique_ptr<TopoDS_Wire> outer_wire(const TopoDS_Face &face) {
 }
 
 // Collections
-inline void map_shapes(const TopoDS_Shape& S, const TopAbs_ShapeEnum T, TopTools_IndexedMapOfShape& M) {
+inline void map_shapes(const TopoDS_Shape &S, const TopAbs_ShapeEnum T, TopTools_IndexedMapOfShape &M) {
   TopExp::MapShapes(S, T, M);
 }
