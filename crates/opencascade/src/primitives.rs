@@ -8,13 +8,13 @@ use opencascade_sys::ffi::{
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
     BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
-    BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
-    Message_ProgressRange_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
-    TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face,
-    TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned,
-    TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire, TopoDS_Wire_to_owned,
-    TopoDS_cast_to_compound, TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex,
-    TopoDS_cast_to_wire,
+    BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value,
+    GC_MakeArcOfCircle_point_point_point, Message_ProgressRange_ctor, StlAPI_Writer_ctor,
+    TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
+    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
+    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
+    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_face, TopoDS_cast_to_solid,
+    TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -232,6 +232,25 @@ impl Solid {
         let inner = TopoDS_Compound_to_owned(compund);
 
         Compound { inner }
+    }
+
+    pub fn loft<'a>(wires: impl Iterator<Item = &'a Wire>) -> Self {
+        let is_solid = true;
+        let mut make_loft = BRepOffsetAPI_ThruSections_ctor(is_solid);
+
+        for wire in wires {
+            // make_wire.pin_mut().add_wire(&wire.inner);
+            make_loft.pin_mut().AddWire(&wire.inner);
+        }
+
+        // TODO(bschwind) - is this needed?
+        make_loft.pin_mut().CheckCompatibility(false);
+
+        let shape = make_loft.pin_mut().Shape();
+        let solid = TopoDS_cast_to_solid(shape);
+        let inner = TopoDS_Solid_to_owned(solid);
+
+        Self { inner }
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), ()> {
