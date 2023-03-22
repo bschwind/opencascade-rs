@@ -1,12 +1,11 @@
 // Keycap generator, referenced from
 // https://github.com/cubiq/OPK/blob/53f9d6a4123b0f309f87158115c83d19811b3484/opk.py
-
-const KEYCAP_PITCH: f64 = 19.05;
-
 use opencascade::{
     glam::dvec3,
     primitives::{Edge, Solid, Wire},
 };
+
+const KEYCAP_PITCH: f64 = 19.05;
 
 pub fn main() {
     let convex = false;

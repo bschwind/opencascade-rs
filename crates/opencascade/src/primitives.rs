@@ -1,3 +1,4 @@
+use crate::Error;
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys::ffi::{
@@ -10,9 +11,9 @@ use opencascade_sys::ffi::{
     BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
     BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, Message_ProgressRange_ctor, StlAPI_Writer_ctor,
-    TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
-    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
-    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
+    TopAbs_ShapeEnum, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned,
+    TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell, TopoDS_Solid,
+    TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
     TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_face, TopoDS_cast_to_solid,
     TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
 };
@@ -27,7 +28,7 @@ pub fn make_dir(p: DVec3) -> UniquePtr<gp_Dir> {
 }
 
 pub struct Vertex {
-    inner: UniquePtr<TopoDS_Vertex>,
+    _inner: UniquePtr<TopoDS_Vertex>,
 }
 
 impl Vertex {
@@ -36,7 +37,7 @@ impl Vertex {
         let vertex = make_vertex.pin_mut().Vertex();
         let inner = TopoDS_Vertex_to_owned(vertex);
 
-        Self { inner }
+        Self { _inner: inner }
     }
 }
 
@@ -73,7 +74,7 @@ impl Edge {
         Self { inner }
     }
 
-    pub fn tangent_arc(p1: DVec3, tangent: DVec3, p3: DVec3) {}
+    pub fn tangent_arc(_p1: DVec3, _tangent: DVec3, _p3: DVec3) {}
 }
 
 pub struct Wire {
@@ -208,7 +209,7 @@ impl Face {
 }
 
 pub struct Shell {
-    inner: UniquePtr<TopoDS_Shell>,
+    _inner: UniquePtr<TopoDS_Shell>,
 }
 
 pub struct Solid {
@@ -231,7 +232,7 @@ impl Solid {
         let compund = TopoDS_cast_to_compound(filleted_shape);
         let inner = TopoDS_Compound_to_owned(compund);
 
-        Compound { inner }
+        Compound { _inner: inner }
     }
 
     pub fn loft<'a>(wires: impl Iterator<Item = &'a Wire>) -> Self {
@@ -253,7 +254,7 @@ impl Solid {
         Self { inner }
     }
 
-    pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), ()> {
+    pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
         let inner_shape = cast_solid_to_shape(&self.inner);
 
         let mut stl_writer = StlAPI_Writer_ctor();
@@ -267,15 +268,15 @@ impl Solid {
         if success {
             Ok(())
         } else {
-            Err(()) // TODO(bschwind) - Make an error type
+            Err(Error::StlWriteFailed)
         }
     }
 }
 
 pub struct Compound {
-    inner: UniquePtr<TopoDS_Compound>,
+    _inner: UniquePtr<TopoDS_Compound>,
 }
 
 pub struct Shape {
-    inner: UniquePtr<TopoDS_Shape>,
+    _inner: UniquePtr<TopoDS_Shape>,
 }

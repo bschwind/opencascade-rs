@@ -1,3 +1,4 @@
+use crate::Error;
 use cxx::UniquePtr;
 use glam::f64::{dvec3, DAffine3, DVec3};
 use opencascade_sys::ffi::{
@@ -161,7 +162,7 @@ impl Plane {
 }
 
 pub struct Workspace {
-    tagged_items: HashMap<String, TaggedItem>, // TODO - replace without a "stringly" typed key
+    _tagged_items: HashMap<String, TaggedItem>, // TODO - replace without a "stringly" typed key
     shapes: Vec<UniquePtr<TopoDS_Shape>>,
 }
 
@@ -173,7 +174,7 @@ impl Default for Workspace {
 
 impl Workspace {
     pub fn new() -> Self {
-        Self { tagged_items: HashMap::new(), shapes: vec![] }
+        Self { _tagged_items: HashMap::new(), shapes: vec![] }
     }
 
     pub fn add(&mut self, solid: Solid) {
@@ -188,7 +189,7 @@ impl Workspace {
         self.workplane(Plane::XY).sketch()
     }
 
-    pub fn write_stl<P: AsRef<Path>>(self, path: P) -> Result<(), ()> {
+    pub fn write_stl<P: AsRef<Path>>(self, path: P) -> Result<(), Error> {
         let result_shape = self.shapes.into_iter().reduce(|acc, shape| {
             let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&acc, &shape);
 
@@ -208,7 +209,7 @@ impl Workspace {
             if success {
                 Ok(())
             } else {
-                Err(()) // TODO(bschwind) - Make an error type
+                Err(Error::StlWriteFailed)
             }
         } else {
             Ok(())
@@ -279,11 +280,11 @@ impl Rect {
 pub struct FreeformSketch {}
 
 impl FreeformSketch {
-    pub fn move_to(mut self) -> Self {
+    pub fn move_to(self) -> Self {
         self
     }
 
-    pub fn line_to(mut self) -> Self {
+    pub fn line_to(self) -> Self {
         self
     }
 }
