@@ -19,10 +19,10 @@ pub fn main() {
     let segment_1 = Edge::segment(point_1, point_2);
     let segment_2 = Edge::segment(point_4, point_5);
 
-    let wire = Wire::from_edges([&segment_1, &arc, &segment_2].into_iter());
+    let wire = Wire::from_edges([&segment_1, &arc, &segment_2]);
     let mirrored_wire = wire.mirror_along_axis(dvec3(0.0, 0.0, 0.0), dvec3(1.0, 0.0, 0.0));
 
-    let wire_profile = Wire::from_wires([&wire, &mirrored_wire].into_iter());
+    let wire_profile = Wire::from_wires([&wire, &mirrored_wire]);
     let face_profile = Face::from_wire(&wire_profile);
 
     let body = face_profile.extrude(dvec3(0.0, 0.0, height));

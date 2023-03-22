@@ -82,10 +82,10 @@ pub struct Wire {
 }
 
 impl Wire {
-    pub fn from_edges<'a>(edges: impl Iterator<Item = &'a Edge>) -> Self {
+    pub fn from_edges<'a>(edges: impl IntoIterator<Item = &'a Edge>) -> Self {
         let mut make_wire = BRepBuilderAPI_MakeWire_ctor();
 
-        for edge in edges {
+        for edge in edges.into_iter() {
             make_wire.pin_mut().add_edge(&edge.inner);
         }
 
@@ -95,10 +95,10 @@ impl Wire {
         Self { inner }
     }
 
-    pub fn from_wires<'a>(wires: impl Iterator<Item = &'a Wire>) -> Self {
+    pub fn from_wires<'a>(wires: impl IntoIterator<Item = &'a Wire>) -> Self {
         let mut make_wire = BRepBuilderAPI_MakeWire_ctor();
 
-        for wire in wires {
+        for wire in wires.into_iter() {
             make_wire.pin_mut().add_wire(&wire.inner);
         }
 

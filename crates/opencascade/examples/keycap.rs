@@ -54,7 +54,7 @@ pub fn main() {
         dvec3(curve, curve * tension, 0.0),
     );
 
-    let mut top_wire = Wire::from_edges([&arc_1, &arc_2, &arc_3, &arc_4].into_iter());
+    let mut top_wire = Wire::from_edges([&arc_1, &arc_2, &arc_3, &arc_4]);
     top_wire.fillet(top_fillet);
 
     // TODO - translate the mid and top wires to the correct height.
