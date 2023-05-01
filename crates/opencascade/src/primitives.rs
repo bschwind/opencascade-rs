@@ -1,21 +1,21 @@
-use crate::Error;
+use crate::{Error, TopoDS_Shape_to_owned};
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys::ffi::{
     cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape, gp_Ax1_ctor, gp_Dir, gp_Dir_ctor,
-    gp_Pnt, map_shapes, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape,
-    new_point, new_transform, new_vec, outer_wire, write_stl,
+    gp_Pnt, gp_Vec, map_shapes, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve,
+    new_indexed_map_of_shape, new_point, new_transform, new_vec, outer_wire, write_stl,
     BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
     BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
     BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, Message_ProgressRange_ctor, StlAPI_Writer_ctor,
-    TopAbs_ShapeEnum, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned,
-    TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell, TopoDS_Solid,
-    TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
-    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_face, TopoDS_cast_to_solid,
-    TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
+    TopAbs_ShapeEnum, TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned,
+    TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape,
+    TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned,
+    TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_face,
+    TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -25,6 +25,10 @@ pub fn make_point(p: DVec3) -> UniquePtr<gp_Pnt> {
 
 pub fn make_dir(p: DVec3) -> UniquePtr<gp_Dir> {
     gp_Dir_ctor(p.x, p.y, p.z)
+}
+
+pub fn make_vec(vec: DVec3) -> UniquePtr<gp_Vec> {
+    new_vec(vec.x, vec.y, vec.z)
 }
 
 pub struct Vertex {
@@ -173,6 +177,23 @@ impl Wire {
         self.inner = wire;
     }
 
+    pub fn translate(&mut self, offset: DVec3) {
+        let mut transform = new_transform();
+        let translation_vec = make_vec(offset);
+
+        transform.pin_mut().set_translation_vec(&translation_vec);
+        let location = TopLoc_Location_from_transform(&transform);
+
+        let wire_shape = cast_wire_to_shape(&self.inner);
+        let mut wire_shape = TopoDS_Shape_to_owned(wire_shape);
+
+        let raise_exception = false;
+        wire_shape.pin_mut().translate(&location, raise_exception);
+
+        let translated_wire = TopoDS_cast_to_wire(&wire_shape);
+        self.inner = TopoDS_Wire_to_owned(translated_wire);
+    }
+
     // Create a closure-based API
     pub fn freeform() {}
 }
@@ -193,7 +214,7 @@ impl Face {
     }
 
     pub fn extrude(&self, dir: DVec3) -> Solid {
-        let prism_vec = new_vec(dir.x, dir.y, dir.z);
+        let prism_vec = make_vec(dir);
 
         let copy = false;
         let canonize = true;

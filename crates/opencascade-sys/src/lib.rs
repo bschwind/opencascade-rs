@@ -193,6 +193,13 @@ pub mod ffi {
         pub fn TopoDS_cast_to_solid(shape: &TopoDS_Shape) -> &TopoDS_Solid;
         pub fn TopoDS_cast_to_compound(shape: &TopoDS_Shape) -> &TopoDS_Compound;
 
+        #[cxx_name = "Move"]
+        pub fn translate(
+            self: Pin<&mut TopoDS_Shape>,
+            position: &TopLoc_Location,
+            raise_exception: bool,
+        );
+
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Vertex_to_owned(shape: &TopoDS_Vertex) -> UniquePtr<TopoDS_Vertex>;
 
@@ -560,6 +567,9 @@ pub mod ffi {
         pub fn SetScale(self: Pin<&mut gp_Trsf>, point: &gp_Pnt, scale: f64);
         pub fn SetTranslation(self: Pin<&mut gp_Trsf>, point1: &gp_Pnt, point2: &gp_Pnt);
 
+        #[cxx_name = "SetTranslation"]
+        pub fn set_translation_vec(self: Pin<&mut gp_Trsf>, translation: &gp_Vec);
+
         type BRepBuilderAPI_Transform;
 
         #[cxx_name = "construct_unique"]
@@ -640,6 +650,9 @@ pub mod ffi {
         type TopLoc_Location;
         #[cxx_name = "construct_unique"]
         pub fn TopLoc_Location_ctor() -> UniquePtr<TopLoc_Location>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn TopLoc_Location_from_transform(transform: &gp_Trsf) -> UniquePtr<TopLoc_Location>;
 
         type Handle_Poly_Triangulation;
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;

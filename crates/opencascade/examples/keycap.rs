@@ -11,6 +11,7 @@ pub fn main() {
     let convex = false;
     let keycap_unit_size_x = 1.0;
     let keycap_unit_size_y = 1.0;
+    let height = 13.0;
     let _angle = 7.0;
     let base = 18.2;
     let top = 13.2;
@@ -32,6 +33,7 @@ pub fn main() {
 
     let mut mid = Wire::rect(bx, by);
     mid.fillet((top_fillet - bottom_fillet) / 3.0);
+    mid.translate(dvec3(0.0, 0.0, height / 4.0));
 
     let arc_1 = Edge::arc(
         dvec3(curve, curve * tension, 0.0),
@@ -54,10 +56,13 @@ pub fn main() {
         dvec3(curve, curve * tension, 0.0),
     );
 
-    let mut top_wire = Wire::from_edges([&arc_1, &arc_2, &arc_3, &arc_4]);
+    // We should use `ConnectEdgesToWires` for `Wire::from_edges`, as it
+    // likely puts these arcs in the order we want.
+    let mut top_wire = Wire::from_edges([&arc_2, &arc_3, &arc_4, &arc_1]);
     top_wire.fillet(top_fillet);
+    top_wire.translate(dvec3(-tx / 2.0, -ty / 2.0, 0.0));
+    top_wire.translate(dvec3(0.0, 0.0, height));
 
-    // TODO - translate the mid and top wires to the correct height.
     let keycap = Solid::loft([&base, &mid, &top_wire].into_iter());
 
     keycap.write_stl("keycap.stl").unwrap();
