@@ -12,7 +12,7 @@ pub fn main() {
     let keycap_unit_size_x = 1.0;
     let keycap_unit_size_y = 1.0;
     let height = 13.0;
-    let _angle = 7.0;
+    let angle = 7.0;
     let base = 18.2;
     let top = 13.2;
     let curve = 1.7;
@@ -33,7 +33,7 @@ pub fn main() {
 
     let mut mid = Wire::rect(bx, by);
     mid.fillet((top_fillet - bottom_fillet) / 3.0);
-    mid.translate(dvec3(0.0, 0.0, height / 4.0));
+    mid.transform(dvec3(0.0, 0.0, height / 4.0), dvec3(1.0, 0.0, 0.0), angle / 4.0);
 
     let arc_1 = Edge::arc(
         dvec3(curve, curve * tension, 0.0),
@@ -61,7 +61,7 @@ pub fn main() {
     let mut top_wire = Wire::from_edges([&arc_2, &arc_3, &arc_4, &arc_1]);
     top_wire.fillet(top_fillet);
     top_wire.translate(dvec3(-tx / 2.0, -ty / 2.0, 0.0));
-    top_wire.translate(dvec3(0.0, 0.0, height));
+    top_wire.transform(dvec3(0.0, 0.0, height), dvec3(1.0, 0.0, 0.0), angle);
 
     let keycap = Solid::loft([&base, &mid, &top_wire].into_iter());
 

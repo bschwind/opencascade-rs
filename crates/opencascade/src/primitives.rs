@@ -178,9 +178,17 @@ impl Wire {
     }
 
     pub fn translate(&mut self, offset: DVec3) {
-        let mut transform = new_transform();
-        let translation_vec = make_vec(offset);
+        self.transform(offset, dvec3(1.0, 0.0, 0.0), 0.0);
+    }
 
+    pub fn transform(&mut self, translation: DVec3, rotation_axis: DVec3, angle: f64) {
+        let angle = angle * std::f64::consts::PI / 180.0;
+
+        let mut transform = new_transform();
+        let rotation_axis_vec = gp_Ax1_ctor(&make_point(DVec3::ZERO), &make_dir(rotation_axis));
+        let translation_vec = make_vec(translation);
+
+        transform.pin_mut().SetRotation(&rotation_axis_vec, angle);
         transform.pin_mut().set_translation_vec(&translation_vec);
         let location = TopLoc_Location_from_transform(&transform);
 
