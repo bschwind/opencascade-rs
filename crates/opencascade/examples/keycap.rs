@@ -59,12 +59,12 @@ pub fn main() {
         .three_point_arc((0.0, 2.0), (by / 2.0, -1.0))
         .line_to(by / 2.0, 10.0)
         .line_to(-by / 2.0, 10.0)
-        .line_to(-by / 2.0, -1.0)
-        .wire();
+        .close();
+
     let scoop = Face::from_wire(&scoop);
     let scoop = scoop.extrude(dvec3(bx, 0.0, 0.0));
 
-    // keycap.subtract(&scoop);
+    let keycap = keycap.subtract(&scoop);
 
     keycap.write_stl("keycap.stl").unwrap();
 }

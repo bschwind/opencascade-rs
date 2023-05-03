@@ -5,6 +5,7 @@ use opencascade_sys::ffi::{
     cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape, gp_Ax1_ctor, gp_Dir, gp_Dir_ctor,
     gp_Pnt, gp_Vec, map_shapes, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve,
     new_indexed_map_of_shape, new_point, new_transform, new_vec, outer_wire, write_stl,
+    BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor,
     BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
@@ -76,6 +77,14 @@ impl Edge {
         let inner = TopoDS_Edge_to_owned(edge);
 
         Self { inner }
+    }
+
+    pub fn start_point(&self) -> DVec3 {
+        let curve = BRepAdaptor_Curve_ctor(&self.inner);
+        let start_param = curve.FirstParameter();
+        let point = BRepAdaptor_Curve_value(&curve, start_param);
+
+        dvec3(point.X(), point.Y(), point.Z())
     }
 
     pub fn tangent_arc(_p1: DVec3, _tangent: DVec3, _p3: DVec3) {}
@@ -299,6 +308,30 @@ impl Solid {
             Err(Error::StlWriteFailed)
         }
     }
+
+    pub fn subtract(&mut self, other: &Solid) -> Shape {
+        let inner_shape = cast_solid_to_shape(&self.inner);
+        let other_inner_shape = cast_solid_to_shape(&other.inner);
+
+        let mut cut_operation = BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+
+        let cut_shape = cut_operation.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(cut_shape);
+
+        Shape { inner }
+    }
+
+    pub fn union(&mut self, other: &Solid) -> Shape {
+        let inner_shape = cast_solid_to_shape(&self.inner);
+        let other_inner_shape = cast_solid_to_shape(&other.inner);
+
+        let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
+
+        let fuse_shape = fuse_operation.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(fuse_shape);
+
+        Shape { inner }
+    }
 }
 
 pub struct Compound {
@@ -306,5 +339,23 @@ pub struct Compound {
 }
 
 pub struct Shape {
-    _inner: UniquePtr<TopoDS_Shape>,
+    inner: UniquePtr<TopoDS_Shape>,
+}
+
+impl Shape {
+    pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
+        let mut stl_writer = StlAPI_Writer_ctor();
+        let triangulation = BRepMesh_IncrementalMesh_ctor(&self.inner, 0.001);
+        let success = write_stl(
+            stl_writer.pin_mut(),
+            triangulation.Shape(),
+            path.as_ref().to_string_lossy().to_string(),
+        );
+
+        if success {
+            Ok(())
+        } else {
+            Err(Error::StlWriteFailed)
+        }
+    }
 }

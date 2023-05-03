@@ -146,7 +146,11 @@ impl Workplane {
         Self { transform: Plane::YZ.transform() }
     }
 
+    // TODO(bschwind) - Test this.
     pub fn set_rotation(&mut self, (rot_x, rot_y, rot_z): (f64, f64, f64)) {
+        let rot_x = rot_x * std::f64::consts::PI / 180.0;
+        let rot_y = rot_y * std::f64::consts::PI / 180.0;
+        let rot_z = rot_z * std::f64::consts::PI / 180.0;
         let rotation_matrix = DMat3::from_euler(EulerRot::XYZ, rot_x, rot_y, rot_z);
 
         let translation = self.transform.translation;
@@ -195,7 +199,6 @@ impl Workplane {
         let new_origin = self.to_world_pos(offset);
 
         self.rotate_by((rotate.x, rotate.y, rotate.z));
-
         self.transform.translation = new_origin;
 
         self
@@ -203,6 +206,10 @@ impl Workplane {
 
     pub fn to_world_pos(&self, pos: DVec3) -> DVec3 {
         self.transform.transform_point3(pos)
+    }
+
+    pub fn to_local_pos(&self, pos: DVec3) -> DVec3 {
+        self.transform.inverse().transform_point3(pos)
     }
 
     pub fn rect(&self, width: f64, height: f64) -> Wire {
@@ -223,21 +230,31 @@ impl Workplane {
     }
 
     pub fn sketch(&self) -> Sketch {
-        Sketch {
-            cursor: self.to_world_pos(DVec3::ZERO),
-            workplane: self.clone(),
-            edges: Vec::new(),
-        }
+        let cursor = self.to_world_pos(DVec3::ZERO);
+        Sketch::new(cursor, self.clone())
     }
 }
 
 pub struct Sketch {
-    cursor: DVec3,
+    first_point: Option<DVec3>,
+    cursor: DVec3, // cursor is in global coordinates
     workplane: Workplane,
     edges: Vec<Edge>,
 }
 
 impl Sketch {
+    fn new(cursor: DVec3, workplane: Workplane) -> Self {
+        Self { first_point: None, cursor, workplane, edges: Vec::new() }
+    }
+
+    fn add_edge(&mut self, edge: Edge) {
+        if self.first_point.is_none() {
+            self.first_point = Some(edge.start_point());
+        }
+
+        self.edges.push(edge);
+    }
+
     pub fn move_to(mut self, x: f64, y: f64) -> Self {
         self.cursor = self.workplane.to_world_pos(dvec3(x, y, 0.0));
         self
@@ -248,7 +265,7 @@ impl Sketch {
         let new_edge = Edge::segment(self.cursor, new_point);
         self.cursor = new_point;
 
-        self.edges.push(new_edge);
+        self.add_edge(new_edge);
 
         self
     }
@@ -262,17 +279,25 @@ impl Sketch {
 
         self.cursor = p3;
 
-        self.edges.push(new_arc);
+        self.add_edge(new_arc);
 
         self
     }
 
     pub fn three_point_arc(self, p2: (f64, f64), p3: (f64, f64)) -> Self {
-        let cursor = self.cursor;
+        let cursor = self.workplane.to_local_pos(self.cursor);
         self.arc((cursor.x, cursor.y), p2, p3)
     }
 
     pub fn wire(self) -> Wire {
+        Wire::from_edges(self.edges.iter())
+    }
+
+    pub fn close(mut self) -> Wire {
+        let start_point = self.first_point.unwrap();
+
+        let new_edge = Edge::segment(self.cursor, start_point);
+        self.add_edge(new_edge);
         Wire::from_edges(self.edges.iter())
     }
 }
