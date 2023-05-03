@@ -1,11 +1,15 @@
 // Keycap generator, referenced from
 // https://github.com/cubiq/OPK/blob/53f9d6a4123b0f309f87158115c83d19811b3484/opk.py
-use opencascade::{glam::dvec3, primitives::Solid, workplane::Workplane};
+use opencascade::{
+    glam::dvec3,
+    primitives::{Face, Solid},
+    workplane::Workplane,
+};
 
 const KEYCAP_PITCH: f64 = 19.05;
 
 pub fn main() {
-    let convex = false;
+    let convex = true;
     let keycap_unit_size_x = 1.0;
     let keycap_unit_size_y = 1.0;
     let height = 13.0;
@@ -46,7 +50,21 @@ pub fn main() {
     top_wire.translate(dvec3(-tx / 2.0, -ty / 2.0, 0.0));
     top_wire.transform(dvec3(0.0, 0.0, height), dvec3(1.0, 0.0, 0.0), angle);
 
-    let keycap = Solid::loft([&base, &mid, &top_wire].into_iter());
+    let mut keycap = Solid::loft([&base, &mid, &top_wire].into_iter());
+
+    let scoop = Workplane::yz()
+        .transformed(dvec3(0.0, height - 2.1, -bx / 2.0), dvec3(0.0, 0.0, angle))
+        .sketch()
+        .move_to(-by / 2.0, -1.0)
+        .three_point_arc((0.0, 2.0), (by / 2.0, -1.0))
+        .line_to(by / 2.0, 10.0)
+        .line_to(-by / 2.0, 10.0)
+        .line_to(-by / 2.0, -1.0)
+        .wire();
+    let scoop = Face::from_wire(&scoop);
+    let scoop = scoop.extrude(dvec3(bx, 0.0, 0.0));
+
+    // keycap.subtract(&scoop);
 
     keycap.write_stl("keycap.stl").unwrap();
 }
