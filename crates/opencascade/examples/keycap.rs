@@ -1,9 +1,6 @@
 // Keycap generator, referenced from
 // https://github.com/cubiq/OPK/blob/53f9d6a4123b0f309f87158115c83d19811b3484/opk.py
-use opencascade::{
-    glam::dvec3,
-    primitives::{Edge, Solid, Wire},
-};
+use opencascade::{glam::dvec3, primitives::Solid, workplane::Workplane};
 
 const KEYCAP_PITCH: f64 = 19.05;
 
@@ -28,37 +25,23 @@ pub fn main() {
     let tx = bx - top_diff;
     let ty = by - top_diff;
 
-    let mut base = Wire::rect(bx, by);
+    let mut base = Workplane::xy().rect(bx, by);
     base.fillet(bottom_fillet);
 
-    let mut mid = Wire::rect(bx, by);
+    let mut mid = Workplane::xy().rect(bx, by);
     mid.fillet((top_fillet - bottom_fillet) / 3.0);
     mid.transform(dvec3(0.0, 0.0, height / 4.0), dvec3(1.0, 0.0, 0.0), angle / 4.0);
 
-    let arc_1 = Edge::arc(
-        dvec3(curve, curve * tension, 0.0),
-        dvec3(0.0, ty / 2.0, 0.0),
-        dvec3(curve, ty - curve * tension, 0.0),
-    );
-    let arc_2 = Edge::arc(
-        dvec3(curve, ty - curve * tension, 0.0),
-        dvec3(tx / 2.0, ty, 0.0),
-        dvec3(tx - curve, ty - curve * tension, 0.0),
-    );
-    let arc_3 = Edge::arc(
-        dvec3(tx - curve, ty - curve * tension, 0.0),
-        dvec3(tx, ty / 2.0, 0.0),
-        dvec3(tx - curve, curve * tension, 0.0),
-    );
-    let arc_4 = Edge::arc(
-        dvec3(tx - curve, curve * tension, 0.0),
-        dvec3(tx / 2.0, 0.0, 0.0),
-        dvec3(curve, curve * tension, 0.0),
-    );
-
     // We should use `ConnectEdgesToWires` for `Wire::from_edges`, as it
     // likely puts these arcs in the order we want.
-    let mut top_wire = Wire::from_edges([&arc_2, &arc_3, &arc_4, &arc_1]);
+    let mut top_wire = Workplane::xy()
+        .sketch()
+        .arc((curve, curve * tension), (0.0, ty / 2.0), (curve, ty - curve * tension))
+        .arc((curve, ty - curve * tension), (tx / 2.0, ty), (tx - curve, ty - curve * tension))
+        .arc((tx - curve, ty - curve * tension), (tx, ty / 2.0), (tx - curve, curve * tension))
+        .arc((tx - curve, curve * tension), (tx / 2.0, 0.0), (curve, curve * tension))
+        .wire();
+
     top_wire.fillet(top_fillet);
     top_wire.translate(dvec3(-tx / 2.0, -ty / 2.0, 0.0));
     top_wire.transform(dvec3(0.0, 0.0, height), dvec3(1.0, 0.0, 0.0), angle);

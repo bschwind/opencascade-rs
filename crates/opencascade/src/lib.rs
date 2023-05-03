@@ -17,6 +17,7 @@ pub use glam;
 
 pub mod geometry;
 pub mod primitives;
+pub mod workplane;
 
 #[derive(Error, Debug)]
 pub enum Error {

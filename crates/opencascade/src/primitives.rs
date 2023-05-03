@@ -269,12 +269,11 @@ impl Solid {
         let mut make_loft = BRepOffsetAPI_ThruSections_ctor(is_solid);
 
         for wire in wires {
-            // make_wire.pin_mut().add_wire(&wire.inner);
             make_loft.pin_mut().AddWire(&wire.inner);
         }
 
-        // TODO(bschwind) - is this needed?
-        make_loft.pin_mut().CheckCompatibility(false);
+        // Set to CheckCompatibility to `true` to avoid twisted results.
+        make_loft.pin_mut().CheckCompatibility(true);
 
         let shape = make_loft.pin_mut().Shape();
         let solid = TopoDS_cast_to_solid(shape);
