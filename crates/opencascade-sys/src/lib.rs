@@ -320,6 +320,14 @@ pub mod ffi {
         pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeFace>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepBuilderAPI_MakeFace) -> bool;
 
+        // BRepAdaptor
+        type BRepAdaptor_Curve;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepAdaptor_Curve_ctor(edge: &TopoDS_Edge) -> UniquePtr<BRepAdaptor_Curve>;
+        pub fn FirstParameter(self: &BRepAdaptor_Curve) -> f64;
+        pub fn BRepAdaptor_Curve_value(curve: &BRepAdaptor_Curve, u: f64) -> UniquePtr<gp_Pnt>;
+
         // Primitives
         type BRepPrimAPI_MakePrism;
 
