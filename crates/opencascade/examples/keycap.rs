@@ -9,11 +9,12 @@ use opencascade::{
 const KEYCAP_PITCH: f64 = 19.05;
 
 pub fn main() {
-    let convex = true;
+    let convex = false;
     let keycap_unit_size_x = 1.0;
     let keycap_unit_size_y = 1.0;
     let height = 13.0;
     let angle = 7.0;
+    let depth: f64 = 2.8;
     let base = 18.2;
     let top = 13.2;
     let curve = 1.7;
@@ -52,17 +53,48 @@ pub fn main() {
 
     let mut keycap = Solid::loft([&base, &mid, &top_wire].into_iter());
 
-    let scoop = Workplane::yz()
-        .transformed(dvec3(0.0, height - 2.1, -bx / 2.0), dvec3(0.0, 0.0, angle))
-        .sketch()
-        .move_to(-by / 2.0, -1.0)
-        .three_point_arc((0.0, 2.0), (by / 2.0, -1.0))
-        .line_to(by / 2.0, 10.0)
-        .line_to(-by / 2.0, 10.0)
-        .close();
+    let scoop = if convex {
+        let scoop = Workplane::yz()
+            .transformed(dvec3(0.0, height - 2.1, -bx / 2.0), dvec3(0.0, 0.0, angle))
+            .sketch()
+            .move_to(-by / 2.0, -1.0)
+            .three_point_arc((0.0, 2.0), (by / 2.0, -1.0))
+            .line_to(by / 2.0, 10.0)
+            .line_to(-by / 2.0, 10.0)
+            .close();
 
-    let scoop = Face::from_wire(&scoop);
-    let scoop = scoop.extrude(dvec3(bx, 0.0, 0.0));
+        let scoop = Face::from_wire(&scoop);
+        scoop.extrude(dvec3(bx, 0.0, 0.0))
+    } else {
+        let scoop_right = Workplane::yz()
+            .transformed(dvec3(0.0, height, bx / 2.0), dvec3(0.0, 0.0, angle))
+            .sketch()
+            .move_to(-by / 2.0 + 2.0, 0.0)
+            .three_point_arc((0.0, (-depth + 1.5).min(-0.1)), (by / 2.0 - 2.0, 0.0))
+            .line_to(by / 2.0, height)
+            .line_to(-by / 2.0, height)
+            .close();
+
+        let scoop_mid = Workplane::yz()
+            .transformed(dvec3(0.0, height, 0.0), dvec3(0.0, 0.0, angle))
+            .sketch()
+            .move_to(-by / 2.0 - 2.0, -0.5)
+            .three_point_arc((0.0, -depth), (by / 2.0 + 2.0, -0.5))
+            .line_to(by / 2.0, height)
+            .line_to(-by / 2.0, height)
+            .close();
+
+        let scoop_left = Workplane::yz()
+            .transformed(dvec3(0.0, height, -bx / 2.0), dvec3(0.0, 0.0, angle))
+            .sketch()
+            .move_to(-by / 2.0 + 2.0, 0.0)
+            .three_point_arc((0.0, (-depth + 1.5).min(-0.1)), (by / 2.0 - 2.0, 0.0))
+            .line_to(by / 2.0, height)
+            .line_to(-by / 2.0, height)
+            .close();
+
+        Solid::loft([&scoop_right, &scoop_mid, &scoop_left].into_iter())
+    };
 
     let keycap = keycap.subtract(&scoop);
 
