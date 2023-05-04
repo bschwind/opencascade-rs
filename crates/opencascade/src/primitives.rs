@@ -4,18 +4,19 @@ use glam::{dvec3, DVec3};
 use opencascade_sys::ffi::{
     cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape, gp_Ax1_ctor, gp_Dir, gp_Dir_ctor,
     gp_Pnt, gp_Vec, map_shapes, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve,
-    new_indexed_map_of_shape, new_point, new_transform, new_vec, outer_wire, write_stl,
-    BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor,
-    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
-    BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
-    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
-    BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor,
-    BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value,
-    GC_MakeArcOfCircle_point_point_point, Message_ProgressRange_ctor, StlAPI_Writer_ctor,
-    TopAbs_ShapeEnum, TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned,
-    TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape,
-    TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned,
-    TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_face,
+    new_indexed_map_of_shape, new_point, new_transform, new_vec, outer_wire, shape_list_to_vector,
+    write_stl, BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor,
+    BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
+    BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt, BRepBuilderAPI_MakeFace_wire,
+    BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_Transform_ctor,
+    BRepFilletAPI_MakeFillet2d_add_fillet, BRepFilletAPI_MakeFillet2d_ctor,
+    BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
+    BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
+    Message_ProgressRange_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
+    TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
+    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
+    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
+    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge, TopoDS_cast_to_face,
     TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
 };
 use std::path::Path;
@@ -309,16 +310,27 @@ impl Solid {
         }
     }
 
-    pub fn subtract(&mut self, other: &Solid) -> Shape {
+    pub fn subtract(&mut self, other: &Solid) -> (Shape, Vec<Edge>) {
         let inner_shape = cast_solid_to_shape(&self.inner);
         let other_inner_shape = cast_solid_to_shape(&other.inner);
 
         let mut cut_operation = BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
 
+        let edge_list = cut_operation.pin_mut().SectionEdges();
+        let vec = shape_list_to_vector(edge_list);
+
+        let mut edges = vec![];
+        for shape in vec.iter() {
+            let edge = TopoDS_cast_to_edge(shape);
+            let inner = TopoDS_Edge_to_owned(edge);
+            let edge = Edge { inner };
+            edges.push(edge);
+        }
+
         let cut_shape = cut_operation.pin_mut().Shape();
         let inner = TopoDS_Shape_to_owned(cut_shape);
 
-        Shape { inner }
+        (Shape { inner }, edges)
     }
 
     pub fn union(&mut self, other: &Solid) -> Shape {
@@ -343,6 +355,27 @@ pub struct Shape {
 }
 
 impl Shape {
+    pub fn fillet_edge(&mut self, radius: f64, edge: &Edge) {
+        let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(&self.inner);
+        make_fillet.pin_mut().add_edge(radius, &edge.inner);
+
+        let filleted_shape = make_fillet.pin_mut().Shape();
+
+        self.inner = TopoDS_Shape_to_owned(filleted_shape);
+    }
+
+    pub fn fillet_edges<'a>(&mut self, radius: f64, edges: impl IntoIterator<Item = &'a Edge>) {
+        let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(&self.inner);
+
+        for edge in edges.into_iter() {
+            make_fillet.pin_mut().add_edge(radius, &edge.inner);
+        }
+
+        let filleted_shape = make_fillet.pin_mut().Shape();
+
+        self.inner = TopoDS_Shape_to_owned(filleted_shape);
+    }
+
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
         let mut stl_writer = StlAPI_Writer_ctor();
         let triangulation = BRepMesh_IncrementalMesh_ctor(&self.inner, 0.001);

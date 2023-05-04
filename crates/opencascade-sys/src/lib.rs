@@ -75,6 +75,12 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn new_list_of_shape() -> UniquePtr<TopTools_ListOfShape>;
         pub fn shape_list_append_face(list: Pin<&mut TopTools_ListOfShape>, face: &TopoDS_Face);
+        pub fn Size(self: &TopTools_ListOfShape) -> i32;
+
+        #[cxx_name = "list_to_vector"]
+        pub fn shape_list_to_vector(
+            list: &TopTools_ListOfShape,
+        ) -> UniquePtr<CxxVector<TopoDS_Shape>>;
 
         type TopTools_IndexedMapOfShape;
 
@@ -504,6 +510,11 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepAlgoAPI_Cut>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Cut) -> bool;
+        pub fn Generated<'a>(
+            self: Pin<&'a mut BRepAlgoAPI_Cut>,
+            shape: &'a TopoDS_Shape,
+        ) -> &'a TopTools_ListOfShape;
+        pub fn SectionEdges<'a>(self: Pin<&'a mut BRepAlgoAPI_Cut>) -> &'a TopTools_ListOfShape;
 
         type BRepAlgoAPI_Common;
 

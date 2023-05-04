@@ -12,8 +12,8 @@ pub fn main() {
     let convex = false;
     let keycap_unit_size_x = 1.0;
     let keycap_unit_size_y = 1.0;
-    let height = 13.0;
-    let angle = 7.0;
+    let height = 16.0;
+    let angle = 13.0;
     let depth: f64 = 2.8;
     let base = 18.2;
     let top = 13.2;
@@ -96,7 +96,8 @@ pub fn main() {
         Solid::loft([&scoop_right, &scoop_mid, &scoop_left].into_iter())
     };
 
-    let keycap = keycap.subtract(&scoop);
+    let (mut keycap, edges) = keycap.subtract(&scoop);
+    keycap.fillet_edges(0.6, &edges);
 
     keycap.write_stl("keycap.stl").unwrap();
 }

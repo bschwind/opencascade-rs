@@ -54,6 +54,11 @@ template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args
   return std::unique_ptr<T>(new T(args...));
 }
 
+// Generic List
+template <typename T> std::unique_ptr<std::vector<T>> list_to_vector(const NCollection_List<T> &list) {
+  return std::unique_ptr<std::vector<T>>(new std::vector<T>(list.begin(), list.end()));
+}
+
 // Handles
 typedef opencascade::handle<Standard_Type> HandleStandardType;
 typedef opencascade::handle<Geom_Curve> HandleGeomCurve;
