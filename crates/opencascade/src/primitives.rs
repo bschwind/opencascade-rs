@@ -274,6 +274,7 @@ impl Solid {
         Compound { _inner: inner }
     }
 
+    // TODO(bschwind) - Accept IntoIter instead of Iterator
     pub fn loft<'a>(wires: impl Iterator<Item = &'a Wire>) -> Self {
         let is_solid = true;
         let mut make_loft = BRepOffsetAPI_ThruSections_ctor(is_solid);
@@ -374,6 +375,28 @@ impl Shape {
         let filleted_shape = make_fillet.pin_mut().Shape();
 
         self.inner = TopoDS_Shape_to_owned(filleted_shape);
+    }
+
+    pub fn subtract(&mut self, other: &Solid) -> (Shape, Vec<Edge>) {
+        let other_inner_shape = cast_solid_to_shape(&other.inner);
+
+        let mut cut_operation = BRepAlgoAPI_Cut_ctor(&self.inner, other_inner_shape);
+
+        let edge_list = cut_operation.pin_mut().SectionEdges();
+        let vec = shape_list_to_vector(edge_list);
+
+        let mut edges = vec![];
+        for shape in vec.iter() {
+            let edge = TopoDS_cast_to_edge(shape);
+            let inner = TopoDS_Edge_to_owned(edge);
+            let edge = Edge { inner };
+            edges.push(edge);
+        }
+
+        let cut_shape = cut_operation.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(cut_shape);
+
+        (Shape { inner }, edges)
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {

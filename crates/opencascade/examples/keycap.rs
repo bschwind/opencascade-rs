@@ -15,6 +15,7 @@ pub fn main() {
     let height = 16.0;
     let angle = 13.0;
     let depth: f64 = 2.8;
+    let thickness: f64 = 1.5;
     let base = 18.2;
     let top = 13.2;
     let curve = 1.7;
@@ -98,6 +99,20 @@ pub fn main() {
 
     let (mut keycap, edges) = keycap.subtract(&scoop);
     keycap.fillet_edges(0.6, &edges);
+
+    let shell_bottom = Workplane::xy().rect(bx - thickness * 2.0, by - thickness * 2.0);
+
+    let shell_mid = Workplane::xy()
+        .transformed(dvec3(0.0, 0.0, height / 4.0), dvec3(0.0, 0.0, 0.0))
+        .rect(bx - thickness * 3.0, by - thickness * 3.0);
+
+    let shell_top = Workplane::xy()
+        .transformed(dvec3(0.0, 0.0, height - height / 4.0 - 4.5), dvec3(angle, 0.0, 0.0))
+        .rect(tx - thickness * 2.0 + 0.5, ty - thickness * 2.0 + 0.5);
+
+    let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top].into_iter());
+
+    let (keycap, _edges) = keycap.subtract(&shell);
 
     keycap.write_stl("keycap.stl").unwrap();
 }
