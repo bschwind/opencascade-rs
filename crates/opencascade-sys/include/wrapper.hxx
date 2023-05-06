@@ -29,9 +29,9 @@
 #include <GC_MakeArcOfCircle.hxx>
 #include <GC_MakeSegment.hxx>
 #include <GProp_GProps.hxx>
-#include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <Geom2d_Ellipse.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
