@@ -151,6 +151,10 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn new_vec(x: f64, y: f64, z: f64) -> UniquePtr<gp_Vec>;
 
+        pub fn X(self: &gp_Vec) -> f64;
+        pub fn Y(self: &gp_Vec) -> f64;
+        pub fn Z(self: &gp_Vec) -> f64;
+
         // Segments
         type GC_MakeSegment;
         type GCE2d_MakeSegment;
@@ -574,6 +578,16 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn gp_Ax2d_ctor(point: &gp_Pnt2d, dir: &gp_Dir2d) -> UniquePtr<gp_Ax2d>;
 
+        // Geometry Querying
+        type GeomAPI_ProjectPointOnSurf;
+
+        #[cxx_name = "construct_unique"]
+        pub fn GeomAPI_ProjectPointOnSurf_ctor(
+            origin: &gp_Pnt,
+            surface: &HandleGeomSurface,
+        ) -> UniquePtr<GeomAPI_ProjectPointOnSurf>;
+        pub fn LowerDistanceParameters(self: &GeomAPI_ProjectPointOnSurf, u: &mut f64, v: &mut f64);
+
         // Transforms
         type gp_Trsf;
 
@@ -710,6 +724,18 @@ pub mod ffi {
         pub fn BRepGProp_LinearProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
         pub fn BRepGProp_SurfaceProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
         pub fn BRepGProp_VolumeProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
+
+        type BRepGProp_Face;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepGProp_Face_ctor(face: &TopoDS_Face) -> UniquePtr<BRepGProp_Face>;
+        pub fn Normal(
+            self: &BRepGProp_Face,
+            u: f64,
+            v: f64,
+            point: Pin<&mut gp_Pnt>,
+            normal: Pin<&mut gp_Vec>,
+        );
 
         // BRepTools
         pub fn outer_wire(face: &TopoDS_Face) -> UniquePtr<TopoDS_Wire>;

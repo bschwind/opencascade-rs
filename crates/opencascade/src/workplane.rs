@@ -138,6 +138,16 @@ pub struct Workplane {
 }
 
 impl Workplane {
+    pub fn new(x_dir: DVec3, normal_dir: DVec3) -> Self {
+        Self {
+            transform: Plane::Custom {
+                x_dir: x_dir.normalize().into(),
+                normal_dir: normal_dir.normalize().into(),
+            }
+            .transform(),
+        }
+    }
+
     pub fn xy() -> Self {
         Self { transform: Plane::XY.transform() }
     }

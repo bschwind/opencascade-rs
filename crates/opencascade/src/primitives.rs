@@ -1,4 +1,4 @@
-use crate::{Error, TopoDS_Shape_to_owned};
+use crate::{workplane::Workplane, Error, TopoDS_Shape_to_owned};
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys::ffi::{
@@ -10,8 +10,10 @@ use opencascade_sys::ffi::{
     BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt, BRepBuilderAPI_MakeFace_wire,
     BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_Transform_ctor,
     BRepFilletAPI_MakeFillet2d_add_fillet, BRepFilletAPI_MakeFillet2d_ctor,
-    BRepFilletAPI_MakeFillet_ctor, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
-    BRepPrimAPI_MakePrism_ctor, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
+    BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor, BRepGProp_SurfaceProperties,
+    BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor,
+    BRep_Tool_Surface, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
+    GProp_GProps_CentreOfMass, GProp_GProps_ctor, GeomAPI_ProjectPointOnSurf_ctor,
     Message_ProgressRange_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
     TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
     TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
@@ -244,6 +246,55 @@ impl Face {
         let inner = TopoDS_Solid_to_owned(solid);
 
         Solid { inner }
+    }
+
+    pub fn center_of_mass(&self) -> DVec3 {
+        let mut props = GProp_GProps_ctor();
+
+        let inner_shape = cast_face_to_shape(&self.inner);
+        BRepGProp_SurfaceProperties(inner_shape, props.pin_mut());
+
+        let center = GProp_GProps_CentreOfMass(&props);
+
+        dvec3(center.X(), center.Y(), center.Z())
+    }
+
+    pub fn normal_at(&self, pos: DVec3) -> DVec3 {
+        let surface = BRep_Tool_Surface(&self.inner);
+        let projector = GeomAPI_ProjectPointOnSurf_ctor(&make_point(pos), &surface);
+        let mut u: f64 = 0.0;
+        let mut v: f64 = 0.0;
+
+        projector.LowerDistanceParameters(&mut u, &mut v);
+
+        let mut p = new_point(0.0, 0.0, 0.0);
+        let mut normal = new_vec(0.0, 1.0, 0.0);
+
+        let face = BRepGProp_Face_ctor(&self.inner);
+        face.Normal(u, v, p.pin_mut(), normal.pin_mut());
+
+        dvec3(normal.X(), normal.Y(), normal.Z())
+    }
+
+    pub fn normal_at_center(&self) -> DVec3 {
+        let center = self.center_of_mass();
+        self.normal_at(center)
+    }
+
+    pub fn workplane(&self) -> Workplane {
+        const NORMAL_DIFF_TOLERANCE: f64 = 0.0001;
+
+        let center = self.center_of_mass();
+        let normal = self.normal_at(center);
+        let mut x_dir = dvec3(0.0, 0.0, 1.0).cross(normal);
+
+        if x_dir.length() < NORMAL_DIFF_TOLERANCE {
+            // The normal of this face is too close to the same direction
+            // as the global Z axis. Use the global X axis for X instead.
+            x_dir = dvec3(1.0, 0.0, 0.0);
+        }
+
+        Workplane::new(x_dir, normal)
     }
 }
 
