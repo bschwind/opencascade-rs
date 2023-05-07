@@ -2,24 +2,25 @@ use crate::{workplane::Workplane, Error, TopoDS_Shape_to_owned};
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys::ffi::{
-    cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape, gp_Ax1_ctor, gp_Dir, gp_Dir_ctor,
-    gp_Pnt, gp_Vec, map_shapes, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve,
-    new_indexed_map_of_shape, new_point, new_transform, new_vec, outer_wire, shape_list_to_vector,
-    write_stl, BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor,
-    BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
-    BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt, BRepBuilderAPI_MakeFace_wire,
-    BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_Transform_ctor,
-    BRepFilletAPI_MakeFillet2d_add_fillet, BRepFilletAPI_MakeFillet2d_ctor,
-    BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor, BRepGProp_SurfaceProperties,
-    BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor,
-    BRep_Tool_Surface, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
-    GProp_GProps_CentreOfMass, GProp_GProps_ctor, GeomAPI_ProjectPointOnSurf_ctor,
-    Message_ProgressRange_ctor, StlAPI_Writer_ctor, TopAbs_ShapeEnum,
-    TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
-    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
-    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
-    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge, TopoDS_cast_to_face,
-    TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
+    cast_compound_to_shape, cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape,
+    gp_Ax1_ctor, gp_Dir, gp_Dir_ctor, gp_Pnt, gp_Vec, map_shapes,
+    new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape, new_point,
+    new_transform, new_vec, outer_wire, shape_list_to_vector, write_stl, BRepAdaptor_Curve_ctor,
+    BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor,
+    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
+    BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
+    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
+    BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
+    BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
+    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, GC_MakeArcOfCircle_Value,
+    GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
+    GeomAPI_ProjectPointOnSurf_ctor, Message_ProgressRange_ctor, ShapeUpgrade_UnifySameDomain_ctor,
+    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopLoc_Location_from_transform, TopoDS_Compound,
+    TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned,
+    TopoDS_Shape, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex,
+    TopoDS_Vertex_to_owned, TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound,
+    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex,
+    TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -296,6 +297,19 @@ impl Face {
 
         Workplane::new(x_dir, normal)
     }
+
+    pub fn union(&self, other: &Face) -> Compound {
+        let inner_shape = cast_face_to_shape(&self.inner);
+        let other_inner_shape = cast_face_to_shape(&other.inner);
+
+        let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
+
+        let fuse_shape = fuse_operation.pin_mut().Shape();
+        let compound = TopoDS_cast_to_compound(fuse_shape);
+        let inner = TopoDS_Compound_to_owned(compound);
+
+        Compound { inner }
+    }
 }
 
 pub struct Shell {
@@ -322,7 +336,7 @@ impl Solid {
         let compund = TopoDS_cast_to_compound(filleted_shape);
         let inner = TopoDS_Compound_to_owned(compund);
 
-        Compound { _inner: inner }
+        Compound { inner }
     }
 
     // TODO(bschwind) - Accept IntoIter instead of Iterator
@@ -385,7 +399,7 @@ impl Solid {
         (Shape { inner }, edges)
     }
 
-    pub fn union(&mut self, other: &Solid) -> Shape {
+    pub fn union(&self, other: &Solid) -> Shape {
         let inner_shape = cast_solid_to_shape(&self.inner);
         let other_inner_shape = cast_solid_to_shape(&other.inner);
 
@@ -399,7 +413,19 @@ impl Solid {
 }
 
 pub struct Compound {
-    _inner: UniquePtr<TopoDS_Compound>,
+    inner: UniquePtr<TopoDS_Compound>,
+}
+
+impl Compound {
+    pub fn clean(&mut self) -> Shape {
+        let inner = cast_compound_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner);
+        let mut shape = Shape { inner };
+
+        shape.clean();
+
+        shape
+    }
 }
 
 pub struct Shape {
@@ -464,5 +490,15 @@ impl Shape {
         } else {
             Err(Error::StlWriteFailed)
         }
+    }
+
+    pub fn clean(&mut self) {
+        let mut upgrader = ShapeUpgrade_UnifySameDomain_ctor(&self.inner, true, true, true);
+        upgrader.pin_mut().AllowInternalEdges(false);
+        upgrader.pin_mut().Build();
+
+        let upgraded_shape = upgrader.Shape();
+
+        self.inner = TopoDS_Shape_to_owned(upgraded_shape);
     }
 }

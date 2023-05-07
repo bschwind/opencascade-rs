@@ -22,6 +22,7 @@ pub fn main() {
     let bottom_fillet = 0.5;
     let top_fillet = 5.0;
     let tension = if convex { 0.4 } else { 1.0 };
+    let pos = false; // Use POS-style stabilizers
 
     let top_diff = base - top;
 
@@ -114,5 +115,51 @@ pub fn main() {
 
     let (keycap, _edges) = keycap.subtract(&shell);
 
+    let temp_face = Face::from_wire(&shell_top).workplane().rect(bx * 2.0, by * 2.0);
+    let temp_face = Face::from_wire(&temp_face);
+
+    let mut stem_points = vec![];
+    let mut ribh_points = vec![];
+    let mut ribv_points = vec![];
+
+    if pos {
+        let stem_num_x = keycap_unit_size_x.floor();
+        let stem_num_y = keycap_unit_size_y.floor();
+
+        let stem_start_x = round_digits(-KEYCAP_PITCH * (stem_num_x / 2.0) + KEYCAP_PITCH / 2.0, 6);
+        let stem_start_y = round_digits(-KEYCAP_PITCH * (stem_num_y / 2.0) + KEYCAP_PITCH / 2.0, 6);
+
+        for i in 0..(stem_num_y as usize) {
+            ribh_points.push((0.0, stem_start_y + i as f64 * KEYCAP_PITCH));
+
+            for l in 0..(stem_num_x as usize) {
+                if i == 0 {
+                    ribv_points.push((stem_start_x + l as f64 * KEYCAP_PITCH, 0.0));
+                }
+
+                stem_points.push((
+                    stem_start_x + l as f64 * KEYCAP_PITCH,
+                    stem_start_y + i as f64 * KEYCAP_PITCH,
+                ));
+            }
+        }
+    }
+
+    // for pos in stem_points {
+
+    // }
+
+    let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));
+    let r2 = Face::from_wire(&Workplane::xy().rect(1.27, 4.15));
+
+    let mut cross = r1.union(&r2);
+    cross.clean();
+    // let result = cross.extrude(dvec3(0.0, 0.0, 5.0));
+
     keycap.write_stl("keycap.stl").unwrap();
+}
+
+fn round_digits(num: f64, digits: i32) -> f64 {
+    let multiplier = 10.0f64.powi(digits);
+    (num * multiplier).round() / multiplier
 }

@@ -36,6 +36,7 @@
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
 #include <StlAPI_Writer.hxx>
 #include <TopAbs_ShapeEnum.hxx>
