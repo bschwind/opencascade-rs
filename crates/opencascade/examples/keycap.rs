@@ -116,7 +116,7 @@ pub fn main() {
     let (keycap, _edges) = keycap.subtract(&shell);
 
     let temp_face = Face::from_wire(&shell_top).workplane().rect(bx * 2.0, by * 2.0);
-    let temp_face = Face::from_wire(&temp_face);
+    let _temp_face = Face::from_wire(&temp_face);
 
     let mut stem_points = vec![];
     let mut ribh_points = vec![];
