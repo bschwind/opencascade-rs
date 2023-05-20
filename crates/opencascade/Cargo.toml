@@ -10,4 +10,5 @@ repository = "https://github.com/bschwind/opencascade-rs"
 [dependencies]
 cxx = "1"
 opencascade-sys = { version = "0.1", path = "../opencascade-sys" }
-glam = "0.22"
+glam = "0.24"
+thiserror = "1"

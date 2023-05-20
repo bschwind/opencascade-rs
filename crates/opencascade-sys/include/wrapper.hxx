@@ -1,16 +1,20 @@
 #include "rust/cxx.h"
+#include <BRepAdaptor_Curve.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Section.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepFeat_MakeCylindricalHole.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
+#include <BRepFilletAPI_MakeFillet2d.hxx>
 #include <BRepGProp.hxx>
+#include <BRepGProp_Face.hxx>
 #include <BRepLib.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
@@ -20,16 +24,19 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
+#include <BRepTools.hxx>
 #include <GCE2d_MakeSegment.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <GC_MakeSegment.hxx>
 #include <GProp_GProps.hxx>
 #include <Geom2d_Ellipse.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
+#include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
 #include <StlAPI_Writer.hxx>
 #include <TopAbs_ShapeEnum.hxx>
@@ -48,6 +55,11 @@
 // Generic template constructor
 template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
   return std::unique_ptr<T>(new T(args...));
+}
+
+// Generic List
+template <typename T> std::unique_ptr<std::vector<T>> list_to_vector(const NCollection_List<T> &list) {
+  return std::unique_ptr<std::vector<T>>(new std::vector<T>(list.begin(), list.end()));
 }
 
 // Handles
@@ -139,6 +151,10 @@ inline std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeArcOfCircle_Value(const GC
   return std::unique_ptr<HandleGeomTrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(arc.Value()));
 }
 
+inline std::unique_ptr<gp_Pnt> BRepAdaptor_Curve_value(const BRepAdaptor_Curve &curve, const Standard_Real U) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve.Value(U)));
+}
+
 // BRepLib
 inline bool BRepLibBuildCurves3d(const TopoDS_Shape &shape) { return BRepLib::BuildCurves3d(shape); }
 
@@ -181,12 +197,16 @@ inline std::unique_ptr<gp_Ax2d> gp_Ax2d_ctor(const gp_Pnt2d &point, const gp_Dir
 
 // Shape stuff
 inline const TopoDS_Vertex &TopoDS_cast_to_vertex(const TopoDS_Shape &shape) { return TopoDS::Vertex(shape); }
-
 inline const TopoDS_Wire &TopoDS_cast_to_wire(const TopoDS_Shape &shape) { return TopoDS::Wire(shape); }
-
 inline const TopoDS_Edge &TopoDS_cast_to_edge(const TopoDS_Shape &shape) { return TopoDS::Edge(shape); }
-
 inline const TopoDS_Face &TopoDS_cast_to_face(const TopoDS_Shape &shape) { return TopoDS::Face(shape); }
+inline const TopoDS_Solid &TopoDS_cast_to_solid(const TopoDS_Shape &shape) { return TopoDS::Solid(shape); }
+inline const TopoDS_Compound &TopoDS_cast_to_compound(const TopoDS_Shape &shape) { return TopoDS::Compound(shape); }
+
+inline const TopoDS_Shape &cast_wire_to_shape(const TopoDS_Wire &wire) { return wire; }
+inline const TopoDS_Shape &cast_face_to_shape(const TopoDS_Face &face) { return face; }
+inline const TopoDS_Shape &cast_solid_to_shape(const TopoDS_Solid &solid) { return solid; }
+inline const TopoDS_Shape &cast_compound_to_shape(const TopoDS_Compound &compound) { return compound; }
 
 // Compound shapes
 inline std::unique_ptr<TopoDS_Shape> TopoDS_Compound_as_shape(std::unique_ptr<TopoDS_Compound> compound) {
@@ -254,4 +274,21 @@ inline void BRepGProp_SurfaceProperties(const TopoDS_Shape &shape, GProp_GProps 
 
 inline void BRepGProp_VolumeProperties(const TopoDS_Shape &shape, GProp_GProps &props) {
   BRepGProp::VolumeProperties(shape, props);
+}
+
+// Fillets
+inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFilletAPI_MakeFillet2d &make_fillet,
+                                                                          const TopoDS_Vertex &vertex,
+                                                                          Standard_Real radius) {
+  return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddFillet(vertex, radius)));
+}
+
+// BRepTools
+inline std::unique_ptr<TopoDS_Wire> outer_wire(const TopoDS_Face &face) {
+  return std::unique_ptr<TopoDS_Wire>(new TopoDS_Wire(BRepTools::OuterWire(face)));
+}
+
+// Collections
+inline void map_shapes(const TopoDS_Shape &S, const TopAbs_ShapeEnum T, TopTools_IndexedMapOfShape &M) {
+  TopExp::MapShapes(S, T, M);
 }

@@ -11,8 +11,18 @@ use opencascade_sys::ffi::{
     TopExp_Explorer_ctor, TopoDS_Shape, TopoDS_Shape_to_owned, TopoDS_cast_to_edge,
 };
 use std::path::Path;
+use thiserror::Error;
 
 pub use glam;
+
+pub mod primitives;
+pub mod workplane;
+
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("Failed to write STL file")]
+    StlWriteFailed,
+}
 
 pub struct Shape {
     shape: UniquePtr<TopoDS_Shape>,
