@@ -15,7 +15,6 @@ use thiserror::Error;
 
 pub use glam;
 
-pub mod geometry;
 pub mod primitives;
 pub mod workplane;
 
