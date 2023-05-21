@@ -87,7 +87,7 @@ fn build_camera_matrix(width: u32, height: u32) -> Mat4 {
     let proj = Mat4::perspective_rh(std::f32::consts::PI / 2.0, aspect_ratio, 0.01, 1000.0);
 
     let view = Mat4::look_at_rh(
-        vec3(30.0, -30.0, 20.0), // Eye position
+        vec3(20.0, -30.0, 20.0), // Eye position
         vec3(0.0, 0.0, 0.0),     // Look-at target
         vec3(0.0, 0.0, 1.0),     // Up vector of the camera
     );
@@ -102,7 +102,7 @@ fn keycap() -> Shape {
     let keycap_unit_size_x = 1.0;
     let keycap_unit_size_y = 1.0;
     let height = 16.0;
-    let angle = 33.0;
+    let angle = 13.0;
     let depth: f64 = 2.8;
     let thickness: f64 = 1.5;
     let base = 18.2;
