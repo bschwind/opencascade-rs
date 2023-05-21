@@ -12,15 +12,16 @@ use opencascade_sys::ffi::{
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
     BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
     BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
-    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, GC_MakeArcOfCircle_Value,
+    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, GCPnts_TangentialDeflection,
+    GCPnts_TangentialDeflection_Value, GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
     GeomAPI_ProjectPointOnSurf_ctor, Message_ProgressRange_ctor, ShapeUpgrade_UnifySameDomain_ctor,
-    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopLoc_Location_from_transform, TopoDS_Compound,
-    TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned,
-    TopoDS_Shape, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex,
-    TopoDS_Vertex_to_owned, TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound,
-    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex,
-    TopoDS_cast_to_wire,
+    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer, TopExp_Explorer_ctor,
+    TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
+    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
+    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
+    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge, TopoDS_cast_to_face,
+    TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -91,7 +92,42 @@ impl Edge {
         dvec3(point.X(), point.Y(), point.Z())
     }
 
+    pub fn end_point(&self) -> DVec3 {
+        let curve = BRepAdaptor_Curve_ctor(&self.inner);
+        let last_param = curve.LastParameter();
+        let point = BRepAdaptor_Curve_value(&curve, last_param);
+
+        dvec3(point.X(), point.Y(), point.Z())
+    }
+
+    pub fn approximation_segments(&self) -> ApproximationSegmentIterator {
+        let adaptor_curve = BRepAdaptor_Curve_ctor(&self.inner);
+        let approximator = GCPnts_TangentialDeflection_ctor(&adaptor_curve, 0.1, 0.1);
+
+        ApproximationSegmentIterator { count: 1, approximator }
+    }
+
     pub fn tangent_arc(_p1: DVec3, _tangent: DVec3, _p3: DVec3) {}
+}
+
+pub struct ApproximationSegmentIterator {
+    count: usize,
+    approximator: UniquePtr<GCPnts_TangentialDeflection>,
+}
+
+impl Iterator for ApproximationSegmentIterator {
+    type Item = DVec3;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.count <= self.approximator.NbPoints() as usize {
+            let point = GCPnts_TangentialDeflection_Value(&self.approximator, self.count as i32);
+
+            self.count += 1;
+            Some(dvec3(point.X(), point.Y(), point.Z()))
+        } else {
+            None
+        }
+    }
 }
 
 pub struct Wire {
@@ -500,5 +536,32 @@ impl Shape {
         let upgraded_shape = upgrader.Shape();
 
         self.inner = TopoDS_Shape_to_owned(upgraded_shape);
+    }
+
+    pub fn edges(&self) -> EdgeIterator {
+        let explorer = TopExp_Explorer_ctor(&self.inner, TopAbs_ShapeEnum::TopAbs_EDGE);
+
+        EdgeIterator { explorer }
+    }
+}
+
+pub struct EdgeIterator {
+    explorer: UniquePtr<TopExp_Explorer>,
+}
+
+impl Iterator for EdgeIterator {
+    type Item = Edge;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.explorer.More() {
+            let edge = TopoDS_cast_to_edge(self.explorer.Current());
+            let inner = TopoDS_Edge_to_owned(edge);
+
+            self.explorer.pin_mut().Next();
+
+            Some(Edge { inner })
+        } else {
+            None
+        }
     }
 }

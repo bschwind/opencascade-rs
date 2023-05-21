@@ -2,6 +2,7 @@
 members = [
     "crates/opencascade",
     "crates/opencascade-sys",
+    "crates/viewer",
 ]
 
 resolver = "2"

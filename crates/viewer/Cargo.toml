@@ -1,0 +1,9 @@
+[package]
+name = "viewer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+opencascade = { version = "0.1", path = "../opencascade" }
+glam = "0.24"
+simple-game = { path = "../../../simple-game" }

@@ -336,6 +336,7 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn BRepAdaptor_Curve_ctor(edge: &TopoDS_Edge) -> UniquePtr<BRepAdaptor_Curve>;
         pub fn FirstParameter(self: &BRepAdaptor_Curve) -> f64;
+        pub fn LastParameter(self: &BRepAdaptor_Curve) -> f64;
         pub fn BRepAdaptor_Curve_value(curve: &BRepAdaptor_Curve, u: f64) -> UniquePtr<gp_Pnt>;
 
         // Primitives
@@ -710,6 +711,21 @@ pub mod ffi {
 
         type Poly_Triangle;
         pub fn Value(self: &Poly_Triangle, index: i32) -> i32;
+
+        // Edge approximation
+        type GCPnts_TangentialDeflection;
+
+        #[cxx_name = "construct_unique"]
+        pub fn GCPnts_TangentialDeflection_ctor(
+            curve: &BRepAdaptor_Curve,
+            angular_deflection: f64,
+            curvature_deflection: f64,
+        ) -> UniquePtr<GCPnts_TangentialDeflection>;
+        pub fn NbPoints(self: &GCPnts_TangentialDeflection) -> i32;
+        pub fn GCPnts_TangentialDeflection_Value(
+            approximator: &GCPnts_TangentialDeflection,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt>;
 
         // Shape Properties
         type GProp_GProps;
