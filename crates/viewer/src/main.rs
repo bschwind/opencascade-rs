@@ -7,7 +7,7 @@ use simple_game::{
     glam::{vec3, Mat4},
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
-        FrameEncoder, FullscreenQuad, GraphicsDevice, LineDrawer3, LineVertex3,
+        FrameEncoder, FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
     },
     util::FPSCounter,
     winit::window::Window,
@@ -18,7 +18,7 @@ struct ViewerApp {
     fullscreen_quad: FullscreenQuad,
     text_system: TextSystem,
     fps_counter: FPSCounter,
-    line_drawer: LineDrawer3,
+    line_drawer: LineDrawer,
     model_edges: Vec<Vec<LineVertex3>>,
 }
 
@@ -50,7 +50,7 @@ impl GameApp for ViewerApp {
             fullscreen_quad: FullscreenQuad::new(graphics_device),
             text_system: TextSystem::new(graphics_device),
             fps_counter: FPSCounter::new(),
-            line_drawer: LineDrawer3::new(graphics_device),
+            line_drawer: LineDrawer::new(graphics_device),
             model_edges,
         }
     }
