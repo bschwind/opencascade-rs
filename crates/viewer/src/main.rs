@@ -10,7 +10,11 @@ use simple_game::{
         FrameEncoder, FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
     },
     util::FPSCounter,
-    winit::window::Window,
+    winit::{
+        event::{KeyboardInput, VirtualKeyCode, WindowEvent},
+        event_loop::ControlFlow,
+        window::Window,
+    },
     GameApp,
 };
 
@@ -20,6 +24,8 @@ struct ViewerApp {
     fps_counter: FPSCounter,
     line_drawer: LineDrawer,
     model_edges: Vec<Vec<LineVertex3>>,
+    angle: f32,
+    scale: f32,
 }
 
 impl GameApp for ViewerApp {
@@ -52,6 +58,26 @@ impl GameApp for ViewerApp {
             fps_counter: FPSCounter::new(),
             line_drawer: LineDrawer::new(graphics_device),
             model_edges,
+            angle: 0.0,
+            scale: 1.0,
+        }
+    }
+
+    fn handle_window_event(&mut self, event: &WindowEvent, control_flow: &mut ControlFlow) {
+        match event {
+            WindowEvent::TouchpadRotate { delta, .. } => {
+                self.angle += delta * std::f32::consts::PI / 180.0;
+            },
+            WindowEvent::TouchpadMagnify { delta, .. } => {
+                self.scale += *delta as f32;
+            },
+            WindowEvent::KeyboardInput {
+                input: KeyboardInput { virtual_keycode: Some(VirtualKeyCode::Escape), .. },
+                ..
+            } => {
+                *control_flow = ControlFlow::Exit;
+            },
+            _ => {},
         }
     }
 
@@ -76,7 +102,11 @@ impl GameApp for ViewerApp {
         for segment_list in &self.model_edges {
             line_recorder.draw_round_line_strip(segment_list);
         }
-        line_recorder.end(frame_encoder, build_camera_matrix(width, height));
+
+        let transform = Mat4::from_rotation_z(self.angle)
+            * Mat4::from_scale(vec3(self.scale, self.scale, self.scale));
+
+        line_recorder.end(frame_encoder, build_camera_matrix(width, height), transform);
 
         self.fps_counter.tick();
     }
