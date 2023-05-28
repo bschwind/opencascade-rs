@@ -46,6 +46,9 @@ exclude = [
     "OCCT/tools/*",
 ]
 
+[features]
+dynamic = []
+
 [dependencies]
 cxx = "1"
 

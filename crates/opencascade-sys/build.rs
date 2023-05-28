@@ -1,8 +1,68 @@
+const LIBS: [&'static str; 18] = [
+    "TKMath",
+    "TKMath",
+    "TKernel",
+    "TKGeomBase",
+    "TKG2d",
+    "TKG3d",
+    "TKTopAlgo",
+    "TKGeomAlgo",
+    "TKGeomBase",
+    "TKBRep",
+    "TKPrim",
+    "TKSTL",
+    "TKMesh",
+    "TKShHealing",
+    "TKFillet",
+    "TKBool",
+    "TKBO",
+    "TKOffset",
+];
+
 fn main() {
     let target = std::env::var("TARGET").expect("No TARGET environment variable defined");
     let is_windows = target.to_lowercase().contains("windows");
     let is_windows_gnu = target.to_lowercase().contains("windows-gnu");
+    let is_dynamic = std::env::var("CARGO_FEATURE_DYNAMIC").is_ok();
 
+    if is_windows {
+        println!("cargo:rustc-link-lib=dylib=user32");
+    }
+
+    let mut build = cxx_build::bridge("src/lib.rs");
+
+    if is_windows_gnu {
+        build.define("OCC_CONVERT_SIGNALS", "TRUE");
+    }
+
+    if !is_dynamic {
+        let opencascade_include = build_opencascade();
+        build.include(opencascade_include);
+
+        for lib in LIBS {
+            println!("cargo:rustc-link-lib=static={lib}");
+        }
+    } else {
+        for lib in LIBS {
+            println!("cargo:rustc-link-lib=dylib={lib}");
+        }
+        build.include("/usr/include/opencascade");
+    }
+
+    build
+        .cpp(true)
+        .flag_if_supported("-std=c++11")
+        .define("_USE_MATH_DEFINES", "TRUE")
+        .include("include")
+        .compile("wrapper");
+
+    println!("cargo:rustc-link-lib=static=wrapper");
+
+    println!("cargo:rerun-if-changed=src/lib.rs");
+    println!("cargo:rerun-if-changed=include/wrapper.hxx");
+}
+
+fn build_opencascade() -> String {
     let dst = cmake::Config::new("OCCT")
         .define("BUILD_LIBRARY_TYPE", "Static")
         .define("BUILD_MODULE_Draw", "FALSE")
@@ -21,45 +81,6 @@ fn main() {
         .build();
 
     println!("cargo:rustc-link-search=native={}", dst.join("lib").display());
-    println!("cargo:rustc-link-lib=static=TKMath");
-    println!("cargo:rustc-link-lib=static=TKernel");
-    println!("cargo:rustc-link-lib=static=TKFeat");
-    println!("cargo:rustc-link-lib=static=TKGeomBase");
-    println!("cargo:rustc-link-lib=static=TKG2d");
-    println!("cargo:rustc-link-lib=static=TKG3d");
-    println!("cargo:rustc-link-lib=static=TKTopAlgo");
-    println!("cargo:rustc-link-lib=static=TKGeomAlgo");
-    println!("cargo:rustc-link-lib=static=TKGeomBase");
-    println!("cargo:rustc-link-lib=static=TKBRep");
-    println!("cargo:rustc-link-lib=static=TKPrim");
-    println!("cargo:rustc-link-lib=static=TKSTL");
-    println!("cargo:rustc-link-lib=static=TKMesh");
-    println!("cargo:rustc-link-lib=static=TKShHealing");
-    println!("cargo:rustc-link-lib=static=TKFillet");
-    println!("cargo:rustc-link-lib=static=TKBool");
-    println!("cargo:rustc-link-lib=static=TKBO");
-    println!("cargo:rustc-link-lib=static=TKOffset");
 
-    if is_windows {
-        println!("cargo:rustc-link-lib=dylib=user32");
-    }
-
-    let mut build = cxx_build::bridge("src/lib.rs");
-
-    if is_windows_gnu {
-        build.define("OCC_CONVERT_SIGNALS", "TRUE");
-    }
-
-    build
-        .cpp(true)
-        .flag_if_supported("-std=c++11")
-        .define("_USE_MATH_DEFINES", "TRUE")
-        .include(format!("{}", dst.join("include").display()))
-        .include("include")
-        .compile("wrapper");
-
-    println!("cargo:rustc-link-lib=static=wrapper");
-
-    println!("cargo:rerun-if-changed=src/lib.rs");
-    println!("cargo:rerun-if-changed=include/wrapper.hxx");
+    format!("{}", dst.join("include").display())
 }
