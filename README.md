@@ -46,6 +46,19 @@ There are other benefits:
 * The `OCCT` codebase is included as a git submodule. Clone the repo with the `--recursive` flag, or use `git submodule update --init` to fetch the submodule.
 * `cargo build --release`
 
+### Using pre-installed OpenCASCADE
+
+If you have `OCCT` library already installed via package manager you may use it to save huge amout of building time. By default `builtin` feature is enabled which means compiling OCCT from embedded sources. You can disable it via command line or using manifest:
+
+`cargo build --no-default-features`
+
+```
+[dependencies]
+opencascade = { version = "0.1", default-features = false, features = [] }
+```
+
+NOTE: If you have installed `OCCT` manually you may need specify path to it via `DEP_OCCT_ROOT` environment variable. Specified root directory usually expected contains `include` and `lib` directories.
+
 ## Run Examples
 
 * `cargo run --release --example bottle`

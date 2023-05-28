@@ -12,3 +12,7 @@ cxx = "1"
 opencascade-sys = { version = "0.2", path = "../opencascade-sys" }
 glam = { version = "0.23", features = ["bytemuck"] }
 thiserror = "1"
+
+[features]
+default = ["builtin"]
+builtin = ["opencascade-sys/builtin"]
