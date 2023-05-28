@@ -1,4 +1,4 @@
-const LIBS: [&'static str; 18] = [
+const LIBS: [&str; 18] = [
     "TKMath",
     "TKMath",
     "TKernel",
