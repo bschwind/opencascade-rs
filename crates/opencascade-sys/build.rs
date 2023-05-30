@@ -1,7 +1,7 @@
 const LIBS: [&str; 18] = [
     "TKMath",
-    "TKMath",
     "TKernel",
+    "TKFeat",
     "TKGeomBase",
     "TKG2d",
     "TKG3d",
