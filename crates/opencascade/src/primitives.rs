@@ -11,12 +11,14 @@ use opencascade_sys::ffi::{
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
     BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
-    BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
-    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, GCPnts_TangentialDeflection,
-    GCPnts_TangentialDeflection_Value, GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
+    BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor,
+    BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
+    BRep_Tool_Triangulation, GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
+    GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
-    GeomAPI_ProjectPointOnSurf_ctor, Message_ProgressRange_ctor, ShapeUpgrade_UnifySameDomain_ctor,
-    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer, TopExp_Explorer_ctor,
+    GeomAPI_ProjectPointOnSurf_ctor, Handle_Poly_Triangulation_Get, Message_ProgressRange_ctor,
+    Poly_Triangulation_Node, ShapeUpgrade_UnifySameDomain_ctor, StlAPI_Writer_ctor,
+    TopAbs_ShapeEnum, TopExp_Explorer, TopExp_Explorer_ctor, TopLoc_Location_ctor,
     TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
     TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
     TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
@@ -538,11 +540,83 @@ impl Shape {
         self.inner = TopoDS_Shape_to_owned(upgraded_shape);
     }
 
+    pub fn mesh(&self) -> Mesh {
+        let mesher = Mesher::new(self);
+        mesher.mesh()
+    }
+
     pub fn edges(&self) -> EdgeIterator {
         let explorer = TopExp_Explorer_ctor(&self.inner, TopAbs_ShapeEnum::TopAbs_EDGE);
 
         EdgeIterator { explorer }
     }
+
+    pub fn faces(&self) -> FaceIterator {
+        let explorer = TopExp_Explorer_ctor(&self.inner, TopAbs_ShapeEnum::TopAbs_FACE);
+
+        FaceIterator { explorer }
+    }
+}
+
+struct Mesher {
+    inner: UniquePtr<BRepMesh_IncrementalMesh>,
+}
+
+impl Mesher {
+    fn new(shape: &Shape) -> Self {
+        let inner = BRepMesh_IncrementalMesh_ctor(&shape.inner, 0.01);
+
+        if !inner.IsDone() {
+            // TODO(bschwind) - Add proper Error type and return Result.
+            panic!("Call to BRepMesh_IncrementalMesh_ctor failed");
+        }
+
+        Self { inner }
+    }
+
+    fn mesh(mut self) -> Mesh {
+        let mut vertices = vec![];
+        let mut indices = vec![];
+
+        let triangulated_shape = TopoDS_Shape_to_owned(self.inner.pin_mut().Shape());
+
+        let triangulated_shape = Shape { inner: triangulated_shape };
+
+        for face in triangulated_shape.faces() {
+            let mut location = TopLoc_Location_ctor();
+
+            let triangulation_handle = BRep_Tool_Triangulation(&face.inner, location.pin_mut());
+
+            let Ok(triangulation) = Handle_Poly_Triangulation_Get(&triangulation_handle) else {
+                // TODO(bschwind) - Do better error handling, use Results.
+                println!("Encountered a face with no triangulation");
+                continue;
+            };
+
+            let index_offset = vertices.len();
+
+            for i in 1..=triangulation.NbNodes() {
+                let point = Poly_Triangulation_Node(triangulation, i);
+                vertices.push(dvec3(point.X(), point.Y(), point.Z()));
+            }
+            for i in 1..=triangulation.NbTriangles() {
+                let triangle = triangulation.Triangle(i);
+
+                indices.push(index_offset + triangle.Value(1) as usize - 1);
+                indices.push(index_offset + triangle.Value(2) as usize - 1);
+                indices.push(index_offset + triangle.Value(3) as usize - 1);
+            }
+        }
+
+        Mesh { vertices, indices }
+    }
+}
+
+#[allow(unused)]
+#[derive(Debug)]
+pub struct Mesh {
+    vertices: Vec<DVec3>,
+    indices: Vec<usize>,
 }
 
 pub struct EdgeIterator {
@@ -560,6 +634,27 @@ impl Iterator for EdgeIterator {
             self.explorer.pin_mut().Next();
 
             Some(Edge { inner })
+        } else {
+            None
+        }
+    }
+}
+
+pub struct FaceIterator {
+    explorer: UniquePtr<TopExp_Explorer>,
+}
+
+impl Iterator for FaceIterator {
+    type Item = Face;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.explorer.More() {
+            let face = TopoDS_cast_to_face(self.explorer.Current());
+            let inner = TopoDS_Face_to_owned(face);
+
+            self.explorer.pin_mut().Next();
+
+            Some(Face { inner })
         } else {
             None
         }
