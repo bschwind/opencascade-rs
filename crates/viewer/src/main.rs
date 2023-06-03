@@ -1,3 +1,4 @@
+use crate::surface_drawer::{CadMesh, SurfaceDrawer};
 use glam::dvec3;
 use opencascade::{
     primitives::{Face, Shape, Solid},
@@ -18,12 +19,16 @@ use simple_game::{
     GameApp,
 };
 
+mod surface_drawer;
+
 struct ViewerApp {
     fullscreen_quad: FullscreenQuad,
     text_system: TextSystem,
     fps_counter: FPSCounter,
     line_drawer: LineDrawer,
+    surface_drawer: SurfaceDrawer,
     model_edges: Vec<Vec<LineVertex3>>,
+    cad_mesh: CadMesh,
     angle: f32,
     scale: f32,
 }
@@ -35,6 +40,9 @@ impl GameApp for ViewerApp {
 
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
         let keycap = keycap();
+
+        let mesh = keycap.mesh();
+        let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device);
 
         let mut model_edges = vec![];
 
@@ -57,7 +65,9 @@ impl GameApp for ViewerApp {
             text_system: TextSystem::new(graphics_device),
             fps_counter: FPSCounter::new(),
             line_drawer: LineDrawer::new(graphics_device),
+            surface_drawer: SurfaceDrawer::new(graphics_device),
             model_edges,
+            cad_mesh,
             angle: 0.0,
             scale: 1.0,
         }
@@ -66,7 +76,7 @@ impl GameApp for ViewerApp {
     fn handle_window_event(&mut self, event: &WindowEvent, control_flow: &mut ControlFlow) {
         match event {
             WindowEvent::TouchpadRotate { delta, .. } => {
-                self.angle += delta * std::f32::consts::PI / 180.0;
+                self.angle += 2.0 * delta * std::f32::consts::PI / 180.0;
             },
             WindowEvent::TouchpadMagnify { delta, .. } => {
                 self.scale += *delta as f32;
@@ -98,13 +108,16 @@ impl GameApp for ViewerApp {
             frame_encoder,
         );
 
+        let camera_matrix = build_camera_matrix(width, height);
+        let transform = Mat4::from_rotation_z(self.angle)
+            * Mat4::from_scale(vec3(self.scale, self.scale, self.scale));
+
+        self.surface_drawer.render(frame_encoder, &self.cad_mesh, camera_matrix, transform);
+
         let mut line_recorder = self.line_drawer.begin();
         for segment_list in &self.model_edges {
             line_recorder.draw_round_line_strip(segment_list);
         }
-
-        let transform = Mat4::from_rotation_z(self.angle)
-            * Mat4::from_scale(vec3(self.scale, self.scale, self.scale));
 
         line_recorder.end(frame_encoder, build_camera_matrix(width, height), transform);
 

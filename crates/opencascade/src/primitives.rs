@@ -18,12 +18,13 @@ use opencascade_sys::ffi::{
     GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
     GeomAPI_ProjectPointOnSurf_ctor, Handle_Poly_Triangulation_Get, Message_ProgressRange_ctor,
     Poly_Triangulation_Node, ShapeUpgrade_UnifySameDomain_ctor, StlAPI_Writer_ctor,
-    TopAbs_ShapeEnum, TopExp_Explorer, TopExp_Explorer_ctor, TopLoc_Location_ctor,
-    TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
-    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
-    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
-    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge, TopoDS_cast_to_face,
-    TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
+    TopAbs_Orientation, TopAbs_ShapeEnum, TopExp_Explorer, TopExp_Explorer_ctor,
+    TopLoc_Location_ctor, TopLoc_Location_from_transform, TopoDS_Compound,
+    TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned,
+    TopoDS_Shape, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex,
+    TopoDS_Vertex_to_owned, TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound,
+    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex,
+    TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -348,6 +349,32 @@ impl Face {
 
         Compound { inner }
     }
+
+    pub fn orientation(&self) -> FaceOrientation {
+        FaceOrientation::from(self.inner.Orientation())
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum FaceOrientation {
+    Forward,
+    Reversed,
+    Internal,
+    External,
+}
+
+impl From<TopAbs_Orientation> for FaceOrientation {
+    fn from(orientation: TopAbs_Orientation) -> Self {
+        match orientation {
+            TopAbs_Orientation::TopAbs_FORWARD => Self::Forward,
+            TopAbs_Orientation::TopAbs_REVERSED => Self::Reversed,
+            TopAbs_Orientation::TopAbs_INTERNAL => Self::Internal,
+            TopAbs_Orientation::TopAbs_EXTERNAL => Self::External,
+            TopAbs_Orientation { repr } => {
+                panic!("TopAbs_Orientation had an unrepresentable value: {repr}")
+            },
+        }
+    }
 }
 
 pub struct Shell {
@@ -602,9 +629,15 @@ impl Mesher {
             for i in 1..=triangulation.NbTriangles() {
                 let triangle = triangulation.Triangle(i);
 
-                indices.push(index_offset + triangle.Value(1) as usize - 1);
-                indices.push(index_offset + triangle.Value(2) as usize - 1);
-                indices.push(index_offset + triangle.Value(3) as usize - 1);
+                if face.orientation() == FaceOrientation::Forward {
+                    indices.push(index_offset + triangle.Value(1) as usize - 1);
+                    indices.push(index_offset + triangle.Value(2) as usize - 1);
+                    indices.push(index_offset + triangle.Value(3) as usize - 1);
+                } else {
+                    indices.push(index_offset + triangle.Value(3) as usize - 1);
+                    indices.push(index_offset + triangle.Value(2) as usize - 1);
+                    indices.push(index_offset + triangle.Value(1) as usize - 1);
+                }
             }
         }
 
@@ -615,8 +648,8 @@ impl Mesher {
 #[allow(unused)]
 #[derive(Debug)]
 pub struct Mesh {
-    vertices: Vec<DVec3>,
-    indices: Vec<usize>,
+    pub vertices: Vec<DVec3>,
+    pub indices: Vec<usize>,
 }
 
 pub struct EdgeIterator {
