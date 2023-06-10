@@ -1,22 +1,21 @@
 use crate::surface_drawer::{CadMesh, SurfaceDrawer};
-use glam::dvec3;
+use glam::{dvec3, vec3, Mat4};
 use opencascade::{
     primitives::{Face, Shape, Solid},
     workplane::Workplane,
 };
 use simple_game::{
-    glam::{vec3, Mat4},
     graphics::{
-        text::{AxisAlign, StyledText, TextAlignment, TextSystem},
-        FrameEncoder, FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
+        text::{AxisAlign, StyledText, TextAlignment, TextSystem}, FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
     },
     util::FPSCounter,
-    winit::{
-        event::{KeyboardInput, VirtualKeyCode, WindowEvent},
-        event_loop::ControlFlow,
-        window::Window,
-    },
     GameApp,
+};
+use smaa::{SmaaMode, SmaaTarget};
+use winit::{
+    event::{KeyboardInput, VirtualKeyCode, WindowEvent},
+    event_loop::ControlFlow,
+    window::Window,
 };
 
 mod surface_drawer;
@@ -27,6 +26,7 @@ struct ViewerApp {
     fps_counter: FPSCounter,
     line_drawer: LineDrawer,
     surface_drawer: SurfaceDrawer,
+    smaa_target: SmaaTarget,
     model_edges: Vec<Vec<LineVertex3>>,
     cad_mesh: CadMesh,
     angle: f32,
@@ -36,6 +36,10 @@ struct ViewerApp {
 impl GameApp for ViewerApp {
     fn window_title() -> &'static str {
         "Viewer"
+    }
+
+    fn desired_fps() -> usize {
+        120
     }
 
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
@@ -60,17 +64,45 @@ impl GameApp for ViewerApp {
             model_edges.push(segments);
         }
 
+        // Create SMAA target
+        let (width, height) = graphics_device.surface_dimensions();
+        let device = graphics_device.device();
+        let queue = graphics_device.queue();
+        let swapchain_format = graphics_device.surface_config().format;
+
+        let smaa_target =
+            SmaaTarget::new(device, queue, width, height, swapchain_format, SmaaMode::Smaa1X);
+
+        let surface_texture_format = graphics_device.surface_texture_format();
+
         Self {
-            fullscreen_quad: FullscreenQuad::new(graphics_device),
-            text_system: TextSystem::new(graphics_device),
+            fullscreen_quad: FullscreenQuad::new(device, surface_texture_format),
+            text_system: TextSystem::new(
+                device,
+                surface_texture_format,
+                width,
+                height,
+            ),
             fps_counter: FPSCounter::new(),
-            line_drawer: LineDrawer::new(graphics_device),
-            surface_drawer: SurfaceDrawer::new(graphics_device),
+            line_drawer: LineDrawer::new(
+                device,
+                surface_texture_format,
+                width,
+                height,
+            ),
+            surface_drawer: SurfaceDrawer::new(device, surface_texture_format),
+            smaa_target,
             model_edges,
             cad_mesh,
             angle: 0.0,
             scale: 1.0,
         }
+    }
+
+    fn resize(&mut self, graphics_device: &mut GraphicsDevice, width: u32, height: u32) {
+        self.text_system.resize(width, height);
+        self.line_drawer.resize(width, height);
+        self.smaa_target.resize(graphics_device.device(), width, height);
     }
 
     fn handle_window_event(&mut self, event: &WindowEvent, control_flow: &mut ControlFlow) {
@@ -93,10 +125,44 @@ impl GameApp for ViewerApp {
 
     fn tick(&mut self, _dt: f32) {}
 
-    fn render(&mut self, frame_encoder: &mut FrameEncoder, _window: &Window) {
+    fn render(&mut self, graphics_device: &mut GraphicsDevice, _window: &Window) {
+        let mut frame_encoder = graphics_device.begin_frame();
         let (width, height) = frame_encoder.surface_dimensions();
 
-        self.fullscreen_quad.render(frame_encoder);
+        let smaa_render_target = self.smaa_target.start_frame(
+            graphics_device.device(),
+            graphics_device.queue(),
+            &frame_encoder.backbuffer_view,
+        );
+
+        self.fullscreen_quad.render(&mut frame_encoder.encoder, &smaa_render_target);
+
+        let camera_matrix = build_camera_matrix(width, height);
+        let transform = Mat4::from_rotation_z(self.angle)
+            * Mat4::from_scale(vec3(self.scale, self.scale, self.scale));
+
+        self.surface_drawer.render(
+            &mut frame_encoder.encoder,
+            &smaa_render_target,
+            graphics_device.queue(),
+            &self.cad_mesh,
+            camera_matrix,
+            transform,
+        );
+
+        let mut line_recorder = self.line_drawer.begin();
+        for segment_list in &self.model_edges {
+            line_recorder.draw_round_line_strip(segment_list);
+        }
+
+        line_recorder.end(
+            &mut frame_encoder.encoder,
+            &smaa_render_target,
+            graphics_device.queue(),
+            build_camera_matrix(width, height),
+            transform,
+        );
+
         self.text_system.render_horizontal(
             TextAlignment {
                 x: AxisAlign::Start(10),
@@ -105,21 +171,15 @@ impl GameApp for ViewerApp {
                 max_height: None,
             },
             &[StyledText::default_styling(&format!("FPS: {}", self.fps_counter.fps()))],
-            frame_encoder,
+            &mut frame_encoder.encoder,
+            &smaa_render_target,
+            graphics_device.queue(),
         );
 
-        let camera_matrix = build_camera_matrix(width, height);
-        let transform = Mat4::from_rotation_z(self.angle)
-            * Mat4::from_scale(vec3(self.scale, self.scale, self.scale));
+        graphics_device.queue().submit(Some(frame_encoder.encoder.finish()));
 
-        self.surface_drawer.render(frame_encoder, &self.cad_mesh, camera_matrix, transform);
-
-        let mut line_recorder = self.line_drawer.begin();
-        for segment_list in &self.model_edges {
-            line_recorder.draw_round_line_strip(segment_list);
-        }
-
-        line_recorder.end(frame_encoder, build_camera_matrix(width, height), transform);
+        smaa_render_target.resolve();
+        frame_encoder.frame.present();
 
         self.fps_counter.tick();
     }

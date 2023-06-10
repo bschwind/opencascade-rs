@@ -1,11 +1,8 @@
-// use glam::Mat4;
 use bytemuck::{Pod, Zeroable};
+use glam::Mat4;
 use opencascade::primitives::Mesh;
-use simple_game::{
-    glam::Mat4,
-    graphics::{FrameEncoder, GraphicsDevice},
-    wgpu::{self, util::DeviceExt, Buffer, RenderPipeline},
-};
+use simple_game::graphics::{FrameEncoder, GraphicsDevice};
+use wgpu::{self, util::DeviceExt, Buffer, RenderPipeline};
 
 pub struct SurfaceDrawer {
     vertex_uniform: wgpu::Buffer,
@@ -14,9 +11,7 @@ pub struct SurfaceDrawer {
 }
 
 impl SurfaceDrawer {
-    pub fn new(graphics_device: &GraphicsDevice) -> Self {
-        let device = graphics_device.device();
-
+    pub fn new(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> Self {
         // Uniform buffer
         let cad_mesh_uniforms = CadMeshUniforms::default();
 
@@ -57,7 +52,8 @@ impl SurfaceDrawer {
             ],
         }];
 
-        let draw_shader = graphics_device.load_wgsl_shader(include_str!("../shaders/surface.wgsl"));
+        let draw_shader =
+            GraphicsDevice::load_wgsl_shader(device, include_str!("../shaders/surface.wgsl"));
 
         let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("CadMesh render pipeline"),
@@ -86,7 +82,7 @@ impl SurfaceDrawer {
                 module: &draw_shader,
                 entry_point: "fs_main",
                 targets: &[Some(wgpu::ColorTargetState {
-                    format: graphics_device.surface_config().format,
+                    format: target_format,
                     blend: Some(wgpu::BlendState {
                         color: wgpu::BlendComponent::REPLACE,
                         alpha: wgpu::BlendComponent::REPLACE,
@@ -111,23 +107,21 @@ impl SurfaceDrawer {
 
     pub fn render(
         &self,
-        frame_encoder: &mut FrameEncoder,
+        encoder: &mut wgpu::CommandEncoder,
+        render_target: &wgpu::TextureView,
+        queue: &wgpu::Queue,
         cad_mesh: &CadMesh,
         camera_matrix: Mat4,
         transform: Mat4,
     ) {
-        let queue = frame_encoder.queue();
-
         let uniforms = CadMeshUniforms { proj: camera_matrix, transform };
 
         queue.write_buffer(&self.vertex_uniform, 0, bytemuck::bytes_of(&uniforms));
 
-        let encoder = &mut frame_encoder.encoder;
-
         let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("CadMesh render pass"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &frame_encoder.backbuffer_view,
+                view: render_target,
                 resolve_target: None,
                 ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: true },
             })],

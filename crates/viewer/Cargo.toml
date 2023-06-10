@@ -6,8 +6,11 @@ edition = "2021"
 [dependencies]
 bytemuck = { version = "1", features = ["derive"] }
 opencascade = { version = "0.1", path = "../opencascade" }
-glam = { version = "0.24", features = ["bytemuck"] } # Tracks the version in bevy
+glam = { version = "0.23", features = ["bytemuck"] }
 simple-game = { path = "../../../simple-game" }
+smaa = { git = "https://github.com/bschwind/smaa-rs.git", branch = "update-deps" }
+wgpu = "0.16"
+winit = "0.28"
 
 [build-dependencies]
 naga = { version = "0.12", features = ["validate", "wgsl-in"] }
