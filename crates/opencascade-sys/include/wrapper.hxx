@@ -26,9 +26,9 @@
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepTools.hxx>
 #include <GCE2d_MakeSegment.hxx>
+#include <GCPnts_TangentialDeflection.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <GC_MakeSegment.hxx>
-#include <GCPnts_TangentialDeflection.hxx>
 #include <GProp_GProps.hxx>
 #include <Geom2d_Ellipse.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
@@ -94,7 +94,8 @@ inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve &curv
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
 }
 
-inline std::unique_ptr<gp_Pnt> GCPnts_TangentialDeflection_Value(const GCPnts_TangentialDeflection &approximator, Standard_Integer i) {
+inline std::unique_ptr<gp_Pnt> GCPnts_TangentialDeflection_Value(const GCPnts_TangentialDeflection &approximator,
+                                                                 Standard_Integer i) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(approximator.Value(i)));
 }
 
@@ -272,9 +273,8 @@ inline std::unique_ptr<gp_Pnt2d> Poly_Triangulation_UV(const Poly_Triangulation 
   return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(triangulation.UVNode(index)));
 }
 
-inline void triangulated_shape_normal(const TopoDS_Face& face,
-                                      Poly_Connect& poly_connect,
-                                      TColgp_Array1OfDir& normals) {
+inline void triangulated_shape_normal(const TopoDS_Face &face, Poly_Connect &poly_connect,
+                                      TColgp_Array1OfDir &normals) {
   StdPrs_ToolTriangulatedShape::Normal(face, poly_connect, normals);
 }
 
