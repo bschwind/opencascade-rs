@@ -264,6 +264,11 @@ inline std::unique_ptr<gp_Pnt> Poly_Triangulation_Node(const Poly_Triangulation 
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(triangulation.Node(index)));
 }
 
+inline std::unique_ptr<gp_Pnt2d> Poly_Triangulation_UV(const Poly_Triangulation &triangulation,
+                                                       const Standard_Integer index) {
+  return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(triangulation.UVNode(index)));
+}
+
 // Shape Properties
 inline std::unique_ptr<gp_Pnt> GProp_GProps_CentreOfMass(const GProp_GProps &props) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(props.CentreOfMass()));

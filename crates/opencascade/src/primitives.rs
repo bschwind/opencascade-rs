@@ -1,6 +1,6 @@
 use crate::{workplane::Workplane, Error, TopoDS_Shape_to_owned};
 use cxx::UniquePtr;
-use glam::{dvec3, DVec3};
+use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi::{
     cast_compound_to_shape, cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape,
     gp_Ax1_ctor, gp_Dir, gp_Dir_ctor, gp_Pnt, gp_Vec, map_shapes,
@@ -17,9 +17,9 @@ use opencascade_sys::ffi::{
     GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
     GeomAPI_ProjectPointOnSurf_ctor, Handle_Poly_Triangulation_Get, Message_ProgressRange_ctor,
-    Poly_Triangulation_Node, ShapeUpgrade_UnifySameDomain_ctor, StlAPI_Writer_ctor,
-    TopAbs_Orientation, TopAbs_ShapeEnum, TopExp_Explorer, TopExp_Explorer_ctor,
-    TopLoc_Location_ctor, TopLoc_Location_from_transform, TopoDS_Compound,
+    Poly_Triangulation_Node, Poly_Triangulation_UV, ShapeUpgrade_UnifySameDomain_ctor,
+    StlAPI_Writer_ctor, TopAbs_Orientation, TopAbs_ShapeEnum, TopExp_Explorer,
+    TopExp_Explorer_ctor, TopLoc_Location_ctor, TopLoc_Location_from_transform, TopoDS_Compound,
     TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned,
     TopoDS_Shape, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex,
     TopoDS_Vertex_to_owned, TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound,
@@ -386,6 +386,13 @@ pub struct Solid {
 }
 
 impl Solid {
+    pub fn to_shape(self) -> Shape {
+        let inner_shape = cast_solid_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner_shape);
+
+        Shape { inner }
+    }
+
     // TODO(bschwind) - Do some cool stuff from this link:
     // https://neweopencascade.wordpress.com/2018/10/17/lets-talk-about-fillets/
     // Key takeaway: Use the `SectionEdges` function to retrieve edges that were
@@ -603,10 +610,10 @@ impl Mesher {
 
     fn mesh(mut self) -> Mesh {
         let mut vertices = vec![];
+        let mut uvs = vec![];
         let mut indices = vec![];
 
         let triangulated_shape = TopoDS_Shape_to_owned(self.inner.pin_mut().Shape());
-
         let triangulated_shape = Shape { inner: triangulated_shape };
 
         for face in triangulated_shape.faces() {
@@ -621,11 +628,42 @@ impl Mesher {
             };
 
             let index_offset = vertices.len();
+            let face_point_count = triangulation.NbNodes();
 
-            for i in 1..=triangulation.NbNodes() {
+            for i in 1..=face_point_count {
                 let point = Poly_Triangulation_Node(triangulation, i);
                 vertices.push(dvec3(point.X(), point.Y(), point.Z()));
             }
+
+            let mut u_min = f64::INFINITY;
+            let mut v_min = f64::INFINITY;
+
+            let mut u_max = f64::NEG_INFINITY;
+            let mut v_max = f64::NEG_INFINITY;
+
+            for i in 1..=(face_point_count) {
+                let uv = Poly_Triangulation_UV(triangulation, i);
+                let (u, v) = (uv.X(), uv.Y());
+
+                u_min = u_min.min(u);
+                v_min = v_min.min(v);
+
+                u_max = u_max.max(u);
+                v_max = v_max.max(v);
+
+                uvs.push(dvec2(u, v));
+            }
+
+            // Normalize the newly added UV coordinates.
+            for uv in &mut uvs[index_offset..(index_offset + face_point_count as usize)] {
+                uv.x = (uv.x - u_min) / (u_max - u_min);
+                uv.y = (uv.y - v_min) / (v_max - v_min);
+
+                if face.orientation() != FaceOrientation::Forward {
+                    uv.x = 1.0 - uv.x;
+                }
+            }
+
             for i in 1..=triangulation.NbTriangles() {
                 let triangle = triangulation.Triangle(i);
 
@@ -641,7 +679,7 @@ impl Mesher {
             }
         }
 
-        Mesh { vertices, indices }
+        Mesh { vertices, uvs, indices }
     }
 }
 
@@ -649,6 +687,7 @@ impl Mesher {
 #[derive(Debug)]
 pub struct Mesh {
     pub vertices: Vec<DVec3>,
+    pub uvs: Vec<DVec2>,
     pub indices: Vec<usize>,
 }
 

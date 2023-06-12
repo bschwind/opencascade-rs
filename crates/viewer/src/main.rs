@@ -1,12 +1,13 @@
 use crate::surface_drawer::{CadMesh, SurfaceDrawer};
 use glam::{dvec3, vec3, Mat4};
 use opencascade::{
-    primitives::{Face, Shape, Solid},
+    primitives::{Face, Shape, Solid, Wire},
     workplane::Workplane,
 };
 use simple_game::{
     graphics::{
-        text::{AxisAlign, StyledText, TextAlignment, TextSystem}, FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
+        text::{AxisAlign, StyledText, TextAlignment, TextSystem},
+        FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
     },
     util::FPSCounter,
     GameApp,
@@ -77,19 +78,9 @@ impl GameApp for ViewerApp {
 
         Self {
             fullscreen_quad: FullscreenQuad::new(device, surface_texture_format),
-            text_system: TextSystem::new(
-                device,
-                surface_texture_format,
-                width,
-                height,
-            ),
+            text_system: TextSystem::new(device, surface_texture_format, width, height),
             fps_counter: FPSCounter::new(),
-            line_drawer: LineDrawer::new(
-                device,
-                surface_texture_format,
-                width,
-                height,
-            ),
+            line_drawer: LineDrawer::new(device, surface_texture_format, width, height),
             surface_drawer: SurfaceDrawer::new(device, surface_texture_format),
             smaa_target,
             model_edges,
@@ -196,6 +187,14 @@ fn build_camera_matrix(width: u32, height: u32) -> Mat4 {
     );
 
     proj * view
+}
+
+#[allow(unused)]
+fn cube() -> Shape {
+    let rect = Wire::rect(10.0, 10.0);
+    let face = Face::from_wire(&rect);
+
+    face.extrude(dvec3(0.0, 0.0, 10.0)).to_shape()
 }
 
 fn keycap() -> Shape {

@@ -146,6 +146,10 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn new_point_2d(x: f64, y: f64) -> UniquePtr<gp_Pnt2d>;
 
+        pub fn X(self: &gp_Pnt2d) -> f64;
+        pub fn Y(self: &gp_Pnt2d) -> f64;
+        pub fn Distance(self: &gp_Pnt2d, other: &gp_Pnt2d) -> f64;
+
         type gp_Vec;
 
         #[cxx_name = "construct_unique"]
@@ -699,6 +703,7 @@ pub mod ffi {
         pub fn NbNodes(self: &Poly_Triangulation) -> i32;
         pub fn NbTriangles(self: &Poly_Triangulation) -> i32;
         pub fn HasNormals(self: &Poly_Triangulation) -> bool;
+        pub fn HasUVNodes(self: &Poly_Triangulation) -> bool;
         pub fn Triangle(self: &Poly_Triangulation, index: i32) -> &Poly_Triangle;
         pub fn Poly_Triangulation_Normal(
             triangulation: &Poly_Triangulation,
@@ -708,6 +713,10 @@ pub mod ffi {
             triangulation: &Poly_Triangulation,
             index: i32,
         ) -> UniquePtr<gp_Pnt>;
+        pub fn Poly_Triangulation_UV(
+            triangulation: &Poly_Triangulation,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt2d>;
 
         type Poly_Triangle;
         pub fn Value(self: &Poly_Triangle, index: i32) -> i32;

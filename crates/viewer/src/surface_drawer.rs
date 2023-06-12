@@ -1,7 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use glam::Mat4;
 use opencascade::primitives::Mesh;
-use simple_game::graphics::{FrameEncoder, GraphicsDevice};
+use simple_game::graphics::GraphicsDevice;
 use wgpu::{self, util::DeviceExt, Buffer, RenderPipeline};
 
 pub struct SurfaceDrawer {
@@ -48,7 +48,7 @@ impl SurfaceDrawer {
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &wgpu::vertex_attr_array![
                 0 => Float32x3, // pos
-                // 1 => Float32x2, // uv
+                1 => Float32x2, // uv
             ],
         }];
 
@@ -147,7 +147,7 @@ struct CadMeshUniforms {
 #[derive(Clone, Copy, Pod, Zeroable)]
 struct CadMeshVertex {
     pos: [f32; 3],
-    // uv: [f32; 2],
+    uv: [f32; 2],
 }
 
 pub struct CadMesh {
@@ -163,7 +163,11 @@ impl CadMesh {
         let vertex_data: Vec<_> = mesh
             .vertices
             .iter()
-            .map(|v| CadMeshVertex { pos: [v.x as f32, v.y as f32, v.z as f32] })
+            .zip(mesh.uvs.iter())
+            .map(|(v, uv)| CadMeshVertex {
+                pos: [v.x as f32, v.y as f32, v.z as f32],
+                uv: [uv.x as f32, uv.y as f32],
+            })
             .collect();
 
         let index_data: Vec<_> = mesh.indices.iter().map(|i| *i as u32).collect();
