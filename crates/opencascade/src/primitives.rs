@@ -5,8 +5,8 @@ use opencascade_sys::ffi::{
     cast_compound_to_shape, cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape,
     gp_Ax1_ctor, gp_Dir, gp_Dir_ctor, gp_Pnt, gp_Vec, map_shapes,
     new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape, new_point,
-    new_transform, new_vec, outer_wire, shape_list_to_vector, write_stl, BRepAdaptor_Curve_ctor,
-    BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor,
+    new_transform, new_vec, outer_wire, shape_list_to_vector, triangulated_shape_normal, write_stl,
+    BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor,
     BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
@@ -17,8 +17,9 @@ use opencascade_sys::ffi::{
     GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
     GeomAPI_ProjectPointOnSurf_ctor, Handle_Poly_Triangulation_Get, Message_ProgressRange_ctor,
-    Poly_Triangulation_Node, Poly_Triangulation_UV, ShapeUpgrade_UnifySameDomain_ctor,
-    StlAPI_Writer_ctor, TopAbs_Orientation, TopAbs_ShapeEnum, TopExp_Explorer,
+    Poly_Connect_ctor, Poly_Triangulation_Node, Poly_Triangulation_UV,
+    ShapeUpgrade_UnifySameDomain_ctor, StlAPI_Writer_ctor, TColgp_Array1OfDir_Value,
+    TColgp_Array1OfDir_ctor, TopAbs_Orientation, TopAbs_ShapeEnum, TopExp_Explorer,
     TopExp_Explorer_ctor, TopLoc_Location_ctor, TopLoc_Location_from_transform, TopoDS_Compound,
     TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned,
     TopoDS_Shape, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex,
@@ -611,6 +612,7 @@ impl Mesher {
     fn mesh(mut self) -> Mesh {
         let mut vertices = vec![];
         let mut uvs = vec![];
+        let mut normals = vec![];
         let mut indices = vec![];
 
         let triangulated_shape = TopoDS_Shape_to_owned(self.inner.pin_mut().Shape());
@@ -664,6 +666,19 @@ impl Mesher {
                 }
             }
 
+            // Add in the normals.
+            // TODO(bschwind) - Use `location` to transform the normals.
+            let mut poly_connect = Poly_Connect_ctor(&triangulation_handle);
+            let mut normal_array = TColgp_Array1OfDir_ctor(0, face_point_count);
+
+            triangulated_shape_normal(&face.inner, poly_connect.pin_mut(), normal_array.pin_mut());
+
+            // TODO(bschwind) - Why do we start at 1 here?
+            for i in 1..(normal_array.Length() as usize) {
+                let normal = TColgp_Array1OfDir_Value(&normal_array, i as i32);
+                normals.push(dvec3(normal.X(), normal.Y(), normal.Z()));
+            }
+
             for i in 1..=triangulation.NbTriangles() {
                 let triangle = triangulation.Triangle(i);
 
@@ -679,7 +694,7 @@ impl Mesher {
             }
         }
 
-        Mesh { vertices, uvs, indices }
+        Mesh { vertices, uvs, normals, indices }
     }
 }
 
@@ -688,6 +703,7 @@ impl Mesher {
 pub struct Mesh {
     pub vertices: Vec<DVec3>,
     pub uvs: Vec<DVec2>,
+    pub normals: Vec<DVec3>,
     pub indices: Vec<usize>,
 }
 

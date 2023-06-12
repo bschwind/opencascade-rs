@@ -13,6 +13,9 @@ struct VertexInput {
 
     @location(1)
     uv: vec2<f32>,
+
+    @location(2)
+    normal: vec3<f32>,
 };
 
 struct VertexOutput {
@@ -21,6 +24,9 @@ struct VertexOutput {
 
     @location(0)
     uv: vec2<f32>,
+
+    @location(1)
+    normal: vec3<f32>,
 };
 
 @vertex
@@ -28,6 +34,7 @@ fn vs_main(input: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
     out.uv = input.uv;
+    out.normal = input.normal; // TODO(bschwind) - Need to transform this.
     out.pos = globals.proj * globals.transform * vec4<f32>(input.pos, 1.0);
 
     return out;
@@ -35,5 +42,5 @@ fn vs_main(input: VertexInput) -> VertexOutput {
 
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
-    return vec4<f32>(in.uv.x, in.uv.y, 0.0, 1.0);
+    return vec4<f32>(in.normal.x, in.normal.y, in.normal.z, 1.0);
 }

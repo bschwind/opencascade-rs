@@ -37,8 +37,11 @@
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <NCollection_Array1.hxx>
+#include <Poly_Connect.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
+#include <StdPrs_ToolTriangulatedShape.hxx>
 #include <StlAPI_Writer.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp_Explorer.hxx>
@@ -269,6 +272,12 @@ inline std::unique_ptr<gp_Pnt2d> Poly_Triangulation_UV(const Poly_Triangulation 
   return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(triangulation.UVNode(index)));
 }
 
+inline void triangulated_shape_normal(const TopoDS_Face& face,
+                                      Poly_Connect& poly_connect,
+                                      TColgp_Array1OfDir& normals) {
+  StdPrs_ToolTriangulatedShape::Normal(face, poly_connect, normals);
+}
+
 // Shape Properties
 inline std::unique_ptr<gp_Pnt> GProp_GProps_CentreOfMass(const GProp_GProps &props) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(props.CentreOfMass()));
@@ -301,4 +310,8 @@ inline std::unique_ptr<TopoDS_Wire> outer_wire(const TopoDS_Face &face) {
 // Collections
 inline void map_shapes(const TopoDS_Shape &S, const TopAbs_ShapeEnum T, TopTools_IndexedMapOfShape &M) {
   TopExp::MapShapes(S, T, M);
+}
+
+inline std::unique_ptr<gp_Dir> TColgp_Array1OfDir_Value(const TColgp_Array1OfDir &array, Standard_Integer index) {
+  return std::unique_ptr<gp_Dir>(new gp_Dir(array.Value(index)));
 }

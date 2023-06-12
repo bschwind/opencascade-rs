@@ -95,6 +95,18 @@ pub mod ffi {
             shape_map: Pin<&mut TopTools_IndexedMapOfShape>,
         );
 
+        type TColgp_Array1OfDir;
+        #[cxx_name = "construct_unique"]
+        pub fn TColgp_Array1OfDir_ctor(
+            lower_bound: i32,
+            upper_bound: i32,
+        ) -> UniquePtr<TColgp_Array1OfDir>;
+        pub fn Length(self: &TColgp_Array1OfDir) -> i32;
+        pub fn TColgp_Array1OfDir_Value(
+            array: &TColgp_Array1OfDir,
+            index: i32,
+        ) -> UniquePtr<gp_Dir>;
+
         // Geometry
         type Geom_TrimmedCurve;
         type Geom_CylindricalSurface;
@@ -720,6 +732,21 @@ pub mod ffi {
 
         type Poly_Triangle;
         pub fn Value(self: &Poly_Triangle, index: i32) -> i32;
+
+        type Poly_Connect;
+        #[cxx_name = "construct_unique"]
+        pub fn Poly_Connect_ctor(
+            triangulation: &Handle_Poly_Triangulation,
+        ) -> UniquePtr<Poly_Connect>;
+
+        type StdPrs_ToolTriangulatedShape;
+        #[cxx_name = "construct_unique"]
+        pub fn StdPrs_ToolTriangulatedShape_ctor() -> UniquePtr<StdPrs_ToolTriangulatedShape>;
+        pub fn triangulated_shape_normal(
+            face: &TopoDS_Face,
+            poly_connect: Pin<&mut Poly_Connect>,
+            normals: Pin<&mut TColgp_Array1OfDir>,
+        );
 
         // Edge approximation
         type GCPnts_TangentialDeflection;

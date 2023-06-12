@@ -49,6 +49,7 @@ impl SurfaceDrawer {
             attributes: &wgpu::vertex_attr_array![
                 0 => Float32x3, // pos
                 1 => Float32x2, // uv
+                2 => Float32x3, // normal
             ],
         }];
 
@@ -67,7 +68,7 @@ impl SurfaceDrawer {
                 topology: wgpu::PrimitiveTopology::TriangleList,
                 // strip_index_format: Some(wgpu::IndexFormat::Uint32),
                 front_face: wgpu::FrontFace::Ccw,
-                cull_mode: Some(wgpu::Face::Front),
+                cull_mode: Some(wgpu::Face::Back),
                 polygon_mode: wgpu::PolygonMode::Fill,
                 conservative: false,
                 ..wgpu::PrimitiveState::default()
@@ -148,6 +149,7 @@ struct CadMeshUniforms {
 struct CadMeshVertex {
     pos: [f32; 3],
     uv: [f32; 2],
+    normal: [f32; 3],
 }
 
 pub struct CadMesh {
@@ -164,9 +166,11 @@ impl CadMesh {
             .vertices
             .iter()
             .zip(mesh.uvs.iter())
-            .map(|(v, uv)| CadMeshVertex {
+            .zip(mesh.normals.iter())
+            .map(|((v, uv), normal)| CadMeshVertex {
                 pos: [v.x as f32, v.y as f32, v.z as f32],
                 uv: [uv.x as f32, uv.y as f32],
+                normal: [normal.x as f32, normal.y as f32, normal.z as f32],
             })
             .collect();
 
