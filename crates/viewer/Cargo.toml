@@ -8,7 +8,7 @@ bytemuck = { version = "1", features = ["derive"] }
 opencascade = { version = "0.1", path = "../opencascade" }
 glam = { version = "0.23", features = ["bytemuck"] }
 simple-game = { path = "../../../simple-game" }
-smaa = { git = "https://github.com/bschwind/smaa-rs.git", branch = "update-deps" }
+smaa = "0.10"
 wgpu = "0.16"
 winit = "0.28"
 
