@@ -7,7 +7,7 @@ use opencascade::{
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
-        FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
+        DepthTexture, FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
     },
     util::FPSCounter,
     GameApp,
@@ -22,6 +22,7 @@ use winit::{
 mod surface_drawer;
 
 struct ViewerApp {
+    depth_texture: DepthTexture,
     fullscreen_quad: FullscreenQuad,
     text_system: TextSystem,
     fps_counter: FPSCounter,
@@ -76,12 +77,26 @@ impl GameApp for ViewerApp {
 
         let surface_texture_format = graphics_device.surface_texture_format();
 
+        let depth_texture = DepthTexture::new(device, width, height);
+        let depth_texture_format = depth_texture.format();
+
         Self {
+            depth_texture,
             fullscreen_quad: FullscreenQuad::new(device, surface_texture_format),
             text_system: TextSystem::new(device, surface_texture_format, width, height),
             fps_counter: FPSCounter::new(),
-            line_drawer: LineDrawer::new(device, surface_texture_format, width, height),
-            surface_drawer: SurfaceDrawer::new(device, surface_texture_format),
+            line_drawer: LineDrawer::new(
+                device,
+                surface_texture_format,
+                depth_texture_format,
+                width,
+                height,
+            ),
+            surface_drawer: SurfaceDrawer::new(
+                device,
+                surface_texture_format,
+                depth_texture_format,
+            ),
             smaa_target,
             model_edges,
             cad_mesh,
@@ -91,6 +106,7 @@ impl GameApp for ViewerApp {
     }
 
     fn resize(&mut self, graphics_device: &mut GraphicsDevice, width: u32, height: u32) {
+        self.depth_texture = DepthTexture::new(graphics_device.device(), width, height);
         self.text_system.resize(width, height);
         self.line_drawer.resize(width, height);
         self.smaa_target.resize(graphics_device.device(), width, height);
@@ -135,6 +151,7 @@ impl GameApp for ViewerApp {
         self.surface_drawer.render(
             &mut frame_encoder.encoder,
             &smaa_render_target,
+            &self.depth_texture.view,
             graphics_device.queue(),
             &self.cad_mesh,
             camera_matrix,
@@ -149,6 +166,7 @@ impl GameApp for ViewerApp {
         line_recorder.end(
             &mut frame_encoder.encoder,
             &smaa_render_target,
+            Some(&self.depth_texture.view),
             graphics_device.queue(),
             build_camera_matrix(width, height),
             transform,
