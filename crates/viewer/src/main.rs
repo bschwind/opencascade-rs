@@ -40,10 +40,6 @@ impl GameApp for ViewerApp {
         "Viewer"
     }
 
-    fn desired_fps() -> usize {
-        120
-    }
-
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
         let keycap = keycap();
 
