@@ -13,8 +13,6 @@ use opencascade_sys::ffi::{
 use std::path::Path;
 use thiserror::Error;
 
-pub use glam;
-
 pub mod primitives;
 pub mod workplane;
 

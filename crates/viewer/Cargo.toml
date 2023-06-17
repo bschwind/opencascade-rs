@@ -1,0 +1,16 @@
+[package]
+name = "viewer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bytemuck = { version = "1", features = ["derive"] }
+opencascade = { version = "0.1", path = "../opencascade" }
+glam = { version = "0.23", features = ["bytemuck"] }
+simple-game = { git = "https://github.com/bschwind/simple-game.git" }
+smaa = "0.10"
+wgpu = "0.16"
+winit = "0.28"
+
+[build-dependencies]
+naga = { version = "0.12", features = ["validate", "wgsl-in"] }

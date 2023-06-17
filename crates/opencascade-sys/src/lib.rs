@@ -95,6 +95,18 @@ pub mod ffi {
             shape_map: Pin<&mut TopTools_IndexedMapOfShape>,
         );
 
+        type TColgp_Array1OfDir;
+        #[cxx_name = "construct_unique"]
+        pub fn TColgp_Array1OfDir_ctor(
+            lower_bound: i32,
+            upper_bound: i32,
+        ) -> UniquePtr<TColgp_Array1OfDir>;
+        pub fn Length(self: &TColgp_Array1OfDir) -> i32;
+        pub fn TColgp_Array1OfDir_Value(
+            array: &TColgp_Array1OfDir,
+            index: i32,
+        ) -> UniquePtr<gp_Dir>;
+
         // Geometry
         type Geom_TrimmedCurve;
         type Geom_CylindricalSurface;
@@ -145,6 +157,10 @@ pub mod ffi {
 
         #[cxx_name = "construct_unique"]
         pub fn new_point_2d(x: f64, y: f64) -> UniquePtr<gp_Pnt2d>;
+
+        pub fn X(self: &gp_Pnt2d) -> f64;
+        pub fn Y(self: &gp_Pnt2d) -> f64;
+        pub fn Distance(self: &gp_Pnt2d, other: &gp_Pnt2d) -> f64;
 
         type gp_Vec;
 
@@ -336,6 +352,7 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn BRepAdaptor_Curve_ctor(edge: &TopoDS_Edge) -> UniquePtr<BRepAdaptor_Curve>;
         pub fn FirstParameter(self: &BRepAdaptor_Curve) -> f64;
+        pub fn LastParameter(self: &BRepAdaptor_Curve) -> f64;
         pub fn BRepAdaptor_Curve_value(curve: &BRepAdaptor_Curve, u: f64) -> UniquePtr<gp_Pnt>;
 
         // Primitives
@@ -698,6 +715,7 @@ pub mod ffi {
         pub fn NbNodes(self: &Poly_Triangulation) -> i32;
         pub fn NbTriangles(self: &Poly_Triangulation) -> i32;
         pub fn HasNormals(self: &Poly_Triangulation) -> bool;
+        pub fn HasUVNodes(self: &Poly_Triangulation) -> bool;
         pub fn Triangle(self: &Poly_Triangulation, index: i32) -> &Poly_Triangle;
         pub fn Poly_Triangulation_Normal(
             triangulation: &Poly_Triangulation,
@@ -707,9 +725,43 @@ pub mod ffi {
             triangulation: &Poly_Triangulation,
             index: i32,
         ) -> UniquePtr<gp_Pnt>;
+        pub fn Poly_Triangulation_UV(
+            triangulation: &Poly_Triangulation,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt2d>;
 
         type Poly_Triangle;
         pub fn Value(self: &Poly_Triangle, index: i32) -> i32;
+
+        type Poly_Connect;
+        #[cxx_name = "construct_unique"]
+        pub fn Poly_Connect_ctor(
+            triangulation: &Handle_Poly_Triangulation,
+        ) -> UniquePtr<Poly_Connect>;
+
+        type StdPrs_ToolTriangulatedShape;
+        #[cxx_name = "construct_unique"]
+        pub fn StdPrs_ToolTriangulatedShape_ctor() -> UniquePtr<StdPrs_ToolTriangulatedShape>;
+        pub fn triangulated_shape_normal(
+            face: &TopoDS_Face,
+            poly_connect: Pin<&mut Poly_Connect>,
+            normals: Pin<&mut TColgp_Array1OfDir>,
+        );
+
+        // Edge approximation
+        type GCPnts_TangentialDeflection;
+
+        #[cxx_name = "construct_unique"]
+        pub fn GCPnts_TangentialDeflection_ctor(
+            curve: &BRepAdaptor_Curve,
+            angular_deflection: f64,
+            curvature_deflection: f64,
+        ) -> UniquePtr<GCPnts_TangentialDeflection>;
+        pub fn NbPoints(self: &GCPnts_TangentialDeflection) -> i32;
+        pub fn GCPnts_TangentialDeflection_Value(
+            approximator: &GCPnts_TangentialDeflection,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt>;
 
         // Shape Properties
         type GProp_GProps;

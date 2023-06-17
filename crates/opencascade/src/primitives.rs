@@ -1,21 +1,26 @@
 use crate::{workplane::Workplane, Error, TopoDS_Shape_to_owned};
 use cxx::UniquePtr;
-use glam::{dvec3, DVec3};
+use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi::{
     cast_compound_to_shape, cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape,
     gp_Ax1_ctor, gp_Dir, gp_Dir_ctor, gp_Pnt, gp_Vec, map_shapes,
     new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape, new_point,
-    new_transform, new_vec, outer_wire, shape_list_to_vector, write_stl, BRepAdaptor_Curve_ctor,
-    BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor,
+    new_transform, new_vec, outer_wire, shape_list_to_vector, triangulated_shape_normal, write_stl,
+    BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor,
     BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
     BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
-    BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
-    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, GC_MakeArcOfCircle_Value,
+    BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor,
+    BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
+    BRep_Tool_Triangulation, GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
+    GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
-    GeomAPI_ProjectPointOnSurf_ctor, Message_ProgressRange_ctor, ShapeUpgrade_UnifySameDomain_ctor,
-    StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopLoc_Location_from_transform, TopoDS_Compound,
+    GeomAPI_ProjectPointOnSurf_ctor, Handle_Poly_Triangulation_Get, Message_ProgressRange_ctor,
+    Poly_Connect_ctor, Poly_Triangulation_Node, Poly_Triangulation_UV,
+    ShapeUpgrade_UnifySameDomain_ctor, StlAPI_Writer_ctor, TColgp_Array1OfDir_Value,
+    TColgp_Array1OfDir_ctor, TopAbs_Orientation, TopAbs_ShapeEnum, TopExp_Explorer,
+    TopExp_Explorer_ctor, TopLoc_Location_ctor, TopLoc_Location_from_transform, TopoDS_Compound,
     TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned,
     TopoDS_Shape, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex,
     TopoDS_Vertex_to_owned, TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound,
@@ -91,7 +96,42 @@ impl Edge {
         dvec3(point.X(), point.Y(), point.Z())
     }
 
+    pub fn end_point(&self) -> DVec3 {
+        let curve = BRepAdaptor_Curve_ctor(&self.inner);
+        let last_param = curve.LastParameter();
+        let point = BRepAdaptor_Curve_value(&curve, last_param);
+
+        dvec3(point.X(), point.Y(), point.Z())
+    }
+
+    pub fn approximation_segments(&self) -> ApproximationSegmentIterator {
+        let adaptor_curve = BRepAdaptor_Curve_ctor(&self.inner);
+        let approximator = GCPnts_TangentialDeflection_ctor(&adaptor_curve, 0.1, 0.1);
+
+        ApproximationSegmentIterator { count: 1, approximator }
+    }
+
     pub fn tangent_arc(_p1: DVec3, _tangent: DVec3, _p3: DVec3) {}
+}
+
+pub struct ApproximationSegmentIterator {
+    count: usize,
+    approximator: UniquePtr<GCPnts_TangentialDeflection>,
+}
+
+impl Iterator for ApproximationSegmentIterator {
+    type Item = DVec3;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.count <= self.approximator.NbPoints() as usize {
+            let point = GCPnts_TangentialDeflection_Value(&self.approximator, self.count as i32);
+
+            self.count += 1;
+            Some(dvec3(point.X(), point.Y(), point.Z()))
+        } else {
+            None
+        }
+    }
 }
 
 pub struct Wire {
@@ -215,6 +255,13 @@ impl Wire {
         self.inner = TopoDS_Wire_to_owned(translated_wire);
     }
 
+    pub fn to_shape(self) -> Shape {
+        let inner_shape = cast_wire_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner_shape);
+
+        Shape { inner }
+    }
+
     // Create a closure-based API
     pub fn freeform() {}
 }
@@ -310,6 +357,32 @@ impl Face {
 
         Compound { inner }
     }
+
+    pub fn orientation(&self) -> FaceOrientation {
+        FaceOrientation::from(self.inner.Orientation())
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum FaceOrientation {
+    Forward,
+    Reversed,
+    Internal,
+    External,
+}
+
+impl From<TopAbs_Orientation> for FaceOrientation {
+    fn from(orientation: TopAbs_Orientation) -> Self {
+        match orientation {
+            TopAbs_Orientation::TopAbs_FORWARD => Self::Forward,
+            TopAbs_Orientation::TopAbs_REVERSED => Self::Reversed,
+            TopAbs_Orientation::TopAbs_INTERNAL => Self::Internal,
+            TopAbs_Orientation::TopAbs_EXTERNAL => Self::External,
+            TopAbs_Orientation { repr } => {
+                panic!("TopAbs_Orientation had an unrepresentable value: {repr}")
+            },
+        }
+    }
 }
 
 pub struct Shell {
@@ -321,6 +394,13 @@ pub struct Solid {
 }
 
 impl Solid {
+    pub fn to_shape(self) -> Shape {
+        let inner_shape = cast_solid_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner_shape);
+
+        Shape { inner }
+    }
+
     // TODO(bschwind) - Do some cool stuff from this link:
     // https://neweopencascade.wordpress.com/2018/10/17/lets-talk-about-fillets/
     // Key takeaway: Use the `SectionEdges` function to retrieve edges that were
@@ -500,5 +580,178 @@ impl Shape {
         let upgraded_shape = upgrader.Shape();
 
         self.inner = TopoDS_Shape_to_owned(upgraded_shape);
+    }
+
+    pub fn mesh(&self) -> Mesh {
+        let mesher = Mesher::new(self);
+        mesher.mesh()
+    }
+
+    pub fn edges(&self) -> EdgeIterator {
+        let explorer = TopExp_Explorer_ctor(&self.inner, TopAbs_ShapeEnum::TopAbs_EDGE);
+
+        EdgeIterator { explorer }
+    }
+
+    pub fn faces(&self) -> FaceIterator {
+        let explorer = TopExp_Explorer_ctor(&self.inner, TopAbs_ShapeEnum::TopAbs_FACE);
+
+        FaceIterator { explorer }
+    }
+}
+
+struct Mesher {
+    inner: UniquePtr<BRepMesh_IncrementalMesh>,
+}
+
+impl Mesher {
+    fn new(shape: &Shape) -> Self {
+        let inner = BRepMesh_IncrementalMesh_ctor(&shape.inner, 0.01);
+
+        if !inner.IsDone() {
+            // TODO(bschwind) - Add proper Error type and return Result.
+            panic!("Call to BRepMesh_IncrementalMesh_ctor failed");
+        }
+
+        Self { inner }
+    }
+
+    fn mesh(mut self) -> Mesh {
+        let mut vertices = vec![];
+        let mut uvs = vec![];
+        let mut normals = vec![];
+        let mut indices = vec![];
+
+        let triangulated_shape = TopoDS_Shape_to_owned(self.inner.pin_mut().Shape());
+        let triangulated_shape = Shape { inner: triangulated_shape };
+
+        for face in triangulated_shape.faces() {
+            let mut location = TopLoc_Location_ctor();
+
+            let triangulation_handle = BRep_Tool_Triangulation(&face.inner, location.pin_mut());
+
+            let Ok(triangulation) = Handle_Poly_Triangulation_Get(&triangulation_handle) else {
+                // TODO(bschwind) - Do better error handling, use Results.
+                println!("Encountered a face with no triangulation");
+                continue;
+            };
+
+            let index_offset = vertices.len();
+            let face_point_count = triangulation.NbNodes();
+
+            for i in 1..=face_point_count {
+                let point = Poly_Triangulation_Node(triangulation, i);
+                vertices.push(dvec3(point.X(), point.Y(), point.Z()));
+            }
+
+            let mut u_min = f64::INFINITY;
+            let mut v_min = f64::INFINITY;
+
+            let mut u_max = f64::NEG_INFINITY;
+            let mut v_max = f64::NEG_INFINITY;
+
+            for i in 1..=(face_point_count) {
+                let uv = Poly_Triangulation_UV(triangulation, i);
+                let (u, v) = (uv.X(), uv.Y());
+
+                u_min = u_min.min(u);
+                v_min = v_min.min(v);
+
+                u_max = u_max.max(u);
+                v_max = v_max.max(v);
+
+                uvs.push(dvec2(u, v));
+            }
+
+            // Normalize the newly added UV coordinates.
+            for uv in &mut uvs[index_offset..(index_offset + face_point_count as usize)] {
+                uv.x = (uv.x - u_min) / (u_max - u_min);
+                uv.y = (uv.y - v_min) / (v_max - v_min);
+
+                if face.orientation() != FaceOrientation::Forward {
+                    uv.x = 1.0 - uv.x;
+                }
+            }
+
+            // Add in the normals.
+            // TODO(bschwind) - Use `location` to transform the normals.
+            let mut poly_connect = Poly_Connect_ctor(&triangulation_handle);
+            let mut normal_array = TColgp_Array1OfDir_ctor(0, face_point_count);
+
+            triangulated_shape_normal(&face.inner, poly_connect.pin_mut(), normal_array.pin_mut());
+
+            // TODO(bschwind) - Why do we start at 1 here?
+            for i in 1..(normal_array.Length() as usize) {
+                let normal = TColgp_Array1OfDir_Value(&normal_array, i as i32);
+                normals.push(dvec3(normal.X(), normal.Y(), normal.Z()));
+            }
+
+            for i in 1..=triangulation.NbTriangles() {
+                let triangle = triangulation.Triangle(i);
+
+                if face.orientation() == FaceOrientation::Forward {
+                    indices.push(index_offset + triangle.Value(1) as usize - 1);
+                    indices.push(index_offset + triangle.Value(2) as usize - 1);
+                    indices.push(index_offset + triangle.Value(3) as usize - 1);
+                } else {
+                    indices.push(index_offset + triangle.Value(3) as usize - 1);
+                    indices.push(index_offset + triangle.Value(2) as usize - 1);
+                    indices.push(index_offset + triangle.Value(1) as usize - 1);
+                }
+            }
+        }
+
+        Mesh { vertices, uvs, normals, indices }
+    }
+}
+
+#[allow(unused)]
+#[derive(Debug)]
+pub struct Mesh {
+    pub vertices: Vec<DVec3>,
+    pub uvs: Vec<DVec2>,
+    pub normals: Vec<DVec3>,
+    pub indices: Vec<usize>,
+}
+
+pub struct EdgeIterator {
+    explorer: UniquePtr<TopExp_Explorer>,
+}
+
+impl Iterator for EdgeIterator {
+    type Item = Edge;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.explorer.More() {
+            let edge = TopoDS_cast_to_edge(self.explorer.Current());
+            let inner = TopoDS_Edge_to_owned(edge);
+
+            self.explorer.pin_mut().Next();
+
+            Some(Edge { inner })
+        } else {
+            None
+        }
+    }
+}
+
+pub struct FaceIterator {
+    explorer: UniquePtr<TopExp_Explorer>,
+}
+
+impl Iterator for FaceIterator {
+    type Item = Face;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.explorer.More() {
+            let face = TopoDS_cast_to_face(self.explorer.Current());
+            let inner = TopoDS_Face_to_owned(face);
+
+            self.explorer.pin_mut().Next();
+
+            Some(Face { inner })
+        } else {
+            None
+        }
     }
 }
