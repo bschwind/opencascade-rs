@@ -1,6 +1,7 @@
 use crate::{
     edge_drawer::{EdgeDrawer, LineBuilder, LineVertex3, RenderedLine},
     surface_drawer::{CadMesh, SurfaceDrawer},
+    wasm_engine::WasmEngine,
 };
 use anyhow::Error;
 use camera::OrbitCamera;
@@ -32,6 +33,7 @@ use winit::{
 mod camera;
 mod edge_drawer;
 mod surface_drawer;
+mod wasm_engine;
 
 // Multipliers to convert mouse position deltas to a more intuitve camera perspective change.
 const ZOOM_MULTIPLIER: f32 = 5.0;
@@ -69,6 +71,7 @@ impl MouseState {
 struct ViewerApp {
     client_rect: Vec2,
     camera: OrbitCamera,
+    _engine: WasmEngine,
     depth_texture: DepthTexture,
     text_system: TextSystem,
     fps_counter: FPSCounter,
@@ -202,9 +205,14 @@ impl GameApp for ViewerApp {
         let depth_texture = DepthTexture::new(device, width, height);
         let depth_texture_format = depth_texture.format();
 
+        // WASM stuff
+        let mut engine = WasmEngine::new();
+        engine.execute_model_wasm("target/wasm32-unknown-unknown/release/model.wasm");
+
         Self {
             client_rect: vec2(width as f32, height as f32),
             camera: OrbitCamera::new(width, height, Vec3::new(40.0, -40.0, 20.0)),
+            _engine: engine,
             depth_texture,
             text_system: TextSystem::new(device, surface_texture_format, width, height),
             fps_counter: FPSCounter::new(),

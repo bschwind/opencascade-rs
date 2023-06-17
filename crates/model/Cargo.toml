@@ -1,0 +1,13 @@
+[package]
+name = "model"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "model"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+glam = { version = "0.23", features = ["bytemuck"] }
+wasm-api = { path = "../wasm-api" }
