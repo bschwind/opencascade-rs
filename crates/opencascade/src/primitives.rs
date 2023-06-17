@@ -255,6 +255,13 @@ impl Wire {
         self.inner = TopoDS_Wire_to_owned(translated_wire);
     }
 
+    pub fn to_shape(self) -> Shape {
+        let inner_shape = cast_wire_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner_shape);
+
+        Shape { inner }
+    }
+
     // Create a closure-based API
     pub fn freeform() {}
 }
