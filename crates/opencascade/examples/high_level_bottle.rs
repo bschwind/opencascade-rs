@@ -1,7 +1,5 @@
-use opencascade::{
-    glam::dvec3,
-    primitives::{Edge, Face, Wire},
-};
+use glam::dvec3;
+use opencascade::primitives::{Edge, Face, Wire};
 
 pub fn main() {
     let height = 70.0;
