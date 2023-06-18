@@ -1,5 +1,5 @@
 use crate::surface_drawer::{CadMesh, SurfaceDrawer};
-use glam::{dvec3, vec3, Mat4};
+use glam::{dvec3, vec3, DVec3, Mat4};
 use opencascade::{
     primitives::{Face, Shape, Solid, Wire},
     workplane::Workplane,
@@ -48,15 +48,26 @@ impl GameApp for ViewerApp {
 
         let mut model_edges = vec![];
 
-        let thickness = 2.0;
+        let thickness = 3.0;
 
         for edge in keycap.edges() {
             let mut segments = vec![];
+
+            let mut last_point: Option<DVec3> = None;
+            let mut length_so_far = 0.0;
+
             for point in edge.approximation_segments() {
+                if let Some(last_point) = last_point {
+                    length_so_far += (point - last_point).length();
+                }
+
                 segments.push(LineVertex3::new(
                     vec3(point.x as f32, point.y as f32, point.z as f32),
                     thickness,
+                    length_so_far as f32,
                 ));
+
+                last_point = Some(point);
             }
 
             model_edges.push(segments);
