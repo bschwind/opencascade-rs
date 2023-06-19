@@ -303,7 +303,7 @@ impl LineRecorder<'_> {
         );
 
         // Write dashed uniforms
-        let uniforms = LineUniforms {
+        let mut uniforms = LineUniforms {
             proj: camera_matrix,
             transform,
             resolution: vec4(
@@ -321,16 +321,8 @@ impl LineRecorder<'_> {
         );
 
         // Write solid uniforms
-        let uniforms = LineUniforms {
-            proj: camera_matrix,
-            transform,
-            resolution: vec4(
-                self.line_drawer.screen_width as f32,
-                self.line_drawer.screen_height as f32,
-                0.0,
-                0.0,
-            ),
-        };
+        uniforms.resolution.z = 0.0; // Dash size
+        uniforms.resolution.w = 0.0; // Gap size
 
         queue.write_buffer(
             &self.line_drawer.buffers.solid_vertex_uniform,
