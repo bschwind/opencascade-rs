@@ -186,20 +186,7 @@ impl Workplane {
     }
 
     pub fn rect(&self, width: f64, height: f64) -> Wire {
-        let half_width = width / 2.0;
-        let half_height = height / 2.0;
-
-        let p1 = self.to_world_pos(dvec3(-half_width, half_height, 0.0));
-        let p2 = self.to_world_pos(dvec3(half_width, half_height, 0.0));
-        let p3 = self.to_world_pos(dvec3(half_width, -half_height, 0.0));
-        let p4 = self.to_world_pos(dvec3(-half_width, -half_height, 0.0));
-
-        let top = Edge::segment(p1, p2);
-        let right = Edge::segment(p2, p3);
-        let bottom = Edge::segment(p3, p4);
-        let left = Edge::segment(p4, p1);
-
-        Wire::from_edges([&top, &right, &bottom, &left])
+        Wire::rect(width, height)
     }
 
     pub fn circle(&self, x: f64, y: f64, radius: f64) -> Wire {

@@ -207,7 +207,20 @@ impl GameApp for ViewerApp {
 
         // WASM stuff
         let mut engine = WasmEngine::new();
-        engine.execute_model_wasm("target/wasm32-unknown-unknown/release/model.wasm");
+        let user_model =
+            engine.execute_model_wasm("target/wasm32-unknown-unknown/release/model.wasm");
+
+        for _edge in user_model.edges() {
+            // let mut segments = vec![];
+            // for point in edge.approximation_segments() {
+            //     segments.push(LineVertex3::new(
+            //         vec3(point.x as f32, point.y as f32, point.z as f32),
+            //         thickness,
+            //     ));
+            // }
+
+            // model_edges.push(segments);
+        }
 
         Self {
             client_rect: vec2(width as f32, height as f32),
