@@ -1,4 +1,7 @@
-use crate::surface_drawer::{CadMesh, SurfaceDrawer};
+use crate::{
+    edge_drawer::{EdgeDrawer, LineVertex3},
+    surface_drawer::{CadMesh, SurfaceDrawer},
+};
 use glam::{dvec3, vec3, DVec3, Mat4};
 use opencascade::{
     primitives::{Face, Shape, Solid, Wire},
@@ -7,7 +10,7 @@ use opencascade::{
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
-        DepthTexture, FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
+        DepthTexture, FullscreenQuad, GraphicsDevice,
     },
     util::FPSCounter,
     GameApp,
@@ -19,6 +22,7 @@ use winit::{
     window::Window,
 };
 
+mod edge_drawer;
 mod surface_drawer;
 
 struct ViewerApp {
@@ -26,7 +30,7 @@ struct ViewerApp {
     fullscreen_quad: FullscreenQuad,
     text_system: TextSystem,
     fps_counter: FPSCounter,
-    line_drawer: LineDrawer,
+    line_drawer: EdgeDrawer,
     surface_drawer: SurfaceDrawer,
     smaa_target: SmaaTarget,
     model_edges: Vec<Vec<LineVertex3>>,
@@ -92,7 +96,7 @@ impl GameApp for ViewerApp {
             fullscreen_quad: FullscreenQuad::new(device, surface_texture_format),
             text_system: TextSystem::new(device, surface_texture_format, width, height),
             fps_counter: FPSCounter::new(),
-            line_drawer: LineDrawer::new(
+            line_drawer: EdgeDrawer::new(
                 device,
                 surface_texture_format,
                 depth_texture_format,
@@ -165,10 +169,15 @@ impl GameApp for ViewerApp {
             transform,
         );
 
+        // TODO(bschwind) - Pre-compute the gpu buffer for this so we don't
+        //                  have to upload data every frame.
         let mut line_recorder = self.line_drawer.begin();
         for segment_list in &self.model_edges {
             line_recorder.draw_round_line_strip(segment_list);
         }
+
+        let dash_size = 0.5;
+        let gap_size = 0.5;
 
         line_recorder.end(
             &mut frame_encoder.encoder,
@@ -177,6 +186,8 @@ impl GameApp for ViewerApp {
             graphics_device.queue(),
             build_camera_matrix(width, height),
             transform,
+            dash_size,
+            gap_size,
         );
 
         self.text_system.render_horizontal(
