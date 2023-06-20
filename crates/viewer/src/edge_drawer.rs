@@ -1,3 +1,10 @@
+// A WGPU utility for drawing solid and dashed lines with variable thickness,
+// round joins, and configurable dash and gap sizes.
+//
+// References:
+// Instanced Line Rendering - https://wwwtyro.net/2019/11/18/instanced-lines.html
+// Dashed Line Rendering - https://stackoverflow.com/a/54543267
+
 use bytemuck::{Pod, Zeroable};
 use glam::{vec4, Mat4, Vec3, Vec4};
 use simple_game::graphics::GraphicsDevice;
