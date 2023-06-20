@@ -1,5 +1,5 @@
 use crate::{
-    edge_drawer::{EdgeDrawer, LineVertex3},
+    edge_drawer::{EdgeDrawer, LineBuilder, LineVertex3, RenderedLine},
     surface_drawer::{CadMesh, SurfaceDrawer},
 };
 use glam::{dvec3, vec3, DVec3, Mat4};
@@ -33,7 +33,7 @@ struct ViewerApp {
     line_drawer: EdgeDrawer,
     surface_drawer: SurfaceDrawer,
     smaa_target: SmaaTarget,
-    model_edges: Vec<Vec<LineVertex3>>,
+    rendered_edges: RenderedLine,
     cad_mesh: CadMesh,
     angle: f32,
     scale: f32,
@@ -48,11 +48,11 @@ impl GameApp for ViewerApp {
         let keycap = keycap();
 
         let mesh = keycap.mesh();
-        let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device);
+        let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
 
-        let mut model_edges = vec![];
-
-        let thickness = 3.0;
+        // Pre-render the model edges.
+        let line_thickness = 3.0;
+        let mut line_builder = LineBuilder::new();
 
         for edge in keycap.edges() {
             let mut segments = vec![];
@@ -67,15 +67,17 @@ impl GameApp for ViewerApp {
 
                 segments.push(LineVertex3::new(
                     vec3(point.x as f32, point.y as f32, point.z as f32),
-                    thickness,
+                    line_thickness,
                     length_so_far as f32,
                 ));
 
                 last_point = Some(point);
             }
 
-            model_edges.push(segments);
+            line_builder.add_round_line_strip(&segments);
         }
+
+        let rendered_edges = line_builder.build(graphics_device.device());
 
         // Create SMAA target
         let (width, height) = graphics_device.surface_dimensions();
@@ -109,8 +111,8 @@ impl GameApp for ViewerApp {
                 depth_texture_format,
             ),
             smaa_target,
-            model_edges,
             cad_mesh,
+            rendered_edges,
             angle: 0.0,
             scale: 1.0,
         }
@@ -169,17 +171,11 @@ impl GameApp for ViewerApp {
             transform,
         );
 
-        // TODO(bschwind) - Pre-compute the gpu buffer for this so we don't
-        //                  have to upload data every frame.
-        let mut line_recorder = self.line_drawer.begin();
-        for segment_list in &self.model_edges {
-            line_recorder.draw_round_line_strip(segment_list);
-        }
-
         let dash_size = 0.5;
         let gap_size = 0.5;
 
-        line_recorder.end(
+        self.line_drawer.draw(
+            &self.rendered_edges,
             &mut frame_encoder.encoder,
             &smaa_render_target,
             Some(&self.depth_texture.view),

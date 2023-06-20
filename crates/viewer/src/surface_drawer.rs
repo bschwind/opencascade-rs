@@ -175,9 +175,7 @@ pub struct CadMesh {
 }
 
 impl CadMesh {
-    pub fn from_mesh(mesh: &Mesh, graphics_device: &GraphicsDevice) -> Self {
-        let device = graphics_device.device();
-
+    pub fn from_mesh(mesh: &Mesh, device: &wgpu::Device) -> Self {
         let vertex_data: Vec<_> = mesh
             .vertices
             .iter()

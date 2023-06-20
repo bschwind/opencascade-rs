@@ -15,7 +15,6 @@ struct Buffers {
     dashed_vertex_uniform: wgpu::Buffer,
     round_strip_geometry: wgpu::Buffer,
     round_strip_geometry_len: usize,
-    round_strip_instances: wgpu::Buffer,
 }
 
 struct BindGroups {
@@ -28,8 +27,6 @@ pub struct EdgeDrawer {
     dashed_line_strip_pipeline: wgpu::RenderPipeline,
     buffers: Buffers,
     bind_groups: BindGroups,
-    round_line_strips: Vec<LineVertex3>,
-    round_line_strip_indices: Vec<usize>,
     screen_width: u32,
     screen_height: u32,
 }
@@ -62,8 +59,6 @@ impl EdgeDrawer {
             dashed_line_strip_pipeline,
             buffers,
             bind_groups,
-            round_line_strips: Vec::new(),
-            round_line_strip_indices: Vec::new(),
             screen_width,
             screen_height,
         }
@@ -74,11 +69,86 @@ impl EdgeDrawer {
         self.screen_height = screen_height;
     }
 
-    pub fn begin(&mut self) -> LineRecorder {
-        self.round_line_strips.clear();
-        self.round_line_strip_indices.clear();
+    #[allow(clippy::too_many_arguments)]
+    pub fn draw(
+        &self,
+        rendered_line: &RenderedLine,
+        encoder: &mut wgpu::CommandEncoder,
+        render_target: &wgpu::TextureView,
+        depth_view: Option<&wgpu::TextureView>,
+        queue: &wgpu::Queue,
+        camera_matrix: Mat4,
+        transform: Mat4,
+        dash_size: f32,
+        gap_size: f32,
+    ) {
+        // Write dashed uniforms
+        let mut uniforms = LineUniforms {
+            proj: camera_matrix,
+            transform,
+            resolution: vec4(
+                self.screen_width as f32,
+                self.screen_height as f32,
+                dash_size,
+                gap_size,
+            ),
+        };
 
-        LineRecorder { line_drawer: self }
+        queue.write_buffer(&self.buffers.dashed_vertex_uniform, 0, bytemuck::bytes_of(&uniforms));
+
+        // Write solid uniforms
+        uniforms.resolution.z = 0.0; // Dash size
+        uniforms.resolution.w = 0.0; // Gap size
+
+        queue.write_buffer(&self.buffers.solid_vertex_uniform, 0, bytemuck::bytes_of(&uniforms));
+
+        encoder.push_debug_group("Line drawer");
+        {
+            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: None,
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: render_target,
+                    resolve_target: None,
+                    ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: true },
+                })],
+                depth_stencil_attachment: depth_view.map(|view| {
+                    wgpu::RenderPassDepthStencilAttachment {
+                        view,
+                        depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Load, store: true }),
+                        stencil_ops: None,
+                    }
+                }),
+            });
+
+            // Render dashed line strips
+            render_pass.set_pipeline(&self.dashed_line_strip_pipeline);
+            render_pass.set_vertex_buffer(0, self.buffers.round_strip_geometry.slice(..));
+            render_pass.set_vertex_buffer(1, rendered_line.vertex_buf.slice(..));
+            render_pass.set_bind_group(0, &self.bind_groups.dashed_vertex_uniform, &[]);
+
+            let mut offset = 0usize;
+            let vertex_count = self.buffers.round_strip_geometry_len as u32;
+
+            for line_strip_size in &rendered_line.line_sizes {
+                let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
+                offset += line_strip_size;
+                render_pass.draw(0..vertex_count, range);
+            }
+
+            // Render solid line strips
+            render_pass.set_pipeline(&self.solid_line_strip_pipeline);
+            render_pass.set_bind_group(0, &self.bind_groups.solid_vertex_uniform, &[]);
+
+            let mut offset = 0usize;
+            let vertex_count = self.buffers.round_strip_geometry_len as u32;
+
+            for line_strip_size in &rendered_line.line_sizes {
+                let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
+                offset += line_strip_size;
+                render_pass.draw(0..vertex_count, range);
+            }
+        }
+        encoder.pop_debug_group();
     }
 
     fn build_pipeline(
@@ -199,7 +269,6 @@ impl EdgeDrawer {
     }
 
     fn build_buffers(device: &wgpu::Device) -> Buffers {
-        const MAX_LINES: u64 = 40_000;
         const CIRCLE_RESOLUTION: usize = 30;
 
         // Uniform buffer
@@ -261,132 +330,49 @@ impl EdgeDrawer {
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
-        // Round strip instances
-        let round_strip_instances = device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("Line strip instance buffer"),
-            size: MAX_LINES * std::mem::size_of::<LineVertex3>() as u64,
-            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
-
         Buffers {
             solid_vertex_uniform,
             dashed_vertex_uniform,
             round_strip_geometry,
             round_strip_geometry_len: round_strip_vertices.len(),
-            round_strip_instances,
         }
     }
 }
 
-pub struct LineRecorder<'a> {
-    line_drawer: &'a mut EdgeDrawer,
+pub struct LineBuilder {
+    round_line_strips: Vec<LineVertex3>,
+    round_line_strip_indices: Vec<usize>,
 }
 
-impl LineRecorder<'_> {
+impl LineBuilder {
+    pub fn new() -> Self {
+        Self { round_line_strips: Vec::new(), round_line_strip_indices: Vec::new() }
+    }
+
     /// A special-case where round line joins and caps are desired. This can be achieved
     /// with a single draw call.
-    pub fn draw_round_line_strip(&mut self, positions: &[LineVertex3]) {
-        self.line_drawer.round_line_strips.extend_from_slice(positions);
-        self.line_drawer.round_line_strip_indices.push(positions.len());
+    pub fn add_round_line_strip(&mut self, positions: &[LineVertex3]) {
+        self.round_line_strips.extend_from_slice(positions);
+        self.round_line_strip_indices.push(positions.len());
     }
 
-    #[allow(clippy::too_many_arguments)]
-    pub fn end(
-        self,
-        encoder: &mut wgpu::CommandEncoder,
-        render_target: &wgpu::TextureView,
-        depth_view: Option<&wgpu::TextureView>,
-        queue: &wgpu::Queue,
-        camera_matrix: Mat4,
-        transform: Mat4,
-        dash_size: f32,
-        gap_size: f32,
-    ) {
-        queue.write_buffer(
-            &self.line_drawer.buffers.round_strip_instances,
-            0,
-            bytemuck::cast_slice(&self.line_drawer.round_line_strips),
-        );
+    pub fn build(self, device: &wgpu::Device) -> RenderedLine {
+        let vertex_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Rendered line vertex buffer"),
+            contents: bytemuck::cast_slice(&self.round_line_strips),
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+        });
 
-        // Write dashed uniforms
-        let mut uniforms = LineUniforms {
-            proj: camera_matrix,
-            transform,
-            resolution: vec4(
-                self.line_drawer.screen_width as f32,
-                self.line_drawer.screen_height as f32,
-                dash_size,
-                gap_size,
-            ),
-        };
+        let line_sizes = self.round_line_strip_indices;
 
-        queue.write_buffer(
-            &self.line_drawer.buffers.dashed_vertex_uniform,
-            0,
-            bytemuck::bytes_of(&uniforms),
-        );
-
-        // Write solid uniforms
-        uniforms.resolution.z = 0.0; // Dash size
-        uniforms.resolution.w = 0.0; // Gap size
-
-        queue.write_buffer(
-            &self.line_drawer.buffers.solid_vertex_uniform,
-            0,
-            bytemuck::bytes_of(&uniforms),
-        );
-
-        encoder.push_debug_group("Line drawer");
-        {
-            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: None,
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: render_target,
-                    resolve_target: None,
-                    ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: true },
-                })],
-                depth_stencil_attachment: depth_view.map(|view| {
-                    wgpu::RenderPassDepthStencilAttachment {
-                        view,
-                        depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Load, store: true }),
-                        stencil_ops: None,
-                    }
-                }),
-            });
-
-            // Render dashed line strips
-            render_pass.set_pipeline(&self.line_drawer.dashed_line_strip_pipeline);
-            render_pass
-                .set_vertex_buffer(0, self.line_drawer.buffers.round_strip_geometry.slice(..));
-            render_pass
-                .set_vertex_buffer(1, self.line_drawer.buffers.round_strip_instances.slice(..));
-            render_pass.set_bind_group(0, &self.line_drawer.bind_groups.dashed_vertex_uniform, &[]);
-
-            let mut offset = 0usize;
-            let vertex_count = self.line_drawer.buffers.round_strip_geometry_len as u32;
-
-            for line_strip_size in &self.line_drawer.round_line_strip_indices {
-                let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
-                offset += line_strip_size;
-                render_pass.draw(0..vertex_count, range);
-            }
-
-            // Render solid line strips
-            render_pass.set_pipeline(&self.line_drawer.solid_line_strip_pipeline);
-            render_pass.set_bind_group(0, &self.line_drawer.bind_groups.solid_vertex_uniform, &[]);
-
-            let mut offset = 0usize;
-            let vertex_count = self.line_drawer.buffers.round_strip_geometry_len as u32;
-
-            for line_strip_size in &self.line_drawer.round_line_strip_indices {
-                let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
-                offset += line_strip_size;
-                render_pass.draw(0..vertex_count, range);
-            }
-        }
-        encoder.pop_debug_group();
+        RenderedLine { vertex_buf, line_sizes }
     }
+}
+
+#[derive(Debug)]
+pub struct RenderedLine {
+    vertex_buf: wgpu::Buffer,
+    line_sizes: Vec<usize>,
 }
 
 #[repr(C)]
