@@ -10,7 +10,7 @@ use opencascade::{
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
-        DepthTexture, FullscreenQuad, GraphicsDevice,
+        DepthTexture, GraphicsDevice,
     },
     util::FPSCounter,
     GameApp,
@@ -27,7 +27,6 @@ mod surface_drawer;
 
 struct ViewerApp {
     depth_texture: DepthTexture,
-    fullscreen_quad: FullscreenQuad,
     text_system: TextSystem,
     fps_counter: FPSCounter,
     line_drawer: EdgeDrawer,
@@ -95,7 +94,6 @@ impl GameApp for ViewerApp {
 
         Self {
             depth_texture,
-            fullscreen_quad: FullscreenQuad::new(device, surface_texture_format),
             text_system: TextSystem::new(device, surface_texture_format, width, height),
             fps_counter: FPSCounter::new(),
             line_drawer: EdgeDrawer::new(
@@ -154,8 +152,6 @@ impl GameApp for ViewerApp {
             graphics_device.queue(),
             &frame_encoder.backbuffer_view,
         );
-
-        self.fullscreen_quad.render(&mut frame_encoder.encoder, &smaa_render_target);
 
         let camera_matrix = build_camera_matrix(width, height);
         let transform = Mat4::from_rotation_z(self.angle)
