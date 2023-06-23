@@ -1,5 +1,8 @@
-use crate::surface_drawer::{CadMesh, SurfaceDrawer};
-use glam::{dvec3, vec3, Mat4};
+use crate::{
+    edge_drawer::{EdgeDrawer, LineBuilder, LineVertex3, RenderedLine},
+    surface_drawer::{CadMesh, SurfaceDrawer},
+};
+use glam::{dvec3, vec3, DVec3, Mat4};
 use opencascade::{
     primitives::{Face, Shape, Solid, Wire},
     workplane::Workplane,
@@ -7,7 +10,7 @@ use opencascade::{
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
-        DepthTexture, FullscreenQuad, GraphicsDevice, LineDrawer, LineVertex3,
+        DepthTexture, GraphicsDevice,
     },
     util::FPSCounter,
     GameApp,
@@ -19,17 +22,17 @@ use winit::{
     window::Window,
 };
 
+mod edge_drawer;
 mod surface_drawer;
 
 struct ViewerApp {
     depth_texture: DepthTexture,
-    fullscreen_quad: FullscreenQuad,
     text_system: TextSystem,
     fps_counter: FPSCounter,
-    line_drawer: LineDrawer,
+    line_drawer: EdgeDrawer,
     surface_drawer: SurfaceDrawer,
     smaa_target: SmaaTarget,
-    model_edges: Vec<Vec<LineVertex3>>,
+    rendered_edges: RenderedLine,
     cad_mesh: CadMesh,
     angle: f32,
     scale: f32,
@@ -44,23 +47,36 @@ impl GameApp for ViewerApp {
         let keycap = keycap();
 
         let mesh = keycap.mesh();
-        let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device);
+        let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
 
-        let mut model_edges = vec![];
-
-        let thickness = 2.0;
+        // Pre-render the model edges.
+        let line_thickness = 3.0;
+        let mut line_builder = LineBuilder::new();
 
         for edge in keycap.edges() {
             let mut segments = vec![];
+
+            let mut last_point: Option<DVec3> = None;
+            let mut length_so_far = 0.0;
+
             for point in edge.approximation_segments() {
+                if let Some(last_point) = last_point {
+                    length_so_far += (point - last_point).length();
+                }
+
                 segments.push(LineVertex3::new(
                     vec3(point.x as f32, point.y as f32, point.z as f32),
-                    thickness,
+                    line_thickness,
+                    length_so_far as f32,
                 ));
+
+                last_point = Some(point);
             }
 
-            model_edges.push(segments);
+            line_builder.add_round_line_strip(&segments);
         }
+
+        let rendered_edges = line_builder.build(graphics_device.device());
 
         // Create SMAA target
         let (width, height) = graphics_device.surface_dimensions();
@@ -78,10 +94,9 @@ impl GameApp for ViewerApp {
 
         Self {
             depth_texture,
-            fullscreen_quad: FullscreenQuad::new(device, surface_texture_format),
             text_system: TextSystem::new(device, surface_texture_format, width, height),
             fps_counter: FPSCounter::new(),
-            line_drawer: LineDrawer::new(
+            line_drawer: EdgeDrawer::new(
                 device,
                 surface_texture_format,
                 depth_texture_format,
@@ -94,8 +109,8 @@ impl GameApp for ViewerApp {
                 depth_texture_format,
             ),
             smaa_target,
-            model_edges,
             cad_mesh,
+            rendered_edges,
             angle: 0.0,
             scale: 1.0,
         }
@@ -138,8 +153,6 @@ impl GameApp for ViewerApp {
             &frame_encoder.backbuffer_view,
         );
 
-        self.fullscreen_quad.render(&mut frame_encoder.encoder, &smaa_render_target);
-
         let camera_matrix = build_camera_matrix(width, height);
         let transform = Mat4::from_rotation_z(self.angle)
             * Mat4::from_scale(vec3(self.scale, self.scale, self.scale));
@@ -154,18 +167,19 @@ impl GameApp for ViewerApp {
             transform,
         );
 
-        let mut line_recorder = self.line_drawer.begin();
-        for segment_list in &self.model_edges {
-            line_recorder.draw_round_line_strip(segment_list);
-        }
+        let dash_size = 0.5;
+        let gap_size = 0.5;
 
-        line_recorder.end(
+        self.line_drawer.draw(
+            &self.rendered_edges,
             &mut frame_encoder.encoder,
             &smaa_render_target,
             Some(&self.depth_texture.view),
             graphics_device.queue(),
             build_camera_matrix(width, height),
             transform,
+            dash_size,
+            gap_size,
         );
 
         self.text_system.render_horizontal(

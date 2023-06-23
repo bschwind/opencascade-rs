@@ -136,7 +136,10 @@ impl SurfaceDrawer {
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: render_target,
                 resolve_target: None,
-                ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: true },
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.3, g: 0.3, b: 0.3, a: 1.0 }),
+                    store: true,
+                },
             })],
             depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                 view: depth_view,
@@ -175,9 +178,7 @@ pub struct CadMesh {
 }
 
 impl CadMesh {
-    pub fn from_mesh(mesh: &Mesh, graphics_device: &GraphicsDevice) -> Self {
-        let device = graphics_device.device();
-
+    pub fn from_mesh(mesh: &Mesh, device: &wgpu::Device) -> Self {
         let vertex_data: Vec<_> = mesh
             .vertices
             .iter()
