@@ -32,6 +32,10 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKGeomBase");
     println!("cargo:rustc-link-lib=static=TKBRep");
     println!("cargo:rustc-link-lib=static=TKPrim");
+    println!("cargo:rustc-link-lib=static=TKSTEP");
+    println!("cargo:rustc-link-lib=static=TKSTEPAttr");
+    println!("cargo:rustc-link-lib=static=TKSTEPBase");
+    println!("cargo:rustc-link-lib=static=TKSTEP209");
     println!("cargo:rustc-link-lib=static=TKSTL");
     println!("cargo:rustc-link-lib=static=TKMesh");
     println!("cargo:rustc-link-lib=static=TKShHealing");
@@ -40,6 +44,7 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKBO");
     println!("cargo:rustc-link-lib=static=TKOffset");
     println!("cargo:rustc-link-lib=static=TKV3d");
+    println!("cargo:rustc-link-lib=static=TKXSBase");
 
     if is_windows {
         println!("cargo:rustc-link-lib=dylib=user32");

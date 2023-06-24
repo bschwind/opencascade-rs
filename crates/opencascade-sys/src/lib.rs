@@ -22,6 +22,16 @@ pub mod ffi {
         TopAbs_EXTERNAL,
     }
 
+    #[derive(Debug)]
+    #[repr(u32)]
+    pub enum IFSelect_ReturnStatus {
+        IFSelect_RetVoid,
+        IFSelect_RetDone,
+        IFSelect_RetError,
+        IFSelect_RetFail,
+        IFSelect_RetStop,
+    }
+
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -672,7 +682,24 @@ pub mod ffi {
         pub fn Build(self: Pin<&mut BRepFeat_MakeCylindricalHole>);
         pub fn Shape(self: &BRepFeat_MakeCylindricalHole) -> &TopoDS_Shape;
 
-        // Data export
+        // Data Import
+        type STEPControl_Reader;
+        type IFSelect_ReturnStatus;
+
+        #[cxx_name = "construct_unique"]
+        pub fn STEPControl_Reader_ctor() -> UniquePtr<STEPControl_Reader>;
+
+        pub fn read_step(
+            reader: Pin<&mut STEPControl_Reader>,
+            filename: String,
+        ) -> IFSelect_ReturnStatus;
+        pub fn TransferRoots(
+            self: Pin<&mut STEPControl_Reader>,
+            progress: &Message_ProgressRange,
+        ) -> i32;
+        pub fn one_shape(reader: &STEPControl_Reader) -> UniquePtr<TopoDS_Shape>;
+
+        // Data Export
         type StlAPI_Writer;
 
         #[cxx_name = "construct_unique"]

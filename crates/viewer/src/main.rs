@@ -44,7 +44,9 @@ impl GameApp for ViewerApp {
     }
 
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
-        let keycap = keycap();
+        // Model sourced from:
+        // https://nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-0
+        let keycap = Shape::read_step("crates/viewer/models/nist_ftc_06.step");
 
         let mesh = keycap.mesh();
         let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
@@ -225,6 +227,7 @@ fn cube() -> Shape {
     face.extrude(dvec3(0.0, 0.0, 10.0)).to_shape()
 }
 
+#[allow(unused)]
 fn keycap() -> Shape {
     const KEYCAP_PITCH: f64 = 19.05;
 

@@ -42,6 +42,7 @@
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
 #include <StdPrs_ToolTriangulatedShape.hxx>
+#include <STEPControl_Reader.hxx>
 #include <StlAPI_Writer.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp_Explorer.hxx>
@@ -253,7 +254,16 @@ inline std::unique_ptr<BRepFeat_MakeCylindricalHole> BRepFeat_MakeCylindricalHol
   return std::unique_ptr<BRepFeat_MakeCylindricalHole>(new BRepFeat_MakeCylindricalHole());
 }
 
-// Data export
+// Data Import
+inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String theFileName) {
+  return reader.ReadFile(theFileName.c_str());
+}
+
+inline std::unique_ptr<TopoDS_Shape> one_shape(const STEPControl_Reader &reader) {
+  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
+}
+
+// Data Export
 inline bool write_stl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::String theFileName) {
   return writer.Write(theShape, theFileName.c_str());
 }
