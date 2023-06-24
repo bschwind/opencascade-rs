@@ -39,10 +39,10 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <NCollection_Array1.hxx>
 #include <Poly_Connect.hxx>
+#include <STEPControl_Reader.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
 #include <StdPrs_ToolTriangulatedShape.hxx>
-#include <STEPControl_Reader.hxx>
 #include <StlAPI_Writer.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp_Explorer.hxx>
