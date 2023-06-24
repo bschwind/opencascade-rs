@@ -164,6 +164,7 @@ pub mod ffi {
         pub fn Y(self: &gp_Pnt) -> f64;
         pub fn Z(self: &gp_Pnt) -> f64;
         pub fn Distance(self: &gp_Pnt, other: &gp_Pnt) -> f64;
+        pub fn Transform(self: Pin<&mut gp_Pnt>, transform: &gp_Trsf);
 
         #[cxx_name = "construct_unique"]
         pub fn new_point_2d(x: f64, y: f64) -> UniquePtr<gp_Pnt2d>;
@@ -730,6 +731,8 @@ pub mod ffi {
 
         #[cxx_name = "construct_unique"]
         pub fn TopLoc_Location_from_transform(transform: &gp_Trsf) -> UniquePtr<TopLoc_Location>;
+
+        pub fn TopLoc_Location_Transformation(location: &TopLoc_Location) -> UniquePtr<gp_Trsf>;
 
         type Handle_Poly_Triangulation;
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;

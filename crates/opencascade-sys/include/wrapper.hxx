@@ -239,6 +239,10 @@ inline std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex &vertex) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(BRep_Tool::Pnt(vertex)));
 }
 
+inline std::unique_ptr<gp_Trsf> TopLoc_Location_Transformation(const TopLoc_Location &location) {
+  return std::unique_ptr<gp_Trsf>(new gp_Trsf(location.Transformation()));
+}
+
 inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
                                                                           TopLoc_Location &location) {
   return std::unique_ptr<Handle_Poly_Triangulation>(
