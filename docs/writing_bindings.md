@@ -37,9 +37,54 @@ There are some rules to how we define these functions in our code:
 
 #### `construct_unique`
 
+Providing bindings to C++ constructors is somewhat [tricky](https://github.com/dtolnay/cxx/issues/280) and not well supported in cxx. At the same time, we can't have functions with return `T` directly, it needs to return either a reference or a smart pointer as stated previously.
 
+So in practice, most constructor functions exposed in this crate return a `UniquePtr<T>`. It would be tedious to have to manually define a C++ wrapper function for each and every constructor, so with the [clever use of templates](https://github.com/dtolnay/cxx/issues/280#issuecomment-1344153115) we can define one C++ function which follows a pattern of taking some number of arguments, calling the constructor of `T` with those arguments, and returning a `UniquePtr` to `T`:
+
+```c++
+// Generic template constructor
+template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
+  return std::unique_ptr<T>(new T(args...));
+}
+```
+
+Here is an example of binding to the constructor of `BRepPrimAPI_MakeBox`, which is a class which constructs...a box (the physical kind, not the Rust kind).
+
+```rust
+#[cxx_name = "construct_unique"]
+pub fn BRepPrimAPI_MakeBox_ctor(
+    point: &gp_Pnt,
+    dx: f64,
+    dy: f64,
+    dz: f64,
+) -> UniquePtr<BRepPrimAPI_MakeBox>;
+```
+
+With this declaration, we can bind to a C++ constructor and name it `BRepPrimAPI_MakeBox_ctor` on the Rust side without having to write any extra C++ code.
 
 ### wrapper.hxx
+
+Sometimes automatic bindings with cxx just doesn't work out - you could be trying to access a static member of a class, cxx can't see through the polymorphism for a parent class method you're trying to call, or the constructor or function you're trying to call doesn't quite follow the `construct_unique` pattern shown above.
+
+As a last resort, you can define your own wrapper C++ function to have the type signature and logic that you want.
+
+Example: The `BRepAdaptor_Curve` class has a `Value()` function which returns `gp_Pnt` directly. Although `gp_Pnt` is a pretty trivial class with XYZ coordinates, we can't return it directly because of the rules imposed by cxx.
+
+To work around this, I define a Rust function in the cxx bridge like so:
+
+```rust
+pub fn BRepAdaptor_Curve_value(curve: &BRepAdaptor_Curve, u: f64) -> UniquePtr<gp_Pnt>;
+```
+
+Then I add a C++ function with the same name in `wrapper.hxx`:
+
+```c++
+inline std::unique_ptr<gp_Pnt> BRepAdaptor_Curve_value(const BRepAdaptor_Curve &curve, const Standard_Real U) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve.Value(U)));
+}
+```
+
+This could possibly also be solved with a clever C++ template, I'm not sure.
 
 ## Example: Binding to the STEP File Import Functionality
 

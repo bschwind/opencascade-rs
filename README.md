@@ -68,8 +68,14 @@ $ cargo run --release --bin viewer
 
 ## Code Formatting
 
+### Rust Code
 ```
 $ cargo +nightly fmt
+```
+
+### C++ Code
+```
+$ clang-format -i crates/opencascade-sys/include/wrapper.hxx
 ```
 
 ## Comparison to other tools
