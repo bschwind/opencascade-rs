@@ -151,7 +151,15 @@ inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String 
 }
 ```
 
-### Step 3 - Declare the rest of the C++ functions
+### Step 3 - Include the proper files in wrapper.hxx
+
+In our case, we need to throw this include at the top of `wrapper.hxx`
+
+```c++
+#include <STEPControl_Reader.hxx>
+```
+
+### Step 4 - Declare the rest of the C++ functions
 
 The next function to bind is `reader.TransferRoots()`. Its C++ definition looks like this:
 
@@ -190,7 +198,27 @@ inline std::unique_ptr<TopoDS_Shape> one_shape(const STEPControl_Reader &reader)
 }
 ```
 
-### Step 4 - Give it a nicer Rust API
+### Step 5 - Link to the OpenCascade libraries in `build.rs`
+
+OpenCascade is split up into lots of smaller libraries, and sometimes if you're bringing in new functionality for the first time, you may need to link to a new library. Otherwise you'll run into huge amounts of linker errors if you try to build a binary based on this new code.
+
+In the case of adding STEP file support, we need to link to five (!) different libraries. We'll add them in `build.rs`:
+
+```rust
+println!("cargo:rustc-link-lib=static=TKSTEP");
+println!("cargo:rustc-link-lib=static=TKSTEPAttr");
+println!("cargo:rustc-link-lib=static=TKSTEPBase");
+println!("cargo:rustc-link-lib=static=TKSTEP209");
+println!("cargo:rustc-link-lib=static=TKXSBase");
+```
+
+How do you know which libraries to link? If you look up `STEPControl_Reader` you'll likely arrive at [this page](https://dev.opencascade.org/doc/refman/html/class_s_t_e_p_control___reader.html). You can find the library name it's contained in here:
+
+![TKSTEP](./images/cascade_library.png)
+
+The rest of the libraries were found through trial and error. The linker will complain that symbols are missing, so copy-paste those symbols into a search engine, find them on OpenCascade's documentation site, and note which library they came from.
+
+### Step 6 - Give it a nicer Rust API
 
 Finally, we can create a higher level Rust function which reads a STEP file and returns a `Shape` primitive:
 
