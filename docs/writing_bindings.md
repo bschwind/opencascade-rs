@@ -89,3 +89,123 @@ This could possibly also be solved with a clever C++ template, I'm not sure.
 ## Example: Binding to the STEP File Import Functionality
 
 In order to give a concrete "tutorial" on binding to new functionality in OpenCascade, I'll go over what was required to add STEP file import functionality to this crate. You can see all the changes for that functionality in [this PR](https://github.com/bschwind/opencascade-rs/pull/33).
+
+You can see the rough outline of loading a STEP file in native OpenCascade code [here](https://dev.opencascade.org/doc/overview/html/occt_user_guides__step.html):
+
+```c++
+STEPControl_Reader reader;
+reader.ReadFile("object.step");
+reader.TransferRoots();
+TopoDS_Shape shape = reader.OneShape();
+```
+
+
+### Step 1 - Declare the C++ types and functions in the bridge file
+First we need to make the cxx bridge aware of the STEPControl_Reader type, and define a constructor function:
+
+```rust
+type STEPControl_Reader;
+
+#[cxx_name = "construct_unique"]
+pub fn STEPControl_Reader_ctor() -> UniquePtr<STEPControl_Reader>;
+```
+
+Mercifully, the reader constructor requires zero parameters. But the next step, reading a from a file, requires us to pass a String argument for the file name. cxx provides some facilities for converting between Rust strings and C++ strings, but now we'll have to define a function manually in `wrapper.hxx`.
+
+```rust
+pub fn read_step(
+    reader: Pin<&mut STEPControl_Reader>,
+    filename: String,
+) -> IFSelect_ReturnStatus;
+```
+
+This returns a `IFSelect_ReturnStatus` so we also need to declare that type in the bridge file:
+
+```rust
+type IFSelect_ReturnStatus;
+```
+
+The cool part here is that `IFSelect_ReturnStatus` is just a simple enum, so we can actually declare a Rust enum of the same name inside of the bridge `ffi` module, but outside of the `unsafe extern "C++" {}` block:
+
+```rust
+#[derive(Debug)]
+#[repr(u32)]
+pub enum IFSelect_ReturnStatus {
+    IFSelect_RetVoid,
+    IFSelect_RetDone,
+    IFSelect_RetError,
+    IFSelect_RetFail,
+    IFSelect_RetStop,
+}
+```
+
+This means we can have functions which return `IFSelect_ReturnStatus` directly instead of dealing with it behind a reference or smart pointer.
+
+### Step 2 - Write the wrapper C++ code
+
+The wrapper functions usually end up being trivial, they usually just have an easy-to-bind signature from Rust and then do whatever translation is required. In this case, we're returning an enum that is declared
+
+```c++
+inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String theFileName) {
+  return reader.ReadFile(theFileName.c_str());
+}
+```
+
+### Step 3 - Declare the rest of the C++ functions
+
+The next function to bind is `reader.TransferRoots()`. Its C++ definition looks like this:
+
+```c++
+Standard_EXPORT Standard_Integer TransferRoots(const Message_ProgressRange& theProgress = Message_ProgressRange());
+```
+
+Luckily we can bind directly to it with Rust:
+
+```rust
+pub fn TransferRoots(
+    self: Pin<&mut STEPControl_Reader>,
+    progress: &Message_ProgressRange,
+) -> i32;
+```
+
+Note that `TransferRoots` is not a `const` function so we need to pass `Pin<&mut STEPControl_Reader>`.
+
+Finally, there is `reader.OneShape()`:
+
+```c++
+Standard_EXPORT TopoDS_Shape OneShape() const;
+```
+
+Unfortunately, this returns a bare `TopoDS_Shape` so we can't directly bind to it, we'll have to create a wrapper C++ function.
+
+```rust
+pub fn one_shape(reader: &STEPControl_Reader) -> UniquePtr<TopoDS_Shape>;
+```
+
+and
+
+```c++
+inline std::unique_ptr<TopoDS_Shape> one_shape(const STEPControl_Reader &reader) {
+  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
+}
+```
+
+### Step 4 - Give it a nicer Rust API
+
+Finally, we can create a higher level Rust function which reads a STEP file and returns a `Shape` primitive:
+
+```rust
+pub fn from_step_file<P: AsRef<Path>>(path: P) -> Shape {
+    let mut reader = STEPControl_Reader_ctor();
+    let _return_status =
+        read_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
+    reader.pin_mut().TransferRoots(&Message_ProgressRange_ctor());
+
+    let inner = one_shape(&reader);
+
+    // Assuming a Shape struct has a UniquePtr<TopoDS_Shape> field called `inner`
+    Shape { inner }
+}
+```
+
+Of course, a better version would inquire into the STEP translation process and return a `Result` so we can handle the case where something fails.
