@@ -5,7 +5,7 @@ Rust bindings to OpenCascade. The code is currently a major work in progress.
 ## Major Goals
 * Define 3D CAD models suitable for 3D printing or machining, in ergonomic Rust code
 * Code-first approach, but allow use of a GUI where it makes sense (2D sketches)
-* Support fillets, chamfers, lofts, surface filling, pipes, extrusions, lathes, etc.
+* Support fillets, chamfers, lofts, surface filling, pipes, extrusions, revolutions, etc.
 * Support quick compile times for faster iterations
 * Ability to import/export STEP files, STL files, SVG, DXF, KiCAD files, and hopefully more!
 * Easy to install the viewer app (provide pre-built binaries for major platforms)
@@ -17,11 +17,11 @@ Rust bindings to OpenCascade. The code is currently a major work in progress.
 
 This project was born out of me designing [my own keyboard](https://github.com/bschwind/key-ripper) and wanting to make a 3D-printed or CNCed aluminum case for it. In typical over-engineering fashion, I didn't want to just use Fusion360 and call it a day. I wanted a fully parameterized, fully open-source, code-based approach so I can easily make changes, and store the model code in version control. I also want to be fairly confident I can build these models any time in the future given I have a C++/Rust toolchain available.
 
-So I researched what kernels are out there, learned that OpenCascade is one of the few open-source B-Rep (boundary representation) kernels out there, and started writing bindings to it with cxx.rs to see if usage of the kernel is feasible. Turns out it is!
+So I researched what kernels are out there, learned that OpenCascade is one of the few open-source B-Rep (boundary representation) kernels available, and started writing bindings to it with cxx.rs to see if usage of the kernel is feasible. Turns out it is!
 
 ### Why Rust?
 
-At this point I'm most comfortable with Rust, so most tools I build will be with Rust. I also don't find any joy in creating my own language or forcing people to learn a new one. Rust is a far better language than I could ever make myself, and contains pretty much every facility I would want for defining 3D models in code. Ultimately it's a hobby project and when you run a hobby project, you get to pick whatever you want :)
+At this point I'm most comfortable with Rust, so most tools I build will be with Rust. I also don't find any joy in creating my own language or forcing people to learn one I created. Rust is a far better language than I could ever make myself, and contains pretty much every facility I would want for defining 3D models in code. Ultimately it's a hobby project and when you run a hobby project, you get to pick whatever you want :)
 
 There are other benefits:
 
@@ -54,7 +54,7 @@ There are low level examples which are more or less directly calling OpenCascade
 
 ### Higher Level
 
-The [higher level examples](./crates/opencascade/examples) use more ergonomic Rust APIs, though the exact API is still in flux and subject ot change.
+The [higher level examples](./crates/opencascade/examples) use more ergonomic Rust APIs, though the exact API is still in flux and subject to change.
 
 ## Viewer Application
 

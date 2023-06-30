@@ -1,6 +1,6 @@
 # Binding to OpenCascade Classes and Functions
 
-OpenCascade is a huge C++ project, spanning mulitple decades. It has an impressive amount of functionality packed in, though it is somewhat hidden behind a (in my opinion) ugly/intimidating API.
+OpenCascade is a huge C++ project, spanning multiple decades. It has an impressive amount of functionality packed in, though it is somewhat hidden behind a (in my opinion) ugly/intimidating API.
 
 One goal of this project is to expose a more ergonomic and approachable API on top of the goodies within OpenCascade so more people can use it to build cool things. OpenCascade leans pretty hard into C++, and so we need to use something more than just `bindgen` in order to have Rust call it safely.
 
@@ -34,6 +34,10 @@ There are some rules to how we define these functions in our code:
 * If you're binding to a free-floating function, then avoid using the special `self` keyword as the name for a function argument, and just use `&T` and `Pin<&mut T>` as appropriate.
 * From what I can tell, generics don't work from Rust to C++ templates. If you have a C++ type called `Handle<Edge>`, you'll need to declare your own C++ type called `HandleEdge` or whatever you want, and alias it to the full type (ex:`typedef opencascade::handle<Edge> HandleEdge;`
 * You can use `#[cxx_name = "SomeCPPFunctionName"]` to tell `cxx` the _real_ name of the C++ function you want to use, and `#[rust_name = "some_rust_fn_name"]` to control what the name of the function is exposed to the Rust side of things. If you don't use these attributes, the exported Rust function is exactly the same as the C++ function name.
+
+#### Getting a `Pin<&mut T>`
+
+If you have a `some_var: UniquePtr<T>`, you can get a `Pin<&mut T>` by calling `some_var.pin_mut()`. `some_var` must be declared as `mut` to use this.
 
 #### `construct_unique`
 
@@ -110,7 +114,7 @@ type STEPControl_Reader;
 pub fn STEPControl_Reader_ctor() -> UniquePtr<STEPControl_Reader>;
 ```
 
-Mercifully, the reader constructor requires zero parameters. But the next step, reading a from a file, requires us to pass a String argument for the file name. cxx provides some facilities for converting between Rust strings and C++ strings, but now we'll have to define a function manually in `wrapper.hxx`.
+Mercifully, the reader constructor requires zero parameters. But the next step, reading from a file, requires us to pass a String argument for the file name. cxx provides some facilities for converting between Rust strings and C++ strings, but now we'll have to define a function manually in `wrapper.hxx`.
 
 ```rust
 pub fn read_step(
@@ -143,7 +147,7 @@ This means we can have functions which return `IFSelect_ReturnStatus` directly i
 
 ### Step 2 - Write the wrapper C++ code
 
-The wrapper functions usually end up being trivial, they usually just have an easy-to-bind signature from Rust and then do whatever translation is required. In this case, we're returning an enum that is declared
+The wrapper functions usually end up being trivial, they usually just have an easy-to-bind signature from Rust and then do whatever translation is required. In this case, we're returning an enum that is declared.
 
 ```c++
 inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String theFileName) {
@@ -216,7 +220,7 @@ How do you know which libraries to link? If you look up `STEPControl_Reader` you
 
 ![TKSTEP](./images/cascade_library.png)
 
-The rest of the libraries were found through trial and error. The linker will complain that symbols are missing, so copy-paste those symbols into a search engine, find them on OpenCascade's documentation site, and note which library they came from.
+The rest of the libraries were found through trial and error. The linker will complain that symbols are missing, so copy-paste those symbols into a search engine, find them on OpenCascade's documentation site, and note which library they came from. Alternatively, you could poke through the project's CMake and other build files to determine which libraries you need to link to.
 
 ### Step 6 - Give it a nicer Rust API
 
