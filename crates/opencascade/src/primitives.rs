@@ -1,20 +1,20 @@
-use crate::{workplane::Workplane, Error, TopoDS_Shape_to_owned};
+use crate::{gp_Ax2_ctor, workplane::Workplane, Error, TopoDS_Shape_to_owned};
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi::{
     cast_compound_to_shape, cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape,
-    gp_Ax1_ctor, gp_Dir, gp_Dir_ctor, gp_Pnt, gp_Vec, map_shapes,
+    gp_Ax1_ctor, gp_Ax2, gp_Circ_ctor, gp_Dir, gp_Dir_ctor, gp_Pnt, gp_Vec, map_shapes,
     new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape, new_point,
     new_transform, new_vec, one_shape, outer_wire, read_step, shape_list_to_vector,
     triangulated_shape_normal, write_stl, BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value,
     BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
-    BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt, BRepBuilderAPI_MakeFace_wire,
-    BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_Transform_ctor,
-    BRepFilletAPI_MakeFillet2d_add_fillet, BRepFilletAPI_MakeFillet2d_ctor,
-    BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor, BRepGProp_SurfaceProperties,
-    BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
-    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, BRep_Tool_Triangulation,
-    GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
+    BRepBuilderAPI_MakeEdge_circle, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
+    BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
+    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
+    BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
+    BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor,
+    BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
+    BRep_Tool_Triangulation, GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
     GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
     GeomAPI_ProjectPointOnSurf_ctor, Handle_Poly_Triangulation_Get, Message_ProgressRange_ctor,
@@ -40,6 +40,10 @@ pub fn make_dir(p: DVec3) -> UniquePtr<gp_Dir> {
 
 pub fn make_vec(vec: DVec3) -> UniquePtr<gp_Vec> {
     new_vec(vec.x, vec.y, vec.z)
+}
+
+pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<gp_Ax2> {
+    gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
 }
 
 pub struct Vertex {
@@ -69,7 +73,18 @@ impl Edge {
         Self { inner }
     }
 
-    pub fn circle() {}
+    pub fn circle(center: DVec3, normal: DVec3, radius: f64) -> Self {
+        let axis = make_axis_2(center, normal);
+
+        let make_circle = gp_Circ_ctor(&axis, radius);
+
+        let mut make_edge = BRepBuilderAPI_MakeEdge_circle(&make_circle);
+
+        let edge = make_edge.pin_mut().Edge();
+        let inner = TopoDS_Edge_to_owned(edge);
+
+        Self { inner }
+    }
 
     pub fn ellipse() {}
 
@@ -568,6 +583,17 @@ impl Shape {
         Self { inner }
     }
 
+    pub fn union(&self, other: &Solid) -> Shape {
+        let other_inner_shape = cast_solid_to_shape(&other.inner);
+
+        let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.inner, other_inner_shape);
+
+        let fuse_shape = fuse_operation.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(fuse_shape);
+
+        Shape { inner }
+    }
+
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
         let mut stl_writer = StlAPI_Writer_ctor();
         let triangulation = BRepMesh_IncrementalMesh_ctor(&self.inner, 0.001);
@@ -750,6 +776,45 @@ impl Iterator for EdgeIterator {
 
 pub struct FaceIterator {
     explorer: UniquePtr<TopExp_Explorer>,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum Direction {
+    PosX,
+    NegX,
+    PosY,
+    NegY,
+    PosZ,
+    NegZ,
+    Custom(DVec3),
+}
+
+impl Direction {
+    pub fn normalized_vec(&self) -> DVec3 {
+        match self {
+            Self::PosX => DVec3::X,
+            Self::NegX => DVec3::NEG_X,
+            Self::PosY => DVec3::Y,
+            Self::NegY => DVec3::NEG_Y,
+            Self::PosZ => DVec3::Z,
+            Self::NegZ => DVec3::NEG_Z,
+            Self::Custom(dir) => dir.normalize(),
+        }
+    }
+}
+
+impl FaceIterator {
+    pub fn farthest(self, direction: Direction) -> Option<Face> {
+        let normalized_dir = direction.normalized_vec();
+
+        Iterator::max_by(self, |face_1, face_2| {
+            let dist_1 = face_1.center_of_mass().dot(normalized_dir);
+            let dist_2 = face_2.center_of_mass().dot(normalized_dir);
+
+            PartialOrd::partial_cmp(&dist_1, &dist_2)
+                .expect("Face center of masses should contain no NaNs")
+        })
+    }
 }
 
 impl Iterator for FaceIterator {

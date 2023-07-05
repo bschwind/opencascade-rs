@@ -209,6 +209,12 @@ pub mod ffi {
             arc: &GC_MakeArcOfCircle,
         ) -> UniquePtr<HandleGeomTrimmedCurve>;
 
+        // Circles
+        type gp_Circ;
+
+        #[cxx_name = "construct_unique"]
+        pub fn gp_Circ_ctor(axis: &gp_Ax2, radius: f64) -> UniquePtr<gp_Circ>;
+
         // Shapes
         type TopoDS_Vertex;
         type TopoDS_Edge;
@@ -302,6 +308,11 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeEdge_HandleGeomCurve(
             geom_curve_handle: &HandleGeomCurve,
+        ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepBuilderAPI_MakeEdge_circle(
+            circle: &gp_Circ,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
 
         #[cxx_name = "construct_unique"]

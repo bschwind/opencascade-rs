@@ -2,7 +2,7 @@
 // https://github.com/cubiq/OPK/blob/53f9d6a4123b0f309f87158115c83d19811b3484/opk.py
 use glam::dvec3;
 use opencascade::{
-    primitives::{Face, Solid},
+    primitives::{Direction, Face, Solid},
     workplane::Workplane,
 };
 
@@ -22,7 +22,7 @@ pub fn main() {
     let bottom_fillet = 0.5;
     let top_fillet = 5.0;
     let tension = if convex { 0.4 } else { 1.0 };
-    let pos = false; // Use POS-style stabilizers
+    let pos = true; // Use POS-style stabilizers
 
     let top_diff = base - top;
 
@@ -113,7 +113,7 @@ pub fn main() {
 
     let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top].into_iter());
 
-    let (keycap, _edges) = keycap.subtract(&shell);
+    let (mut keycap, _edges) = keycap.subtract(&shell);
 
     let temp_face = Face::from_wire(&shell_top).workplane().rect(bx * 2.0, by * 2.0);
     let _temp_face = Face::from_wire(&temp_face);
@@ -145,9 +145,18 @@ pub fn main() {
         }
     }
 
-    // for pos in stem_points {
+    let bottom_face =
+        keycap.faces().farthest(Direction::NegZ).expect("Keycap should have a bottom face");
 
-    // }
+    for (x, y) in stem_points {
+        let circle = bottom_face.workplane().circle(x, y, 2.75);
+        let circle = Face::from_wire(&circle);
+
+        // TODO(bschwind) - Add extrude_until(face) support.
+        let post = circle.extrude(bottom_face.normal_at_center() * -10.0);
+
+        keycap = keycap.union(&post);
+    }
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));
     let r2 = Face::from_wire(&Workplane::xy().rect(1.27, 4.15));
