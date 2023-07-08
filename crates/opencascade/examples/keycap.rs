@@ -154,13 +154,37 @@ pub fn main() {
     let bottom_face =
         keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
 
+    let bottom_workplane =
+        bottom_face.workplane().transformed(dvec3(0.0, 0.0, -4.5), dvec3(0.0, 0.0, 0.0));
+
     for (x, y) in stem_points {
-        let circle = bottom_face.workplane().circle(x, y, 2.75);
-        let circle = Face::from_wire(&circle);
+        let circle = bottom_workplane.circle(x, y, 2.75).to_face();
 
         let post = circle.extrude_to_face(&keycap, &temp_face);
 
         keycap = keycap.union_shape(&post);
+    }
+
+    for (x, y) in ribh_points {
+        let rect = bottom_workplane
+            .transformed(dvec3(x, y, 0.0), dvec3(0.0, 0.0, 0.0))
+            .rect(tx, 0.8)
+            .to_face();
+
+        let rib = rect.extrude_to_face(&keycap, &temp_face);
+
+        keycap = keycap.union_shape(&rib);
+    }
+
+    for (x, y) in ribv_points {
+        let rect = bottom_workplane
+            .transformed(dvec3(x, y, 0.0), dvec3(0.0, 0.0, 0.0))
+            .rect(0.8, ty)
+            .to_face();
+
+        let rib = rect.extrude_to_face(&keycap, &temp_face);
+
+        keycap = keycap.union_shape(&rib);
     }
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));

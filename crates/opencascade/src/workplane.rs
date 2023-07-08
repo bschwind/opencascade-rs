@@ -213,13 +213,14 @@ impl Workplane {
         self.transform.translation += offset;
     }
 
-    pub fn transformed(mut self, offset: DVec3, rotate: DVec3) -> Self {
-        let new_origin = self.to_world_pos(offset);
+    pub fn transformed(&self, offset: DVec3, rotate: DVec3) -> Self {
+        let mut new = self.clone();
+        let new_origin = new.to_world_pos(offset);
 
-        self.rotate_by((rotate.x, rotate.y, rotate.z));
-        self.transform.translation = new_origin;
+        new.rotate_by((rotate.x, rotate.y, rotate.z));
+        new.transform.translation = new_origin;
 
-        self
+        new
     }
 
     pub fn to_world_pos(&self, pos: DVec3) -> DVec3 {
