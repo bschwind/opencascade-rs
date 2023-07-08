@@ -224,6 +224,9 @@ pub mod ffi {
         type TopoDS_Solid;
         type TopoDS_Shape;
 
+        #[cxx_name = "construct_unique"]
+        pub fn TopoDS_Face_ctor() -> UniquePtr<TopoDS_Face>;
+
         pub fn cast_wire_to_shape(wire: &TopoDS_Wire) -> &TopoDS_Shape;
         pub fn cast_face_to_shape(wire: &TopoDS_Face) -> &TopoDS_Shape;
         pub fn cast_solid_to_shape(wire: &TopoDS_Solid) -> &TopoDS_Shape;
@@ -391,6 +394,20 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepPrimAPI_MakePrism>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakePrism) -> bool;
+
+        type BRepFeat_MakeDPrism;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepFeat_MakeDPrism_ctor(
+            shape: &TopoDS_Shape,
+            profile_base: &TopoDS_Face,
+            sketch_base: &TopoDS_Face,
+            angle: f64,
+            fuse: i32, // 0 = subtractive, 1 = additive
+            modify: bool,
+        ) -> UniquePtr<BRepFeat_MakeDPrism>;
+        pub fn Perform(self: Pin<&mut BRepFeat_MakeDPrism>, until: &TopoDS_Shape);
+        pub fn Shape(self: Pin<&mut BRepFeat_MakeDPrism>) -> &TopoDS_Shape;
 
         type BRepPrimAPI_MakeRevol;
 

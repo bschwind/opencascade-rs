@@ -115,8 +115,14 @@ pub fn main() {
 
     let (mut keycap, _edges) = keycap.subtract(&shell);
 
-    let temp_face = Face::from_wire(&shell_top).workplane().rect(bx * 2.0, by * 2.0);
-    let _temp_face = Face::from_wire(&temp_face);
+    let temp_face = shell
+        .to_shape()
+        .faces()
+        .farthest(Direction::PosZ)
+        .expect("shell should have a top face")
+        .workplane()
+        .rect(bx * 2.0, by * 2.0)
+        .to_face();
 
     let mut stem_points = vec![];
     let mut ribh_points = vec![];
@@ -146,16 +152,15 @@ pub fn main() {
     }
 
     let bottom_face =
-        keycap.faces().farthest(Direction::NegZ).expect("Keycap should have a bottom face");
+        keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
 
     for (x, y) in stem_points {
         let circle = bottom_face.workplane().circle(x, y, 2.75);
         let circle = Face::from_wire(&circle);
 
-        // TODO(bschwind) - Add extrude_until(face) support.
-        let post = circle.extrude(bottom_face.normal_at_center() * -10.0);
+        let post = circle.extrude_to_face(&keycap, &temp_face);
 
-        keycap = keycap.union(&post);
+        keycap = keycap.union_shape(&post);
     }
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));

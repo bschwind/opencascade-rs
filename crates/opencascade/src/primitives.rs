@@ -10,7 +10,7 @@ use opencascade_sys::ffi::{
     BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
     BRepBuilderAPI_MakeEdge_circle, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
-    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
+    BRepBuilderAPI_Transform_ctor, BRepFeat_MakeDPrism_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
     BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
     BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor,
     BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
@@ -23,10 +23,10 @@ use opencascade_sys::ffi::{
     TColgp_Array1OfDir_ctor, TopAbs_Orientation, TopAbs_ShapeEnum, TopExp_Explorer,
     TopExp_Explorer_ctor, TopLoc_Location_Transformation, TopLoc_Location_ctor,
     TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
-    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
-    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
-    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge, TopoDS_cast_to_face,
-    TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
+    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_ctor, TopoDS_Face_to_owned, TopoDS_Shape,
+    TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned,
+    TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge,
+    TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -271,6 +271,16 @@ impl Wire {
         self.inner = TopoDS_Wire_to_owned(translated_wire);
     }
 
+    pub fn to_face(self) -> Face {
+        let only_plane = false;
+        let make_face = BRepBuilderAPI_MakeFace_wire(&self.inner, only_plane);
+
+        let face = make_face.Face();
+        let inner = TopoDS_Face_to_owned(face);
+
+        Face { inner }
+    }
+
     pub fn to_shape(self) -> Shape {
         let inner_shape = cast_wire_to_shape(&self.inner);
         let inner = TopoDS_Shape_to_owned(inner_shape);
@@ -310,6 +320,31 @@ impl Face {
         let inner = TopoDS_Solid_to_owned(solid);
 
         Solid { inner }
+    }
+
+    pub fn extrude_to_face(&self, shape_with_face: &Shape, face: &Face) -> Shape {
+        let profile_base = &self.inner;
+        let sketch_base = TopoDS_Face_ctor();
+        let angle = 0.0;
+        let fuse = 1; // 0 = subtractive, 1 = additive
+        let modify = false;
+
+        let mut make_prism = BRepFeat_MakeDPrism_ctor(
+            &shape_with_face.inner,
+            profile_base,
+            &sketch_base,
+            angle,
+            fuse,
+            modify,
+        );
+
+        let until_face = cast_face_to_shape(&face.inner);
+        make_prism.pin_mut().Perform(until_face);
+
+        let extruded_shape = make_prism.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(extruded_shape);
+
+        Shape { inner }
     }
 
     pub fn center_of_mass(&self) -> DVec3 {
@@ -358,7 +393,9 @@ impl Face {
             x_dir = dvec3(1.0, 0.0, 0.0);
         }
 
-        Workplane::new(x_dir, normal)
+        let mut workplane = Workplane::new(x_dir, normal);
+        workplane.set_translation(center);
+        workplane
     }
 
     pub fn union(&self, other: &Face) -> Compound {
@@ -587,6 +624,16 @@ impl Shape {
         let other_inner_shape = cast_solid_to_shape(&other.inner);
 
         let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.inner, other_inner_shape);
+
+        let fuse_shape = fuse_operation.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(fuse_shape);
+
+        Shape { inner }
+    }
+
+    // TODO(bschwind) - Unify this later
+    pub fn union_shape(&self, other: &Shape) -> Shape {
+        let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
         let inner = TopoDS_Shape_to_owned(fuse_shape);
