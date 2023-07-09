@@ -104,7 +104,7 @@ pub fn main() {
     let shell_bottom = Workplane::xy().rect(bx - thickness * 2.0, by - thickness * 2.0);
 
     let shell_mid = Workplane::xy()
-        .transformed(dvec3(0.0, 0.0, height / 4.0), dvec3(0.0, 0.0, 0.0))
+        .translated(dvec3(0.0, 0.0, height / 4.0))
         .rect(bx - thickness * 3.0, by - thickness * 3.0);
 
     let shell_top = Workplane::xy()
@@ -154,8 +154,7 @@ pub fn main() {
     let bottom_face =
         keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
 
-    let bottom_workplane =
-        bottom_face.workplane().transformed(dvec3(0.0, 0.0, -4.5), dvec3(0.0, 0.0, 0.0));
+    let bottom_workplane = bottom_face.workplane().translated(dvec3(0.0, 0.0, -4.5));
 
     for (x, y) in stem_points {
         let circle = bottom_workplane.circle(x, y, 2.75).to_face();
@@ -166,10 +165,7 @@ pub fn main() {
     }
 
     for (x, y) in ribh_points {
-        let rect = bottom_workplane
-            .transformed(dvec3(x, y, 0.0), dvec3(0.0, 0.0, 0.0))
-            .rect(tx, 0.8)
-            .to_face();
+        let rect = bottom_workplane.translated(dvec3(x, y, 0.0)).rect(tx, 0.8).to_face();
 
         let rib = rect.extrude_to_face(&keycap, &temp_face);
 
@@ -177,15 +173,14 @@ pub fn main() {
     }
 
     for (x, y) in ribv_points {
-        let rect = bottom_workplane
-            .transformed(dvec3(x, y, 0.0), dvec3(0.0, 0.0, 0.0))
-            .rect(0.8, ty)
-            .to_face();
+        let rect = bottom_workplane.translated(dvec3(x, y, 0.0)).rect(0.8, ty).to_face();
 
         let rib = rect.extrude_to_face(&keycap, &temp_face);
 
         keycap = keycap.union_shape(&rib);
     }
+
+    // TODO(bschwind) - Add support for "extrude to next face"
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));
     let r2 = Face::from_wire(&Workplane::xy().rect(1.27, 4.15));

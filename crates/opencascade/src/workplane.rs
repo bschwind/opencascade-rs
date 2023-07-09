@@ -223,6 +223,21 @@ impl Workplane {
         new
     }
 
+    pub fn translated(&self, offset: DVec3) -> Self {
+        let mut new = self.clone();
+        let new_origin = new.to_world_pos(offset);
+        new.transform.translation = new_origin;
+
+        new
+    }
+
+    pub fn rotated(&self, rotate: DVec3) -> Self {
+        let mut new = self.clone();
+        new.rotate_by((rotate.x, rotate.y, rotate.z));
+
+        new
+    }
+
     pub fn to_world_pos(&self, pos: DVec3) -> DVec3 {
         self.transform.transform_point3(pos)
     }
