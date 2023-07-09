@@ -195,6 +195,12 @@ pub mod ffi {
             p2: &gp_Pnt2d,
         ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
 
+        // Lines
+        type gp_Lin;
+
+        #[cxx_name = "construct_unique"]
+        pub fn gp_Lin_ctor(point: &gp_Pnt, dir: &gp_Dir) -> UniquePtr<gp_Lin>;
+
         // Arcs
         type GC_MakeArcOfCircle;
 
@@ -698,6 +704,25 @@ pub mod ffi {
             face: &TopoDS_Face,
             location: Pin<&mut TopLoc_Location>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
+
+        type BRepIntCurveSurface_Inter;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepIntCurveSurface_Inter_ctor() -> UniquePtr<BRepIntCurveSurface_Inter>;
+        pub fn Init(
+            self: Pin<&mut BRepIntCurveSurface_Inter>,
+            shape: &TopoDS_Shape,
+            line: &gp_Lin,
+            tolerance: f64,
+        );
+        pub fn More(self: &BRepIntCurveSurface_Inter) -> bool;
+        pub fn Next(self: Pin<&mut BRepIntCurveSurface_Inter>);
+        pub fn BRepIntCurveSurface_Inter_face(
+            intersector: &BRepIntCurveSurface_Inter,
+        ) -> UniquePtr<TopoDS_Face>;
+        pub fn BRepIntCurveSurface_Inter_point(
+            intersector: &BRepIntCurveSurface_Inter,
+        ) -> UniquePtr<gp_Pnt>;
 
         // BRepFeat
         type BRepFeat_MakeCylindricalHole;

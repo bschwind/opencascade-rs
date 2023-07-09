@@ -156,8 +156,8 @@ pub fn main() {
 
     let bottom_workplane = bottom_face.workplane().translated(dvec3(0.0, 0.0, -4.5));
 
-    for (x, y) in stem_points {
-        let circle = bottom_workplane.circle(x, y, 2.75).to_face();
+    for (x, y) in &stem_points {
+        let circle = bottom_workplane.circle(*x, *y, 2.75).to_face();
 
         let post = circle.extrude_to_face(&keycap, &temp_face);
 
@@ -180,7 +180,31 @@ pub fn main() {
         keycap = keycap.union_shape(&rib);
     }
 
-    // TODO(bschwind) - Add support for "extrude to next face"
+    // TODO(bschwind) - This should probably be done after every union...
+    keycap.clean();
+
+    for (x, y) in stem_points {
+        let bottom_face =
+            keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
+        let workplane = bottom_face.workplane().translated(dvec3(0.0, 0.0, -0.6));
+
+        let circle = workplane.circle(x, y, 2.75).to_face();
+
+        // TODO(bschwind) - Abstract all this into a "extrude_to_next_face" function.
+        let mut faces = keycap.faces_along_ray(workplane.origin(), workplane.normal());
+        faces.sort_by(|(_, a_point), (_, b_point)| {
+            let a_dist = (*a_point - workplane.origin()).length();
+            let b_dist = (*b_point - workplane.origin()).length();
+
+            a_dist.total_cmp(&b_dist)
+        });
+
+        let (face_target, _) = faces.get(0).expect("We should have a face to extrude to");
+
+        let post = circle.extrude_to_face(&keycap, face_target);
+
+        keycap = keycap.union_shape(&post);
+    }
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));
     let r2 = Face::from_wire(&Workplane::xy().rect(1.27, 4.15));

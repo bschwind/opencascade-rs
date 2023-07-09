@@ -3,16 +3,17 @@ use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi::{
     cast_compound_to_shape, cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape,
-    gp_Ax1_ctor, gp_Ax2, gp_Circ_ctor, gp_Dir, gp_Dir_ctor, gp_Pnt, gp_Vec, map_shapes,
-    new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape, new_point,
-    new_transform, new_vec, one_shape, outer_wire, read_step, shape_list_to_vector,
+    gp_Ax1_ctor, gp_Ax2, gp_Circ_ctor, gp_Dir, gp_Dir_ctor, gp_Lin_ctor, gp_Pnt, gp_Vec,
+    map_shapes, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape,
+    new_point, new_transform, new_vec, one_shape, outer_wire, read_step, shape_list_to_vector,
     triangulated_shape_normal, write_stl, BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value,
     BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
     BRepBuilderAPI_MakeEdge_circle, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_Transform_ctor, BRepFeat_MakeDPrism_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
     BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
-    BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor,
+    BRepGProp_SurfaceProperties, BRepIntCurveSurface_Inter_ctor, BRepIntCurveSurface_Inter_face,
+    BRepIntCurveSurface_Inter_point, BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor,
     BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
     BRep_Tool_Triangulation, GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
     GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
@@ -682,6 +683,31 @@ impl Shape {
         let explorer = TopExp_Explorer_ctor(&self.inner, TopAbs_ShapeEnum::TopAbs_FACE);
 
         FaceIterator { explorer }
+    }
+
+    pub fn faces_along_ray(&self, ray_start: DVec3, ray_dir: DVec3) -> Vec<(Face, DVec3)> {
+        let mut intersector = BRepIntCurveSurface_Inter_ctor();
+        let tolerance = 0.0001;
+        intersector.pin_mut().Init(
+            &self.inner,
+            &gp_Lin_ctor(&make_point(ray_start), &make_dir(ray_dir)),
+            tolerance,
+        );
+
+        let mut results = vec![];
+
+        while intersector.More() {
+            let face = BRepIntCurveSurface_Inter_face(&intersector);
+            let point = BRepIntCurveSurface_Inter_point(&intersector);
+
+            let face = Face { inner: TopoDS_Face_to_owned(&face) };
+
+            results.push((face, dvec3(point.X(), point.Y(), point.Z())));
+
+            intersector.pin_mut().Next();
+        }
+
+        results
     }
 }
 
