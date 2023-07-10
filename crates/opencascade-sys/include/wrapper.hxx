@@ -39,6 +39,7 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <NCollection_Array1.hxx>
 #include <Poly_Connect.hxx>
+#include <STEPControl_Reader.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
 #include <StdPrs_ToolTriangulatedShape.hxx>
@@ -238,6 +239,10 @@ inline std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex &vertex) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(BRep_Tool::Pnt(vertex)));
 }
 
+inline std::unique_ptr<gp_Trsf> TopLoc_Location_Transformation(const TopLoc_Location &location) {
+  return std::unique_ptr<gp_Trsf>(new gp_Trsf(location.Transformation()));
+}
+
 inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
                                                                           TopLoc_Location &location) {
   return std::unique_ptr<Handle_Poly_Triangulation>(
@@ -253,7 +258,16 @@ inline std::unique_ptr<BRepFeat_MakeCylindricalHole> BRepFeat_MakeCylindricalHol
   return std::unique_ptr<BRepFeat_MakeCylindricalHole>(new BRepFeat_MakeCylindricalHole());
 }
 
-// Data export
+// Data Import
+inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String theFileName) {
+  return reader.ReadFile(theFileName.c_str());
+}
+
+inline std::unique_ptr<TopoDS_Shape> one_shape(const STEPControl_Reader &reader) {
+  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
+}
+
+// Data Export
 inline bool write_stl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::String theFileName) {
   return writer.Write(theShape, theFileName.c_str());
 }

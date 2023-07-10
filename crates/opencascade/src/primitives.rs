@@ -5,27 +5,28 @@ use opencascade_sys::ffi::{
     cast_compound_to_shape, cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape,
     gp_Ax1_ctor, gp_Dir, gp_Dir_ctor, gp_Pnt, gp_Vec, map_shapes,
     new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape, new_point,
-    new_transform, new_vec, outer_wire, shape_list_to_vector, triangulated_shape_normal, write_stl,
-    BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value, BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor,
-    BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
-    BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
-    BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
-    BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
-    BRepGProp_SurfaceProperties, BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor,
-    BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
-    BRep_Tool_Triangulation, GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
+    new_transform, new_vec, one_shape, outer_wire, read_step, shape_list_to_vector,
+    triangulated_shape_normal, write_stl, BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value,
+    BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
+    BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt, BRepBuilderAPI_MakeFace_wire,
+    BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_Transform_ctor,
+    BRepFilletAPI_MakeFillet2d_add_fillet, BRepFilletAPI_MakeFillet2d_ctor,
+    BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor, BRepGProp_SurfaceProperties,
+    BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
+    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, BRep_Tool_Triangulation,
+    GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
     GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
     GeomAPI_ProjectPointOnSurf_ctor, Handle_Poly_Triangulation_Get, Message_ProgressRange_ctor,
-    Poly_Connect_ctor, Poly_Triangulation_Node, Poly_Triangulation_UV,
+    Poly_Connect_ctor, Poly_Triangulation_Node, Poly_Triangulation_UV, STEPControl_Reader_ctor,
     ShapeUpgrade_UnifySameDomain_ctor, StlAPI_Writer_ctor, TColgp_Array1OfDir_Value,
     TColgp_Array1OfDir_ctor, TopAbs_Orientation, TopAbs_ShapeEnum, TopExp_Explorer,
-    TopExp_Explorer_ctor, TopLoc_Location_ctor, TopLoc_Location_from_transform, TopoDS_Compound,
-    TopoDS_Compound_to_owned, TopoDS_Edge, TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned,
-    TopoDS_Shape, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex,
-    TopoDS_Vertex_to_owned, TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound,
-    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex,
-    TopoDS_cast_to_wire,
+    TopExp_Explorer_ctor, TopLoc_Location_Transformation, TopLoc_Location_ctor,
+    TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
+    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
+    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
+    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge, TopoDS_cast_to_face,
+    TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -556,6 +557,17 @@ impl Shape {
         (Shape { inner }, edges)
     }
 
+    pub fn read_step<P: AsRef<Path>>(path: P) -> Self {
+        let mut reader = STEPControl_Reader_ctor();
+        let _return_status =
+            read_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
+        reader.pin_mut().TransferRoots(&Message_ProgressRange_ctor());
+
+        let inner = one_shape(&reader);
+
+        Self { inner }
+    }
+
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
         let mut stl_writer = StlAPI_Writer_ctor();
         let triangulation = BRepMesh_IncrementalMesh_ctor(&self.inner, 0.001);
@@ -640,7 +652,8 @@ impl Mesher {
             let face_point_count = triangulation.NbNodes();
 
             for i in 1..=face_point_count {
-                let point = Poly_Triangulation_Node(triangulation, i);
+                let mut point = Poly_Triangulation_Node(triangulation, i);
+                point.pin_mut().Transform(&TopLoc_Location_Transformation(&location));
                 vertices.push(dvec3(point.X(), point.Y(), point.Z()));
             }
 
