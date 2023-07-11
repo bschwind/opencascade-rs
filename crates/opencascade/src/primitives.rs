@@ -340,7 +340,31 @@ impl Face {
         );
 
         let until_face = cast_face_to_shape(&face.inner);
-        make_prism.pin_mut().Perform(until_face);
+        make_prism.pin_mut().perform_until_face(until_face);
+
+        let extruded_shape = make_prism.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(extruded_shape);
+
+        Shape { inner }
+    }
+
+    pub fn subtractive_extrude(&self, shape_with_face: &Shape, height: f64) -> Shape {
+        let profile_base = &self.inner;
+        let sketch_base = TopoDS_Face_ctor();
+        let angle = 0.0;
+        let fuse = 1; // 0 = subtractive, 1 = additive
+        let modify = false;
+
+        let mut make_prism = BRepFeat_MakeDPrism_ctor(
+            &shape_with_face.inner,
+            profile_base,
+            &sketch_base,
+            angle,
+            fuse,
+            modify,
+        );
+
+        make_prism.pin_mut().perform_with_height(height);
 
         let extruded_shape = make_prism.pin_mut().Shape();
         let inner = TopoDS_Shape_to_owned(extruded_shape);
@@ -399,21 +423,76 @@ impl Face {
         workplane
     }
 
-    pub fn union(&self, other: &Face) -> Compound {
+    pub fn union(&self, other: &Face) -> CompoundFace {
         let inner_shape = cast_face_to_shape(&self.inner);
         let other_inner_shape = cast_face_to_shape(&other.inner);
 
         let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
+
         let compound = TopoDS_cast_to_compound(fuse_shape);
         let inner = TopoDS_Compound_to_owned(compound);
 
-        Compound { inner }
+        CompoundFace { inner }
     }
 
     pub fn orientation(&self) -> FaceOrientation {
         FaceOrientation::from(self.inner.Orientation())
+    }
+
+    pub fn from_shape(shape: &Shape) -> Self {
+        let face = TopoDS_cast_to_face(&shape.inner);
+        let inner = TopoDS_Face_to_owned(face);
+
+        Self { inner }
+    }
+}
+
+pub struct CompoundFace {
+    inner: UniquePtr<TopoDS_Compound>,
+}
+
+impl CompoundFace {
+    pub fn clean(&mut self) -> Self {
+        let inner = cast_compound_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner);
+        let mut shape = Shape { inner };
+
+        shape.clean();
+
+        let inner = TopoDS_cast_to_compound(&shape.inner);
+        let inner = TopoDS_Compound_to_owned(inner);
+
+        Self { inner }
+    }
+
+    pub fn extrude(&self, dir: DVec3) -> Shape {
+        let prism_vec = make_vec(dir);
+
+        let copy = false;
+        let canonize = true;
+
+        let inner_shape = cast_compound_to_shape(&self.inner);
+
+        let mut make_solid = BRepPrimAPI_MakePrism_ctor(inner_shape, &prism_vec, copy, canonize);
+        let extruded_shape = make_solid.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(extruded_shape);
+
+        Shape { inner }
+    }
+
+    pub fn set_global_translation(&mut self, translation: DVec3) {
+        let inner = cast_compound_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner);
+        let mut shape = Shape { inner };
+
+        shape.set_global_translation(translation);
+
+        let compound = TopoDS_cast_to_compound(&shape.inner);
+        let compound = TopoDS_Compound_to_owned(compound);
+
+        self.inner = compound;
     }
 }
 
@@ -560,6 +639,13 @@ impl Compound {
 
         shape
     }
+
+    pub fn to_shape(self) -> Shape {
+        let inner_shape = cast_compound_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner_shape);
+
+        Shape { inner }
+    }
 }
 
 pub struct Shape {
@@ -592,6 +678,27 @@ impl Shape {
         let other_inner_shape = cast_solid_to_shape(&other.inner);
 
         let mut cut_operation = BRepAlgoAPI_Cut_ctor(&self.inner, other_inner_shape);
+
+        let edge_list = cut_operation.pin_mut().SectionEdges();
+        let vec = shape_list_to_vector(edge_list);
+
+        let mut edges = vec![];
+        for shape in vec.iter() {
+            let edge = TopoDS_cast_to_edge(shape);
+            let inner = TopoDS_Edge_to_owned(edge);
+            let edge = Edge { inner };
+            edges.push(edge);
+        }
+
+        let cut_shape = cut_operation.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(cut_shape);
+
+        (Shape { inner }, edges)
+    }
+
+    // TODO(bschwind) - Deduplicate with the above function.
+    pub fn subtract_shape(&mut self, other: &Shape) -> (Shape, Vec<Edge>) {
+        let mut cut_operation = BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
 
         let edge_list = cut_operation.pin_mut().SectionEdges();
         let vec = shape_list_to_vector(edge_list);
@@ -666,6 +773,16 @@ impl Shape {
         let upgraded_shape = upgrader.Shape();
 
         self.inner = TopoDS_Shape_to_owned(upgraded_shape);
+    }
+
+    pub fn set_global_translation(&mut self, translation: DVec3) {
+        let mut transform = new_transform();
+        let translation_vec = make_vec(translation);
+        transform.pin_mut().set_translation_vec(&translation_vec);
+
+        let location = TopLoc_Location_from_transform(&transform);
+
+        self.inner.pin_mut().set_global_translation(&location, false);
     }
 
     pub fn mesh(&self) -> Mesh {

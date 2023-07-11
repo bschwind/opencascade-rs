@@ -252,6 +252,13 @@ pub mod ffi {
             raise_exception: bool,
         );
 
+        #[cxx_name = "Location"]
+        pub fn set_global_translation(
+            self: Pin<&mut TopoDS_Shape>,
+            translation: &TopLoc_Location,
+            raise_exception: bool,
+        );
+
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Vertex_to_owned(shape: &TopoDS_Vertex) -> UniquePtr<TopoDS_Vertex>;
 
@@ -412,7 +419,12 @@ pub mod ffi {
             fuse: i32, // 0 = subtractive, 1 = additive
             modify: bool,
         ) -> UniquePtr<BRepFeat_MakeDPrism>;
-        pub fn Perform(self: Pin<&mut BRepFeat_MakeDPrism>, until: &TopoDS_Shape);
+
+        #[cxx_name = "Perform"]
+        pub fn perform_until_face(self: Pin<&mut BRepFeat_MakeDPrism>, until: &TopoDS_Shape);
+
+        #[cxx_name = "Perform"]
+        pub fn perform_with_height(self: Pin<&mut BRepFeat_MakeDPrism>, height: f64);
         pub fn Shape(self: Pin<&mut BRepFeat_MakeDPrism>) -> &TopoDS_Shape;
 
         type BRepPrimAPI_MakeRevol;
