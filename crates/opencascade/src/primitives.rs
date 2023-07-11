@@ -10,8 +10,8 @@ use opencascade_sys::ffi::{
     BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
     BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt, BRepBuilderAPI_MakeFace_wire,
     BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_Transform_ctor,
-    BRepFilletAPI_MakeFillet2d_add_fillet, BRepFilletAPI_MakeFillet2d_ctor,
-    BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor, BRepGProp_SurfaceProperties,
+    BRepFilletAPI_MakeFillet2d_add_fillet, BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet2d_add_chamfer_angle,
+    BRepFilletAPI_MakeFillet_ctor, BRepFilletAPI_MakeChamfer_ctor, BRepGProp_Face_ctor, BRepGProp_SurfaceProperties,
     BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
     BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, BRep_Tool_Triangulation,
     GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
@@ -226,6 +226,65 @@ impl Wire {
         // convert back to a wire with BRepTools::OuterWire
 
         let result_face = TopoDS_cast_to_face(result_shape);
+        let wire = outer_wire(result_face);
+
+        self.inner = wire;
+    }
+
+    /// Chamfer the wire by a given distance and angle in radians
+    pub fn chamfer_angle(&mut self, distance: f64, angle: f64) {
+        // Create a face from this wire
+        let face = Face::from_wire(self);
+        // use BRepFilletAPI_MakeFillet2d
+        let mut make_fillet = BRepFilletAPI_MakeFillet2d_ctor(&face.inner);
+
+        // add all vertices from the face
+        let face_shape = cast_face_to_shape(&face.inner);
+
+        // We use a shape map here to avoid duplicates.
+        let mut vector_map = new_indexed_map_of_shape();
+        map_shapes(face_shape, TopAbs_ShapeEnum::TopAbs_VERTEX, vector_map.pin_mut());
+
+        let mut edge_map = new_indexed_map_of_shape();
+        map_shapes(face_shape, TopAbs_ShapeEnum::TopAbs_EDGE, edge_map.pin_mut());
+
+        // walk vertices - will chamfer edges connected to the vertex
+        // TODO should be a dict lookup of vertex to edge? Only works if both equal length - a enclosed shape
+        for i in 1..=vector_map.Extent() {
+            let vertex = TopoDS_cast_to_vertex(vector_map.FindKey(i));
+            let edge = TopoDS_cast_to_edge(edge_map.FindKey(i));
+            BRepFilletAPI_MakeFillet2d_add_chamfer_angle(make_fillet.pin_mut(), edge, vertex, distance, angle);
+        }
+
+        make_fillet.pin_mut().Build(&Message_ProgressRange_ctor());
+
+        let result_shape = make_fillet.pin_mut().Shape();
+        // convert back to a wire with BRepTools::OuterWire
+
+        let result_face = TopoDS_cast_to_face(result_shape);
+        let wire = outer_wire(result_face);
+
+        self.inner = wire;
+    }
+
+    pub fn chamfer(&mut self, distance: f64) {
+        // Create a face from this wire
+        let face = Face::from_wire(self);
+
+        // add all vertices from the face
+        let face_shape = cast_face_to_shape(&face.inner);
+
+        let mut make_chamfer = BRepFilletAPI_MakeChamfer_ctor(&face_shape);
+        let mut edge_explorer = TopExp_Explorer_ctor(&face_shape, TopAbs_ShapeEnum::TopAbs_EDGE);
+
+        while edge_explorer.More() {
+            let edge = TopoDS_cast_to_edge(edge_explorer.Current());
+            make_chamfer.pin_mut().add_edge(distance, edge);
+            edge_explorer.pin_mut().Next();
+        }
+
+        let filleted_shape = make_chamfer.pin_mut().Shape();
+        let result_face = TopoDS_cast_to_face(&filleted_shape);
         let wire = outer_wire(result_face);
 
         self.inner = wire;
@@ -523,6 +582,15 @@ impl Shape {
         self.inner = TopoDS_Shape_to_owned(filleted_shape);
     }
 
+    pub fn chamfer_edge(&mut self, distance: f64, edge: &Edge) {
+        let mut make_chamfer = BRepFilletAPI_MakeChamfer_ctor(&self.inner);
+        make_chamfer.pin_mut().add_edge(distance, &edge.inner);
+
+        let chamfered_shape = make_chamfer.pin_mut().Shape();
+
+        self.inner = TopoDS_Shape_to_owned(chamfered_shape);
+    }
+
     pub fn fillet_edges<'a>(&mut self, radius: f64, edges: impl IntoIterator<Item = &'a Edge>) {
         let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(&self.inner);
 
@@ -534,6 +602,19 @@ impl Shape {
 
         self.inner = TopoDS_Shape_to_owned(filleted_shape);
     }
+
+    pub fn chamfer_edges<'a>(&mut self, distance: f64, edges: impl IntoIterator<Item = &'a Edge>) {
+        let mut make_chamfer = BRepFilletAPI_MakeChamfer_ctor(&self.inner);
+
+        for edge in edges.into_iter() {
+            make_chamfer.pin_mut().add_edge(distance, &edge.inner);
+        }
+
+        let chamfered_shape = make_chamfer.pin_mut().Shape();
+
+        self.inner = TopoDS_Shape_to_owned(chamfered_shape);
+    }
+
 
     pub fn subtract(&mut self, other: &Solid) -> (Shape, Vec<Edge>) {
         let other_inner_shape = cast_solid_to_shape(&other.inner);

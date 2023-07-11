@@ -466,6 +466,20 @@ pub mod ffi {
             vertex: &TopoDS_Vertex,
             radius: f64,
         ) -> UniquePtr<TopoDS_Edge>;
+        pub fn BRepFilletAPI_MakeFillet2d_add_chamfer(
+            make_fillet: Pin<&mut BRepFilletAPI_MakeFillet2d>,
+            edge1: &TopoDS_Edge,
+            edge2: &TopoDS_Edge,
+            distance1: f64,
+            distance2: f64,
+        ) -> UniquePtr<TopoDS_Edge>;
+        pub fn BRepFilletAPI_MakeFillet2d_add_chamfer_angle(
+            make_fillet: Pin<&mut BRepFilletAPI_MakeFillet2d>,
+            edge: &TopoDS_Edge,
+            vertex: &TopoDS_Vertex,
+            distance: f64,
+            angle: f64,
+        ) -> UniquePtr<TopoDS_Edge>;
         pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet2d>, progress: &Message_ProgressRange);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet2d>) -> &TopoDS_Shape;
         pub fn IsDone(self: &BRepFilletAPI_MakeFillet2d) -> bool;
