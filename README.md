@@ -113,6 +113,10 @@ Like CadQuery, Cascade Studio is also based on the OpenCascade kernel. It's quit
 
 But its web browser support and relatively simple JavaScript API make it a nice, approachable tool if you want to create models quickly.
 
+### [DeclaraCAD](https://declaracad.com/docs/introduction/)
+
+Also based on OpenCascade, DeclaraCAD aims to allow you to write a declarative tree which represents all the operations you perform to create a shape. It seems to have quite rich support for sketches, part modeling, and part assembly. It is distributed as a Qt application and is fully offline and driven by user text files - nice! I would personally worry about the rightward drift of code for non-trivial models, and my brain doesn't really think in a tree the way the code is structured, but if you're a LISPer this is probably perfect!
+
 ### [Fornjot](https://github.com/hannobraun/fornjot)
 
 Fornjot is an early-stage B-Rep kernel, written in Rust. I think the project has a lot of potential, but of course being an early-stage project, it's not nearly as featureful as something like OpenCascade, which has had decades of development behind it.
