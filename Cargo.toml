@@ -3,6 +3,7 @@ members = [
     "crates/opencascade",
     "crates/opencascade-sys",
     "crates/viewer",
+    "crates/kicad",
 ]
 
 resolver = "2"
