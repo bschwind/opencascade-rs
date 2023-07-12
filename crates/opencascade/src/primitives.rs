@@ -1,20 +1,21 @@
-use crate::{workplane::Workplane, Error, TopoDS_Shape_to_owned};
+use crate::{gp_Ax2_ctor, workplane::Workplane, Error, TopoDS_Shape_to_owned};
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi::{
     cast_compound_to_shape, cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape,
-    gp_Ax1_ctor, gp_Dir, gp_Dir_ctor, gp_Pnt, gp_Vec, map_shapes,
-    new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape, new_point,
-    new_transform, new_vec, one_shape, outer_wire, read_step, shape_list_to_vector,
+    gp_Ax1_ctor, gp_Ax2, gp_Circ_ctor, gp_Dir, gp_Dir_ctor, gp_Lin_ctor, gp_Pnt, gp_Vec,
+    map_shapes, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_indexed_map_of_shape,
+    new_point, new_transform, new_vec, one_shape, outer_wire, read_step, shape_list_to_vector,
     triangulated_shape_normal, write_stl, BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value,
     BRepAlgoAPI_Cut_ctor, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
-    BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt, BRepBuilderAPI_MakeFace_wire,
-    BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_Transform_ctor,
-    BRepFilletAPI_MakeFillet2d_add_fillet, BRepFilletAPI_MakeFillet2d_ctor,
-    BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor, BRepGProp_SurfaceProperties,
-    BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor, BRepOffsetAPI_ThruSections_ctor,
-    BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface, BRep_Tool_Triangulation,
-    GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
+    BRepBuilderAPI_MakeEdge_circle, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
+    BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
+    BRepBuilderAPI_Transform_ctor, BRepFeat_MakeDPrism_ctor, BRepFilletAPI_MakeFillet2d_add_fillet,
+    BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
+    BRepGProp_SurfaceProperties, BRepIntCurveSurface_Inter_ctor, BRepIntCurveSurface_Inter_face,
+    BRepIntCurveSurface_Inter_point, BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor,
+    BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
+    BRep_Tool_Triangulation, GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
     GCPnts_TangentialDeflection_ctor, GC_MakeArcOfCircle_Value,
     GC_MakeArcOfCircle_point_point_point, GProp_GProps_CentreOfMass, GProp_GProps_ctor,
     GeomAPI_ProjectPointOnSurf_ctor, Handle_Poly_Triangulation_Get, Message_ProgressRange_ctor,
@@ -23,10 +24,10 @@ use opencascade_sys::ffi::{
     TColgp_Array1OfDir_ctor, TopAbs_Orientation, TopAbs_ShapeEnum, TopExp_Explorer,
     TopExp_Explorer_ctor, TopLoc_Location_Transformation, TopLoc_Location_ctor,
     TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
-    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_to_owned, TopoDS_Shape, TopoDS_Shell,
-    TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned, TopoDS_Wire,
-    TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge, TopoDS_cast_to_face,
-    TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
+    TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_ctor, TopoDS_Face_to_owned, TopoDS_Shape,
+    TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned,
+    TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge,
+    TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -40,6 +41,10 @@ pub fn make_dir(p: DVec3) -> UniquePtr<gp_Dir> {
 
 pub fn make_vec(vec: DVec3) -> UniquePtr<gp_Vec> {
     new_vec(vec.x, vec.y, vec.z)
+}
+
+pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<gp_Ax2> {
+    gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
 }
 
 pub struct Vertex {
@@ -69,7 +74,18 @@ impl Edge {
         Self { inner }
     }
 
-    pub fn circle() {}
+    pub fn circle(center: DVec3, normal: DVec3, radius: f64) -> Self {
+        let axis = make_axis_2(center, normal);
+
+        let make_circle = gp_Circ_ctor(&axis, radius);
+
+        let mut make_edge = BRepBuilderAPI_MakeEdge_circle(&make_circle);
+
+        let edge = make_edge.pin_mut().Edge();
+        let inner = TopoDS_Edge_to_owned(edge);
+
+        Self { inner }
+    }
 
     pub fn ellipse() {}
 
@@ -256,6 +272,16 @@ impl Wire {
         self.inner = TopoDS_Wire_to_owned(translated_wire);
     }
 
+    pub fn to_face(self) -> Face {
+        let only_plane = false;
+        let make_face = BRepBuilderAPI_MakeFace_wire(&self.inner, only_plane);
+
+        let face = make_face.Face();
+        let inner = TopoDS_Face_to_owned(face);
+
+        Face { inner }
+    }
+
     pub fn to_shape(self) -> Shape {
         let inner_shape = cast_wire_to_shape(&self.inner);
         let inner = TopoDS_Shape_to_owned(inner_shape);
@@ -295,6 +321,55 @@ impl Face {
         let inner = TopoDS_Solid_to_owned(solid);
 
         Solid { inner }
+    }
+
+    pub fn extrude_to_face(&self, shape_with_face: &Shape, face: &Face) -> Shape {
+        let profile_base = &self.inner;
+        let sketch_base = TopoDS_Face_ctor();
+        let angle = 0.0;
+        let fuse = 1; // 0 = subtractive, 1 = additive
+        let modify = false;
+
+        let mut make_prism = BRepFeat_MakeDPrism_ctor(
+            &shape_with_face.inner,
+            profile_base,
+            &sketch_base,
+            angle,
+            fuse,
+            modify,
+        );
+
+        let until_face = cast_face_to_shape(&face.inner);
+        make_prism.pin_mut().perform_until_face(until_face);
+
+        let extruded_shape = make_prism.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(extruded_shape);
+
+        Shape { inner }
+    }
+
+    pub fn subtractive_extrude(&self, shape_with_face: &Shape, height: f64) -> Shape {
+        let profile_base = &self.inner;
+        let sketch_base = TopoDS_Face_ctor();
+        let angle = 0.0;
+        let fuse = 1; // 0 = subtractive, 1 = additive
+        let modify = false;
+
+        let mut make_prism = BRepFeat_MakeDPrism_ctor(
+            &shape_with_face.inner,
+            profile_base,
+            &sketch_base,
+            angle,
+            fuse,
+            modify,
+        );
+
+        make_prism.pin_mut().perform_with_height(height);
+
+        let extruded_shape = make_prism.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(extruded_shape);
+
+        Shape { inner }
     }
 
     pub fn center_of_mass(&self) -> DVec3 {
@@ -343,24 +418,81 @@ impl Face {
             x_dir = dvec3(1.0, 0.0, 0.0);
         }
 
-        Workplane::new(x_dir, normal)
+        let mut workplane = Workplane::new(x_dir, normal);
+        workplane.set_translation(center);
+        workplane
     }
 
-    pub fn union(&self, other: &Face) -> Compound {
+    pub fn union(&self, other: &Face) -> CompoundFace {
         let inner_shape = cast_face_to_shape(&self.inner);
         let other_inner_shape = cast_face_to_shape(&other.inner);
 
         let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
+
         let compound = TopoDS_cast_to_compound(fuse_shape);
         let inner = TopoDS_Compound_to_owned(compound);
 
-        Compound { inner }
+        CompoundFace { inner }
     }
 
     pub fn orientation(&self) -> FaceOrientation {
         FaceOrientation::from(self.inner.Orientation())
+    }
+
+    pub fn from_shape(shape: &Shape) -> Self {
+        let face = TopoDS_cast_to_face(&shape.inner);
+        let inner = TopoDS_Face_to_owned(face);
+
+        Self { inner }
+    }
+}
+
+pub struct CompoundFace {
+    inner: UniquePtr<TopoDS_Compound>,
+}
+
+impl CompoundFace {
+    pub fn clean(&mut self) -> Self {
+        let inner = cast_compound_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner);
+        let mut shape = Shape { inner };
+
+        shape.clean();
+
+        let inner = TopoDS_cast_to_compound(&shape.inner);
+        let inner = TopoDS_Compound_to_owned(inner);
+
+        Self { inner }
+    }
+
+    pub fn extrude(&self, dir: DVec3) -> Shape {
+        let prism_vec = make_vec(dir);
+
+        let copy = false;
+        let canonize = true;
+
+        let inner_shape = cast_compound_to_shape(&self.inner);
+
+        let mut make_solid = BRepPrimAPI_MakePrism_ctor(inner_shape, &prism_vec, copy, canonize);
+        let extruded_shape = make_solid.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(extruded_shape);
+
+        Shape { inner }
+    }
+
+    pub fn set_global_translation(&mut self, translation: DVec3) {
+        let inner = cast_compound_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner);
+        let mut shape = Shape { inner };
+
+        shape.set_global_translation(translation);
+
+        let compound = TopoDS_cast_to_compound(&shape.inner);
+        let compound = TopoDS_Compound_to_owned(compound);
+
+        self.inner = compound;
     }
 }
 
@@ -507,6 +639,13 @@ impl Compound {
 
         shape
     }
+
+    pub fn to_shape(self) -> Shape {
+        let inner_shape = cast_compound_to_shape(&self.inner);
+        let inner = TopoDS_Shape_to_owned(inner_shape);
+
+        Shape { inner }
+    }
 }
 
 pub struct Shape {
@@ -557,6 +696,27 @@ impl Shape {
         (Shape { inner }, edges)
     }
 
+    // TODO(bschwind) - Deduplicate with the above function.
+    pub fn subtract_shape(&mut self, other: &Shape) -> (Shape, Vec<Edge>) {
+        let mut cut_operation = BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
+
+        let edge_list = cut_operation.pin_mut().SectionEdges();
+        let vec = shape_list_to_vector(edge_list);
+
+        let mut edges = vec![];
+        for shape in vec.iter() {
+            let edge = TopoDS_cast_to_edge(shape);
+            let inner = TopoDS_Edge_to_owned(edge);
+            let edge = Edge { inner };
+            edges.push(edge);
+        }
+
+        let cut_shape = cut_operation.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(cut_shape);
+
+        (Shape { inner }, edges)
+    }
+
     pub fn read_step<P: AsRef<Path>>(path: P) -> Self {
         let mut reader = STEPControl_Reader_ctor();
         let _return_status =
@@ -566,6 +726,27 @@ impl Shape {
         let inner = one_shape(&reader);
 
         Self { inner }
+    }
+
+    pub fn union(&self, other: &Solid) -> Shape {
+        let other_inner_shape = cast_solid_to_shape(&other.inner);
+
+        let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.inner, other_inner_shape);
+
+        let fuse_shape = fuse_operation.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(fuse_shape);
+
+        Shape { inner }
+    }
+
+    // TODO(bschwind) - Unify this later
+    pub fn union_shape(&self, other: &Shape) -> Shape {
+        let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
+
+        let fuse_shape = fuse_operation.pin_mut().Shape();
+        let inner = TopoDS_Shape_to_owned(fuse_shape);
+
+        Shape { inner }
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
@@ -594,6 +775,16 @@ impl Shape {
         self.inner = TopoDS_Shape_to_owned(upgraded_shape);
     }
 
+    pub fn set_global_translation(&mut self, translation: DVec3) {
+        let mut transform = new_transform();
+        let translation_vec = make_vec(translation);
+        transform.pin_mut().set_translation_vec(&translation_vec);
+
+        let location = TopLoc_Location_from_transform(&transform);
+
+        self.inner.pin_mut().set_global_translation(&location, false);
+    }
+
     pub fn mesh(&self) -> Mesh {
         let mesher = Mesher::new(self);
         mesher.mesh()
@@ -609,6 +800,31 @@ impl Shape {
         let explorer = TopExp_Explorer_ctor(&self.inner, TopAbs_ShapeEnum::TopAbs_FACE);
 
         FaceIterator { explorer }
+    }
+
+    pub fn faces_along_ray(&self, ray_start: DVec3, ray_dir: DVec3) -> Vec<(Face, DVec3)> {
+        let mut intersector = BRepIntCurveSurface_Inter_ctor();
+        let tolerance = 0.0001;
+        intersector.pin_mut().Init(
+            &self.inner,
+            &gp_Lin_ctor(&make_point(ray_start), &make_dir(ray_dir)),
+            tolerance,
+        );
+
+        let mut results = vec![];
+
+        while intersector.More() {
+            let face = BRepIntCurveSurface_Inter_face(&intersector);
+            let point = BRepIntCurveSurface_Inter_point(&intersector);
+
+            let face = Face { inner: TopoDS_Face_to_owned(&face) };
+
+            results.push((face, dvec3(point.X(), point.Y(), point.Z())));
+
+            intersector.pin_mut().Next();
+        }
+
+        results
     }
 }
 
@@ -750,6 +966,45 @@ impl Iterator for EdgeIterator {
 
 pub struct FaceIterator {
     explorer: UniquePtr<TopExp_Explorer>,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum Direction {
+    PosX,
+    NegX,
+    PosY,
+    NegY,
+    PosZ,
+    NegZ,
+    Custom(DVec3),
+}
+
+impl Direction {
+    pub fn normalized_vec(&self) -> DVec3 {
+        match self {
+            Self::PosX => DVec3::X,
+            Self::NegX => DVec3::NEG_X,
+            Self::PosY => DVec3::Y,
+            Self::NegY => DVec3::NEG_Y,
+            Self::PosZ => DVec3::Z,
+            Self::NegZ => DVec3::NEG_Z,
+            Self::Custom(dir) => dir.normalize(),
+        }
+    }
+}
+
+impl FaceIterator {
+    pub fn farthest(self, direction: Direction) -> Option<Face> {
+        let normalized_dir = direction.normalized_vec();
+
+        Iterator::max_by(self, |face_1, face_2| {
+            let dist_1 = face_1.center_of_mass().dot(normalized_dir);
+            let dist_2 = face_2.center_of_mass().dot(normalized_dir);
+
+            PartialOrd::partial_cmp(&dist_1, &dist_2)
+                .expect("Face center of masses should contain no NaNs")
+        })
+    }
 }
 
 impl Iterator for FaceIterator {
