@@ -46,16 +46,17 @@ impl GameApp for ViewerApp {
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
         // Model sourced from:
         // https://nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-0
-        let keycap = Shape::read_step("crates/viewer/models/nist_ftc_06.step");
+        // let arrow = Shape::read_step("crates/viewer/models/nist_ftc_06.step");
+        let arrow = gizmo();
 
-        let mesh = keycap.mesh();
+        let mesh = arrow.mesh();
         let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
 
         // Pre-render the model edges.
         let line_thickness = 3.0;
         let mut line_builder = LineBuilder::new();
 
-        for edge in keycap.edges() {
+        for edge in arrow.edges() {
             let mut segments = vec![];
 
             let mut last_point: Option<DVec3> = None;
@@ -337,6 +338,22 @@ fn keycap() -> Shape {
     let (keycap, _edges) = keycap.subtract(&shell);
 
     keycap
+}
+
+#[allow(unused)]
+fn gizmo() -> Shape {
+    let arrow_length = 10.0;
+    let cone_height = 2.0;
+
+    let mut cylinder =
+        Workplane::xy().circle(0.0, 0.0, 0.1).to_face().extrude(DVec3::new(0.0, 0.0, arrow_length));
+    let cone_base = Workplane::xy()
+        .translated(DVec3::new(0.0, 0.0, arrow_length - cone_height))
+        .circle(0.0, 0.0, 1.0);
+    let cone_top =
+        Workplane::xy().translated(DVec3::new(0.0, 0.0, arrow_length)).circle(0.0, 0.0, 0.05);
+    let cone = Solid::loft([&cone_base, &cone_top].into_iter());
+    cylinder.union(&cone)
 }
 
 fn main() {
