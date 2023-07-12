@@ -37,69 +37,48 @@ impl Plane {
                 dvec3(1.0, 0.0, 0.0),
                 dvec3(0.0, 0.0, 0.0),
             ),
-            Self::ZX => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::XZ => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::YX => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::ZY => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::Front => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::Back => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::Left => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
+            Self::ZX => DAffine3::from_cols(
+                dvec3(0.0, 0.0, 1.0),
+                dvec3(1.0, 0.0, 0.0),
+                dvec3(0.0, 1.0, 0.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
+            Self::XZ => DAffine3::from_cols(
+                dvec3(1.0, 0.0, 0.0),
+                dvec3(0.0, 0.0, 1.0),
+                dvec3(0.0, -1.0, 0.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
+            Self::YX => DAffine3::from_cols(
+                dvec3(0.0, 1.0, 0.0),
+                dvec3(1.0, 0.0, 0.0),
+                dvec3(0.0, 0.0, -1.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
+            Self::ZY => DAffine3::from_cols(
+                dvec3(0.0, 0.0, 1.0),
+                dvec3(0.0, 1.0, 0.0),
+                dvec3(-1.0, 0.0, 0.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
+            Self::Front => DAffine3::from_cols(
+                dvec3(1.0, 0.0, 0.0),
+                dvec3(0.0, 1.0, 0.0),
+                dvec3(0.0, 0.0, 1.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
+            Self::Back => DAffine3::from_cols(
+                dvec3(-1.0, 0.0, 0.0),
+                dvec3(0.0, 1.0, 0.0),
+                dvec3(0.0, 0.0, -1.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
+            Self::Left => DAffine3::from_cols(
+                dvec3(0.0, 0.0, 1.0),
+                dvec3(0.0, 1.0, 0.0),
+                dvec3(-1.0, 0.0, 0.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
             Self::Right => DAffine3::from_cols(
                 dvec3(0.0, 0.0, -1.0),
                 dvec3(0.0, 1.0, 0.0),
@@ -112,15 +91,12 @@ impl Plane {
                 dvec3(0.0, 1.0, 0.0),
                 dvec3(0.0, 0.0, 0.0),
             ),
-            Self::Bottom => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
+            Self::Bottom => DAffine3::from_cols(
+                dvec3(1.0, 0.0, 0.0),
+                dvec3(0.0, 0.0, 1.0),
+                dvec3(0.0, -1.0, 0.0),
+                dvec3(0.0, 0.0, 0.0),
+            ),
             Self::Custom { x_dir, normal_dir } => {
                 let x_axis = dvec3(x_dir.0, x_dir.1, x_dir.2);
                 let z_axis = dvec3(normal_dir.0, normal_dir.1, normal_dir.2);
@@ -154,6 +130,22 @@ impl Workplane {
 
     pub fn yz() -> Self {
         Self { transform: Plane::YZ.transform() }
+    }
+
+    pub fn zx() -> Self {
+        Self { transform: Plane::ZX.transform() }
+    }
+
+    pub fn xz() -> Self {
+        Self { transform: Plane::XZ.transform() }
+    }
+
+    pub fn zy() -> Self {
+        Self { transform: Plane::ZY.transform() }
+    }
+
+    pub fn yx() -> Self {
+        Self { transform: Plane::YX.transform() }
     }
 
     pub fn origin(&self) -> DVec3 {
