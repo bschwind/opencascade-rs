@@ -105,6 +105,36 @@ pub mod ffi {
             shape_map: Pin<&mut TopTools_IndexedMapOfShape>,
         );
 
+        type TopTools_IndexedDataMapOfShapeListOfShape;
+
+        #[cxx_name = "construct_unique"]
+        pub fn new_indexed_data_map_of_shape_list_of_shape(
+        ) -> UniquePtr<TopTools_IndexedDataMapOfShapeListOfShape>;
+        pub fn Extent(self: &TopTools_IndexedDataMapOfShapeListOfShape) -> i32;
+        pub fn FindKey(
+            self: &TopTools_IndexedDataMapOfShapeListOfShape,
+            index: i32,
+        ) -> &TopoDS_Shape;
+        pub fn FindFromIndex<'a>(
+            self: &'a TopTools_IndexedDataMapOfShapeListOfShape,
+            index: i32,
+        ) -> &'a TopTools_ListOfShape;
+        pub fn FindIndex(
+            self: &TopTools_IndexedDataMapOfShapeListOfShape,
+            shape: &TopoDS_Shape,
+        ) -> i32;
+        pub fn FindFromKey<'a>(
+            self: &'a TopTools_IndexedDataMapOfShapeListOfShape,
+            shape: &TopoDS_Shape,
+        ) -> &'a TopTools_ListOfShape;
+
+        pub fn map_shapes_and_ancestors(
+            shape: &TopoDS_Shape,
+            parent_type: TopAbs_ShapeEnum,
+            child_type: TopAbs_ShapeEnum,
+            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
+        );
+
         type TColgp_Array1OfDir;
         #[cxx_name = "construct_unique"]
         pub fn TColgp_Array1OfDir_ctor(
@@ -590,6 +620,7 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepAlgoAPI_Fuse>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Fuse) -> bool;
+        pub fn SectionEdges<'a>(self: Pin<&'a mut BRepAlgoAPI_Fuse>) -> &'a TopTools_ListOfShape;
 
         type BRepAlgoAPI_Cut;
 

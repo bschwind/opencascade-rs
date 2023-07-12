@@ -352,6 +352,11 @@ inline void map_shapes(const TopoDS_Shape &S, const TopAbs_ShapeEnum T, TopTools
   TopExp::MapShapes(S, T, M);
 }
 
+inline void map_shapes_and_ancestors(const TopoDS_Shape &S, const TopAbs_ShapeEnum TS, const TopAbs_ShapeEnum TA,
+                                     TopTools_IndexedDataMapOfShapeListOfShape &M) {
+  TopExp::MapShapesAndAncestors(S, TS, TA, M);
+}
+
 inline std::unique_ptr<gp_Dir> TColgp_Array1OfDir_Value(const TColgp_Array1OfDir &array, Standard_Integer index) {
   return std::unique_ptr<gp_Dir>(new gp_Dir(array.Value(index)));
 }
