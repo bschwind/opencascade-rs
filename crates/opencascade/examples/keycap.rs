@@ -22,7 +22,7 @@ pub fn main() {
     let bottom_fillet = 0.5;
     let top_fillet = 5.0;
     let tension = if convex { 0.4 } else { 1.0 };
-    let pos = true; // Use POS-style stabilizers
+    let pos = false; // Use POS-style stabilizers
 
     let top_diff = base - top;
 
@@ -151,6 +151,32 @@ pub fn main() {
                     stem_start_y + i as f64 * KEYCAP_PITCH,
                 ));
             }
+        }
+    } else {
+        stem_points.push((0.0, 0.0));
+
+        if keycap_unit_size_y > keycap_unit_size_x {
+            if keycap_unit_size_y > 2.75 {
+                let dist = keycap_unit_size_y / 2.0 * KEYCAP_PITCH - KEYCAP_PITCH / 2.0;
+                stem_points.extend_from_slice(&[(0.0, dist), (0.0, -dist)]);
+            } else if keycap_unit_size_y > 1.75 {
+                let dist = 2.25 / 2.0 * KEYCAP_PITCH - KEYCAP_PITCH / 2.0;
+                stem_points.extend_from_slice(&[(0.0, -dist), (0.0, dist)]);
+            }
+
+            ribh_points = stem_points.clone();
+            ribv_points.push((0.0, 0.0));
+        } else {
+            if keycap_unit_size_x > 2.75 {
+                let dist = keycap_unit_size_x / 2.0 * KEYCAP_PITCH - KEYCAP_PITCH / 2.0;
+                stem_points.extend_from_slice(&[(dist, 0.0), (-dist, 0.0)]);
+            } else if keycap_unit_size_x > 1.75 {
+                let dist = 2.25 / 2.0 * KEYCAP_PITCH - KEYCAP_PITCH / 2.0;
+                stem_points.extend_from_slice(&[(dist, 0.0), (-dist, 0.0)]);
+            }
+
+            ribh_points.push((0.0, 0.0));
+            ribv_points = stem_points.clone();
         }
     }
 
