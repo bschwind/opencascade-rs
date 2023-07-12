@@ -2,7 +2,7 @@
 // https://github.com/cubiq/OPK/blob/53f9d6a4123b0f309f87158115c83d19811b3484/opk.py
 use glam::dvec3;
 use opencascade::{
-    primitives::{Face, Solid},
+    primitives::{Direction, Face, Solid},
     workplane::Workplane,
 };
 
@@ -104,19 +104,28 @@ pub fn main() {
     let shell_bottom = Workplane::xy().rect(bx - thickness * 2.0, by - thickness * 2.0);
 
     let shell_mid = Workplane::xy()
-        .transformed(dvec3(0.0, 0.0, height / 4.0), dvec3(0.0, 0.0, 0.0))
+        .translated(dvec3(0.0, 0.0, height / 4.0))
         .rect(bx - thickness * 3.0, by - thickness * 3.0);
 
     let shell_top = Workplane::xy()
-        .transformed(dvec3(0.0, 0.0, height - height / 4.0 - 4.5), dvec3(angle, 0.0, 0.0))
+        .transformed(
+            dvec3(0.0, 0.0, (height / 4.0) + height - height / 4.0 - 4.5),
+            dvec3(angle, 0.0, 0.0),
+        )
         .rect(tx - thickness * 2.0 + 0.5, ty - thickness * 2.0 + 0.5);
 
     let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top].into_iter());
 
-    let (keycap, _edges) = keycap.subtract(&shell);
+    let (mut keycap, _edges) = keycap.subtract(&shell);
 
-    let temp_face = Face::from_wire(&shell_top).workplane().rect(bx * 2.0, by * 2.0);
-    let _temp_face = Face::from_wire(&temp_face);
+    let temp_face = shell
+        .to_shape()
+        .faces()
+        .farthest(Direction::PosZ)
+        .expect("shell should have a top face")
+        .workplane()
+        .rect(bx * 2.0, by * 2.0)
+        .to_face();
 
     let mut stem_points = vec![];
     let mut ribh_points = vec![];
@@ -143,18 +152,101 @@ pub fn main() {
                 ));
             }
         }
+    } else {
+        stem_points.push((0.0, 0.0));
+
+        if keycap_unit_size_y > keycap_unit_size_x {
+            if keycap_unit_size_y > 2.75 {
+                let dist = keycap_unit_size_y / 2.0 * KEYCAP_PITCH - KEYCAP_PITCH / 2.0;
+                stem_points.extend_from_slice(&[(0.0, dist), (0.0, -dist)]);
+            } else if keycap_unit_size_y > 1.75 {
+                let dist = 2.25 / 2.0 * KEYCAP_PITCH - KEYCAP_PITCH / 2.0;
+                stem_points.extend_from_slice(&[(0.0, -dist), (0.0, dist)]);
+            }
+
+            ribh_points = stem_points.clone();
+            ribv_points.push((0.0, 0.0));
+        } else {
+            if keycap_unit_size_x > 2.75 {
+                let dist = keycap_unit_size_x / 2.0 * KEYCAP_PITCH - KEYCAP_PITCH / 2.0;
+                stem_points.extend_from_slice(&[(dist, 0.0), (-dist, 0.0)]);
+            } else if keycap_unit_size_x > 1.75 {
+                let dist = 2.25 / 2.0 * KEYCAP_PITCH - KEYCAP_PITCH / 2.0;
+                stem_points.extend_from_slice(&[(dist, 0.0), (-dist, 0.0)]);
+            }
+
+            ribh_points.push((0.0, 0.0));
+            ribv_points = stem_points.clone();
+        }
     }
 
-    // for pos in stem_points {
+    let bottom_face =
+        keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
 
-    // }
+    let bottom_workplane = bottom_face.workplane().translated(dvec3(0.0, 0.0, -4.5));
+
+    for (x, y) in &stem_points {
+        let circle = bottom_workplane.circle(*x, *y, 2.75).to_face();
+
+        let post = circle.extrude_to_face(&keycap, &temp_face);
+
+        keycap = keycap.union_shape(&post);
+    }
+
+    for (x, y) in ribh_points {
+        let rect = bottom_workplane.translated(dvec3(x, y, 0.0)).rect(tx, 0.8).to_face();
+
+        let rib = rect.extrude_to_face(&keycap, &temp_face);
+
+        keycap = keycap.union_shape(&rib);
+    }
+
+    for (x, y) in ribv_points {
+        let rect = bottom_workplane.translated(dvec3(x, y, 0.0)).rect(0.8, ty).to_face();
+
+        let rib = rect.extrude_to_face(&keycap, &temp_face);
+
+        keycap = keycap.union_shape(&rib);
+    }
+
+    // TODO(bschwind) - This should probably be done after every union...
+    keycap.clean();
+
+    for (x, y) in &stem_points {
+        let bottom_face =
+            keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
+        let workplane = bottom_face.workplane().translated(dvec3(0.0, 0.0, -0.6));
+
+        let circle = workplane.circle(*x, *y, 2.75).to_face();
+
+        // TODO(bschwind) - Abstract all this into a "extrude_to_next_face" function.
+        let origin = workplane.to_world_pos(dvec3(*x, *y, 0.0));
+        let mut faces = keycap.faces_along_ray(origin, workplane.normal());
+        faces.sort_by(|(_, a_point), (_, b_point)| {
+            let a_dist = (*a_point - origin).length();
+            let b_dist = (*b_point - origin).length();
+
+            a_dist.total_cmp(&b_dist)
+        });
+
+        let (face_target, _) = faces.get(0).expect("We should have a face to extrude to");
+        let post = circle.extrude_to_face(&keycap, face_target);
+
+        keycap = keycap.union_shape(&post);
+    }
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));
     let r2 = Face::from_wire(&Workplane::xy().rect(1.27, 4.15));
 
-    let mut cross = r1.union(&r2);
-    cross.clean();
-    // let result = cross.extrude(dvec3(0.0, 0.0, 5.0));
+    let mut cross = r1.union(&r2).clean();
+
+    for (x, y) in stem_points {
+        cross.set_global_translation(dvec3(x, y, 0.0));
+        let cross = cross.extrude(dvec3(0.0, 0.0, 4.6));
+
+        let (subtracted, _) = keycap.subtract_shape(&cross);
+        keycap = subtracted;
+    }
 
     keycap.write_stl("keycap.stl").unwrap();
 }

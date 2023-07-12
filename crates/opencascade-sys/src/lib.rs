@@ -195,6 +195,12 @@ pub mod ffi {
             p2: &gp_Pnt2d,
         ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
 
+        // Lines
+        type gp_Lin;
+
+        #[cxx_name = "construct_unique"]
+        pub fn gp_Lin_ctor(point: &gp_Pnt, dir: &gp_Dir) -> UniquePtr<gp_Lin>;
+
         // Arcs
         type GC_MakeArcOfCircle;
 
@@ -209,6 +215,12 @@ pub mod ffi {
             arc: &GC_MakeArcOfCircle,
         ) -> UniquePtr<HandleGeomTrimmedCurve>;
 
+        // Circles
+        type gp_Circ;
+
+        #[cxx_name = "construct_unique"]
+        pub fn gp_Circ_ctor(axis: &gp_Ax2, radius: f64) -> UniquePtr<gp_Circ>;
+
         // Shapes
         type TopoDS_Vertex;
         type TopoDS_Edge;
@@ -217,6 +229,9 @@ pub mod ffi {
         type TopoDS_Shell;
         type TopoDS_Solid;
         type TopoDS_Shape;
+
+        #[cxx_name = "construct_unique"]
+        pub fn TopoDS_Face_ctor() -> UniquePtr<TopoDS_Face>;
 
         pub fn cast_wire_to_shape(wire: &TopoDS_Wire) -> &TopoDS_Shape;
         pub fn cast_face_to_shape(wire: &TopoDS_Face) -> &TopoDS_Shape;
@@ -234,6 +249,13 @@ pub mod ffi {
         pub fn translate(
             self: Pin<&mut TopoDS_Shape>,
             position: &TopLoc_Location,
+            raise_exception: bool,
+        );
+
+        #[cxx_name = "Location"]
+        pub fn set_global_translation(
+            self: Pin<&mut TopoDS_Shape>,
+            translation: &TopLoc_Location,
             raise_exception: bool,
         );
 
@@ -302,6 +324,11 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeEdge_HandleGeomCurve(
             geom_curve_handle: &HandleGeomCurve,
+        ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepBuilderAPI_MakeEdge_circle(
+            circle: &gp_Circ,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
 
         #[cxx_name = "construct_unique"]
@@ -380,6 +407,25 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepPrimAPI_MakePrism>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakePrism) -> bool;
+
+        type BRepFeat_MakeDPrism;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepFeat_MakeDPrism_ctor(
+            shape: &TopoDS_Shape,
+            profile_base: &TopoDS_Face,
+            sketch_base: &TopoDS_Face,
+            angle: f64,
+            fuse: i32, // 0 = subtractive, 1 = additive
+            modify: bool,
+        ) -> UniquePtr<BRepFeat_MakeDPrism>;
+
+        #[cxx_name = "Perform"]
+        pub fn perform_until_face(self: Pin<&mut BRepFeat_MakeDPrism>, until: &TopoDS_Shape);
+
+        #[cxx_name = "Perform"]
+        pub fn perform_with_height(self: Pin<&mut BRepFeat_MakeDPrism>, height: f64);
+        pub fn Shape(self: Pin<&mut BRepFeat_MakeDPrism>) -> &TopoDS_Shape;
 
         type BRepPrimAPI_MakeRevol;
 
@@ -684,6 +730,25 @@ pub mod ffi {
             face: &TopoDS_Face,
             location: Pin<&mut TopLoc_Location>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
+
+        type BRepIntCurveSurface_Inter;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepIntCurveSurface_Inter_ctor() -> UniquePtr<BRepIntCurveSurface_Inter>;
+        pub fn Init(
+            self: Pin<&mut BRepIntCurveSurface_Inter>,
+            shape: &TopoDS_Shape,
+            line: &gp_Lin,
+            tolerance: f64,
+        );
+        pub fn More(self: &BRepIntCurveSurface_Inter) -> bool;
+        pub fn Next(self: Pin<&mut BRepIntCurveSurface_Inter>);
+        pub fn BRepIntCurveSurface_Inter_face(
+            intersector: &BRepIntCurveSurface_Inter,
+        ) -> UniquePtr<TopoDS_Face>;
+        pub fn BRepIntCurveSurface_Inter_point(
+            intersector: &BRepIntCurveSurface_Inter,
+        ) -> UniquePtr<gp_Pnt>;
 
         // BRepFeat
         type BRepFeat_MakeCylindricalHole;

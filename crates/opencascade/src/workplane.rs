@@ -156,6 +156,14 @@ impl Workplane {
         Self { transform: Plane::YZ.transform() }
     }
 
+    pub fn origin(&self) -> DVec3 {
+        self.transform.translation
+    }
+
+    pub fn normal(&self) -> DVec3 {
+        self.transform.matrix3.z_axis
+    }
+
     // TODO(bschwind) - Test this.
     pub fn set_rotation(&mut self, (rot_x, rot_y, rot_z): (f64, f64, f64)) {
         let rot_x = rot_x * std::f64::consts::PI / 180.0;
@@ -205,13 +213,29 @@ impl Workplane {
         self.transform.translation += offset;
     }
 
-    pub fn transformed(mut self, offset: DVec3, rotate: DVec3) -> Self {
-        let new_origin = self.to_world_pos(offset);
+    pub fn transformed(&self, offset: DVec3, rotate: DVec3) -> Self {
+        let mut new = self.clone();
+        let new_origin = new.to_world_pos(offset);
 
-        self.rotate_by((rotate.x, rotate.y, rotate.z));
-        self.transform.translation = new_origin;
+        new.rotate_by((rotate.x, rotate.y, rotate.z));
+        new.transform.translation = new_origin;
 
-        self
+        new
+    }
+
+    pub fn translated(&self, offset: DVec3) -> Self {
+        let mut new = self.clone();
+        let new_origin = new.to_world_pos(offset);
+        new.transform.translation = new_origin;
+
+        new
+    }
+
+    pub fn rotated(&self, rotate: DVec3) -> Self {
+        let mut new = self.clone();
+        new.rotate_by((rotate.x, rotate.y, rotate.z));
+
+        new
     }
 
     pub fn to_world_pos(&self, pos: DVec3) -> DVec3 {
@@ -237,6 +261,14 @@ impl Workplane {
         let left = Edge::segment(p4, p1);
 
         Wire::from_edges([&top, &right, &bottom, &left].into_iter())
+    }
+
+    pub fn circle(&self, x: f64, y: f64, radius: f64) -> Wire {
+        let center = self.to_world_pos(dvec3(x, y, 0.0));
+
+        let circle = Edge::circle(center, self.normal(), radius);
+
+        Wire::from_edges([&circle].into_iter())
     }
 
     pub fn sketch(&self) -> Sketch {
