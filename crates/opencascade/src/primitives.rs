@@ -236,7 +236,6 @@ impl Wire {
     pub fn chamfer_angle(&mut self, distance: f64, angle: f64) {
         // Create a face from this wire
         let face = Face::from_wire(self);
-        // use BRepFilletAPI_MakeFillet2d
         let mut make_fillet = BRepFilletAPI_MakeFillet2d_ctor(&face.inner);
 
         // add all vertices from the face
@@ -288,21 +287,30 @@ impl Wire {
 
         // use BRepFilletAPI_MakeFillet2d for 2d face
         let mut make_fillet = BRepFilletAPI_MakeFillet2d_ctor(&face.inner);
-        let mut edge_explorer = TopExp_Explorer_ctor(face_shape, TopAbs_ShapeEnum::TopAbs_EDGE);
+        let mut edge_map = new_indexed_map_of_shape();
+        map_shapes(face_shape, TopAbs_ShapeEnum::TopAbs_EDGE, edge_map.pin_mut());
 
-        // walk all edges running chamfer on each
-        while edge_explorer.More() {
-            let edge = TopoDS_cast_to_edge(edge_explorer.Current());
-            // seems to take same edge as both arguments? Tried +1 for edge 2 but last vertex is not chamfered
+        // chamfer at vertex of all edges
+        for i in 1..=edge_map.Extent()-1 {
+            let edge1 = TopoDS_cast_to_edge(edge_map.FindKey(i));
+            let edge2 = TopoDS_cast_to_edge(edge_map.FindKey(i+1));
             BRepFilletAPI_MakeFillet2d_add_chamfer(
                 make_fillet.pin_mut(),
-                edge,
-                edge,
+                edge1,
+                edge2,
                 distance1,
                 distance2,
             );
-            edge_explorer.pin_mut().Next();
         }
+
+        // last corner between first and last
+        BRepFilletAPI_MakeFillet2d_add_chamfer(
+            make_fillet.pin_mut(),
+            TopoDS_cast_to_edge(edge_map.FindKey(1)),
+            TopoDS_cast_to_edge(edge_map.FindKey(edge_map.Extent())),
+            distance1,
+            distance2,
+        );
 
         let filleted_shape = make_fillet.pin_mut().Shape();
         let result_face = TopoDS_cast_to_face(filleted_shape);
