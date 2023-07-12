@@ -244,7 +244,8 @@ pub fn main() {
         cross.set_global_translation(dvec3(x, y, 0.0));
         let cross = cross.extrude(dvec3(0.0, 0.0, 4.6));
 
-        let (subtracted, _) = keycap.subtract_shape(&cross);
+        let (mut subtracted, edges) = keycap.subtract_shape(&cross);
+        subtracted.chamfer_edges(0.2, &edges);
         keycap = subtracted;
     }
 

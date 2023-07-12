@@ -1,6 +1,8 @@
 use glam::dvec3;
-use opencascade::primitives::{Edge, Face, ToAngle};
-use opencascade::{primitives::Solid, workplane::Workplane};
+use opencascade::{
+    primitives::{Edge, Face, Solid, ToAngle},
+    workplane::Workplane,
+};
 
 pub fn main() {
     let mut base = Workplane::xy().rect(10.0, 10.0);
