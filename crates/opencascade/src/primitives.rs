@@ -12,10 +12,9 @@ use opencascade_sys::ffi::{
     BRepBuilderAPI_MakeEdge_circle, BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt,
     BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeVertex_gp_Pnt, BRepBuilderAPI_MakeWire_ctor,
     BRepBuilderAPI_Transform_ctor, BRepFeat_MakeDPrism_ctor, BRepFilletAPI_MakeChamfer_ctor,
-    BRepFilletAPI_MakeFillet2d_add_chamfer, BRepFilletAPI_MakeFillet2d_add_chamfer_angle,
-    BRepFilletAPI_MakeFillet2d_add_fillet, BRepFilletAPI_MakeFillet2d_ctor,
-    BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor, BRepGProp_SurfaceProperties,
-    BRepIntCurveSurface_Inter_ctor, BRepIntCurveSurface_Inter_face,
+    BRepFilletAPI_MakeFillet2d_add_chamfer, BRepFilletAPI_MakeFillet2d_add_fillet,
+    BRepFilletAPI_MakeFillet2d_ctor, BRepFilletAPI_MakeFillet_ctor, BRepGProp_Face_ctor,
+    BRepGProp_SurfaceProperties, BRepIntCurveSurface_Inter_ctor, BRepIntCurveSurface_Inter_face,
     BRepIntCurveSurface_Inter_point, BRepMesh_IncrementalMesh, BRepMesh_IncrementalMesh_ctor,
     BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Tool_Surface,
     BRep_Tool_Triangulation, GCPnts_TangentialDeflection, GCPnts_TangentialDeflection_Value,
@@ -273,46 +272,6 @@ impl Wire {
         let mut face = Face::from_wire(self);
         face.fillet(radius);
         let wire = outer_wire(&face.inner);
-
-        self.inner = wire;
-    }
-
-    /// Chamfer the wire by a given distance and angle in radians
-    pub fn chamfer_angle(&mut self, distance: f64, angle: Angle) {
-        // Create a face from this wire
-        let face = Face::from_wire(self);
-        let mut make_fillet = BRepFilletAPI_MakeFillet2d_ctor(&face.inner);
-
-        // add all vertices from the face
-        let face_shape = cast_face_to_shape(&face.inner);
-
-        // We use a shape map here to avoid duplicates.
-        let mut vertex_map = new_indexed_map_of_shape();
-        map_shapes(face_shape, TopAbs_ShapeEnum::TopAbs_VERTEX, vertex_map.pin_mut());
-
-        let mut edge_map = new_indexed_map_of_shape();
-        map_shapes(face_shape, TopAbs_ShapeEnum::TopAbs_EDGE, edge_map.pin_mut());
-
-        // walk vertices - will chamfer edges connected to the vertex
-        for i in 1..=vertex_map.Extent() {
-            let vertex = TopoDS_cast_to_vertex(vertex_map.FindKey(i));
-            let edge = TopoDS_cast_to_edge(edge_map.FindKey(i));
-            BRepFilletAPI_MakeFillet2d_add_chamfer_angle(
-                make_fillet.pin_mut(),
-                edge,
-                vertex,
-                distance,
-                angle.radians(),
-            );
-        }
-
-        make_fillet.pin_mut().Build(&Message_ProgressRange_ctor());
-
-        let result_shape = make_fillet.pin_mut().Shape();
-        // convert back to a wire with BRepTools::OuterWire
-
-        let result_face = TopoDS_cast_to_face(result_shape);
-        let wire = outer_wire(result_face);
 
         self.inner = wire;
     }
