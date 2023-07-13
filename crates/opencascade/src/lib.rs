@@ -23,7 +23,7 @@ pub enum Error {
 }
 
 pub struct Shape {
-    shape: UniquePtr<TopoDS_Shape>,
+    inner: UniquePtr<TopoDS_Shape>,
 }
 
 impl Shape {
@@ -31,9 +31,9 @@ impl Shape {
     pub fn make_box(x: f64, y: f64, z: f64) -> Self {
         let point = new_point(0.0, 0.0, 0.0);
         let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, x, y, z);
-        let shape = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
+        let inner = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
 
-        Self { shape }
+        Self { inner }
     }
 
     /// Make a box with one corner at p1, and the opposite corner
@@ -45,9 +45,9 @@ impl Shape {
         let point = new_point(min_corner.x, min_corner.y, min_corner.z);
         let diff = max_corner - min_corner;
         let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
-        let shape = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
+        let inner = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
 
-        Self { shape }
+        Self { inner }
     }
 
     /// Make a cylinder with its bottom at point p, with radius r and height h.
@@ -57,9 +57,9 @@ impl Shape {
         let cylinder_coord_system = gp_Ax2_ctor(&point, cylinder_axis);
 
         let mut cylinder = BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
-        let shape = TopoDS_Shape_to_owned(cylinder.pin_mut().Shape());
+        let inner = TopoDS_Shape_to_owned(cylinder.pin_mut().Shape());
 
-        Self { shape }
+        Self { inner }
     }
 
     /// Purposefully underpowered for now, this simply takes a list of points,
@@ -97,9 +97,9 @@ impl Shape {
         let mut extrusion =
             BRepPrimAPI_MakePrism_ctor(face_profile.pin_mut().Shape(), &prism_vec, false, true);
 
-        let shape = TopoDS_Shape_to_owned(extrusion.pin_mut().Shape());
+        let inner = TopoDS_Shape_to_owned(extrusion.pin_mut().Shape());
 
-        Self { shape }
+        Self { inner }
     }
 
     /// Drills a cylindrical hole starting at point p, pointing down the Z axis
@@ -114,7 +114,7 @@ impl Shape {
         // let cylinder_coord_system = gp_Ax2_ctor(&point, cylinder_axis);
 
         let mut make_hole = BRepFeat_MakeCylindricalHole_ctor();
-        make_hole.pin_mut().Init(&self.shape, &hole_axis);
+        make_hole.pin_mut().Init(&self.inner, &hole_axis);
 
         make_hole.pin_mut().Perform(radius);
         make_hole.pin_mut().Build();
@@ -124,12 +124,12 @@ impl Shape {
 
         // Self { shape }
 
-        self.shape = TopoDS_Shape_to_owned(make_hole.pin_mut().Shape());
+        self.inner = TopoDS_Shape_to_owned(make_hole.pin_mut().Shape());
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) {
         let mut stl_writer = StlAPI_Writer_ctor();
-        let triangulation = BRepMesh_IncrementalMesh_ctor(&self.shape, 0.001);
+        let triangulation = BRepMesh_IncrementalMesh_ctor(&self.inner, 0.001);
         let success = write_stl(
             stl_writer.pin_mut(),
             triangulation.Shape(),
@@ -140,8 +140,8 @@ impl Shape {
     }
 
     pub fn fillet_edges(&mut self, radius: f64) {
-        let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(&self.shape);
-        let mut edge_explorer = TopExp_Explorer_ctor(&self.shape, TopAbs_ShapeEnum::TopAbs_EDGE);
+        let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(&self.inner);
+        let mut edge_explorer = TopExp_Explorer_ctor(&self.inner, TopAbs_ShapeEnum::TopAbs_EDGE);
 
         while edge_explorer.More() {
             let edge = TopoDS_cast_to_edge(edge_explorer.Current());
@@ -151,12 +151,12 @@ impl Shape {
 
         let filleted_shape = make_fillet.pin_mut().Shape();
 
-        self.shape = TopoDS_Shape_to_owned(filleted_shape);
+        self.inner = TopoDS_Shape_to_owned(filleted_shape);
     }
 
     pub fn chamfer_edges(&mut self, distance: f64) {
-        let mut make_chamfer = BRepFilletAPI_MakeChamfer_ctor(&self.shape);
-        let mut edge_explorer = TopExp_Explorer_ctor(&self.shape, TopAbs_ShapeEnum::TopAbs_EDGE);
+        let mut make_chamfer = BRepFilletAPI_MakeChamfer_ctor(&self.inner);
+        let mut edge_explorer = TopExp_Explorer_ctor(&self.inner, TopAbs_ShapeEnum::TopAbs_EDGE);
 
         while edge_explorer.More() {
             let edge = TopoDS_cast_to_edge(edge_explorer.Current());
@@ -166,27 +166,27 @@ impl Shape {
 
         let filleted_shape = make_chamfer.pin_mut().Shape();
 
-        self.shape = TopoDS_Shape_to_owned(filleted_shape);
+        self.inner = TopoDS_Shape_to_owned(filleted_shape);
     }
 
     pub fn subtract(&mut self, other: &Shape) {
-        let mut cut_operation = BRepAlgoAPI_Cut_ctor(&self.shape, &other.shape);
+        let mut cut_operation = BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
 
         let cut_shape = cut_operation.pin_mut().Shape();
-        self.shape = TopoDS_Shape_to_owned(cut_shape);
+        self.inner = TopoDS_Shape_to_owned(cut_shape);
     }
 
     pub fn union(&mut self, other: &Shape) {
-        let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.shape, &other.shape);
+        let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
 
         let cut_shape = fuse_operation.pin_mut().Shape();
-        self.shape = TopoDS_Shape_to_owned(cut_shape);
+        self.inner = TopoDS_Shape_to_owned(cut_shape);
     }
 
     pub fn intersect(&mut self, other: &Shape) {
-        let mut common_operation = BRepAlgoAPI_Common_ctor(&self.shape, &other.shape);
+        let mut common_operation = BRepAlgoAPI_Common_ctor(&self.inner, &other.inner);
 
         let cut_shape = common_operation.pin_mut().Shape();
-        self.shape = TopoDS_Shape_to_owned(cut_shape);
+        self.inner = TopoDS_Shape_to_owned(cut_shape);
     }
 }
