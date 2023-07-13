@@ -890,25 +890,45 @@ impl Shape {
         Self { inner }
     }
 
-    pub fn union(&self, other: &Solid) -> Shape {
+    pub fn union(&self, other: &Solid) -> (Shape, Vec<Edge>) {
         let other_inner_shape = cast_solid_to_shape(&other.inner);
 
         let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.inner, other_inner_shape);
+        let edge_list = fuse_operation.pin_mut().SectionEdges();
+        let vec = shape_list_to_vector(edge_list);
+
+        let mut edges = vec![];
+        for shape in vec.iter() {
+            let edge = TopoDS_cast_to_edge(shape);
+            let inner = TopoDS_Edge_to_owned(edge);
+            let edge = Edge { inner };
+            edges.push(edge);
+        }
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
         let inner = TopoDS_Shape_to_owned(fuse_shape);
 
-        Shape { inner }
+        (Shape { inner }, edges)
     }
 
     // TODO(bschwind) - Unify this later
-    pub fn union_shape(&self, other: &Shape) -> Shape {
+    pub fn union_shape(&self, other: &Shape) -> (Shape, Vec<Edge>) {
         let mut fuse_operation = BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
+        let edge_list = fuse_operation.pin_mut().SectionEdges();
+        let vec = shape_list_to_vector(edge_list);
+
+        let mut edges = vec![];
+        for shape in vec.iter() {
+            let edge = TopoDS_cast_to_edge(shape);
+            let inner = TopoDS_Edge_to_owned(edge);
+            let edge = Edge { inner };
+            edges.push(edge);
+        }
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
         let inner = TopoDS_Shape_to_owned(fuse_shape);
 
-        Shape { inner }
+        (Shape { inner }, edges)
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
