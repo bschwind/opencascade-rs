@@ -32,6 +32,14 @@ pub mod ffi {
         IFSelect_RetStop,
     }
 
+    #[derive(Debug)]
+    #[repr(u32)]
+    pub enum BOPAlgo_GlueEnum {
+        BOPAlgo_GlueOff,
+        BOPAlgo_GlueShift,
+        BOPAlgo_GlueFull,
+    }
+
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -616,6 +624,7 @@ pub mod ffi {
 
         // Boolean Operations
         type BRepAlgoAPI_Fuse;
+        type BOPAlgo_GlueEnum;
 
         #[cxx_name = "construct_unique"]
         pub fn BRepAlgoAPI_Fuse_ctor(
@@ -627,6 +636,7 @@ pub mod ffi {
         pub fn Build(self: Pin<&mut BRepAlgoAPI_Fuse>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Fuse) -> bool;
         pub fn SectionEdges<'a>(self: Pin<&'a mut BRepAlgoAPI_Fuse>) -> &'a TopTools_ListOfShape;
+        pub fn SetGlue(self: Pin<&mut BRepAlgoAPI_Fuse>, glue: BOPAlgo_GlueEnum);
 
         type BRepAlgoAPI_Cut;
 
