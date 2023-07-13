@@ -508,12 +508,12 @@ impl Face {
         // chamfer at vertex of all edges
         for i in 1..=vertex_map.Extent() {
             let edges = shape_list_to_vector(data_map.FindFromIndex(i));
-            let edge1 = edges.get(0).expect("Vertex has no edges");
-            let edge2 = edges.get(1).expect("Vertex has only one edge");
+            let edge_1 = edges.get(0).expect("Vertex has no edges");
+            let edge_2 = edges.get(1).expect("Vertex has only one edge");
             BRepFilletAPI_MakeFillet2d_add_chamfer(
                 make_fillet.pin_mut(),
-                TopoDS_cast_to_edge(edge1),
-                TopoDS_cast_to_edge(edge2),
+                TopoDS_cast_to_edge(edge_1),
+                TopoDS_cast_to_edge(edge_2),
                 distance_1,
                 distance_2,
             );

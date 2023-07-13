@@ -134,6 +134,12 @@ pub mod ffi {
             child_type: TopAbs_ShapeEnum,
             shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
         );
+        pub fn map_shapes_and_unique_ancestors(
+            shape: &TopoDS_Shape,
+            parent_type: TopAbs_ShapeEnum,
+            child_type: TopAbs_ShapeEnum,
+            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
+        );
 
         type TColgp_Array1OfDir;
         #[cxx_name = "construct_unique"]
@@ -749,6 +755,24 @@ pub mod ffi {
         pub fn Next(self: Pin<&mut TopExp_Explorer>);
         pub fn ExplorerCurrentShape(explorer: &TopExp_Explorer) -> UniquePtr<TopoDS_Shape>;
         pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
+
+        pub fn TopExp_FirstVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
+        pub fn TopExp_LastVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
+        pub fn TopExp_EdgeVertices(
+            edge: &TopoDS_Edge,
+            vertex_first: Pin<&mut TopoDS_Vertex>,
+            vertex_last: Pin<&mut TopoDS_Vertex>,
+        );
+        pub fn TopExp_WireVertices(
+            wire: &TopoDS_Wire,
+            vertex_first: Pin<&mut TopoDS_Vertex>,
+            vertex_last: Pin<&mut TopoDS_Vertex>,
+        );
+        pub fn TopExp_CommonVertex(
+            edge_1: &TopoDS_Edge,
+            edge_2: &TopoDS_Edge,
+            vertex: Pin<&mut TopoDS_Vertex>,
+        ) -> bool;
 
         pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<HandleGeomSurface>;
         pub fn BRep_Tool_Curve(

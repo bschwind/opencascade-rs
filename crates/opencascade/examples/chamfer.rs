@@ -1,18 +1,17 @@
 use glam::dvec3;
 use opencascade::{
-    primitives::{Direction, Edge, Face, Solid, ToAngle},
+    primitives::{Direction, Edge, Face, Solid},
     workplane::Workplane,
 };
 
 pub fn main() {
+    // A tapering chamfer from bottom to top 2->1
     let mut base = Workplane::xy().rect(10.0, 10.0);
-    // asymmetric chamfer
-    base.chamfer(1.0, Some(2.0));
+    base.chamfer(2.0, None);
 
     let mut top = Workplane::xy().rect(10.0, 10.0);
-    // 45 degree chamfer - other angles will be asymmetric
-    top.chamfer_angle(2.0, 45.degrees());
     top.translate(dvec3(0.0, 0.0, 10.0));
+    top.chamfer(1.0, None);
 
     let chamfered_box = Solid::loft([&base, &top].into_iter());
 
@@ -31,6 +30,7 @@ pub fn main() {
         .collect();
     chamfered_shape.chamfer_edges(1.0, &top_edges);
 
+    // TODO figure out why the fuse does not return edges
     // chamfer the handle join edges
     // let handle_join_edges = chamfered_shape
     //     .edges()
