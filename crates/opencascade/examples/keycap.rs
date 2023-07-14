@@ -10,7 +10,7 @@ const KEYCAP_PITCH: f64 = 19.05;
 
 pub fn main() {
     let convex = false;
-    let keycap_unit_size_x = 2.0;
+    let keycap_unit_size_x = 1.0;
     let keycap_unit_size_y = 1.0;
     let height = 16.0;
     let angle = 13.0;
