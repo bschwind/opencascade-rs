@@ -1,10 +1,10 @@
-use crate::{gp_Ax2_ctor, workplane::Workplane, Error, TopoDS_Shape_to_owned};
+use crate::{workplane::Workplane, Error};
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi::{
     cast_compound_to_shape, cast_face_to_shape, cast_solid_to_shape, cast_wire_to_shape,
-    gp_Ax1_ctor, gp_Ax2, gp_Circ_ctor, gp_Dir, gp_Dir_ctor, gp_Lin_ctor, gp_Pnt, gp_Vec,
-    map_shapes, map_shapes_and_ancestors, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve,
+    gp_Ax1_ctor, gp_Ax2, gp_Ax2_ctor, gp_Circ_ctor, gp_Dir, gp_Dir_ctor, gp_Lin_ctor, gp_Pnt,
+    gp_Vec, map_shapes, map_shapes_and_ancestors, new_HandleGeomCurve_from_HandleGeom_TrimmedCurve,
     new_indexed_data_map_of_shape_list_of_shape, new_indexed_map_of_shape, new_point,
     new_transform, new_vec, one_shape, outer_wire, read_step, shape_list_to_vector,
     triangulated_shape_normal, write_stl, BRepAdaptor_Curve_ctor, BRepAdaptor_Curve_value,
@@ -27,9 +27,10 @@ use opencascade_sys::ffi::{
     TopExp_Explorer_ctor, TopLoc_Location_Transformation, TopLoc_Location_ctor,
     TopLoc_Location_from_transform, TopoDS_Compound, TopoDS_Compound_to_owned, TopoDS_Edge,
     TopoDS_Edge_to_owned, TopoDS_Face, TopoDS_Face_ctor, TopoDS_Face_to_owned, TopoDS_Shape,
-    TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex, TopoDS_Vertex_to_owned,
-    TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound, TopoDS_cast_to_edge,
-    TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex, TopoDS_cast_to_wire,
+    TopoDS_Shape_to_owned, TopoDS_Shell, TopoDS_Solid, TopoDS_Solid_to_owned, TopoDS_Vertex,
+    TopoDS_Vertex_to_owned, TopoDS_Wire, TopoDS_Wire_to_owned, TopoDS_cast_to_compound,
+    TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_solid, TopoDS_cast_to_vertex,
+    TopoDS_cast_to_wire,
 };
 use std::path::Path;
 
@@ -769,7 +770,7 @@ impl Compound {
 }
 
 pub struct Shape {
-    inner: UniquePtr<TopoDS_Shape>,
+    pub(crate) inner: UniquePtr<TopoDS_Shape>,
 }
 
 impl Shape {
