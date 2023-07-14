@@ -123,17 +123,17 @@ pub mod ffi {
             self: &TopTools_IndexedDataMapOfShapeListOfShape,
             index: i32,
         ) -> &TopoDS_Shape;
-        pub fn FindFromIndex<'a>(
-            self: &'a TopTools_IndexedDataMapOfShapeListOfShape,
+        pub fn FindFromIndex(
+            self: &TopTools_IndexedDataMapOfShapeListOfShape,
             index: i32,
-        ) -> &'a TopTools_ListOfShape;
+        ) -> &TopTools_ListOfShape;
         pub fn FindIndex(
             self: &TopTools_IndexedDataMapOfShapeListOfShape,
             shape: &TopoDS_Shape,
         ) -> i32;
         pub fn FindFromKey<'a>(
             self: &'a TopTools_IndexedDataMapOfShapeListOfShape,
-            shape: &TopoDS_Shape,
+            shape: &'a TopoDS_Shape,
         ) -> &'a TopTools_ListOfShape;
 
         pub fn map_shapes_and_ancestors(
@@ -635,7 +635,7 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepAlgoAPI_Fuse>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Fuse) -> bool;
-        pub fn SectionEdges<'a>(self: Pin<&'a mut BRepAlgoAPI_Fuse>) -> &'a TopTools_ListOfShape;
+        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopTools_ListOfShape;
         pub fn SetGlue(self: Pin<&mut BRepAlgoAPI_Fuse>, glue: BOPAlgo_GlueEnum);
 
         type BRepAlgoAPI_Cut;
@@ -653,7 +653,7 @@ pub mod ffi {
             self: Pin<&'a mut BRepAlgoAPI_Cut>,
             shape: &'a TopoDS_Shape,
         ) -> &'a TopTools_ListOfShape;
-        pub fn SectionEdges<'a>(self: Pin<&'a mut BRepAlgoAPI_Cut>) -> &'a TopTools_ListOfShape;
+        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopTools_ListOfShape;
 
         type BRepAlgoAPI_Common;
 
