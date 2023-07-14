@@ -35,7 +35,8 @@ impl DerefMut for AdHocShape {
 }
 
 impl AdHocShape {
-    fn new(inner: UniquePtr<TopoDS_Shape>) -> Self {
+    /// Internal helper to create [Self] from the FFI inner type.
+    fn from_inner(inner: UniquePtr<TopoDS_Shape>) -> Self {
         Self(Shape { inner })
     }
 
@@ -45,7 +46,7 @@ impl AdHocShape {
         let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, x, y, z);
         let inner = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
 
-        Self::new(inner)
+        Self::from_inner(inner)
     }
 
     /// Make a box with one corner at p1, and the opposite corner
@@ -59,7 +60,7 @@ impl AdHocShape {
         let mut my_box = BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
         let inner = TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
 
-        Self::new(inner)
+        Self::from_inner(inner)
     }
 
     /// Make a cylinder with its bottom at point p, with radius r and height h.
@@ -71,7 +72,7 @@ impl AdHocShape {
         let mut cylinder = BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
         let inner = TopoDS_Shape_to_owned(cylinder.pin_mut().Shape());
 
-        Self::new(inner)
+        Self::from_inner(inner)
     }
 
     /// Purposefully underpowered for now, this simply takes a list of points,
@@ -111,7 +112,7 @@ impl AdHocShape {
 
         let inner = TopoDS_Shape_to_owned(extrusion.pin_mut().Shape());
 
-        Self::new(inner)
+        Self::from_inner(inner)
     }
 
     /// Drills a cylindrical hole starting at point p, pointing down the Z axis
