@@ -1015,7 +1015,8 @@ impl Mesher {
             let triangulation_handle =
                 ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
 
-            let Ok(triangulation) = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle) else {
+            let Ok(triangulation) = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle)
+            else {
                 // TODO(bschwind) - Do better error handling, use Results.
                 println!("Encountered a face with no triangulation");
                 continue;
