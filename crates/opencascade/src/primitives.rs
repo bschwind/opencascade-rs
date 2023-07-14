@@ -279,10 +279,10 @@ impl Wire {
     /// Chamfer the wire edges at each vertex by a given distance
     ///
     /// If distance2 is None, then the chamfer is symmetric
-    pub fn chamfer(&mut self, distance_1: f64, distance_2: Option<f64>) {
+    pub fn chamfer(&mut self, distance_1: f64) {
         // Create a face from this wire
         let mut face = Face::from_wire(self);
-        face.chamfer(distance_1, distance_2);
+        face.chamfer(distance_1);
 
         let wire = outer_wire(&face.inner);
 
@@ -443,8 +443,9 @@ impl Face {
     /// Chamfer the wire edges at each vertex by a given distance
     ///
     /// If distance2 is None, then the chamfer is symmetric
-    pub fn chamfer(&mut self, distance_1: f64, distance_2: Option<f64>) {
-        let distance_2 = distance_2.unwrap_or(distance_1);
+    pub fn chamfer(&mut self, distance_1: f64) {
+        // TODO - Support asymmetric chamfers.
+        let distance_2 = distance_1;
 
         // add all vertices from the face
         let face_shape = cast_face_to_shape(&self.inner);

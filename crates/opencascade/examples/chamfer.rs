@@ -7,11 +7,11 @@ use opencascade::{
 pub fn main() {
     // A tapering chamfer from bottom to top 2->1
     let mut base = Workplane::xy().rect(10.0, 10.0);
-    base.chamfer(2.0, None);
+    base.chamfer(2.0);
 
     let mut top = Workplane::xy().rect(10.0, 10.0);
     top.translate(dvec3(0.0, 0.0, 10.0));
-    top.chamfer(1.0, None);
+    top.chamfer(1.0);
 
     let chamfered_box = Solid::loft([&base, &top].into_iter()).to_shape();
 
