@@ -276,11 +276,8 @@ impl Wire {
         self.inner = wire;
     }
 
-    /// Chamfer the wire edges at each vertex by a given distance
-    ///
-    /// If distance2 is None, then the chamfer is symmetric
+    /// Chamfer the wire edges at each vertex by a given distance.
     pub fn chamfer(&mut self, distance_1: f64) {
-        // Create a face from this wire
         let mut face = Face::from_wire(self);
         face.chamfer(distance_1);
 
@@ -416,10 +413,8 @@ impl Face {
 
     /// Fillets the face edges by a given radius at each vertex
     pub fn fillet(&mut self, radius: f64) {
-        // use BRepFilletAPI_MakeFillet2d
         let mut make_fillet = BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
 
-        // add all vertices from the face
         let face_shape = cast_face_to_shape(&self.inner);
 
         // We use a shape map here to avoid duplicates.
@@ -434,29 +429,24 @@ impl Face {
         make_fillet.pin_mut().Build(&Message_ProgressRange_ctor());
 
         let result_shape = make_fillet.pin_mut().Shape();
-        // convert back to a wire with BRepTools::OuterWire
         let result_face = TopoDS_cast_to_face(result_shape);
 
         self.inner = TopoDS_Face_to_owned(result_face);
     }
 
     /// Chamfer the wire edges at each vertex by a given distance
-    ///
-    /// If distance2 is None, then the chamfer is symmetric
     pub fn chamfer(&mut self, distance_1: f64) {
         // TODO - Support asymmetric chamfers.
         let distance_2 = distance_1;
 
-        // add all vertices from the face
         let face_shape = cast_face_to_shape(&self.inner);
 
-        // use BRepFilletAPI_MakeFillet2d for 2d face
         let mut make_fillet = BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
 
         let mut vertex_map = new_indexed_map_of_shape();
         map_shapes(face_shape, TopAbs_ShapeEnum::TopAbs_VERTEX, vertex_map.pin_mut());
 
-        // get map of vertices to edges so we can find the edges connected to each vertex
+        // Get map of vertices to edges so we can find the edges connected to each vertex.
         let mut data_map = new_indexed_data_map_of_shape_list_of_shape();
         map_shapes_and_ancestors(
             face_shape,
@@ -465,7 +455,7 @@ impl Face {
             data_map.pin_mut(),
         );
 
-        // chamfer at vertex of all edges
+        // Chamfer at vertex of all edges.
         for i in 1..=vertex_map.Extent() {
             let edges = shape_list_to_vector(data_map.FindFromIndex(i));
             let edge_1 = edges.get(0).expect("Vertex has no edges");
