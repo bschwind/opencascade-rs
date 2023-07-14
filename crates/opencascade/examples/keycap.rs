@@ -190,7 +190,7 @@ pub fn main() {
 
         let post = circle.extrude_to_face(&keycap, &temp_face);
 
-        keycap = keycap.union_shape(&post);
+        (keycap, _) = keycap.union_shape(&post);
     }
 
     for (x, y) in ribh_points {
@@ -198,7 +198,7 @@ pub fn main() {
 
         let rib = rect.extrude_to_face(&keycap, &temp_face);
 
-        keycap = keycap.union_shape(&rib);
+        (keycap, _) = keycap.union_shape(&rib);
     }
 
     for (x, y) in ribv_points {
@@ -206,7 +206,7 @@ pub fn main() {
 
         let rib = rect.extrude_to_face(&keycap, &temp_face);
 
-        keycap = keycap.union_shape(&rib);
+        (keycap, _) = keycap.union_shape(&rib);
     }
 
     // TODO(bschwind) - This should probably be done after every union...
@@ -232,7 +232,7 @@ pub fn main() {
         let (face_target, _) = faces.get(0).expect("We should have a face to extrude to");
         let post = circle.extrude_to_face(&keycap, face_target);
 
-        keycap = keycap.union_shape(&post);
+        (keycap, _) = keycap.union_shape(&post);
     }
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));
@@ -244,7 +244,8 @@ pub fn main() {
         cross.set_global_translation(dvec3(x, y, 0.0));
         let cross = cross.extrude(dvec3(0.0, 0.0, 4.6));
 
-        let (subtracted, _) = keycap.subtract_shape(&cross);
+        let (mut subtracted, edges) = keycap.subtract_shape(&cross);
+        subtracted.chamfer_edges(0.2, &edges);
         keycap = subtracted;
     }
 

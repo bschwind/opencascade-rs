@@ -32,6 +32,14 @@ pub mod ffi {
         IFSelect_RetStop,
     }
 
+    #[derive(Debug)]
+    #[repr(u32)]
+    pub enum BOPAlgo_GlueEnum {
+        BOPAlgo_GlueOff,
+        BOPAlgo_GlueShift,
+        BOPAlgo_GlueFull,
+    }
+
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -103,6 +111,42 @@ pub mod ffi {
             shape: &TopoDS_Shape,
             shape_type: TopAbs_ShapeEnum,
             shape_map: Pin<&mut TopTools_IndexedMapOfShape>,
+        );
+
+        type TopTools_IndexedDataMapOfShapeListOfShape;
+
+        #[cxx_name = "construct_unique"]
+        pub fn new_indexed_data_map_of_shape_list_of_shape(
+        ) -> UniquePtr<TopTools_IndexedDataMapOfShapeListOfShape>;
+        pub fn Extent(self: &TopTools_IndexedDataMapOfShapeListOfShape) -> i32;
+        pub fn FindKey(
+            self: &TopTools_IndexedDataMapOfShapeListOfShape,
+            index: i32,
+        ) -> &TopoDS_Shape;
+        pub fn FindFromIndex(
+            self: &TopTools_IndexedDataMapOfShapeListOfShape,
+            index: i32,
+        ) -> &TopTools_ListOfShape;
+        pub fn FindIndex(
+            self: &TopTools_IndexedDataMapOfShapeListOfShape,
+            shape: &TopoDS_Shape,
+        ) -> i32;
+        pub fn FindFromKey<'a>(
+            self: &'a TopTools_IndexedDataMapOfShapeListOfShape,
+            shape: &'a TopoDS_Shape,
+        ) -> &'a TopTools_ListOfShape;
+
+        pub fn map_shapes_and_ancestors(
+            shape: &TopoDS_Shape,
+            parent_type: TopAbs_ShapeEnum,
+            child_type: TopAbs_ShapeEnum,
+            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
+        );
+        pub fn map_shapes_and_unique_ancestors(
+            shape: &TopoDS_Shape,
+            parent_type: TopAbs_ShapeEnum,
+            child_type: TopAbs_ShapeEnum,
+            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
         );
 
         type TColgp_Array1OfDir;
@@ -512,6 +556,20 @@ pub mod ffi {
             vertex: &TopoDS_Vertex,
             radius: f64,
         ) -> UniquePtr<TopoDS_Edge>;
+        pub fn BRepFilletAPI_MakeFillet2d_add_chamfer(
+            make_fillet: Pin<&mut BRepFilletAPI_MakeFillet2d>,
+            edge1: &TopoDS_Edge,
+            edge2: &TopoDS_Edge,
+            distance1: f64,
+            distance2: f64,
+        ) -> UniquePtr<TopoDS_Edge>;
+        pub fn BRepFilletAPI_MakeFillet2d_add_chamfer_angle(
+            make_fillet: Pin<&mut BRepFilletAPI_MakeFillet2d>,
+            edge: &TopoDS_Edge,
+            vertex: &TopoDS_Vertex,
+            distance: f64,
+            angle: f64,
+        ) -> UniquePtr<TopoDS_Edge>;
         pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet2d>, progress: &Message_ProgressRange);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet2d>) -> &TopoDS_Shape;
         pub fn IsDone(self: &BRepFilletAPI_MakeFillet2d) -> bool;
@@ -566,6 +624,7 @@ pub mod ffi {
 
         // Boolean Operations
         type BRepAlgoAPI_Fuse;
+        type BOPAlgo_GlueEnum;
 
         #[cxx_name = "construct_unique"]
         pub fn BRepAlgoAPI_Fuse_ctor(
@@ -576,6 +635,8 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepAlgoAPI_Fuse>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Fuse) -> bool;
+        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopTools_ListOfShape;
+        pub fn SetGlue(self: Pin<&mut BRepAlgoAPI_Fuse>, glue: BOPAlgo_GlueEnum);
 
         type BRepAlgoAPI_Cut;
 
@@ -592,7 +653,7 @@ pub mod ffi {
             self: Pin<&'a mut BRepAlgoAPI_Cut>,
             shape: &'a TopoDS_Shape,
         ) -> &'a TopTools_ListOfShape;
-        pub fn SectionEdges<'a>(self: Pin<&'a mut BRepAlgoAPI_Cut>) -> &'a TopTools_ListOfShape;
+        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopTools_ListOfShape;
 
         type BRepAlgoAPI_Common;
 
@@ -704,6 +765,24 @@ pub mod ffi {
         pub fn Next(self: Pin<&mut TopExp_Explorer>);
         pub fn ExplorerCurrentShape(explorer: &TopExp_Explorer) -> UniquePtr<TopoDS_Shape>;
         pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
+
+        pub fn TopExp_FirstVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
+        pub fn TopExp_LastVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
+        pub fn TopExp_EdgeVertices(
+            edge: &TopoDS_Edge,
+            vertex_first: Pin<&mut TopoDS_Vertex>,
+            vertex_last: Pin<&mut TopoDS_Vertex>,
+        );
+        pub fn TopExp_WireVertices(
+            wire: &TopoDS_Wire,
+            vertex_first: Pin<&mut TopoDS_Vertex>,
+            vertex_last: Pin<&mut TopoDS_Vertex>,
+        );
+        pub fn TopExp_CommonVertex(
+            edge_1: &TopoDS_Edge,
+            edge_2: &TopoDS_Edge,
+            vertex: Pin<&mut TopoDS_Vertex>,
+        ) -> bool;
 
         pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<HandleGeomSurface>;
         pub fn BRep_Tool_Curve(
