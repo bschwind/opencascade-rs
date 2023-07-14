@@ -1,5 +1,5 @@
 use glam::{DVec2, DVec3};
-use opencascade::Shape;
+use opencascade::adhoc::AdHocShape;
 
 // All units are in millimeters.
 // The top/bottom/left/right conventions relate to 2D rectangles in
@@ -68,13 +68,14 @@ struct SupportPost {
 }
 
 impl SupportPost {
-    fn shape(&self) -> Shape {
+    fn shape(&self) -> AdHocShape {
         let bottom_z = CASE_FLOOR_Z;
         let top_z = TOP_PLATE_BOTTOM_Z;
 
         let pos = DVec3::from((self.pos, CASE_FLOOR_Z));
-        let mut cylinder = Shape::make_cylinder(pos, SUPPORT_POST_RADIUS, top_z - bottom_z);
-        let m2_drill_hole = Shape::make_cylinder(pos, SUPPORT_POST_DRILL_RADIUS, top_z - bottom_z);
+        let mut cylinder = AdHocShape::make_cylinder(pos, SUPPORT_POST_RADIUS, top_z - bottom_z);
+        let m2_drill_hole =
+            AdHocShape::make_cylinder(pos, SUPPORT_POST_DRILL_RADIUS, top_z - bottom_z);
 
         let box_part = match self.direction {
             PostDirection::Up => {
@@ -85,7 +86,7 @@ impl SupportPost {
                 );
                 let corner_2 = DVec3::new(pos.x + SUPPORT_POST_RADIUS, pos.y, top_z);
 
-                Shape::make_box_point_point(corner_1, corner_2)
+                AdHocShape::make_box_point_point(corner_1, corner_2)
             },
             PostDirection::Down => {
                 let corner_1 = DVec3::new(pos.x - SUPPORT_POST_RADIUS, pos.y, bottom_z);
@@ -95,7 +96,7 @@ impl SupportPost {
                     top_z,
                 );
 
-                Shape::make_box_point_point(corner_1, corner_2)
+                AdHocShape::make_box_point_point(corner_1, corner_2)
             },
             PostDirection::Left => {
                 let corner_1 = DVec3::new(
@@ -105,7 +106,7 @@ impl SupportPost {
                 );
                 let corner_2 = DVec3::new(pos.x, pos.y + SUPPORT_POST_RADIUS, top_z);
 
-                Shape::make_box_point_point(corner_1, corner_2)
+                AdHocShape::make_box_point_point(corner_1, corner_2)
             },
             PostDirection::Right => {
                 let corner_1 = DVec3::new(pos.x, pos.y - SUPPORT_POST_RADIUS, bottom_z);
@@ -115,7 +116,7 @@ impl SupportPost {
                     top_z,
                 );
 
-                Shape::make_box_point_point(corner_1, corner_2)
+                AdHocShape::make_box_point_point(corner_1, corner_2)
             },
         };
 
@@ -189,32 +190,32 @@ const PINHOLE_BUTTON_RADIUS: f64 = 1.1;
 
 const PINHOLE_LOCATIONS: &[DVec2] = &[DVec2::new(35.85, -53.95), DVec2::new(8.425, -86.075)];
 
-fn case_outer_box() -> Shape {
+fn case_outer_box() -> AdHocShape {
     let corner_1 = DVec3::new(CASE_LEFT, CASE_TOP, CASE_BOTTOM_Z);
     let corner_2 = DVec3::new(CASE_RIGHT, CASE_BOTTOM, CASE_TOP_Z);
 
-    Shape::make_box_point_point(corner_1, corner_2)
+    AdHocShape::make_box_point_point(corner_1, corner_2)
 }
 
-fn case_inner_box() -> Shape {
+fn case_inner_box() -> AdHocShape {
     let corner_1 = DVec3::new(PCB_LEFT, PCB_TOP, CASE_FLOOR_Z);
     let corner_2 = DVec3::new(PCB_RIGHT, PCB_BOTTOM, CASE_TOP_Z);
 
-    Shape::make_box_point_point(corner_1, corner_2)
+    AdHocShape::make_box_point_point(corner_1, corner_2)
 }
 
-fn pcb_top_shelf() -> Shape {
+fn pcb_top_shelf() -> AdHocShape {
     let corner_1 = DVec3::new(PCB_LEFT, PCB_TOP, CASE_FLOOR_Z);
     let corner_2 = DVec3::new(PCB_RIGHT, PCB_TOP - PCB_SHELF_THICKNESS_TOP, PCB_BOTTOM_Z);
 
-    Shape::make_box_point_point(corner_1, corner_2)
+    AdHocShape::make_box_point_point(corner_1, corner_2)
 }
 
-fn pcb_bottom_shelf() -> Shape {
+fn pcb_bottom_shelf() -> AdHocShape {
     let corner_1 = DVec3::new(PCB_LEFT, PCB_BOTTOM + PCB_SHELF_THICKNESS_BOTTOM, CASE_FLOOR_Z);
     let corner_2 = DVec3::new(PCB_RIGHT, PCB_BOTTOM, CASE_FLOOR_Z + PCB_SHELF_HEIGHT);
 
-    let mut bottom_shelf = Shape::make_box_point_point(corner_1, corner_2);
+    let mut bottom_shelf = AdHocShape::make_box_point_point(corner_1, corner_2);
 
     // Cut out gaps for the space bar stabilizer.
 
@@ -223,7 +224,7 @@ fn pcb_bottom_shelf() -> Shape {
         let corner_2 =
             DVec3::new(keepout_left + STABILIZER_SCREW_KEEPOUT_WIDTH, corner_2.y, corner_2.z);
 
-        let cutout_box = Shape::make_box_point_point(corner_1, corner_2);
+        let cutout_box = AdHocShape::make_box_point_point(corner_1, corner_2);
 
         bottom_shelf.subtract(&cutout_box);
     }
@@ -231,7 +232,7 @@ fn pcb_bottom_shelf() -> Shape {
     bottom_shelf
 }
 
-fn usb_connector_cutout() -> Shape {
+fn usb_connector_cutout() -> AdHocShape {
     let corner_1 = DVec3::new(
         USB_LEFT - USB_CUTOUT_PADDING,
         CASE_TOP + USB_CUTOUT_PADDING,
@@ -243,7 +244,7 @@ fn usb_connector_cutout() -> Shape {
         PCB_BOTTOM_Z + USB_CUTOUT_PADDING,
     );
 
-    let mut shape = Shape::make_box_point_point(corner_1, corner_2);
+    let mut shape = AdHocShape::make_box_point_point(corner_1, corner_2);
 
     shape.fillet_edges(2.0);
     shape
@@ -251,8 +252,8 @@ fn usb_connector_cutout() -> Shape {
 
 // This is the little trapezoidal PCB shape which helps the USB C connector
 // extend forward into the case.
-fn pcb_usb_overhang() -> Shape {
-    Shape::extrude_polygon(
+fn pcb_usb_overhang() -> AdHocShape {
+    AdHocShape::extrude_polygon(
         &[
             DVec3::new(19.05, 0.0, PCB_BOTTOM_Z),
             DVec3::new(21.431, 2.381, PCB_BOTTOM_Z),
