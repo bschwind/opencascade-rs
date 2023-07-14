@@ -10,9 +10,9 @@ For that we use [CXX](https://cxx.rs/), by dtolnay. CXX itself is also somewhat 
 
 ### `build.rs`
 
-At the very bottom, we have the [opencascade-sys crate](../crates/opencascade-sys), which includes the OpenCascade source code in the [OCCT directory](../crates/opencascade-sys/OCCT).
+At the very bottom, we have the [occt-sys crate](../crates/occt-sys/), which builds OpenCascade C++ project statically without any modifications.
 
-This sys crate has a [build.rs](../crates/opencascade-sys/build.rs) file which calls out to `cmake` to configure and build the project. I've tried to disable as many features as possible which are unrelated to model building (such as FFMPEG, OpenGL, Tcl, basically anything related to visualization or infrastructure as we'll be building that ourselves in Rust).
+Right above this is [opencascade-sys crate](../crates/opencascade-sys), which has a [build.rs](../crates/opencascade-sys/build.rs) file with necessary `cxx` infrastructure to compile its wrapper and C++ bindings to OpenCascade.
 
 In the theme of keeping it minimal, the OpenCascade libraries we statically link to are all explicitly laid out with `cargo:rustc-link-lib=static=LIB_NAME_HERE` cargo directives.
 
