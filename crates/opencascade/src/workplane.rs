@@ -25,106 +25,22 @@ impl Plane {
 
     pub fn transform(&self) -> DAffine3 {
         match self {
-            Self::XY => DAffine3::from_cols(
-                dvec3(1.0, 0.0, 0.0),
-                dvec3(0.0, 1.0, 0.0),
-                dvec3(0.0, 0.0, 1.0),
-                dvec3(0.0, 0.0, 0.0),
-            ),
-            Self::YZ => DAffine3::from_cols(
-                dvec3(0.0, 1.0, 0.0),
-                dvec3(0.0, 0.0, 1.0),
-                dvec3(1.0, 0.0, 0.0),
-                dvec3(0.0, 0.0, 0.0),
-            ),
-            Self::ZX => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::XZ => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::YX => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::ZY => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::Front => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::Back => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::Left => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
-            Self::Right => DAffine3::from_cols(
-                dvec3(0.0, 0.0, -1.0),
-                dvec3(0.0, 1.0, 0.0),
-                dvec3(1.0, 0.0, 0.0),
-                dvec3(0.0, 0.0, 0.0),
-            ),
-            Self::Top => DAffine3::from_cols(
-                dvec3(1.0, 0.0, 0.0),
-                dvec3(0.0, 0.0, -1.0),
-                dvec3(0.0, 1.0, 0.0),
-                dvec3(0.0, 0.0, 0.0),
-            ),
-            Self::Bottom => {
-                // TODO - fix this
-                DAffine3::from_cols(
-                    dvec3(1.0, 0.0, 0.0),
-                    dvec3(0.0, 1.0, 0.0),
-                    dvec3(0.0, 0.0, 1.0),
-                    dvec3(0.0, 0.0, 0.0),
-                )
-            },
+            Self::XY => DAffine3::from_cols(DVec3::X, DVec3::Y, DVec3::Z, DVec3::ZERO),
+            Self::YZ => DAffine3::from_cols(DVec3::Y, DVec3::Z, DVec3::X, DVec3::ZERO),
+            Self::ZX => DAffine3::from_cols(DVec3::Z, DVec3::X, DVec3::Y, DVec3::ZERO),
+            Self::XZ => DAffine3::from_cols(DVec3::X, DVec3::Z, DVec3::NEG_Y, DVec3::ZERO),
+            Self::YX => DAffine3::from_cols(DVec3::Y, DVec3::X, DVec3::NEG_Z, DVec3::ZERO),
+            Self::ZY => DAffine3::from_cols(DVec3::Z, DVec3::Y, DVec3::NEG_X, DVec3::ZERO),
+            Self::Front => DAffine3::from_cols(DVec3::X, DVec3::Y, DVec3::Z, DVec3::ZERO),
+            Self::Back => DAffine3::from_cols(DVec3::NEG_X, DVec3::Y, DVec3::NEG_Z, DVec3::ZERO),
+            Self::Left => DAffine3::from_cols(DVec3::Z, DVec3::Y, DVec3::NEG_X, DVec3::ZERO),
+            Self::Right => DAffine3::from_cols(DVec3::NEG_Z, DVec3::Y, DVec3::X, DVec3::ZERO),
+            Self::Top => DAffine3::from_cols(DVec3::X, DVec3::NEG_Z, DVec3::Y, DVec3::ZERO),
+            Self::Bottom => DAffine3::from_cols(DVec3::X, DVec3::Z, DVec3::NEG_Y, DVec3::ZERO),
             Self::Custom { x_dir, normal_dir } => {
-                let x_axis = dvec3(x_dir.0, x_dir.1, x_dir.2);
-                let z_axis = dvec3(normal_dir.0, normal_dir.1, normal_dir.2);
-                let y_axis = z_axis.cross(x_axis);
+                let x_axis = dvec3(x_dir.0, x_dir.1, x_dir.2).normalize();
+                let z_axis = dvec3(normal_dir.0, normal_dir.1, normal_dir.2).normalize();
+                let y_axis = z_axis.cross(x_axis).normalize();
 
                 DAffine3::from_cols(x_axis, y_axis, z_axis, DVec3::ZERO)
             },
@@ -156,6 +72,22 @@ impl Workplane {
         Self { transform: Plane::YZ.transform() }
     }
 
+    pub fn zx() -> Self {
+        Self { transform: Plane::ZX.transform() }
+    }
+
+    pub fn xz() -> Self {
+        Self { transform: Plane::XZ.transform() }
+    }
+
+    pub fn zy() -> Self {
+        Self { transform: Plane::ZY.transform() }
+    }
+
+    pub fn yx() -> Self {
+        Self { transform: Plane::YX.transform() }
+    }
+
     pub fn origin(&self) -> DVec3 {
         self.transform.translation
     }
@@ -173,8 +105,8 @@ impl Workplane {
 
         let translation = self.transform.translation;
 
-        let x_dir = dvec3(1.0, 0.0, 0.0);
-        let normal_dir = dvec3(0.0, 0.0, 1.0);
+        let x_dir = DVec3::X;
+        let normal_dir = DVec3::Z;
 
         self.transform = Plane::Custom {
             x_dir: rotation_matrix.mul_vec3(x_dir).into(),
@@ -193,8 +125,8 @@ impl Workplane {
 
         let translation = self.transform.translation;
 
-        let x_dir = rotation_matrix.mul_vec3(dvec3(1.0, 0.0, 0.0));
-        let normal_dir = rotation_matrix.mul_vec3(dvec3(0.0, 0.0, 1.0));
+        let x_dir = rotation_matrix.mul_vec3(DVec3::X);
+        let normal_dir = rotation_matrix.mul_vec3(DVec3::Z);
 
         self.transform = Plane::Custom {
             x_dir: self.transform.transform_vector3(x_dir).into(),
