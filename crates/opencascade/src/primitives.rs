@@ -1,55 +1,12 @@
-use crate::{workplane::Workplane, Error};
+use crate::{
+    angle::{Angle, ToAngle},
+    workplane::Workplane,
+    Error,
+};
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi;
 use std::path::Path;
-
-#[derive(Debug, Copy, Clone)]
-pub enum Angle {
-    Radians(f64),
-    Degrees(f64),
-}
-
-impl Angle {
-    pub fn radians(&self) -> f64 {
-        match self {
-            Self::Radians(r) => *r,
-            Self::Degrees(d) => (d * std::f64::consts::PI) / 180.0,
-        }
-    }
-
-    pub fn degrees(&self) -> f64 {
-        match self {
-            Self::Radians(r) => (r * 180.0) / std::f64::consts::PI,
-            Self::Degrees(d) => *d,
-        }
-    }
-}
-
-pub trait ToAngle {
-    fn degrees(&self) -> Angle;
-    fn radians(&self) -> Angle;
-}
-
-impl ToAngle for f64 {
-    fn degrees(&self) -> Angle {
-        Angle::Degrees(*self)
-    }
-
-    fn radians(&self) -> Angle {
-        Angle::Radians(*self)
-    }
-}
-
-impl ToAngle for u64 {
-    fn degrees(&self) -> Angle {
-        Angle::Degrees(*self as f64)
-    }
-
-    fn radians(&self) -> Angle {
-        Angle::Radians(*self as f64)
-    }
-}
 
 pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
     ffi::new_point(p.x, p.y, p.z)
@@ -265,18 +222,16 @@ impl Wire {
     }
 
     pub fn translate(&mut self, offset: DVec3) {
-        self.transform(offset, dvec3(1.0, 0.0, 0.0), 0.0);
+        self.transform(offset, dvec3(1.0, 0.0, 0.0), 0.degrees());
     }
 
-    pub fn transform(&mut self, translation: DVec3, rotation_axis: DVec3, angle: f64) {
-        let angle = angle * std::f64::consts::PI / 180.0;
-
+    pub fn transform(&mut self, translation: DVec3, rotation_axis: DVec3, angle: Angle) {
         let mut transform = ffi::new_transform();
         let rotation_axis_vec =
             ffi::gp_Ax1_ctor(&make_point(DVec3::ZERO), &make_dir(rotation_axis));
         let translation_vec = make_vec(translation);
 
-        transform.pin_mut().SetRotation(&rotation_axis_vec, angle);
+        transform.pin_mut().SetRotation(&rotation_axis_vec, angle.radians());
         transform.pin_mut().set_translation_vec(&translation_vec);
         let location = ffi::TopLoc_Location_from_transform(&transform);
 

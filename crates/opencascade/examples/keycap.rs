@@ -2,6 +2,7 @@
 // https://github.com/cubiq/OPK/blob/53f9d6a4123b0f309f87158115c83d19811b3484/opk.py
 use glam::dvec3;
 use opencascade::{
+    angle::{RVec, ToAngle},
     primitives::{Direction, Face, Solid},
     workplane::Workplane,
 };
@@ -13,7 +14,7 @@ pub fn main() {
     let keycap_unit_size_x = 1.0;
     let keycap_unit_size_y = 1.0;
     let height = 16.0;
-    let angle = 13.0;
+    let angle = 13.0.degrees();
     let depth: f64 = 2.8;
     let thickness: f64 = 1.5;
     let base = 18.2;
@@ -57,7 +58,7 @@ pub fn main() {
 
     let scoop = if convex {
         let scoop = Workplane::yz()
-            .transformed(dvec3(0.0, height - 2.1, -bx / 2.0), dvec3(0.0, 0.0, angle))
+            .transformed(dvec3(0.0, height - 2.1, -bx / 2.0), RVec::z(angle))
             .sketch()
             .move_to(-by / 2.0, -1.0)
             .three_point_arc((0.0, 2.0), (by / 2.0, -1.0))
@@ -69,7 +70,7 @@ pub fn main() {
         scoop.extrude(dvec3(bx, 0.0, 0.0))
     } else {
         let scoop_right = Workplane::yz()
-            .transformed(dvec3(0.0, height, bx / 2.0), dvec3(0.0, 0.0, angle))
+            .transformed(dvec3(0.0, height, bx / 2.0), RVec::z(angle))
             .sketch()
             .move_to(-by / 2.0 + 2.0, 0.0)
             .three_point_arc((0.0, (-depth + 1.5).min(-0.1)), (by / 2.0 - 2.0, 0.0))
@@ -78,7 +79,7 @@ pub fn main() {
             .close();
 
         let scoop_mid = Workplane::yz()
-            .transformed(dvec3(0.0, height, 0.0), dvec3(0.0, 0.0, angle))
+            .transformed(dvec3(0.0, height, 0.0), RVec::z(angle))
             .sketch()
             .move_to(-by / 2.0 - 2.0, -0.5)
             .three_point_arc((0.0, -depth), (by / 2.0 + 2.0, -0.5))
@@ -87,7 +88,7 @@ pub fn main() {
             .close();
 
         let scoop_left = Workplane::yz()
-            .transformed(dvec3(0.0, height, -bx / 2.0), dvec3(0.0, 0.0, angle))
+            .transformed(dvec3(0.0, height, -bx / 2.0), RVec::z(angle))
             .sketch()
             .move_to(-by / 2.0 + 2.0, 0.0)
             .three_point_arc((0.0, (-depth + 1.5).min(-0.1)), (by / 2.0 - 2.0, 0.0))
@@ -108,10 +109,7 @@ pub fn main() {
         .rect(bx - thickness * 3.0, by - thickness * 3.0);
 
     let shell_top = Workplane::xy()
-        .transformed(
-            dvec3(0.0, 0.0, (height / 4.0) + height - height / 4.0 - 4.5),
-            dvec3(angle, 0.0, 0.0),
-        )
+        .transformed(dvec3(0.0, 0.0, (height / 4.0) + height - height / 4.0 - 4.5), RVec::x(angle))
         .rect(tx - thickness * 2.0 + 0.5, ty - thickness * 2.0 + 0.5);
 
     let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top].into_iter());

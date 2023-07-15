@@ -1,6 +1,7 @@
 use thiserror::Error;
 
 pub mod adhoc;
+pub mod angle;
 pub mod primitives;
 pub mod workplane;
 
