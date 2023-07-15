@@ -13,9 +13,9 @@ pub fn main() {
     top.translate(dvec3(0.0, 0.0, 10.0));
     top.chamfer(1.0);
 
-    let chamfered_box = Solid::loft([&base, &top].into_iter()).to_shape();
+    let chamfered_box = Solid::loft([&base, &top]).to_shape();
 
-    // insert the workplane into the chamfered box area so union returns edges
+    // Insert the workplane into the chamfered box area so union returns edges
     let handle = Workplane::xy().translated(dvec3(0.0, 0.0, 0.1)).rect(5.0, 5.0);
     let handle_face = Face::from_wire(&handle);
 
@@ -23,16 +23,16 @@ pub fn main() {
     let (mut chamfered_shape, fuse_edges) = chamfered_box.union(&handle_body);
     chamfered_shape.chamfer_edges(0.5, &fuse_edges);
 
-    // chamfer the top of the protrusion
-    let top_edges: Vec<_> = chamfered_shape
+    // Chamfer the top of the protrusion
+    let top_edges = chamfered_shape
         .faces()
         .farthest(Direction::NegZ) // Get the face whose center of mass is the farthest in the negative Z direction
         .expect("Should have a face on the bottom of the handle")
-        .edges() // Get all the edges of this face
-        .collect();
-    chamfered_shape.chamfer_edges(1.0, &top_edges);
+        .edges(); // Get all the edges of this face
 
-    // can also just chamfer the whole shape
+    chamfered_shape.chamfer_edges(1.0, top_edges);
+
+    // Can also just chamfer the whole shape with:
     // chamfered_shape.chamfer(0.5);
 
     chamfered_shape.write_stl("chamfer.stl").unwrap();
