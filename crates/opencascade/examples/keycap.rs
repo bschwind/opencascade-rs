@@ -122,7 +122,6 @@ pub fn main() {
         .to_shape()
         .faces()
         .farthest(Direction::PosZ)
-        .expect("shell should have a top face")
         .workplane()
         .rect(bx * 2.0, by * 2.0)
         .to_face();
@@ -180,8 +179,7 @@ pub fn main() {
         }
     }
 
-    let bottom_face =
-        keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
+    let bottom_face = keycap.faces().farthest(Direction::NegZ);
 
     let bottom_workplane = bottom_face.workplane().translated(dvec3(0.0, 0.0, -4.5));
 
@@ -213,8 +211,7 @@ pub fn main() {
     keycap.clean();
 
     for (x, y) in &stem_points {
-        let bottom_face =
-            keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
+        let bottom_face = keycap.faces().farthest(Direction::NegZ);
         let workplane = bottom_face.workplane().translated(dvec3(0.0, 0.0, -0.6));
 
         let circle = workplane.circle(*x, *y, 2.75).to_face();

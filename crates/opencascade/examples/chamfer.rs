@@ -27,7 +27,6 @@ pub fn main() {
     let top_edges = chamfered_shape
         .faces()
         .farthest(Direction::NegZ) // Get the face whose center of mass is the farthest in the negative Z direction
-        .expect("Should have a face on the bottom of the handle")
         .edges(); // Get all the edges of this face
 
     chamfered_shape.chamfer_edges(1.0, top_edges);

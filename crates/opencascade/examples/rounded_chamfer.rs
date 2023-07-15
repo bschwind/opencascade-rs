@@ -10,8 +10,7 @@ pub fn main() {
     let shape = base.to_face().extrude(dvec3(0.0, 0.0, 3.0));
     let mut shape = shape.to_shape();
 
-    let top_edges =
-        shape.faces().farthest(Direction::PosZ).expect("Should have a top face").edges();
+    let top_edges = shape.faces().farthest(Direction::PosZ).edges();
     shape.chamfer_edges(0.7, top_edges);
 
     shape.write_stl("rounded_chamfer.stl").unwrap();

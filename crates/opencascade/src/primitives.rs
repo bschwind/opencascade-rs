@@ -1216,7 +1216,11 @@ impl Direction {
 }
 
 impl FaceIterator {
-    pub fn farthest(self, direction: Direction) -> Option<Face> {
+    pub fn farthest(self, direction: Direction) -> Face {
+        self.try_farthest(direction).unwrap()
+    }
+
+    pub fn try_farthest(self, direction: Direction) -> Option<Face> {
         let normalized_dir = direction.normalized_vec();
 
         Iterator::max_by(self, |face_1, face_2| {
