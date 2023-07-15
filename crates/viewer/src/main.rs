@@ -353,9 +353,17 @@ fn gizmo() -> Shape {
         let cone_top =
             workplane.translated(DVec3::new(0.0, 0.0, arrow_length)).circle(0.0, 0.0, 0.05);
         let cone = Solid::loft([&cone_base, &cone_top].into_iter());
-        shaft.union(&cone)
+        let (arrow_shape, _) = shaft.union(&cone);
+
+        arrow_shape
     };
-    arrow(Workplane::yz()).union_shape(&arrow(Workplane::xz())).union_shape(&arrow(Workplane::xy()))
+
+    // TODO(bschwind) - Make it easier to chain union operations together.
+    arrow(Workplane::yz())
+        .union_shape(&arrow(Workplane::xz()))
+        .0
+        .union_shape(&arrow(Workplane::xy()))
+        .0
 }
 
 fn main() {
