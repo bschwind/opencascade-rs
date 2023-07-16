@@ -53,7 +53,7 @@ pub fn main() {
     top_wire.translate(dvec3(-tx / 2.0, -ty / 2.0, 0.0));
     top_wire.transform(dvec3(0.0, 0.0, height), dvec3(1.0, 0.0, 0.0), angle);
 
-    let mut keycap = Solid::loft([&base, &mid, &top_wire].into_iter());
+    let mut keycap = Solid::loft([&base, &mid, &top_wire]);
 
     let scoop = if convex {
         let scoop = Workplane::yz()
@@ -95,7 +95,7 @@ pub fn main() {
             .line_to(-by / 2.0, height)
             .close();
 
-        Solid::loft([&scoop_right, &scoop_mid, &scoop_left].into_iter())
+        Solid::loft([&scoop_right, &scoop_mid, &scoop_left])
     };
 
     let (mut keycap, edges) = keycap.subtract(&scoop);
@@ -114,7 +114,7 @@ pub fn main() {
         )
         .rect(tx - thickness * 2.0 + 0.5, ty - thickness * 2.0 + 0.5);
 
-    let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top].into_iter());
+    let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top]);
 
     let (mut keycap, _edges) = keycap.subtract(&shell);
 
@@ -122,7 +122,6 @@ pub fn main() {
         .to_shape()
         .faces()
         .farthest(Direction::PosZ)
-        .expect("shell should have a top face")
         .workplane()
         .rect(bx * 2.0, by * 2.0)
         .to_face();
@@ -180,8 +179,7 @@ pub fn main() {
         }
     }
 
-    let bottom_face =
-        keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
+    let bottom_face = keycap.faces().farthest(Direction::NegZ);
 
     let bottom_workplane = bottom_face.workplane().translated(dvec3(0.0, 0.0, -4.5));
 
@@ -213,8 +211,7 @@ pub fn main() {
     keycap.clean();
 
     for (x, y) in &stem_points {
-        let bottom_face =
-            keycap.faces().farthest(Direction::NegZ).expect("keycap should have a bottom face");
+        let bottom_face = keycap.faces().farthest(Direction::NegZ);
         let workplane = bottom_face.workplane().translated(dvec3(0.0, 0.0, -0.6));
 
         let circle = workplane.circle(*x, *y, 2.75).to_face();

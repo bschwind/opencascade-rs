@@ -71,6 +71,22 @@ pub struct Vertex {
     _inner: UniquePtr<ffi::TopoDS_Vertex>,
 }
 
+// You'll see several of these `impl AsRef` blocks for the various primitive
+// geometry types. This is for functions which take an Iterator of primitives
+// which are either owned or borrowed values. The general pattern looks like this:
+//
+//     pub fn do_something_with_edges<T: AsRef<Edge>>(edges: impl IntoIterator<Item = T>) {
+//         for edge in edges.into_iter() {
+//             let edge_ref = edge.as_ref();
+//             // Do something with edge_ref
+//         }
+//     }
+impl AsRef<Vertex> for Vertex {
+    fn as_ref(&self) -> &Vertex {
+        self
+    }
+}
+
 impl Vertex {
     pub fn new(point: DVec3) -> Self {
         let mut make_vertex = ffi::BRepBuilderAPI_MakeVertex_gp_Pnt(&make_point(point));
@@ -83,6 +99,12 @@ impl Vertex {
 
 pub struct Edge {
     inner: UniquePtr<ffi::TopoDS_Edge>,
+}
+
+impl AsRef<Edge> for Edge {
+    fn as_ref(&self) -> &Edge {
+        self
+    }
 }
 
 impl Edge {
@@ -182,6 +204,12 @@ pub struct Wire {
     inner: UniquePtr<ffi::TopoDS_Wire>,
 }
 
+impl AsRef<Wire> for Wire {
+    fn as_ref(&self) -> &Wire {
+        self
+    }
+}
+
 impl Wire {
     pub fn from_edges<'a>(edges: impl IntoIterator<Item = &'a Edge>) -> Self {
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
@@ -242,7 +270,7 @@ impl Wire {
         let bottom = Edge::segment(p3, p4);
         let left = Edge::segment(p4, p1);
 
-        Self::from_edges([&top, &right, &bottom, &left].into_iter())
+        Self::from_edges([&top, &right, &bottom, &left])
     }
 
     pub fn fillet(&mut self, radius: f64) {
@@ -313,6 +341,12 @@ impl Wire {
 
 pub struct Face {
     inner: UniquePtr<ffi::TopoDS_Face>,
+}
+
+impl AsRef<Face> for Face {
+    fn as_ref(&self) -> &Face {
+        self
+    }
 }
 
 impl Face {
@@ -545,6 +579,12 @@ pub struct CompoundFace {
     inner: UniquePtr<ffi::TopoDS_Compound>,
 }
 
+impl AsRef<CompoundFace> for CompoundFace {
+    fn as_ref(&self) -> &CompoundFace {
+        self
+    }
+}
+
 impl CompoundFace {
     pub fn clean(&mut self) -> Self {
         let inner = ffi::cast_compound_to_shape(&self.inner);
@@ -615,8 +655,20 @@ pub struct Shell {
     _inner: UniquePtr<ffi::TopoDS_Shell>,
 }
 
+impl AsRef<Shell> for Shell {
+    fn as_ref(&self) -> &Shell {
+        self
+    }
+}
+
 pub struct Solid {
     inner: UniquePtr<ffi::TopoDS_Solid>,
+}
+
+impl AsRef<Solid> for Solid {
+    fn as_ref(&self) -> &Solid {
+        self
+    }
 }
 
 impl Solid {
@@ -645,13 +697,12 @@ impl Solid {
         Compound { inner }
     }
 
-    // TODO(bschwind) - Accept IntoIter instead of Iterator
-    pub fn loft<'a>(wires: impl Iterator<Item = &'a Wire>) -> Self {
+    pub fn loft<T: AsRef<Wire>>(wires: impl IntoIterator<Item = T>) -> Self {
         let is_solid = true;
         let mut make_loft = ffi::BRepOffsetAPI_ThruSections_ctor(is_solid);
 
-        for wire in wires {
-            make_loft.pin_mut().AddWire(&wire.inner);
+        for wire in wires.into_iter() {
+            make_loft.pin_mut().AddWire(&wire.as_ref().inner);
         }
 
         // Set to CheckCompatibility to `true` to avoid twisted results.
@@ -732,6 +783,12 @@ pub struct Compound {
     inner: UniquePtr<ffi::TopoDS_Compound>,
 }
 
+impl AsRef<Compound> for Compound {
+    fn as_ref(&self) -> &Compound {
+        self
+    }
+}
+
 impl Compound {
     pub fn clean(&mut self) -> Shape {
         let inner = ffi::cast_compound_to_shape(&self.inner);
@@ -755,6 +812,12 @@ pub struct Shape {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Shape>,
 }
 
+impl AsRef<Shape> for Shape {
+    fn as_ref(&self) -> &Shape {
+        self
+    }
+}
+
 impl Shape {
     pub fn fillet_edge(&mut self, radius: f64, edge: &Edge) {
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
@@ -774,11 +837,15 @@ impl Shape {
         self.inner = ffi::TopoDS_Shape_to_owned(chamfered_shape);
     }
 
-    pub fn fillet_edges<'a>(&mut self, radius: f64, edges: impl IntoIterator<Item = &'a Edge>) {
+    pub fn fillet_edges<T: AsRef<Edge>>(
+        &mut self,
+        radius: f64,
+        edges: impl IntoIterator<Item = T>,
+    ) {
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
 
         for edge in edges.into_iter() {
-            make_fillet.pin_mut().add_edge(radius, &edge.inner);
+            make_fillet.pin_mut().add_edge(radius, &edge.as_ref().inner);
         }
 
         let filleted_shape = make_fillet.pin_mut().Shape();
@@ -786,11 +853,15 @@ impl Shape {
         self.inner = ffi::TopoDS_Shape_to_owned(filleted_shape);
     }
 
-    pub fn chamfer_edges<'a>(&mut self, distance: f64, edges: impl IntoIterator<Item = &'a Edge>) {
+    pub fn chamfer_edges<T: AsRef<Edge>>(
+        &mut self,
+        distance: f64,
+        edges: impl IntoIterator<Item = T>,
+    ) {
         let mut make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
 
         for edge in edges.into_iter() {
-            make_chamfer.pin_mut().add_edge(distance, &edge.inner);
+            make_chamfer.pin_mut().add_edge(distance, &edge.as_ref().inner);
         }
 
         let chamfered_shape = make_chamfer.pin_mut().Shape();
@@ -800,14 +871,12 @@ impl Shape {
 
     /// Performs fillet of `radius` on all edges of the shape
     pub fn fillet(&mut self, radius: f64) {
-        let all_edges = self.edges().collect::<Vec<_>>();
-        self.fillet_edges(radius, &all_edges);
+        self.fillet_edges(radius, self.edges());
     }
 
     /// Performs chamfer of `distance` on all edges of the shape
     pub fn chamfer(&mut self, distance: f64) {
-        let all_edges = self.edges().collect::<Vec<_>>();
-        self.chamfer_edges(distance, &all_edges);
+        self.chamfer_edges(distance, self.edges());
     }
 
     pub fn subtract(&mut self, other: &Solid) -> (Shape, Vec<Edge>) {
@@ -958,6 +1027,7 @@ impl Shape {
         FaceIterator { explorer }
     }
 
+    // TODO(bschwind) - Convert the return type to an iterator.
     pub fn faces_along_ray(&self, ray_start: DVec3, ray_dir: DVec3) -> Vec<(Face, DVec3)> {
         let mut intersector = ffi::BRepIntCurveSurface_Inter_ctor();
         let tolerance = 0.0001;
@@ -1156,7 +1226,11 @@ impl Direction {
 }
 
 impl FaceIterator {
-    pub fn farthest(self, direction: Direction) -> Option<Face> {
+    pub fn farthest(self, direction: Direction) -> Face {
+        self.try_farthest(direction).unwrap()
+    }
+
+    pub fn try_farthest(self, direction: Direction) -> Option<Face> {
         let normalized_dir = direction.normalized_vec();
 
         Iterator::max_by(self, |face_1, face_2| {

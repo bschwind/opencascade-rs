@@ -192,7 +192,7 @@ impl Workplane {
         let bottom = Edge::segment(p3, p4);
         let left = Edge::segment(p4, p1);
 
-        Wire::from_edges([&top, &right, &bottom, &left].into_iter())
+        Wire::from_edges([&top, &right, &bottom, &left])
     }
 
     pub fn circle(&self, x: f64, y: f64, radius: f64) -> Wire {
@@ -200,7 +200,7 @@ impl Workplane {
 
         let circle = Edge::circle(center, self.normal(), radius);
 
-        Wire::from_edges([&circle].into_iter())
+        Wire::from_edges([&circle])
     }
 
     pub fn sketch(&self) -> Sketch {
@@ -264,7 +264,7 @@ impl Sketch {
     }
 
     pub fn wire(self) -> Wire {
-        Wire::from_edges(self.edges.iter())
+        Wire::from_edges(&self.edges)
     }
 
     pub fn close(mut self) -> Wire {
@@ -272,6 +272,6 @@ impl Sketch {
 
         let new_edge = Edge::segment(self.cursor, start_point);
         self.add_edge(new_edge);
-        Wire::from_edges(self.edges.iter())
+        Wire::from_edges(&self.edges)
     }
 }
