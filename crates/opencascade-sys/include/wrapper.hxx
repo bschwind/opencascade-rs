@@ -1,4 +1,5 @@
 #include "rust/cxx.h"
+#include <BOPAlgo_GlueEnum.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
@@ -10,11 +11,13 @@
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepFeat_MakeCylindricalHole.hxx>
+#include <BRepFeat_MakeDPrism.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 #include <BRepFilletAPI_MakeFillet2d.hxx>
 #include <BRepGProp.hxx>
 #include <BRepGProp_Face.hxx>
+#include <BRepIntCurveSurface_Inter.hxx>
 #include <BRepLib.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
@@ -26,6 +29,7 @@
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepTools.hxx>
 #include <GCE2d_MakeSegment.hxx>
+#include <GCPnts_TangentialDeflection.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <GC_MakeSegment.hxx>
 #include <GProp_GProps.hxx>
@@ -36,8 +40,12 @@
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <NCollection_Array1.hxx>
+#include <Poly_Connect.hxx>
+#include <STEPControl_Reader.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
+#include <StdPrs_ToolTriangulatedShape.hxx>
 #include <StlAPI_Writer.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp_Explorer.hxx>
@@ -48,6 +56,8 @@
 #include <gp.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Ax3.hxx>
+#include <gp_Circ.hxx>
+#include <gp_Lin.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
@@ -88,6 +98,11 @@ inline rust::String type_name(const HandleStandardType &handle) { return std::st
 
 inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve &curve, const Standard_Real U) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
+}
+
+inline std::unique_ptr<gp_Pnt> GCPnts_TangentialDeflection_Value(const GCPnts_TangentialDeflection &approximator,
+                                                                 Standard_Integer i) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(approximator.Value(i)));
 }
 
 inline std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurface(const HandleGeomSurface &surface) {
@@ -229,6 +244,10 @@ inline std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex &vertex) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(BRep_Tool::Pnt(vertex)));
 }
 
+inline std::unique_ptr<gp_Trsf> TopLoc_Location_Transformation(const TopLoc_Location &location) {
+  return std::unique_ptr<gp_Trsf>(new gp_Trsf(location.Transformation()));
+}
+
 inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
                                                                           TopLoc_Location &location) {
   return std::unique_ptr<Handle_Poly_Triangulation>(
@@ -239,12 +258,49 @@ inline std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer 
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(explorer.Current()));
 }
 
+inline std::unique_ptr<TopoDS_Vertex> TopExp_FirstVertex(const TopoDS_Edge &edge) {
+  return std::unique_ptr<TopoDS_Vertex>(new TopoDS_Vertex(TopExp::FirstVertex(edge)));
+}
+
+inline std::unique_ptr<TopoDS_Vertex> TopExp_LastVertex(const TopoDS_Edge &edge) {
+  return std::unique_ptr<TopoDS_Vertex>(new TopoDS_Vertex(TopExp::LastVertex(edge)));
+}
+
+inline void TopExp_EdgeVertices(const TopoDS_Edge &edge, TopoDS_Vertex &vertex1, TopoDS_Vertex &vertex2) {
+  return TopExp::Vertices(edge, vertex1, vertex2);
+}
+
+inline void TopExp_WireVertices(const TopoDS_Wire &wire, TopoDS_Vertex &vertex1, TopoDS_Vertex &vertex2) {
+  return TopExp::Vertices(wire, vertex1, vertex2);
+}
+
+inline bool TopExp_CommonVertex(const TopoDS_Edge &edge1, const TopoDS_Edge &edge2, TopoDS_Vertex &vertex) {
+  return TopExp::CommonVertex(edge1, edge2, vertex);
+}
+
+inline std::unique_ptr<TopoDS_Face> BRepIntCurveSurface_Inter_face(const BRepIntCurveSurface_Inter &intersector) {
+  return std::unique_ptr<TopoDS_Face>(new TopoDS_Face(intersector.Face()));
+}
+
+inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurveSurface_Inter &intersector) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(intersector.Pnt()));
+}
+
 // BRepFeat
 inline std::unique_ptr<BRepFeat_MakeCylindricalHole> BRepFeat_MakeCylindricalHole_ctor() {
   return std::unique_ptr<BRepFeat_MakeCylindricalHole>(new BRepFeat_MakeCylindricalHole());
 }
 
-// Data export
+// Data Import
+inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String theFileName) {
+  return reader.ReadFile(theFileName.c_str());
+}
+
+inline std::unique_ptr<TopoDS_Shape> one_shape(const STEPControl_Reader &reader) {
+  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
+}
+
+// Data Export
 inline bool write_stl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::String theFileName) {
   return writer.Write(theShape, theFileName.c_str());
 }
@@ -257,6 +313,16 @@ inline std::unique_ptr<gp_Dir> Poly_Triangulation_Normal(const Poly_Triangulatio
 inline std::unique_ptr<gp_Pnt> Poly_Triangulation_Node(const Poly_Triangulation &triangulation,
                                                        const Standard_Integer index) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(triangulation.Node(index)));
+}
+
+inline std::unique_ptr<gp_Pnt2d> Poly_Triangulation_UV(const Poly_Triangulation &triangulation,
+                                                       const Standard_Integer index) {
+  return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(triangulation.UVNode(index)));
+}
+
+inline void triangulated_shape_normal(const TopoDS_Face &face, Poly_Connect &poly_connect,
+                                      TColgp_Array1OfDir &normals) {
+  StdPrs_ToolTriangulatedShape::Normal(face, poly_connect, normals);
 }
 
 // Shape Properties
@@ -283,6 +349,20 @@ inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFi
   return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddFillet(vertex, radius)));
 }
 
+// Chamfers
+inline std::unique_ptr<TopoDS_Edge>
+BRepFilletAPI_MakeFillet2d_add_chamfer(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Edge &edge1,
+                                       const TopoDS_Edge &edge2, const Standard_Real dist1, const Standard_Real dist2) {
+  return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddChamfer(edge1, edge2, dist1, dist2)));
+}
+
+inline std::unique_ptr<TopoDS_Edge>
+BRepFilletAPI_MakeFillet2d_add_chamfer_angle(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Edge &edge,
+                                             const TopoDS_Vertex &vertex, const Standard_Real dist,
+                                             const Standard_Real angle) {
+  return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddChamfer(edge, vertex, dist, angle)));
+}
+
 // BRepTools
 inline std::unique_ptr<TopoDS_Wire> outer_wire(const TopoDS_Face &face) {
   return std::unique_ptr<TopoDS_Wire>(new TopoDS_Wire(BRepTools::OuterWire(face)));
@@ -291,4 +371,18 @@ inline std::unique_ptr<TopoDS_Wire> outer_wire(const TopoDS_Face &face) {
 // Collections
 inline void map_shapes(const TopoDS_Shape &S, const TopAbs_ShapeEnum T, TopTools_IndexedMapOfShape &M) {
   TopExp::MapShapes(S, T, M);
+}
+
+inline void map_shapes_and_ancestors(const TopoDS_Shape &S, const TopAbs_ShapeEnum TS, const TopAbs_ShapeEnum TA,
+                                     TopTools_IndexedDataMapOfShapeListOfShape &M) {
+  TopExp::MapShapesAndAncestors(S, TS, TA, M);
+}
+
+inline void map_shapes_and_unique_ancestors(const TopoDS_Shape &S, const TopAbs_ShapeEnum TS, const TopAbs_ShapeEnum TA,
+                                            TopTools_IndexedDataMapOfShapeListOfShape &M) {
+  TopExp::MapShapesAndUniqueAncestors(S, TS, TA, M);
+}
+
+inline std::unique_ptr<gp_Dir> TColgp_Array1OfDir_Value(const TColgp_Array1OfDir &array, Standard_Integer index) {
+  return std::unique_ptr<gp_Dir>(new gp_Dir(array.Value(index)));
 }
