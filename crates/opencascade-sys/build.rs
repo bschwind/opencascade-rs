@@ -24,7 +24,7 @@ const LIBS: &[&str] = &[
     "TKBO",
     "TKOffset",
     "TKV3d",
-    "TKXSBase"
+    "TKXSBase",
 ];
 
 #[cfg(feature = "dynamic")]
@@ -37,14 +37,10 @@ mod opencascade {
     pub(super) fn get_build_paths() -> Result<(PathBuf, PathBuf), String> {
         let (pkgconfig_include_path, pkgconfig_lib_path) = find_pkgconfig_paths();
 
-        let include_path = std::env::var("OPENCASCADE_INCLUDE")
-            .ok()
-            .map(|x| x.into())
-            .or(pkgconfig_include_path);
-        let lib_path = std::env::var("OPENCASCADE_LIB")
-            .ok()
-            .map(|x| x.into())
-            .or(pkgconfig_lib_path);
+        let include_path =
+            std::env::var("OPENCASCADE_INCLUDE").ok().map(|x| x.into()).or(pkgconfig_include_path);
+        let lib_path =
+            std::env::var("OPENCASCADE_LIB").ok().map(|x| x.into()).or(pkgconfig_lib_path);
 
         println!("{:?}, {:?}", include_path, lib_path);
 
@@ -72,21 +68,18 @@ mod opencascade {
         match pkg_config::Config::new()
             // Be exact because API changes often break builds
             .exactly_version(LIB_VERSION)
-            .probe(LIB_NAME) {
-                Ok(mut libary) => {
-                    let include_path = libary
-                        .include_paths
-                        .pop();
-                    let lib_path = libary
-                        .link_paths
-                        .pop();
-                    (include_path, lib_path)
-                },
-                Err(e) => {
-                    eprintln!("Couldn't find {} via pkg-config: {}", LIB_NAME, e);
-                    (None, None)
-                }
-            }
+            .probe(LIB_NAME)
+        {
+            Ok(mut libary) => {
+                let include_path = libary.include_paths.pop();
+                let lib_path = libary.link_paths.pop();
+                (include_path, lib_path)
+            },
+            Err(e) => {
+                eprintln!("Couldn't find {} via pkg-config: {}", LIB_NAME, e);
+                (None, None)
+            },
+        }
     }
 }
 
