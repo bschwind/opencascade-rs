@@ -25,8 +25,6 @@ fn main() {
     );
     println!(
         "cargo:rustc-env=OCCT_INCLUDE_PATH={}",
-        dst.join(INCLUDE_DIR)
-            .to_str()
-            .expect("path is valid Unicode")
+        dst.join(INCLUDE_DIR).to_str().expect("path is valid Unicode")
     );
 }
