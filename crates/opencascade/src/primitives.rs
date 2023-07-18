@@ -1,7 +1,7 @@
 use crate::{workplane::Workplane, Error};
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
-use opencascade_sys::ffi;
+use opencascade_sys::ffi::{self, IFSelect_ReturnStatus};
 use std::path::Path;
 
 #[derive(Debug, Copy, Clone)]
@@ -931,6 +931,24 @@ impl Shape {
         let inner = ffi::one_shape(&reader);
 
         Self { inner }
+    }
+
+    pub fn write_step(&self, path: impl AsRef<Path>) -> Result<(), Error> {
+        let mut writer = ffi::STEPControl_Writer_ctor();
+
+        let status = ffi::transfer_shape(writer.pin_mut(), &self.inner);
+
+        if status != IFSelect_ReturnStatus::IFSelect_RetDone {
+            return Err(Error::StepWriteFailed);
+        }
+
+        let status = ffi::write_step(writer.pin_mut(), path.as_ref().to_string_lossy().to_string());
+
+        if status != IFSelect_ReturnStatus::IFSelect_RetDone {
+            return Err(Error::StepWriteFailed);
+        }
+
+        Ok(())
     }
 
     pub fn union(&self, other: &Solid) -> (Shape, Vec<Edge>) {

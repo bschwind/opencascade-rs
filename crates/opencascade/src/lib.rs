@@ -8,4 +8,6 @@ pub mod workplane;
 pub enum Error {
     #[error("Failed to write STL file")]
     StlWriteFailed,
+    #[error("Failed to write STEP file")]
+    StepWriteFailed,
 }

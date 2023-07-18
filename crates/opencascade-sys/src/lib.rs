@@ -845,6 +845,20 @@ pub mod ffi {
         pub fn one_shape(reader: &STEPControl_Reader) -> UniquePtr<TopoDS_Shape>;
 
         // Data Export
+        type STEPControl_Writer;
+
+        #[cxx_name = "construct_unique"]
+        pub fn STEPControl_Writer_ctor() -> UniquePtr<STEPControl_Writer>;
+
+        pub fn transfer_shape(
+            writer: Pin<&mut STEPControl_Writer>,
+            shape: &TopoDS_Shape,
+        ) -> IFSelect_ReturnStatus;
+        pub fn write_step(
+            writer: Pin<&mut STEPControl_Writer>,
+            filename: String,
+        ) -> IFSelect_ReturnStatus;
+
         type StlAPI_Writer;
 
         #[cxx_name = "construct_unique"]
