@@ -922,15 +922,20 @@ impl Shape {
         (Shape { inner }, edges)
     }
 
-    pub fn read_step<P: AsRef<Path>>(path: P) -> Self {
+    pub fn read_step(path: impl AsRef<Path>) -> Result<Self, Error> {
         let mut reader = ffi::STEPControl_Reader_ctor();
-        let _return_status =
-            ffi::read_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
+
+        let status = ffi::read_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
+
+        if status != IFSelect_ReturnStatus::IFSelect_RetDone {
+            return Err(Error::StepReadFailed);
+        }
+
         reader.pin_mut().TransferRoots(&ffi::Message_ProgressRange_ctor());
 
         let inner = ffi::one_shape(&reader);
 
-        Self { inner }
+        Ok(Self { inner })
     }
 
     pub fn write_step(&self, path: impl AsRef<Path>) -> Result<(), Error> {
