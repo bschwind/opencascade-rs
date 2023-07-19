@@ -1,5 +1,5 @@
 use crate::{
-    angle::{Angle, ToAngle},
+    angle::{Radians, ToAngle},
     workplane::Workplane,
     Error,
 };
@@ -225,13 +225,18 @@ impl Wire {
         self.transform(offset, dvec3(1.0, 0.0, 0.0), 0.degrees());
     }
 
-    pub fn transform(&mut self, translation: DVec3, rotation_axis: DVec3, angle: Angle) {
+    pub fn transform(
+        &mut self,
+        translation: DVec3,
+        rotation_axis: DVec3,
+        angle: impl Into<Radians>,
+    ) {
         let mut transform = ffi::new_transform();
         let rotation_axis_vec =
             ffi::gp_Ax1_ctor(&make_point(DVec3::ZERO), &make_dir(rotation_axis));
         let translation_vec = make_vec(translation);
 
-        transform.pin_mut().SetRotation(&rotation_axis_vec, angle.radians());
+        transform.pin_mut().SetRotation(&rotation_axis_vec, angle.into().into());
         transform.pin_mut().set_translation_vec(&translation_vec);
         let location = ffi::TopLoc_Location_from_transform(&transform);
 

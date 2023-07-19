@@ -1,5 +1,5 @@
 use crate::{
-    angle::{Angle, RVec},
+    angle::{RVec, Radians},
     primitives::{Edge, Wire},
 };
 use glam::{dvec3, DAffine3, DMat3, DVec3, EulerRot};
@@ -100,9 +100,16 @@ impl Workplane {
     }
 
     // TODO(bschwind) - Test this.
-    pub fn set_rotation(&mut self, (rot_x, rot_y, rot_z): (Angle, Angle, Angle)) {
-        let rotation_matrix =
-            DMat3::from_euler(EulerRot::XYZ, rot_x.radians(), rot_y.radians(), rot_z.radians());
+    pub fn set_rotation(
+        &mut self,
+        (rot_x, rot_y, rot_z): (impl Into<Radians>, impl Into<Radians>, impl Into<Radians>),
+    ) {
+        let rotation_matrix = DMat3::from_euler(
+            EulerRot::XYZ,
+            rot_x.into().into(),
+            rot_y.into().into(),
+            rot_z.into().into(),
+        );
 
         let translation = self.transform.translation;
 
@@ -118,9 +125,16 @@ impl Workplane {
         self.set_translation(translation);
     }
 
-    pub fn rotate_by(&mut self, (rot_x, rot_y, rot_z): (Angle, Angle, Angle)) {
-        let rotation_matrix =
-            DMat3::from_euler(EulerRot::XYZ, rot_x.radians(), rot_y.radians(), rot_z.radians());
+    pub fn rotate_by(
+        &mut self,
+        (rot_x, rot_y, rot_z): (impl Into<Radians>, impl Into<Radians>, impl Into<Radians>),
+    ) {
+        let rotation_matrix = DMat3::from_euler(
+            EulerRot::XYZ,
+            rot_x.into().into(),
+            rot_y.into().into(),
+            rot_z.into().into(),
+        );
 
         let translation = self.transform.translation;
 

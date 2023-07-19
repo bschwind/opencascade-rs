@@ -1,72 +1,83 @@
 use glam::{dvec3, DVec3};
-use std::ops::{Div, Mul};
+use std::{
+    f64::consts::PI,
+    ops::{Div, Mul},
+};
 
 #[derive(Debug, Copy, Clone)]
-pub enum Angle {
-    Radians(f64),
-    Degrees(f64),
-}
+pub struct Radians(pub f64);
 
-impl Angle {
-    pub fn radians(&self) -> f64 {
-        match self {
-            Self::Radians(r) => *r,
-            Self::Degrees(d) => (d * std::f64::consts::PI) / 180.0,
-        }
-    }
+#[derive(Debug, Copy, Clone)]
+pub struct Degrees(pub f64);
 
-    pub fn degrees(&self) -> f64 {
-        match self {
-            Self::Radians(r) => (r * 180.0) / std::f64::consts::PI,
-            Self::Degrees(d) => *d,
-        }
+impl From<Degrees> for Radians {
+    fn from(Degrees(d): Degrees) -> Self {
+        Self(d * PI / 180.0)
     }
 }
 
-impl Mul<f64> for Angle {
-    type Output = Angle;
+impl From<Radians> for Degrees {
+    fn from(Radians(r): Radians) -> Self {
+        Self(r * 180.0 / PI)
+    }
+}
+
+impl From<Radians> for f64 {
+    fn from(Radians(r): Radians) -> Self {
+        r
+    }
+}
+
+impl From<Degrees> for f64 {
+    fn from(Degrees(d): Degrees) -> Self {
+        d
+    }
+}
+
+impl Mul<f64> for Radians {
+    type Output = Radians;
 
     fn mul(self, multiplier: f64) -> Self::Output {
-        match self {
-            Self::Radians(angle) => Self::Radians(angle * multiplier),
-            Self::Degrees(angle) => Self::Degrees(angle * multiplier),
-        }
+        Radians(self.0 * multiplier)
     }
 }
 
-impl Div<f64> for Angle {
-    type Output = Angle;
+impl Mul<f64> for Degrees {
+    type Output = Degrees;
+
+    fn mul(self, multiplier: f64) -> Self::Output {
+        Degrees(self.0 * multiplier)
+    }
+}
+
+impl Div<f64> for Radians {
+    type Output = Radians;
 
     fn div(self, divisor: f64) -> Self::Output {
-        match self {
-            Self::Radians(angle) => Self::Radians(angle / divisor),
-            Self::Degrees(angle) => Self::Degrees(angle / divisor),
-        }
+        Radians(self.0 / divisor)
+    }
+}
+
+impl Div<f64> for Degrees {
+    type Output = Degrees;
+
+    fn div(self, divisor: f64) -> Self::Output {
+        Degrees(self.0 / divisor)
     }
 }
 
 pub trait ToAngle {
-    fn degrees(&self) -> Angle;
-    fn radians(&self) -> Angle;
+    fn degrees(&self) -> Degrees;
+    fn radians(&self) -> Radians;
 }
 
-impl ToAngle for f64 {
-    fn degrees(&self) -> Angle {
-        Angle::Degrees(*self)
+impl<T: Into<f64> + Copy> ToAngle for T {
+    fn degrees(&self) -> Degrees {
+        Degrees((*self).into())
     }
 
-    fn radians(&self) -> Angle {
-        Angle::Radians(*self)
-    }
-}
-
-impl ToAngle for u64 {
-    fn degrees(&self) -> Angle {
-        Angle::Degrees(*self as f64)
-    }
-
-    fn radians(&self) -> Angle {
-        Angle::Radians(*self as f64)
+    fn radians(&self) -> Radians {
+        Radians((*self).into())
     }
 }
 
@@ -74,33 +85,33 @@ impl ToAngle for u64 {
 /// as Euler angle representation.
 #[derive(Debug, Copy, Clone)]
 pub struct RVec {
-    pub x: Angle,
-    pub y: Angle,
-    pub z: Angle,
+    pub x: Radians,
+    pub y: Radians,
+    pub z: Radians,
 }
 
 impl RVec {
+    pub fn x(x: impl Into<Radians>) -> Self {
+        RVec { x: x.into(), y: 0.radians(), z: 0.radians() }
+    }
+
+    pub fn y(y: impl Into<Radians>) -> Self {
+        RVec { x: 0.radians(), y: y.into(), z: 0.radians() }
+    }
+
+    pub fn z(z: impl Into<Radians>) -> Self {
+        RVec { x: 0.radians(), y: 0.radians(), z: z.into() }
+    }
+
     pub fn radians(&self) -> DVec3 {
-        dvec3(self.x.radians(), self.y.radians(), self.z.radians())
+        dvec3(self.x.into(), self.y.into(), self.z.into())
     }
 
     pub fn degrees(&self) -> DVec3 {
-        dvec3(self.x.degrees(), self.y.degrees(), self.z.degrees())
-    }
-
-    pub fn x(x: Angle) -> Self {
-        RVec { x, y: 0.degrees(), z: 0.degrees() }
-    }
-
-    pub fn y(y: Angle) -> Self {
-        RVec { x: 0.degrees(), y, z: 0.degrees() }
-    }
-
-    pub fn z(z: Angle) -> Self {
-        RVec { x: 0.degrees(), y: 0.degrees(), z }
+        dvec3(self.x.degrees().into(), self.y.degrees().into(), self.z.degrees().into())
     }
 }
 
-pub fn rvec(x: Angle, y: Angle, z: Angle) -> RVec {
-    RVec { x, y, z }
+pub fn rvec(x: impl Into<Radians>, y: impl Into<Radians>, z: impl Into<Radians>) -> RVec {
+    RVec { x: x.into(), y: y.into(), z: z.into() }
 }
