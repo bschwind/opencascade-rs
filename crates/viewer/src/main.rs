@@ -22,10 +22,14 @@ use winit::{
     window::Window,
 };
 
+mod camera;
 mod edge_drawer;
 mod surface_drawer;
 
+const MIN_SCALE: f32 = 0.01;
+
 struct ViewerApp {
+    camera: camera::Camera,
     depth_texture: DepthTexture,
     text_system: TextSystem,
     fps_counter: FPSCounter,
@@ -95,6 +99,7 @@ impl GameApp for ViewerApp {
         let depth_texture_format = depth_texture.format();
 
         Self {
+            camera: camera::Camera::new(width, height),
             depth_texture,
             text_system: TextSystem::new(device, surface_texture_format, width, height),
             fps_counter: FPSCounter::new(),
@@ -119,6 +124,7 @@ impl GameApp for ViewerApp {
     }
 
     fn resize(&mut self, graphics_device: &mut GraphicsDevice, width: u32, height: u32) {
+        self.camera.resize(width, height);
         self.depth_texture = DepthTexture::new(graphics_device.device(), width, height);
         self.text_system.resize(width, height);
         self.line_drawer.resize(width, height);
@@ -132,12 +138,16 @@ impl GameApp for ViewerApp {
             },
             WindowEvent::TouchpadMagnify { delta, .. } => {
                 self.scale += *delta as f32;
+                self.scale = self.scale.max(MIN_SCALE);
             },
             WindowEvent::KeyboardInput {
-                input: KeyboardInput { virtual_keycode: Some(VirtualKeyCode::Escape), .. },
+                input: KeyboardInput { virtual_keycode: Some(keycode), .. },
                 ..
-            } => {
-                *control_flow = ControlFlow::Exit;
+            } => match keycode {
+                VirtualKeyCode::Escape => *control_flow = ControlFlow::Exit,
+                VirtualKeyCode::P => self.camera.use_perspective(),
+                VirtualKeyCode::O => self.camera.use_orthographic(),
+                _ => {},
             },
             _ => {},
         }
@@ -147,7 +157,6 @@ impl GameApp for ViewerApp {
 
     fn render(&mut self, graphics_device: &mut GraphicsDevice, _window: &Window) {
         let mut frame_encoder = graphics_device.begin_frame();
-        let (width, height) = frame_encoder.surface_dimensions();
 
         let smaa_render_target = self.smaa_target.start_frame(
             graphics_device.device(),
@@ -155,7 +164,7 @@ impl GameApp for ViewerApp {
             &frame_encoder.backbuffer_view,
         );
 
-        let camera_matrix = build_camera_matrix(width, height);
+        let camera_matrix = self.camera.matrix();
         let transform = Mat4::from_rotation_z(self.angle)
             * Mat4::from_scale(vec3(self.scale, self.scale, self.scale));
 
@@ -178,7 +187,7 @@ impl GameApp for ViewerApp {
             &smaa_render_target,
             Some(&self.depth_texture.view),
             graphics_device.queue(),
-            build_camera_matrix(width, height),
+            camera_matrix,
             transform,
             dash_size,
             gap_size,
@@ -204,19 +213,6 @@ impl GameApp for ViewerApp {
 
         self.fps_counter.tick();
     }
-}
-
-fn build_camera_matrix(width: u32, height: u32) -> Mat4 {
-    let aspect_ratio = width as f32 / height as f32;
-    let proj = Mat4::perspective_rh(std::f32::consts::PI / 2.0, aspect_ratio, 0.01, 1000.0);
-
-    let view = Mat4::look_at_rh(
-        vec3(20.0, -30.0, 20.0), // Eye position
-        vec3(0.0, 0.0, 0.0),     // Look-at target
-        vec3(0.0, 0.0, 1.0),     // Up vector of the camera
-    );
-
-    proj * view
 }
 
 #[allow(unused)]
