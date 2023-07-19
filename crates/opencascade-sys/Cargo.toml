@@ -7,48 +7,10 @@ version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/bschwind/opencascade-rs"
 
-# Desperately trying to reduce the crate size here...
-exclude = [
-    "OCCT/adm/*",
-    "OCCT/data/*",
-    "OCCT/dox/*",
-    "OCCT/samples/*",
-    "OCCT/src/AdvApp2Var/*",
-    "OCCT/src/AIS/*",
-    "OCCT/src/AppCont/*",
-    "OCCT/src/BRepTest/*",
-    "OCCT/src/Draw/*",
-    "OCCT/src/Graphic3d/*",
-    "OCCT/src/HLRBRep/*",
-    "OCCT/src/IFSelect/*",
-    "OCCT/src/IGESAppli/*",
-    "OCCT/src/IGESData/*",
-    "OCCT/src/IGESDimen/*",
-    "OCCT/src/IGESDraw/*",
-    "OCCT/src/IGESGeom/*",
-    "OCCT/src/IGESSolid/*",
-    "OCCT/src/MeshVS/*",
-    "OCCT/src/OpenGl/*",
-    "OCCT/src/PrsDim/*",
-    "OCCT/src/QABugs/*",
-    "OCCT/src/Resource/*",
-    "OCCT/src/SelectMgr/*",
-    "OCCT/src/Shaders/*",
-    "OCCT/src/StepVisual/*",
-    "OCCT/src/TDataStd/*",
-    "OCCT/src/Textures/*",
-    "OCCT/src/ViewerTest/*",
-    "OCCT/src/Vrml/*",
-    "OCCT/src/VrmlData/*",
-    "OCCT/src/XCAFDoc/*",
-    "OCCT/src/XDEDRAW/*",
-    "OCCT/tests/*",
-    "OCCT/tools/*",
-]
-
 [dependencies]
 cxx = "1"
 
 [build-dependencies]
 cmake = "0.1"
 cxx-build = "1"
+occt-sys = { path = "../occt-sys" }
