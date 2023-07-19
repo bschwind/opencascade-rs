@@ -6,8 +6,6 @@ fn main() {
     let patch_dir = current_dir.join("patch");
 
     let dst = cmake::Config::new("OCCT")
-        // TODO(bschwind) - Verify this is set properly
-        // .define("CMAKE_BUILD_TYPE", "Release")
         .define("BUILD_PATCH", patch_dir)
         .define("BUILD_LIBRARY_TYPE", "Static")
         .define("BUILD_MODULE_Draw", "FALSE")
