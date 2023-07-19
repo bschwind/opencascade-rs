@@ -9,7 +9,6 @@ repository = "https://github.com/bschwind/opencascade-rs"
 
 # Desperately trying to reduce the crate size here...
 exclude = [
-    "OCCT/adm/*",
     "OCCT/data/*",
     "OCCT/dox/*",
     "OCCT/samples/*",
