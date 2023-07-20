@@ -4,7 +4,7 @@ use crate::{
 };
 use anyhow::Error;
 use clap::{Parser, ValueEnum};
-use glam::{vec3, DVec3, Mat4};
+use glam::{vec2, vec3, DVec3, Mat4, Vec2};
 use opencascade::primitives::Shape;
 use simple_game::{
     graphics::{
@@ -17,7 +17,8 @@ use simple_game::{
 use smaa::{SmaaMode, SmaaTarget};
 use std::path::PathBuf;
 use winit::{
-    event::{KeyEvent, WindowEvent},
+    dpi::PhysicalPosition,
+    event::{ElementState, KeyEvent, MouseButton, MouseScrollDelta::PixelDelta, WindowEvent},
     event_loop::EventLoopWindowTarget,
     keyboard::{KeyCode, PhysicalKey},
     window::Window,
@@ -27,9 +28,40 @@ mod camera;
 mod edge_drawer;
 mod surface_drawer;
 
-const MIN_SCALE: f32 = 0.01;
+// Multipliers to convert mouse position deltas to a more sane camera perspective change.
+const ZOOM_MULTIPLIER: f32 = 5.0;
+const TOUCHPAD_ZOOM_MULTIPLIER: f32 = 2.0;
+const ROTATE_MULTIPLIER: f32 = 5.0;
+const TOUCHPAD_ROTATE_MULTIPLIER: f32 = 0.05;
+const PAN_MULTIPLIER: f32 = 100.0;
+
+#[derive(Default)]
+struct MouseState {
+    left_button_down: bool,
+    middle_button_down: bool,
+    right_button_down: bool,
+    last_position: PhysicalPosition<f64>,
+}
+
+impl MouseState {
+    fn delta(&mut self, position: PhysicalPosition<f64>) -> (f64, f64) {
+        let delta = (position.x - self.last_position.x, position.y - self.last_position.y);
+        self.last_position = position;
+        delta
+    }
+
+    fn input(&mut self, button: MouseButton, state: ElementState) {
+        match button {
+            MouseButton::Left => self.left_button_down = state == ElementState::Pressed,
+            MouseButton::Middle => self.middle_button_down = state == ElementState::Pressed,
+            MouseButton::Right => self.right_button_down = state == ElementState::Pressed,
+            _ => {},
+        }
+    }
+}
 
 struct ViewerApp {
+    client_rect: Vec2,
     camera: camera::Camera,
     depth_texture: DepthTexture,
     text_system: TextSystem,
@@ -39,8 +71,7 @@ struct ViewerApp {
     smaa_target: SmaaTarget,
     rendered_edges: RenderedLine,
     cad_mesh: CadMesh,
-    angle: f32,
-    scale: f32,
+    mouse_state: MouseState,
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -149,6 +180,7 @@ impl GameApp for ViewerApp {
         let depth_texture_format = depth_texture.format();
 
         Self {
+            client_rect: vec2(width as f32, height as f32),
             camera: camera::Camera::new(width, height),
             depth_texture,
             text_system: TextSystem::new(device, surface_texture_format, width, height),
@@ -168,12 +200,12 @@ impl GameApp for ViewerApp {
             smaa_target,
             cad_mesh,
             rendered_edges,
-            angle: 0.0,
-            scale: 1.0,
+            mouse_state: Default::default(),
         }
     }
 
     fn resize(&mut self, graphics_device: &mut GraphicsDevice, width: u32, height: u32) {
+        self.client_rect = vec2(width as f32, height as f32);
         self.camera.resize(width, height);
         self.depth_texture = DepthTexture::new(graphics_device.device(), width, height);
         self.text_system.resize(width, height);
@@ -188,11 +220,32 @@ impl GameApp for ViewerApp {
     ) {
         match event {
             WindowEvent::TouchpadRotate { delta, .. } => {
-                self.angle += 2.0 * delta * std::f32::consts::PI / 180.0;
+                self.camera.rotate(delta * TOUCHPAD_ROTATE_MULTIPLIER, 0.0);
+            },
+            WindowEvent::CursorMoved { position, .. } => {
+                let delta = self.mouse_state.delta(*position);
+                let delta_x = delta.0 as f32 / self.client_rect.x;
+                let delta_y = delta.1 as f32 / self.client_rect.y;
+                if self.mouse_state.left_button_down {
+                    self.camera.rotate(delta_x * ROTATE_MULTIPLIER, delta_y * ROTATE_MULTIPLIER);
+                }
+                if self.mouse_state.middle_button_down {
+                    self.camera.pan(delta_x * PAN_MULTIPLIER, delta_y * PAN_MULTIPLIER);
+                }
+                if self.mouse_state.right_button_down {
+                    self.camera.zoom(delta_y * ZOOM_MULTIPLIER);
+                }
+            },
+            WindowEvent::MouseInput { state, button, .. } => {
+                self.mouse_state.input(*button, *state)
+            },
+            WindowEvent::MouseWheel { delta: PixelDelta(delta), .. } => {
+                let delta_x = delta.x as f32 / self.client_rect.x;
+                let delta_y = delta.y as f32 / self.client_rect.y;
+                self.camera.pan(delta_x * PAN_MULTIPLIER, delta_y * PAN_MULTIPLIER);
             },
             WindowEvent::TouchpadMagnify { delta, .. } => {
-                self.scale += *delta as f32;
-                self.scale = self.scale.max(MIN_SCALE);
+                self.camera.zoom(*delta as f32 * TOUCHPAD_ZOOM_MULTIPLIER);
             },
             WindowEvent::KeyboardInput {
                 event: KeyEvent { physical_key: PhysicalKey::Code(key_code), .. },
@@ -219,8 +272,7 @@ impl GameApp for ViewerApp {
         );
 
         let camera_matrix = self.camera.matrix();
-        let transform = Mat4::from_rotation_z(self.angle)
-            * Mat4::from_scale(vec3(self.scale, self.scale, self.scale));
+        let transform = Mat4::IDENTITY;
 
         self.surface_drawer.render(
             &mut frame_encoder.encoder,

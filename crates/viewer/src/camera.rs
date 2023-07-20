@@ -1,4 +1,6 @@
-use glam::{vec3, Mat4};
+use glam::{vec3, Mat3, Mat4, Vec3};
+
+const MIN_ZOOM_FACTOR: f32 = 0.05;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Projection {
@@ -11,11 +13,22 @@ enum Projection {
 pub struct Camera {
     projection: Projection,
     aspect_ratio: f32,
+    zoom_factor: f32,
+    position: Vec3,
+    upward: Vec3,
+    target: Vec3,
 }
 
 impl Camera {
     pub fn new(width: u32, height: u32) -> Self {
-        Self { projection: Projection::Orthographic, aspect_ratio: width as f32 / height as f32 }
+        Self {
+            projection: Projection::Orthographic,
+            aspect_ratio: width as f32 / height as f32,
+            zoom_factor: 1.0,
+            position: vec3(20.0, -30.0, 20.0),
+            upward: vec3(0.0, 0.0, 1.0),
+            target: vec3(0.0, 0.0, 0.0),
+        }
     }
 
     pub fn resize(&mut self, width: u32, height: u32) {
@@ -30,16 +43,43 @@ impl Camera {
         self.projection = Projection::Orthographic;
     }
 
+    /// Pan the camera view horizontally and vertically. Look-at target will move along with the
+    /// camera.
+    pub fn pan(&mut self, x: f32, y: f32) {
+        let forward = self.target - self.position;
+        let rightward = self.upward.cross(forward).normalize();
+        let translation = rightward * x + self.upward * y;
+        self.position += translation;
+        self.target += translation;
+    }
+
+    /// Zoom in or out, while looking at the same target.
+    pub fn zoom(&mut self, zoom_delta: f32) {
+        // Change the camera position for perspective projection.
+        let forward = self.target - self.position;
+        self.position += forward * zoom_delta;
+        // Update the zoom factor for orthographic projection.
+        self.zoom_factor = (self.zoom_factor - zoom_delta).max(MIN_ZOOM_FACTOR);
+    }
+
+    /// Orbit around the target while keeping the distance.
+    pub fn rotate(&mut self, yaw: f32, pitch: f32) {
+        let backward = self.position - self.target;
+        let yaw_rotation = Mat3::from_rotation_z(yaw);
+        let pitch_rotation = Mat3::from_rotation_x(pitch);
+        self.position = self.target + yaw_rotation * pitch_rotation * backward
+    }
+
     pub fn matrix(&self) -> Mat4 {
         // These magic numbers are configured so that the particular model we are loading is
         // visible in its entirety. They will be dynamically computed eventually when we have "fit
         // to view" function or alike.
         let proj = match self.projection {
             Projection::Orthographic => Mat4::orthographic_rh(
-                -100.0 * self.aspect_ratio,
-                100.0 * self.aspect_ratio,
-                -100.0,
-                100.0,
+                -50.0 * self.zoom_factor * self.aspect_ratio,
+                50.0 * self.zoom_factor * self.aspect_ratio,
+                -50.0 * self.zoom_factor,
+                50.0 * self.zoom_factor,
                 -1000.0,
                 1000.0,
             ),
@@ -48,11 +88,7 @@ impl Camera {
             },
         };
 
-        let view = Mat4::look_at_rh(
-            vec3(20.0, -30.0, 20.0), // Eye position
-            vec3(0.0, 0.0, 0.0),     // Look-at target
-            vec3(0.0, 0.0, 1.0),     // Up vector of the camera
-        );
+        let view = Mat4::look_at_rh(self.position, self.target, self.upward);
 
         proj * view
     }
