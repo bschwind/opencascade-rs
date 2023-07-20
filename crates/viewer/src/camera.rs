@@ -31,6 +31,9 @@ impl Camera {
     }
 
     pub fn matrix(&self) -> Mat4 {
+        // These magic numbers are configured so that the particular model we are loading is
+        // visible in its entirety. They will be dynamically computed eventually when we have "fit
+        // to view" function or alike.
         let proj = match self.projection {
             Projection::Orthographic => Mat4::orthographic_rh(
                 -100.0 * self.aspect_ratio,
