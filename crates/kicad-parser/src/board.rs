@@ -1,9 +1,9 @@
 use anyhow::{anyhow, Context, Result};
+use opencascade::primitives::{Edge, Face, Wire};
 use sexp::{Atom, Sexp};
 use std::path::Path;
-use opencascade::primitives::{Edge, Wire, Face};
 
-use crate::graphics::{GraphicLine, GraphicArc, GraphicRect, GraphicCircle};
+use crate::graphics::{GraphicArc, GraphicCircle, GraphicLine, GraphicRect};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum BoardLayer {
@@ -31,7 +31,7 @@ pub enum BoardLayer {
     In2Cu,
     In3Cu,
     In4Cu,
-    User(String)
+    User(String),
 }
 
 impl From<&str> for BoardLayer {
@@ -182,12 +182,13 @@ impl KicadBoard {
     }
 
     pub fn layer_edges(&self, layer: BoardLayer) -> Vec<Edge> {
-        self.graphic_lines.iter()
+        self.graphic_lines
+            .iter()
             .filter(|line| line.layer() == layer)
             .map(Into::<Edge>::into)
-            .chain(self.graphic_arcs.iter()
-                .filter(|arc| arc.layer() == layer)
-                .map(Into::<Edge>::into))
+            .chain(
+                self.graphic_arcs.iter().filter(|arc| arc.layer() == layer).map(Into::<Edge>::into),
+            )
             .collect()
     }
 

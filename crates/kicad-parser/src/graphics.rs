@@ -1,8 +1,10 @@
 use anyhow::{anyhow, Result};
-use sexp::{Atom, Sexp};
 use glam::{dvec3, DVec3};
-use opencascade::primitives::{Edge, Face};
-use opencascade::workplane::Workplane;
+use opencascade::{
+    primitives::{Edge, Face},
+    workplane::Workplane,
+};
+use sexp::{Atom, Sexp};
 
 use crate::board::BoardLayer;
 
@@ -267,10 +269,7 @@ impl Into<Face> for &GraphicRect {
     fn into(self) -> Face {
         let height = (self.end.1 - self.start.1).abs();
         let width = (self.end.0 - self.start.0).abs();
-        Workplane::xy()
-            .translated(self.start_point())
-            .rect(height, width)
-            .to_face()
+        Workplane::xy().translated(self.start_point()).rect(height, width).to_face()
     }
 }
 
