@@ -43,6 +43,7 @@
 #include <NCollection_Array1.hxx>
 #include <Poly_Connect.hxx>
 #include <STEPControl_Reader.hxx>
+#include <STEPControl_Writer.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
 #include <StdPrs_ToolTriangulatedShape.hxx>
@@ -301,6 +302,14 @@ inline std::unique_ptr<TopoDS_Shape> one_shape(const STEPControl_Reader &reader)
 }
 
 // Data Export
+inline IFSelect_ReturnStatus transfer_shape(STEPControl_Writer &writer, const TopoDS_Shape &theShape) {
+  return writer.Transfer(theShape, STEPControl_AsIs);
+}
+
+inline IFSelect_ReturnStatus write_step(STEPControl_Writer &writer, rust::String theFileName) {
+  return writer.Write(theFileName.c_str());
+}
+
 inline bool write_stl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::String theFileName) {
   return writer.Write(theShape, theFileName.c_str());
 }

@@ -50,7 +50,7 @@ impl GameApp for ViewerApp {
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
         // Model sourced from:
         // https://nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-0
-        let keycap = Shape::read_step("crates/viewer/models/nist_ftc_06.step");
+        let keycap = Shape::read_step("crates/viewer/models/nist_ftc_06.step").unwrap();
 
         let mesh = keycap.mesh();
         let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
