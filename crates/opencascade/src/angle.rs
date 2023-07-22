@@ -50,23 +50,13 @@ pub trait ToAngle {
     fn radians(&self) -> Angle;
 }
 
-impl ToAngle for f64 {
+impl<T: Into<f64> + Copy> ToAngle for T {
     fn degrees(&self) -> Angle {
-        Angle::Degrees(*self)
+        Angle::Degrees((*self).into())
     }
 
     fn radians(&self) -> Angle {
-        Angle::Radians(*self)
-    }
-}
-
-impl ToAngle for u64 {
-    fn degrees(&self) -> Angle {
-        Angle::Degrees(*self as f64)
-    }
-
-    fn radians(&self) -> Angle {
-        Angle::Radians(*self as f64)
+        Angle::Radians((*self).into())
     }
 }
 
