@@ -1,4 +1,7 @@
-use crate::primitives::{Edge, Wire};
+use crate::{
+    angle::{Angle, RVec},
+    primitives::{Edge, Wire},
+};
 use glam::{dvec3, DAffine3, DMat3, DVec3, EulerRot};
 
 #[derive(Debug, Copy, Clone)]
@@ -105,11 +108,9 @@ impl Workplane {
     }
 
     // TODO(bschwind) - Test this.
-    pub fn set_rotation(&mut self, (rot_x, rot_y, rot_z): (f64, f64, f64)) {
-        let rot_x = rot_x * std::f64::consts::PI / 180.0;
-        let rot_y = rot_y * std::f64::consts::PI / 180.0;
-        let rot_z = rot_z * std::f64::consts::PI / 180.0;
-        let rotation_matrix = DMat3::from_euler(EulerRot::XYZ, rot_x, rot_y, rot_z);
+    pub fn set_rotation(&mut self, (rot_x, rot_y, rot_z): (Angle, Angle, Angle)) {
+        let rotation_matrix =
+            DMat3::from_euler(EulerRot::XYZ, rot_x.radians(), rot_y.radians(), rot_z.radians());
 
         let translation = self.transform.translation;
 
@@ -125,11 +126,9 @@ impl Workplane {
         self.set_translation(translation);
     }
 
-    pub fn rotate_by(&mut self, (rot_x, rot_y, rot_z): (f64, f64, f64)) {
-        let rot_x = rot_x * std::f64::consts::PI / 180.0;
-        let rot_y = rot_y * std::f64::consts::PI / 180.0;
-        let rot_z = rot_z * std::f64::consts::PI / 180.0;
-        let rotation_matrix = DMat3::from_euler(EulerRot::XYZ, rot_x, rot_y, rot_z);
+    pub fn rotate_by(&mut self, (rot_x, rot_y, rot_z): (Angle, Angle, Angle)) {
+        let rotation_matrix =
+            DMat3::from_euler(EulerRot::XYZ, rot_x.radians(), rot_y.radians(), rot_z.radians());
 
         let translation = self.transform.translation;
 
@@ -153,7 +152,7 @@ impl Workplane {
         self.transform.translation += offset;
     }
 
-    pub fn transformed(&self, offset: DVec3, rotate: DVec3) -> Self {
+    pub fn transformed(&self, offset: DVec3, rotate: RVec) -> Self {
         let mut new = self.clone();
         let new_origin = new.to_world_pos(offset);
 
@@ -171,7 +170,7 @@ impl Workplane {
         new
     }
 
-    pub fn rotated(&self, rotate: DVec3) -> Self {
+    pub fn rotated(&self, rotate: RVec) -> Self {
         let mut new = self.clone();
         new.rotate_by((rotate.x, rotate.y, rotate.z));
 
