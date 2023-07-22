@@ -107,6 +107,12 @@ I'd say CadQuery is an _excellent_ tool, and likely the most fully-featured code
 
 So if you like Python and have patience to deal with Python installations and such, absolutely go with CadQuery. It'll take this project quite awhile to reach feature parity with it.
 
+### [Build123d](https://github.com/gumyr/build123d)
+
+Build123d seems to be an evolution of CadQuery. Still in Python, it replaces the "fluent" API with stateful context managers using `with` blocks. It's still an early project and I haven't looked closely at it, but I do wonder if the context-manager approach will lead to lots of rightward drift in code. Aside from that, it seems like a reasonable syntax approach for CAD modeling.
+
+Still has the same downsides of managing a Python installation and managing how you distribute that.
+
 ### [Cascade Studio](https://github.com/zalo/CascadeStudio)
 
 Like CadQuery, Cascade Studio is also based on the OpenCascade kernel. It's quite nice as well, and has an [incredible manual](https://github.com/raydeleu/CascadeStudioManual) with tons of detail. I was mainly turned off by the fact that you have to use the GUI to discover edge indices, which you then pass to the `FilletEdges()` function as a list of numbers. These indices can change as you modify the shape, and it all feels a bit unstable and relies too much on mouse picking from the GUI.
