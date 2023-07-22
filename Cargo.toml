@@ -6,3 +6,11 @@ members = [
 ]
 
 resolver = "2"
+
+# Cargo by default builds build (only) dependencies with opt-level of 0 even in the release profile.
+# That makes sense, as such code is normally run only once. But `occt-sys` is special: it is a build
+# dependency of `opencascade-sys`, but it compiles static libraries that do end up in the final
+# binaries.
+# So set the regular release opt-level. `cmake` crate then picks it up and passes to the C++ build.
+[profile.release.package.occt-sys]
+opt-level = 3
