@@ -8,7 +8,7 @@ use sexp::{Atom, Sexp};
 
 use crate::board::BoardLayer;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct GraphicLine {
     start: (f64, f64),
     end: (f64, f64),
@@ -70,7 +70,7 @@ impl Into<Edge> for &GraphicLine {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct GraphicArc {
     start: (f64, f64),
     mid: (f64, f64),
@@ -141,7 +141,7 @@ impl Into<Edge> for &GraphicArc {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct GraphicCircle {
     center: (f64, f64),
     end: (f64, f64),
@@ -209,7 +209,7 @@ impl Into<Face> for &GraphicCircle {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct GraphicRect {
     start: (f64, f64),
     end: (f64, f64),
