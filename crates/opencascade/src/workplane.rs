@@ -96,6 +96,14 @@ impl Workplane {
         self.transform.matrix3.z_axis
     }
 
+    pub fn x_dir(&self) -> DVec3 {
+        self.transform.matrix3.x_axis
+    }
+
+    pub fn y_dir(&self) -> DVec3 {
+        self.transform.matrix3.y_axis
+    }
+
     // TODO(bschwind) - Test this.
     pub fn set_rotation(&mut self, (rot_x, rot_y, rot_z): (f64, f64, f64)) {
         let rot_x = rot_x * std::f64::consts::PI / 180.0;
