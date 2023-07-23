@@ -387,7 +387,7 @@ impl Face {
     pub fn revolve(&self, origin: DVec3, axis: DVec3, angle: Option<Angle>) -> Solid {
         let revol_vec = make_axis_1(origin, axis);
 
-        let angle = angle.map(Angle::radians).unwrap_or(std::f64::consts::PI * 2.0);
+        let angle = angle.map(|angle| angle.radians()).unwrap_or(std::f64::consts::PI * 2.0);
         let copy = false;
 
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
@@ -592,7 +592,7 @@ impl CompoundFace {
     pub fn revolve(&self, origin: DVec3, axis: DVec3, angle: Option<Angle>) -> Shape {
         let revol_axis = make_axis_1(origin, axis);
 
-        let angle = angle.map(Angle::radians).unwrap_or(std::f64::consts::PI * 2.0);
+        let angle = angle.map(|angle| angle.radians()).unwrap_or(std::f64::consts::PI * 2.0);
         let copy = false;
 
         let inner_shape = ffi::cast_compound_to_shape(&self.inner);
