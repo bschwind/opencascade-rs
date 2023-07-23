@@ -83,6 +83,8 @@ impl GameApp for ViewerApp {
             line_builder.add_round_line_strip(&segments);
         }
 
+        draw_xyz_axes(&mut line_builder);
+
         let rendered_edges = line_builder.build(graphics_device.device());
 
         // Create SMAA target
@@ -214,6 +216,25 @@ impl GameApp for ViewerApp {
 
         self.fps_counter.tick();
     }
+}
+
+fn draw_xyz_axes(line_builder: &mut LineBuilder) {
+    let thickness = 1.0;
+    // TODO(Matej): this is a naive hack; how to determine proper extent?
+    let reach = 1000.0;
+
+    line_builder.add_round_line_strip(&[
+        LineVertex3::new(vec3(-reach, 0.0, 0.0), thickness, 0.0),
+        LineVertex3::new(vec3(reach, 0.0, 0.0), thickness, 2.0 * reach),
+    ]);
+    line_builder.add_round_line_strip(&[
+        LineVertex3::new(vec3(0.0, -reach, 0.0), thickness, 0.0),
+        LineVertex3::new(vec3(0.0, reach, 0.0), thickness, 2.0 * reach),
+    ]);
+    line_builder.add_round_line_strip(&[
+        LineVertex3::new(vec3(0.0, 0.0, -reach), thickness, 0.0),
+        LineVertex3::new(vec3(0.0, 0.0, reach), thickness, 2.0 * reach),
+    ]);
 }
 
 #[allow(unused)]
