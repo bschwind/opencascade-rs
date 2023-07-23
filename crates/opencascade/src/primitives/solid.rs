@@ -3,7 +3,7 @@ use crate::{
     Error,
 };
 use cxx::UniquePtr;
-use opencascade_sys::ffi::{self};
+use opencascade_sys::ffi;
 use std::path::Path;
 
 pub struct Solid {

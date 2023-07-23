@@ -1,6 +1,6 @@
 use cxx::UniquePtr;
 use glam::DVec3;
-use opencascade_sys::ffi::{self};
+use opencascade_sys::ffi;
 
 mod boolean_shape;
 mod compound;

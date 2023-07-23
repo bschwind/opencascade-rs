@@ -1,7 +1,7 @@
 use crate::primitives::{make_axis_2, make_point};
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::ffi::{self};
+use opencascade_sys::ffi;
 
 pub struct Edge {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Edge>,

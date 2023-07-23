@@ -1,6 +1,6 @@
 use crate::primitives::Shape;
 use cxx::UniquePtr;
-use opencascade_sys::ffi::{self};
+use opencascade_sys::ffi;
 
 pub struct Compound {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Compound>,
