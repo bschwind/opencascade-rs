@@ -99,8 +99,8 @@ pub fn main() {
         Solid::loft([&scoop_right, &scoop_mid, &scoop_left])
     };
 
-    let (mut keycap, edges) = keycap.subtract(&scoop);
-    keycap.fillet_edges(0.6, &edges);
+    let mut keycap = keycap.subtract(&scoop);
+    keycap.fillet_new_edges(0.6);
 
     let shell_bottom = Workplane::xy().rect(bx - thickness * 2.0, by - thickness * 2.0);
 
@@ -114,7 +114,7 @@ pub fn main() {
 
     let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top]);
 
-    let (mut keycap, _edges) = keycap.subtract(&shell);
+    let mut keycap = keycap.subtract(&shell);
 
     let temp_face = shell
         .to_shape()
@@ -186,7 +186,7 @@ pub fn main() {
 
         let post = circle.extrude_to_face(&keycap, &temp_face);
 
-        (keycap, _) = keycap.union_shape(&post);
+        keycap = keycap.union_shape(&post);
     }
 
     for (x, y) in ribh_points {
@@ -194,7 +194,7 @@ pub fn main() {
 
         let rib = rect.extrude_to_face(&keycap, &temp_face);
 
-        (keycap, _) = keycap.union_shape(&rib);
+        keycap = keycap.union_shape(&rib);
     }
 
     for (x, y) in ribv_points {
@@ -202,7 +202,7 @@ pub fn main() {
 
         let rib = rect.extrude_to_face(&keycap, &temp_face);
 
-        (keycap, _) = keycap.union_shape(&rib);
+        keycap = keycap.union_shape(&rib);
     }
 
     // TODO(bschwind) - This should probably be done after every union...
@@ -227,7 +227,7 @@ pub fn main() {
         let (face_target, _) = faces.get(0).expect("We should have a face to extrude to");
         let post = circle.extrude_to_face(&keycap, face_target);
 
-        (keycap, _) = keycap.union_shape(&post);
+        keycap = keycap.union_shape(&post);
     }
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));
@@ -239,9 +239,8 @@ pub fn main() {
         cross.set_global_translation(dvec3(x, y, 0.0));
         let cross = cross.extrude(dvec3(0.0, 0.0, 4.6));
 
-        let (mut subtracted, edges) = keycap.subtract_shape(&cross);
-        subtracted.chamfer_edges(0.2, &edges);
-        keycap = subtracted;
+        keycap = keycap.subtract_shape(&cross);
+        keycap.chamfer_new_edges(0.2);
     }
 
     keycap.write_stl("keycap.stl").unwrap();

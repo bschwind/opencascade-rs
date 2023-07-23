@@ -6,7 +6,10 @@ use crate::{
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi::{self, IFSelect_ReturnStatus};
-use std::path::Path;
+use std::{
+    ops::{Deref, DerefMut},
+    path::Path,
+};
 
 pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
     ffi::new_point(p.x, p.y, p.z)
@@ -722,7 +725,7 @@ impl Solid {
         }
     }
 
-    pub fn subtract(&mut self, other: &Solid) -> (Shape, Vec<Edge>) {
+    pub fn subtract(&mut self, other: &Solid) -> BooleanShape {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
@@ -731,21 +734,21 @@ impl Solid {
         let edge_list = cut_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let cut_shape = cut_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(cut_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 
-    pub fn union(&self, other: &Solid) -> (Shape, Vec<Edge>) {
+    pub fn union(&self, other: &Solid) -> BooleanShape {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
@@ -753,18 +756,18 @@ impl Solid {
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(fuse_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 }
 
@@ -868,7 +871,7 @@ impl Shape {
         self.chamfer_edges(distance, self.edges());
     }
 
-    pub fn subtract(&mut self, other: &Solid) -> (Shape, Vec<Edge>) {
+    pub fn subtract(&mut self, other: &Solid) -> BooleanShape {
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
         let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, other_inner_shape);
@@ -876,39 +879,39 @@ impl Shape {
         let edge_list = cut_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let cut_shape = cut_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(cut_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 
     // TODO(bschwind) - Deduplicate with the above function.
-    pub fn subtract_shape(&mut self, other: &Shape) -> (Shape, Vec<Edge>) {
+    pub fn subtract_shape(&mut self, other: &Shape) -> BooleanShape {
         let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
 
         let edge_list = cut_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let cut_shape = cut_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(cut_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 
     pub fn read_step(path: impl AsRef<Path>) -> Result<Self, Error> {
@@ -945,45 +948,45 @@ impl Shape {
         Ok(())
     }
 
-    pub fn union(&self, other: &Solid) -> (Shape, Vec<Edge>) {
+    pub fn union(&self, other: &Solid) -> BooleanShape {
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
         let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, other_inner_shape);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(fuse_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 
     // TODO(bschwind) - Unify this later
-    pub fn union_shape(&self, other: &Shape) -> (Shape, Vec<Edge>) {
+    pub fn union_shape(&self, other: &Shape) -> BooleanShape {
         let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(fuse_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
@@ -1063,6 +1066,41 @@ impl Shape {
         }
 
         results
+    }
+}
+
+/// The result of running a boolean operation (union, subtraction, intersection)
+/// on two shapes.
+pub struct BooleanShape {
+    pub shape: Shape,
+    pub new_edges: Vec<Edge>,
+}
+
+impl Deref for BooleanShape {
+    type Target = Shape;
+
+    fn deref(&self) -> &Self::Target {
+        &self.shape
+    }
+}
+
+impl DerefMut for BooleanShape {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.shape
+    }
+}
+
+impl BooleanShape {
+    pub fn new_edges(&self) -> impl Iterator<Item = &Edge> {
+        self.new_edges.iter()
+    }
+
+    pub fn fillet_new_edges(&mut self, radius: f64) {
+        self.shape.fillet_edges(radius, &self.new_edges);
+    }
+
+    pub fn chamfer_new_edges(&mut self, distance: f64) {
+        self.shape.chamfer_edges(distance, &self.new_edges);
     }
 }
 

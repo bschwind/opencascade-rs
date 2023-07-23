@@ -316,8 +316,8 @@ fn keycap() -> Shape {
         Solid::loft([&scoop_right, &scoop_mid, &scoop_left])
     };
 
-    let (mut keycap, edges) = keycap.subtract(&scoop);
-    keycap.fillet_edges(0.6, &edges);
+    let mut keycap = keycap.subtract(&scoop);
+    keycap.fillet_new_edges(0.6);
 
     let shell_bottom = Workplane::xy().rect(bx - thickness * 2.0, by - thickness * 2.0);
 
@@ -331,9 +331,9 @@ fn keycap() -> Shape {
 
     let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top]);
 
-    let (keycap, _edges) = keycap.subtract(&shell);
+    let keycap = keycap.subtract(&shell);
 
-    keycap
+    keycap.shape
 }
 
 #[allow(unused)]
@@ -350,17 +350,15 @@ fn gizmo() -> Shape {
         let cone_top =
             workplane.translated(DVec3::new(0.0, 0.0, arrow_length)).circle(0.0, 0.0, 0.05);
         let cone = Solid::loft([&cone_base, &cone_top].into_iter());
-        let (arrow_shape, _) = shaft.union(&cone);
+        let arrow_shape = shaft.union(&cone);
 
-        arrow_shape
+        arrow_shape.shape
     };
 
-    // TODO(bschwind) - Make it easier to chain union operations together.
     arrow(Workplane::yz())
         .union_shape(&arrow(Workplane::xz()))
-        .0
         .union_shape(&arrow(Workplane::xy()))
-        .0
+        .shape
 }
 
 fn main() {

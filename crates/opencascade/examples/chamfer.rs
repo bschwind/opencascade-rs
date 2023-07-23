@@ -20,8 +20,8 @@ pub fn main() {
     let handle_face = Face::from_wire(&handle);
 
     let handle_body = handle_face.extrude(dvec3(0.0, 0.0, -10.1));
-    let (mut chamfered_shape, fuse_edges) = chamfered_box.union(&handle_body);
-    chamfered_shape.chamfer_edges(0.5, &fuse_edges);
+    let mut chamfered_shape = chamfered_box.union(&handle_body);
+    chamfered_shape.chamfer_new_edges(0.5);
 
     // Chamfer the top of the protrusion
     let top_edges = chamfered_shape
