@@ -20,6 +20,10 @@ pub fn make_vec(vec: DVec3) -> UniquePtr<ffi::gp_Vec> {
     ffi::new_vec(vec.x, vec.y, vec.z)
 }
 
+pub fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax1> {
+    ffi::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
+}
+
 pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
     ffi::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
 }
@@ -380,6 +384,21 @@ impl Face {
         Shape { inner }
     }
 
+    pub fn revolve(&self, origin: DVec3, axis: DVec3, angle: Option<Angle>) -> Solid {
+        let revol_vec = make_axis_1(origin, axis);
+
+        let angle = angle.map(Angle::radians).unwrap_or(std::f64::consts::PI * 2.0);
+        let copy = false;
+
+        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        let mut make_solid = ffi::BRepPrimAPI_MakeRevol_ctor(inner_shape, &revol_vec, angle, copy);
+        let revolved_shape = make_solid.pin_mut().Shape();
+        let solid = ffi::TopoDS_cast_to_solid(revolved_shape);
+        let inner = ffi::TopoDS_Solid_to_owned(solid);
+
+        Solid { inner }
+    }
+
     /// Fillets the face edges by a given radius at each vertex
     pub fn fillet(&mut self, radius: f64) {
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
@@ -566,6 +585,21 @@ impl CompoundFace {
             ffi::BRepPrimAPI_MakePrism_ctor(inner_shape, &prism_vec, copy, canonize);
         let extruded_shape = make_solid.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(extruded_shape);
+
+        Shape { inner }
+    }
+
+    pub fn revolve(&self, origin: DVec3, axis: DVec3, angle: Option<Angle>) -> Shape {
+        let revol_axis = make_axis_1(origin, axis);
+
+        let angle = angle.map(Angle::radians).unwrap_or(std::f64::consts::PI * 2.0);
+        let copy = false;
+
+        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
+
+        let mut make_solid = ffi::BRepPrimAPI_MakeRevol_ctor(inner_shape, &revol_axis, angle, copy);
+        let revolved_shape = make_solid.pin_mut().Shape();
+        let inner = ffi::TopoDS_Shape_to_owned(revolved_shape);
 
         Shape { inner }
     }
