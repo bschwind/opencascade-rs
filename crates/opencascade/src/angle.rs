@@ -8,17 +8,17 @@ pub enum Angle {
 }
 
 impl Angle {
-    pub fn radians(&self) -> f64 {
+    pub fn radians(self) -> f64 {
         match self {
-            Self::Radians(r) => *r,
+            Self::Radians(r) => r,
             Self::Degrees(d) => (d * std::f64::consts::PI) / 180.0,
         }
     }
 
-    pub fn degrees(&self) -> f64 {
+    pub fn degrees(self) -> f64 {
         match self {
             Self::Radians(r) => (r * 180.0) / std::f64::consts::PI,
-            Self::Degrees(d) => *d,
+            Self::Degrees(d) => d,
         }
     }
 }
