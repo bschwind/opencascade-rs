@@ -17,6 +17,13 @@ impl AsRef<Wire> for Wire {
 }
 
 impl Wire {
+    fn from_make_wire(mut make_wire: UniquePtr<ffi::BRepBuilderAPI_MakeWire>) -> Self {
+        let wire = make_wire.pin_mut().Wire();
+        let inner = ffi::TopoDS_Wire_to_owned(wire);
+
+        Self { inner }
+    }
+
     pub fn from_edges<'a>(edges: impl IntoIterator<Item = &'a Edge>) -> Self {
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 
@@ -24,10 +31,7 @@ impl Wire {
             make_wire.pin_mut().add_edge(&edge.inner);
         }
 
-        let wire = make_wire.pin_mut().Wire();
-        let inner = ffi::TopoDS_Wire_to_owned(wire);
-
-        Self { inner }
+        Self::from_make_wire(make_wire)
     }
 
     pub fn from_wires<'a>(wires: impl IntoIterator<Item = &'a Wire>) -> Self {
@@ -37,10 +41,7 @@ impl Wire {
             make_wire.pin_mut().add_wire(&wire.inner);
         }
 
-        let wire = make_wire.pin_mut().Wire();
-        let inner = ffi::TopoDS_Wire_to_owned(wire);
-
-        Self { inner }
+        Self::from_make_wire(make_wire)
     }
 
     pub fn mirror_along_axis(&self, axis_origin: DVec3, axis_dir: DVec3) -> Self {
@@ -81,7 +82,7 @@ impl Wire {
 
     pub fn fillet(&mut self, radius: f64) {
         // Create a face from this wire
-        let mut face: Face = Face::from_wire(self);
+        let mut face = Face::from_wire(self);
         face.fillet(radius);
         let wire = ffi::outer_wire(&face.inner);
 
