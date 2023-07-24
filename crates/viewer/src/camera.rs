@@ -13,9 +13,13 @@ enum Projection {
 pub struct Camera {
     projection: Projection,
     aspect_ratio: f32,
+    // Zoom factor used for orthographic projection.
     zoom_factor: f32,
+    // Position of the camera.
     position: Vec3,
+    // The upward vector of the camera, determining its orientation.
     upward: Vec3,
+    // The look-at target, in the center of the view.
     target: Vec3,
 }
 
