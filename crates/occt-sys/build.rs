@@ -2,8 +2,9 @@ const LIB_DIR: &str = "lib";
 const INCLUDE_DIR: &str = "include";
 
 fn main() {
-    let dst = cmake::Config::new("OCCT")
-        .define("BUILD_LIBRARY_TYPE", "Static")
+    let mut cfg = cmake::Config::new("OCCT");
+
+    cfg.define("BUILD_LIBRARY_TYPE", "Static")
         .define("BUILD_MODULE_Draw", "FALSE")
         .define("USE_OPENGL", "FALSE")
         .define("USE_GLES2", "FALSE")
@@ -16,8 +17,14 @@ fn main() {
         .define("USE_OPENVR", "FALSE")
         .define("USE_FFMPEG", "FALSE")
         .define("INSTALL_DIR_LIB", LIB_DIR)
-        .define("INSTALL_DIR_INCLUDE", INCLUDE_DIR)
-        .build();
+        .define("INSTALL_DIR_INCLUDE", INCLUDE_DIR);
+
+    if let Ok(ccache) = which::which("sccache").or_else(|_| which::which("ccache")) {
+        cfg.define("CMAKE_C_COMPILER_LAUNCHER", ccache.as_os_str())
+            .define("CMAKE_CXX_COMPILER_LAUNCHER", ccache.as_os_str());
+    }
+
+    let dst = cfg.build();
 
     println!(
         "cargo:rustc-env=OCCT_LIB_PATH={}",

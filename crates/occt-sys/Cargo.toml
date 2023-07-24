@@ -50,3 +50,4 @@ exclude = [
 
 [build-dependencies]
 cmake = "0.1"
+which = "4"

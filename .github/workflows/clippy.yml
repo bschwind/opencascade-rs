@@ -20,4 +20,10 @@ jobs:
           components: clippy
       - name: Cache Rust Dependencies
         uses: Swatinem/rust-cache@v2
+      - name: SCcache config
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
+      - name: SCcache setup
+        uses: mozilla-actions/sccache-action@v0.0.3
       - run: cargo clippy --all-targets -- -D warnings
