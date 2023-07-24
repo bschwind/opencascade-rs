@@ -4,8 +4,6 @@ use opencascade::{
     workplane::Workplane,
 };
 
-// Demonstrates filleting a 2D profile, extruding it, then chamfering
-// the top edges, resulting in a nice, rounded chamfer.
 pub fn main() {
     let bot_rad: f64 = 30.0;
     let top_rad: f64 = 40.0;
