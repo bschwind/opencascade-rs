@@ -9,6 +9,7 @@ mod face;
 mod shape;
 mod shell;
 mod solid;
+mod surface;
 mod vertex;
 mod wire;
 
@@ -19,6 +20,7 @@ pub use face::*;
 pub use shape::*;
 pub use shell::*;
 pub use solid::*;
+pub use surface::*;
 pub use vertex::*;
 pub use wire::*;
 

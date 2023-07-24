@@ -1,6 +1,6 @@
 use crate::{
     angle::Angle,
-    primitives::{make_axis_1, make_point, make_vec, EdgeIterator, Shape, Solid, Wire},
+    primitives::{make_axis_1, make_point, make_vec, EdgeIterator, Shape, Solid, Surface, Wire},
     workplane::Workplane,
 };
 use cxx::UniquePtr;
@@ -28,6 +28,14 @@ impl Face {
     pub fn from_wire(wire: &Wire) -> Self {
         let only_plane = false;
         let make_face = ffi::BRepBuilderAPI_MakeFace_wire(&wire.inner, only_plane);
+
+        Self::from_make_face(make_face)
+    }
+
+    pub fn from_surface(surface: &Surface) -> Self {
+        const EDGE_TOLERANCE: f64 = 0.0001;
+
+        let make_face = ffi::BRepBuilderAPI_MakeFace_surface(&surface.inner, EDGE_TOLERANCE);
 
         Self::from_make_face(make_face)
     }
