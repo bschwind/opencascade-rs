@@ -16,8 +16,8 @@ impl Surface {
             poles.first().map(|first| first.len()).unwrap_or(0) as i32 - 1,
         );
 
-        for (row, poles) in poles.into_iter().enumerate() {
-            for (column, pole) in poles.into_iter().enumerate() {
+        for (row, poles) in poles.iter().enumerate() {
+            for (column, pole) in poles.iter().enumerate() {
                 let pole = &make_point(*pole);
                 pole_array.pin_mut().SetValue(row as i32, column as i32, pole);
             }
