@@ -1,3 +1,4 @@
+pub mod airfoil;
 pub mod box_shape;
 pub mod chamfer;
 pub mod gizmo;
