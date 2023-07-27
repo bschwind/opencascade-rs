@@ -8,7 +8,10 @@ pub struct Surface {
 }
 
 impl Surface {
-    pub fn bezier(poles: &[&[DVec3]]) -> Self {
+    pub fn bezier(poles: impl IntoIterator<Item = impl IntoIterator<Item = DVec3>>) -> Self {
+        let poles: Vec<Vec<_>> =
+            poles.into_iter().map(|poles| poles.into_iter().collect()).collect();
+
         let mut pole_array = ffi::TColgp_Array2OfPnt_ctor(
             0,
             poles.len() as i32 - 1,

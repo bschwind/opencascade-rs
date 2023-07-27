@@ -19,7 +19,7 @@ pub fn shape() -> Shape {
         dvec3(100.0, 0.0, 0.0),
     ];
 
-    let surface = Surface::bezier(&[&points1, &points2]);
+    let surface = Surface::bezier([points1, points2]);
     let face = Face::from_surface(&surface);
 
     let airfoil = face.extrude(dvec3(0.0, 50.0, 0.0));
