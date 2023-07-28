@@ -2,6 +2,8 @@
 
 Rust bindings to OpenCascade. The code is currently a major work in progress.
 
+I currently work a full-time job and work on this in my spare time, so please adjust timing expectations accordingly :)
+
 ## Major Goals
 * Define 3D CAD models suitable for 3D printing or machining, in ergonomic Rust code
 * Code-first approach, but allow use of a GUI where it makes sense (2D sketches)
