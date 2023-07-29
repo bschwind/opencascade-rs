@@ -26,7 +26,6 @@ fn main() {
         .define("USE_TK", "FALSE")
         .define("USE_VTK", "FALSE")
         .define("USE_XLIB", "FALSE")
-        .define("USE_XLIB", "FALSE")
         .define("INSTALL_DIR_LIB", LIB_DIR)
         .define("INSTALL_DIR_INCLUDE", INCLUDE_DIR)
         .build();
