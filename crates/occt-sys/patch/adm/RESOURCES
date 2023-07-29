@@ -1,11 +1,6 @@
-DrawResources
 StdResource
 SHMessage
-Shaders
 XRResources
-XSMessage
 XSTEPResource
 XmlOcafResource
 UnitsAPI/Units.dat
-TObj/TObj.msg
-BOPAlgo/BOPAlgo.msg
