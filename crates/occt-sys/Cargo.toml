@@ -103,7 +103,7 @@ exclude = [
     # "OCCT/src/GeomInt/*",
     # "OCCT/src/StepFEA/*",
     # "OCCT/src/IntCurve/*",
-    "OCCT/src/StdPrs/*",
+    # "OCCT/src/StdPrs/*",
     # "OCCT/src/RWStepFEA/*",
     "OCCT/src/IGESSelect/*",
     # "OCCT/src/Approx/*",
