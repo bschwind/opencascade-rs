@@ -8,26 +8,30 @@ edition = "2021"
 repository = "https://github.com/bschwind/opencascade-rs"
 
 # Desperately trying to reduce the crate size here...
+# Sorted by file size
 exclude = [
     "OCCT/data/*",
     "OCCT/dox/*",
+    "OCCT/tests/*",
     "OCCT/samples/*",
-    "OCCT/src/BRepTest/*",
+    "OCCT/tools/*",
+
+    "OCCT/src/Textures/*",
+    "OCCT/src/OpenGl/*",
+    "OCCT/src/ViewerTest/*",
+    "OCCT/src/QABugs/*",
+    "OCCT/src/IGESGeom/*",
     "OCCT/src/Draw/*",
-    "OCCT/src/IGESAppli/*",
     "OCCT/src/IGESData/*",
     "OCCT/src/IGESDimen/*",
-    "OCCT/src/IGESDraw/*",
-    "OCCT/src/IGESGeom/*",
     "OCCT/src/IGESSolid/*",
+    "OCCT/src/BRepTest/*",
     "OCCT/src/MeshVS/*",
-    "OCCT/src/OpenGl/*",
-    "OCCT/src/QABugs/*",
-    "OCCT/src/Textures/*",
-    "OCCT/src/ViewerTest/*",
     "OCCT/src/XDEDRAW/*",
-    "OCCT/tests/*",
-    "OCCT/tools/*",
+    "OCCT/src/IGESAppli/*",
+    "OCCT/src/IGESDraw/*",
+    "OCCT/src/VrmlData/*",
+    "OCCT/src/Vrml/*",
 ]
 
 [dependencies]
