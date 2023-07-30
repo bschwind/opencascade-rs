@@ -14,7 +14,6 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKG3d");
     println!("cargo:rustc-link-lib=static=TKTopAlgo");
     println!("cargo:rustc-link-lib=static=TKGeomAlgo");
-    println!("cargo:rustc-link-lib=static=TKGeomBase");
     println!("cargo:rustc-link-lib=static=TKBRep");
     println!("cargo:rustc-link-lib=static=TKPrim");
     println!("cargo:rustc-link-lib=static=TKSTEP");
@@ -28,7 +27,6 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKBool");
     println!("cargo:rustc-link-lib=static=TKBO");
     println!("cargo:rustc-link-lib=static=TKOffset");
-    println!("cargo:rustc-link-lib=static=TKV3d");
     println!("cargo:rustc-link-lib=static=TKXSBase");
 
     if is_windows {

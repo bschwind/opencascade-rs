@@ -1,0 +1,4 @@
+FoundationClasses TKernel TKMath
+ModelingData TKG2d TKG3d TKGeomBase TKBRep
+ModelingAlgorithms TKGeomAlgo TKTopAlgo TKPrim TKBO TKBool TKFillet TKOffset TKFeat TKMesh TKShHealing
+DataExchange TKXSBase TKSTEPBase TKSTEPAttr TKSTEP209 TKSTEP TKSTL
