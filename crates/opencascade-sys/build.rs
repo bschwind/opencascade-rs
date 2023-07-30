@@ -27,7 +27,6 @@ fn main() {
     println!("cargo:rustc-link-lib=static=TKBool");
     println!("cargo:rustc-link-lib=static=TKBO");
     println!("cargo:rustc-link-lib=static=TKOffset");
-    println!("cargo:rustc-link-lib=static=TKV3d");
     println!("cargo:rustc-link-lib=static=TKXSBase");
 
     if is_windows {
