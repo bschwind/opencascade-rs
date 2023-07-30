@@ -927,14 +927,7 @@ pub mod ffi {
             triangulation: &Handle_Poly_Triangulation,
         ) -> UniquePtr<Poly_Connect>;
 
-        type StdPrs_ToolTriangulatedShape;
-        #[cxx_name = "construct_unique"]
-        pub fn StdPrs_ToolTriangulatedShape_ctor() -> UniquePtr<StdPrs_ToolTriangulatedShape>;
-        pub fn triangulated_shape_normal(
-            face: &TopoDS_Face,
-            poly_connect: Pin<&mut Poly_Connect>,
-            normals: Pin<&mut TColgp_Array1OfDir>,
-        );
+        pub fn compute_normals(face: &TopoDS_Face, triangulation: &Handle_Poly_Triangulation);
 
         // Edge approximation
         type GCPnts_TangentialDeflection;
