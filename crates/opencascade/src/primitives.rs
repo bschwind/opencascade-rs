@@ -1144,18 +1144,13 @@ impl Mesher {
 
             // Add in the normals.
             // TODO(bschwind) - Use `location` to transform the normals.
-            let mut poly_connect = ffi::Poly_Connect_ctor(&triangulation_handle);
-            let mut normal_array = ffi::TColgp_Array1OfDir_ctor(0, face_point_count);
+            let normal_array = ffi::TColgp_Array1OfDir_ctor(0, face_point_count);
 
-            ffi::triangulated_shape_normal(
-                &face.inner,
-                poly_connect.pin_mut(),
-                normal_array.pin_mut(),
-            );
+            ffi::compute_normals(&face.inner, &triangulation_handle);
 
             // TODO(bschwind) - Why do we start at 1 here?
             for i in 1..(normal_array.Length() as usize) {
-                let normal = ffi::TColgp_Array1OfDir_Value(&normal_array, i as i32);
+                let normal = ffi::Poly_Triangulation_Normal(triangulation, i as i32);
                 normals.push(dvec3(normal.X(), normal.Y(), normal.Z()));
             }
 

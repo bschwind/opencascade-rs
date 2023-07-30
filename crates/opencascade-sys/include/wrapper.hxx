@@ -19,6 +19,7 @@
 #include <BRepGProp_Face.hxx>
 #include <BRepIntCurveSurface_Inter.hxx>
 #include <BRepLib.hxx>
+#include <BRepLib_ToolTriangulatedShape.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
@@ -46,8 +47,8 @@
 #include <STEPControl_Writer.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
-#include <StdPrs_ToolTriangulatedShape.hxx>
 #include <StlAPI_Writer.hxx>
+#include <TColgp_Array1OfDir.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
@@ -329,9 +330,8 @@ inline std::unique_ptr<gp_Pnt2d> Poly_Triangulation_UV(const Poly_Triangulation 
   return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(triangulation.UVNode(index)));
 }
 
-inline void triangulated_shape_normal(const TopoDS_Face &face, Poly_Connect &poly_connect,
-                                      TColgp_Array1OfDir &normals) {
-  StdPrs_ToolTriangulatedShape::Normal(face, poly_connect, normals);
+inline void compute_normals(const TopoDS_Face &face, const Handle(Poly_Triangulation) & triangulation) {
+  BRepLib_ToolTriangulatedShape::ComputeNormals(face, triangulation);
 }
 
 // Shape Properties
