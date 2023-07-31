@@ -37,6 +37,9 @@ fn main() {
 
     if is_windows_gnu {
         build.define("OCC_CONVERT_SIGNALS", "TRUE");
+    }
+
+    if let "windows" = std::env::consts::OS {
         let current = std::env::current_dir().unwrap();
         build.include(current.parent().unwrap());
     } else {
