@@ -11,6 +11,59 @@ use std::{
     path::Path,
 };
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum ShapeType {
+    /// Abstract topological data structure describes a basic entity.
+    Shape,
+
+    /// A zero-dimensional shape corresponding to a point in geometry.
+    Vertex,
+
+    /// A single dimensional shape correspondingto a curve, and bound
+    /// by a vertex at each extremity.
+    Edge,
+
+    /// A sequence of edges connected by their vertices. It can be open
+    /// or closed depending on whether the edges are linked or not.
+    Wire,
+
+    /// Part of a plane (in 2D geometry) or a surface(in 3D geometry)
+    /// bounded by a closed wire. Its geometry is constrained (trimmed)
+    /// by contours.
+    Face,
+
+    /// A set of faces connected by some of the
+    /// edges of their wire boundaries. A shell can be open or closed.
+    Shell,
+
+    /// A part of 3D space bounded by shells.
+    Solid,
+
+    /// A set of solids connected by their faces. This expands
+    /// the notions of Wire and Shell to solids.
+    CompoundSolid,
+
+    /// A group of any of the shapes below.
+    Compound,
+}
+
+impl From<ffi::TopAbs_ShapeEnum> for ShapeType {
+    fn from(shape_enum: ffi::TopAbs_ShapeEnum) -> Self {
+        match shape_enum {
+            ffi::TopAbs_ShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
+            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
+            ffi::TopAbs_ShapeEnum::TopAbs_EDGE => ShapeType::Edge,
+            ffi::TopAbs_ShapeEnum::TopAbs_WIRE => ShapeType::Wire,
+            ffi::TopAbs_ShapeEnum::TopAbs_FACE => ShapeType::Face,
+            ffi::TopAbs_ShapeEnum::TopAbs_SHELL => ShapeType::Shell,
+            ffi::TopAbs_ShapeEnum::TopAbs_SOLID => ShapeType::Solid,
+            ffi::TopAbs_ShapeEnum::TopAbs_COMPSOLID => ShapeType::CompoundSolid,
+            ffi::TopAbs_ShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
+            ffi::TopAbs_ShapeEnum { repr } => panic!("Unexpected shape type: {repr}"),
+        }
+    }
+}
+
 pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
     ffi::new_point(p.x, p.y, p.z)
 }
@@ -865,6 +918,10 @@ impl From<Compound> for Shape {
 }
 
 impl Shape {
+    pub fn shape_type(&self) -> ShapeType {
+        self.inner.ShapeType().into()
+    }
+
     pub fn fillet_edge(&mut self, radius: f64, edge: &Edge) {
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
         make_fillet.pin_mut().add_edge(radius, &edge.inner);
