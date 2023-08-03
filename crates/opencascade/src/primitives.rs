@@ -1,4 +1,5 @@
 use crate::{
+    adhoc::AdHocShape,
     angle::{Angle, ToAngle},
     workplane::Workplane,
     Error,
@@ -914,6 +915,18 @@ impl From<Compound> for Shape {
         let inner = ffi::TopoDS_Shape_to_owned(shape);
 
         Shape { inner }
+    }
+}
+
+impl From<BooleanShape> for Shape {
+    fn from(boolean_shape: BooleanShape) -> Self {
+        boolean_shape.shape
+    }
+}
+
+impl From<AdHocShape> for Shape {
+    fn from(adhoc_shape: AdHocShape) -> Self {
+        adhoc_shape.0
     }
 }
 
