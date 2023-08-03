@@ -54,7 +54,7 @@ pub fn main() {
     top_wire.translate(dvec3(-tx / 2.0, -ty / 2.0, 0.0));
     top_wire.transform(dvec3(0.0, 0.0, height), dvec3(1.0, 0.0, 0.0), angle);
 
-    let mut keycap = Solid::loft([&base, &mid, &top_wire]);
+    let keycap = Solid::loft([&base, &mid, &top_wire]);
 
     let scoop = if convex {
         let scoop = Workplane::yz()

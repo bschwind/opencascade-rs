@@ -13,7 +13,7 @@ pub fn main() {
     top.translate(dvec3(0.0, 0.0, 10.0));
     top.chamfer(1.0);
 
-    let chamfered_box = Solid::loft([&base, &top]).to_shape();
+    let chamfered_box = Solid::loft([&base, &top]);
 
     // Insert the workplane into the chamfered box area so union returns edges
     let handle = Workplane::xy().translated(dvec3(0.0, 0.0, 0.1)).rect(5.0, 5.0);

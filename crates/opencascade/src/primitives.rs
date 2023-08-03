@@ -778,7 +778,7 @@ impl Solid {
         }
     }
 
-    pub fn subtract(&mut self, other: &Solid) -> BooleanShape {
+    pub fn subtract(&self, other: &Solid) -> BooleanShape {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
@@ -982,7 +982,7 @@ impl Shape {
         self.chamfer_edges(distance, self.edges());
     }
 
-    pub fn subtract(&mut self, other: &Solid) -> BooleanShape {
+    pub fn subtract(&self, other: &Solid) -> BooleanShape {
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
         let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, other_inner_shape);
@@ -1005,7 +1005,7 @@ impl Shape {
     }
 
     // TODO(bschwind) - Deduplicate with the above function.
-    pub fn subtract_shape(&mut self, other: &Shape) -> BooleanShape {
+    pub fn subtract_shape(&self, other: &Shape) -> BooleanShape {
         let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
 
         let edge_list = cut_operation.pin_mut().SectionEdges();
