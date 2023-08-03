@@ -9,7 +9,7 @@ use opencascade::{
 
 const KEYCAP_PITCH: f64 = 19.05;
 
-pub fn main() {
+pub fn shape() -> Shape {
     let convex = false;
     let keycap_unit_size_x = 1.0;
     let keycap_unit_size_y = 1.0;
@@ -238,7 +238,7 @@ pub fn main() {
         keycap.chamfer_new_edges(0.2);
     }
 
-    keycap.write_stl("keycap.stl").unwrap();
+    keycap.into()
 }
 
 fn round_digits(num: f64, digits: i32) -> f64 {

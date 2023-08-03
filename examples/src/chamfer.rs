@@ -1,10 +1,10 @@
 use glam::dvec3;
 use opencascade::{
-    primitives::{Direction, Face, Solid},
+    primitives::{Direction, Face, Shape, Solid},
     workplane::Workplane,
 };
 
-pub fn main() {
+pub fn shape() -> Shape {
     // A tapering chamfer from bottom to top 2->1
     let mut base = Workplane::xy().rect(10.0, 10.0);
     base.chamfer(2.0);
@@ -34,5 +34,5 @@ pub fn main() {
     // Can also just chamfer the whole shape with:
     // chamfered_shape.chamfer(0.5);
 
-    chamfered_shape.write_stl("chamfer.stl").unwrap();
+    chamfered_shape.into()
 }

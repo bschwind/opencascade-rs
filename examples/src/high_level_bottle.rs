@@ -1,7 +1,7 @@
 use glam::dvec3;
-use opencascade::primitives::{Edge, Face, Wire};
+use opencascade::primitives::{Edge, Face, Shape, Wire};
 
-pub fn main() {
+pub fn shape() -> Shape {
     let height = 70.0;
     let width = 50.0;
     let thickness = 30.0;
@@ -25,5 +25,5 @@ pub fn main() {
 
     let body = face_profile.extrude(dvec3(0.0, 0.0, height));
 
-    body.write_stl("high_level_bottle.stl").unwrap();
+    body.into()
 }

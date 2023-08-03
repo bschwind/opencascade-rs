@@ -2,12 +2,7 @@ use crate::{
     edge_drawer::{EdgeDrawer, LineBuilder, LineVertex3, RenderedLine},
     surface_drawer::{CadMesh, SurfaceDrawer},
 };
-use glam::{dvec3, vec3, DVec3, Mat4};
-use opencascade::{
-    angle::{RVec, ToAngle},
-    primitives::{Face, IntoShape, Shape, Solid, Wire},
-    workplane::Workplane,
-};
+use glam::{vec3, DVec3, Mat4};
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
@@ -51,7 +46,8 @@ impl GameApp for ViewerApp {
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
         // Model sourced from:
         // https://nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-0
-        let keycap = Shape::read_step("crates/viewer/models/nist_ftc_06.step").unwrap();
+        // let keycap = Shape::read_step("crates/viewer/models/nist_ftc_06.step").unwrap();
+        let keycap = examples::gizmo::shape();
 
         let mesh = keycap.mesh();
         let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
@@ -214,148 +210,6 @@ impl GameApp for ViewerApp {
 
         self.fps_counter.tick();
     }
-}
-
-#[allow(unused)]
-fn cube() -> Shape {
-    let rect = Wire::rect(10.0, 10.0);
-    let face = Face::from_wire(&rect);
-
-    face.extrude(dvec3(0.0, 0.0, 10.0)).into_shape()
-}
-
-#[allow(unused)]
-fn keycap() -> Shape {
-    const KEYCAP_PITCH: f64 = 19.05;
-
-    let convex = false;
-    let keycap_unit_size_x = 1.0;
-    let keycap_unit_size_y = 1.0;
-    let height = 16.0;
-    let angle = 13.0.degrees();
-    let depth: f64 = 2.8;
-    let thickness: f64 = 1.5;
-    let base = 18.2;
-    let top = 13.2;
-    let curve = 1.7;
-    let bottom_fillet = 0.5;
-    let top_fillet = 5.0;
-    let tension = if convex { 0.4 } else { 1.0 };
-
-    let top_diff = base - top;
-
-    let bx = KEYCAP_PITCH * keycap_unit_size_x - (KEYCAP_PITCH - base);
-    let by = KEYCAP_PITCH * keycap_unit_size_y - (KEYCAP_PITCH - base);
-
-    let tx = bx - top_diff;
-    let ty = by - top_diff;
-
-    let mut base = Workplane::xy().rect(bx, by);
-    base.fillet(bottom_fillet);
-
-    let mut mid = Workplane::xy().rect(bx, by);
-    mid.fillet((top_fillet - bottom_fillet) / 3.0);
-    mid.transform(dvec3(0.0, 0.0, height / 4.0), dvec3(1.0, 0.0, 0.0), angle / 4.0);
-
-    // We should use `ConnectEdgesToWires` for `Wire::from_edges`, as it
-    // likely puts these arcs in the order we want.
-    let mut top_wire = Workplane::xy()
-        .sketch()
-        .arc((curve, curve * tension), (0.0, ty / 2.0), (curve, ty - curve * tension))
-        .arc((curve, ty - curve * tension), (tx / 2.0, ty), (tx - curve, ty - curve * tension))
-        .arc((tx - curve, ty - curve * tension), (tx, ty / 2.0), (tx - curve, curve * tension))
-        .arc((tx - curve, curve * tension), (tx / 2.0, 0.0), (curve, curve * tension))
-        .wire();
-
-    top_wire.fillet(top_fillet);
-    top_wire.translate(dvec3(-tx / 2.0, -ty / 2.0, 0.0));
-    top_wire.transform(dvec3(0.0, 0.0, height), dvec3(1.0, 0.0, 0.0), angle);
-
-    let mut keycap = Solid::loft([&base, &mid, &top_wire]);
-
-    let scoop = if convex {
-        let scoop = Workplane::yz()
-            .transformed(dvec3(0.0, height - 2.1, -bx / 2.0), RVec::z(angle))
-            .sketch()
-            .move_to(-by / 2.0, -1.0)
-            .three_point_arc((0.0, 2.0), (by / 2.0, -1.0))
-            .line_to(by / 2.0, 10.0)
-            .line_to(-by / 2.0, 10.0)
-            .close();
-
-        let scoop = Face::from_wire(&scoop);
-        scoop.extrude(dvec3(bx, 0.0, 0.0))
-    } else {
-        let scoop_right = Workplane::yz()
-            .transformed(dvec3(0.0, height, bx / 2.0), RVec::z(angle))
-            .sketch()
-            .move_to(-by / 2.0 + 2.0, 0.0)
-            .three_point_arc((0.0, (-depth + 1.5).min(-0.1)), (by / 2.0 - 2.0, 0.0))
-            .line_to(by / 2.0, height)
-            .line_to(-by / 2.0, height)
-            .close();
-
-        let scoop_mid = Workplane::yz()
-            .transformed(dvec3(0.0, height, 0.0), RVec::z(angle))
-            .sketch()
-            .move_to(-by / 2.0 - 2.0, -0.5)
-            .three_point_arc((0.0, -depth), (by / 2.0 + 2.0, -0.5))
-            .line_to(by / 2.0, height)
-            .line_to(-by / 2.0, height)
-            .close();
-
-        let scoop_left = Workplane::yz()
-            .transformed(dvec3(0.0, height, -bx / 2.0), RVec::z(angle))
-            .sketch()
-            .move_to(-by / 2.0 + 2.0, 0.0)
-            .three_point_arc((0.0, (-depth + 1.5).min(-0.1)), (by / 2.0 - 2.0, 0.0))
-            .line_to(by / 2.0, height)
-            .line_to(-by / 2.0, height)
-            .close();
-
-        Solid::loft([&scoop_right, &scoop_mid, &scoop_left])
-    };
-
-    let mut keycap = keycap.subtract(&scoop);
-    keycap.fillet_new_edges(0.6);
-
-    let shell_bottom = Workplane::xy().rect(bx - thickness * 2.0, by - thickness * 2.0);
-
-    let shell_mid = Workplane::xy()
-        .translated(dvec3(0.0, 0.0, height / 4.0))
-        .rect(bx - thickness * 3.0, by - thickness * 3.0);
-
-    let shell_top = Workplane::xy()
-        .transformed(dvec3(0.0, 0.0, height - height / 4.0 - 4.5), RVec::x(angle))
-        .rect(tx - thickness * 2.0 + 0.5, ty - thickness * 2.0 + 0.5);
-
-    let shell: Shape = Solid::loft([&shell_bottom, &shell_mid, &shell_top]).into();
-
-    let keycap = keycap.subtract(&shell);
-
-    keycap.shape
-}
-
-#[allow(unused)]
-fn gizmo() -> Shape {
-    let arrow_length = 10.0;
-    let cone_height = 2.0;
-    let shaft_length = arrow_length - cone_height;
-
-    let arrow = |workplane: Workplane| {
-        let shaft =
-            workplane.circle(0.0, 0.0, 0.1).to_face().extrude(workplane.normal() * arrow_length);
-        let cone_base =
-            workplane.translated(DVec3::new(0.0, 0.0, shaft_length)).circle(0.0, 0.0, 1.0);
-        let cone_top =
-            workplane.translated(DVec3::new(0.0, 0.0, arrow_length)).circle(0.0, 0.0, 0.05);
-        let cone = Solid::loft([&cone_base, &cone_top].into_iter());
-        let arrow_shape = shaft.union(&cone);
-
-        arrow_shape.shape
-    };
-
-    arrow(Workplane::yz()).union(&arrow(Workplane::xz())).union(&arrow(Workplane::xy())).shape
 }
 
 fn main() {

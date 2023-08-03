@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "examples",
     "crates/opencascade",
     "crates/opencascade-sys",
     "crates/viewer",
