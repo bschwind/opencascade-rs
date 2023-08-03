@@ -32,7 +32,7 @@ pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
 }
 
 pub struct Vertex {
-    _inner: UniquePtr<ffi::TopoDS_Vertex>,
+    inner: UniquePtr<ffi::TopoDS_Vertex>,
 }
 
 // You'll see several of these `impl AsRef` blocks for the various primitive
@@ -57,7 +57,7 @@ impl Vertex {
         let vertex = make_vertex.pin_mut().Vertex();
         let inner = ffi::TopoDS_Vertex_to_owned(vertex);
 
-        Self { _inner: inner }
+        Self { inner }
     }
 }
 
@@ -239,7 +239,7 @@ impl Wire {
 
     pub fn fillet(&mut self, radius: f64) {
         // Create a face from this wire
-        let mut face = Face::from_wire(self);
+        let mut face: Face = Face::from_wire(self);
         face.fillet(radius);
         let wire = ffi::outer_wire(&face.inner);
 
@@ -807,6 +807,60 @@ pub struct Shape {
 impl AsRef<Shape> for Shape {
     fn as_ref(&self) -> &Shape {
         self
+    }
+}
+
+impl From<Vertex> for Shape {
+    fn from(vertex: Vertex) -> Self {
+        let shape = ffi::cast_vertex_to_shape(&vertex.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Edge> for Shape {
+    fn from(edge: Edge) -> Self {
+        let shape = ffi::cast_edge_to_shape(&edge.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Wire> for Shape {
+    fn from(wire: Wire) -> Self {
+        let shape = ffi::cast_wire_to_shape(&wire.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Face> for Shape {
+    fn from(face: Face) -> Self {
+        let shape = ffi::cast_face_to_shape(&face.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Solid> for Shape {
+    fn from(solid: Solid) -> Self {
+        let shape = ffi::cast_solid_to_shape(&solid.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Compound> for Shape {
+    fn from(compound: Compound) -> Self {
+        let shape = ffi::cast_compound_to_shape(&compound.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
     }
 }
 
