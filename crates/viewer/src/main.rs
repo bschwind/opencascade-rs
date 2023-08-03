@@ -329,7 +329,7 @@ fn keycap() -> Shape {
         .transformed(dvec3(0.0, 0.0, height - height / 4.0 - 4.5), RVec::x(angle))
         .rect(tx - thickness * 2.0 + 0.5, ty - thickness * 2.0 + 0.5);
 
-    let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top]);
+    let shell: Shape = Solid::loft([&shell_bottom, &shell_mid, &shell_top]).into();
 
     let keycap = keycap.subtract(&shell);
 
@@ -355,10 +355,7 @@ fn gizmo() -> Shape {
         arrow_shape.shape
     };
 
-    arrow(Workplane::yz())
-        .union_shape(&arrow(Workplane::xz()))
-        .union_shape(&arrow(Workplane::xy()))
-        .shape
+    arrow(Workplane::yz()).union(&arrow(Workplane::xz())).union(&arrow(Workplane::xy())).shape
 }
 
 fn main() {

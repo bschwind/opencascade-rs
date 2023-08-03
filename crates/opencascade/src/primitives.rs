@@ -982,30 +982,7 @@ impl Shape {
         self.chamfer_edges(distance, self.edges());
     }
 
-    pub fn subtract(&self, other: &Solid) -> BooleanShape {
-        let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
-
-        let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, other_inner_shape);
-
-        let edge_list = cut_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
-
-        let mut new_edges = vec![];
-        for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
-            let inner = ffi::TopoDS_Edge_to_owned(edge);
-            let edge = Edge { inner };
-            new_edges.push(edge);
-        }
-
-        let cut_shape = cut_operation.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(cut_shape);
-
-        BooleanShape { shape: Shape { inner }, new_edges }
-    }
-
-    // TODO(bschwind) - Deduplicate with the above function.
-    pub fn subtract_shape(&self, other: &Shape) -> BooleanShape {
+    pub fn subtract(&self, other: &Shape) -> BooleanShape {
         let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
 
         let edge_list = cut_operation.pin_mut().SectionEdges();
@@ -1059,29 +1036,7 @@ impl Shape {
         Ok(())
     }
 
-    pub fn union(&self, other: &Solid) -> BooleanShape {
-        let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
-
-        let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, other_inner_shape);
-        let edge_list = fuse_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
-
-        let mut new_edges = vec![];
-        for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
-            let inner = ffi::TopoDS_Edge_to_owned(edge);
-            let edge = Edge { inner };
-            new_edges.push(edge);
-        }
-
-        let fuse_shape = fuse_operation.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(fuse_shape);
-
-        BooleanShape { shape: Shape { inner }, new_edges }
-    }
-
-    // TODO(bschwind) - Unify this later
-    pub fn union_shape(&self, other: &Shape) -> BooleanShape {
+    pub fn union(&self, other: &Shape) -> BooleanShape {
         let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);

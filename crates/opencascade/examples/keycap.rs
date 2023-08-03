@@ -3,7 +3,7 @@
 use glam::dvec3;
 use opencascade::{
     angle::{RVec, ToAngle},
-    primitives::{Direction, Face, Solid},
+    primitives::{Direction, Face, Shape, Solid},
     workplane::Workplane,
 };
 
@@ -112,17 +112,12 @@ pub fn main() {
         .transformed(dvec3(0.0, 0.0, (height / 4.0) + height - height / 4.0 - 4.5), RVec::x(angle))
         .rect(tx - thickness * 2.0 + 0.5, ty - thickness * 2.0 + 0.5);
 
-    let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top]);
+    let shell: Shape = Solid::loft([&shell_bottom, &shell_mid, &shell_top]).into();
 
     let mut keycap = keycap.subtract(&shell);
 
-    let temp_face = shell
-        .to_shape()
-        .faces()
-        .farthest(Direction::PosZ)
-        .workplane()
-        .rect(bx * 2.0, by * 2.0)
-        .to_face();
+    let temp_face =
+        shell.faces().farthest(Direction::PosZ).workplane().rect(bx * 2.0, by * 2.0).to_face();
 
     let mut stem_points = vec![];
     let mut ribh_points = vec![];
@@ -186,7 +181,7 @@ pub fn main() {
 
         let post = circle.extrude_to_face(&keycap, &temp_face);
 
-        keycap = keycap.union_shape(&post);
+        keycap = keycap.union(&post);
     }
 
     for (x, y) in ribh_points {
@@ -194,7 +189,7 @@ pub fn main() {
 
         let rib = rect.extrude_to_face(&keycap, &temp_face);
 
-        keycap = keycap.union_shape(&rib);
+        keycap = keycap.union(&rib);
     }
 
     for (x, y) in ribv_points {
@@ -202,7 +197,7 @@ pub fn main() {
 
         let rib = rect.extrude_to_face(&keycap, &temp_face);
 
-        keycap = keycap.union_shape(&rib);
+        keycap = keycap.union(&rib);
     }
 
     // TODO(bschwind) - This should probably be done after every union...
@@ -227,7 +222,7 @@ pub fn main() {
         let (face_target, _) = faces.get(0).expect("We should have a face to extrude to");
         let post = circle.extrude_to_face(&keycap, face_target);
 
-        keycap = keycap.union_shape(&post);
+        keycap = keycap.union(&post);
     }
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));
@@ -239,7 +234,7 @@ pub fn main() {
         cross.set_global_translation(dvec3(x, y, 0.0));
         let cross = cross.extrude(dvec3(0.0, 0.0, 4.6));
 
-        keycap = keycap.subtract_shape(&cross);
+        keycap = keycap.subtract(&cross);
         keycap.chamfer_new_edges(0.2);
     }
 
