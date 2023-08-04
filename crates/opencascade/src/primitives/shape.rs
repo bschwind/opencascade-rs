@@ -324,4 +324,9 @@ impl Shape {
 
         Self { inner }
     }
+
+    pub fn offset_surface(self, offset: f64) -> Self {
+        let faces_to_remove: [Face; 0] = [];
+        self.hollow(offset, faces_to_remove)
+    }
 }
