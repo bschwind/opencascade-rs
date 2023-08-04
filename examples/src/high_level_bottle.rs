@@ -1,7 +1,7 @@
 use glam::dvec3;
 use opencascade::{
     adhoc::AdHocShape,
-    primitives::{Edge, Face, Shape, Wire},
+    primitives::{Direction::PosZ, Edge, Face, Shape, Wire},
 };
 
 pub fn shape() -> Shape {
@@ -37,5 +37,7 @@ pub fn shape() -> Shape {
     let mut neck = AdHocShape::make_cylinder(dvec3(0.0, 0.0, height), neck_radius, neck_height);
     neck.union(&body);
 
-    neck.0
+    let bottle = neck.0;
+    let top_face = bottle.faces().farthest(PosZ);
+    bottle.hollow(-thickness / 50.0, [top_face])
 }
