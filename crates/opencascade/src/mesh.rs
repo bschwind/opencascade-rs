@@ -1,7 +1,7 @@
 use crate::primitives::{FaceOrientation, Shape};
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
-use opencascade_sys::ffi::{self};
+use opencascade_sys::ffi;
 
 #[derive(Debug)]
 pub struct Mesh {

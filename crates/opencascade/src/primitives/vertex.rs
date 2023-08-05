@@ -1,7 +1,7 @@
 use crate::primitives::make_point;
 use cxx::UniquePtr;
 use glam::DVec3;
-use opencascade_sys::ffi::{self};
+use opencascade_sys::ffi;
 
 pub struct Vertex {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Vertex>,

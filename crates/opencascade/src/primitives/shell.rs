@@ -1,5 +1,5 @@
 use cxx::UniquePtr;
-use opencascade_sys::ffi::{self};
+use opencascade_sys::ffi;
 
 pub struct Shell {
     pub(crate) _inner: UniquePtr<ffi::TopoDS_Shell>,

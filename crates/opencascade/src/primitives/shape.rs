@@ -9,7 +9,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::ffi::{self, IFSelect_ReturnStatus};
+use opencascade_sys::ffi;
 use std::path::Path;
 
 pub struct Shape {
@@ -178,7 +178,7 @@ impl Shape {
 
         let status = ffi::read_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
 
-        if status != IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::StepReadFailed);
         }
 
@@ -194,13 +194,13 @@ impl Shape {
 
         let status = ffi::transfer_shape(writer.pin_mut(), &self.inner);
 
-        if status != IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);
         }
 
         let status = ffi::write_step(writer.pin_mut(), path.as_ref().to_string_lossy().to_string());
 
-        if status != IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);
         }
 

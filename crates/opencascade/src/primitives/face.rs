@@ -1,11 +1,11 @@
 use crate::{
     angle::Angle,
-    primitives::{make_axis_1, make_point, make_vec, EdgeIterator, Shape, Solid, Wire},
+    primitives::{make_axis_1, make_point, make_vec, EdgeIterator, Shape, Solid, Surface, Wire},
     workplane::Workplane,
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::ffi::{self};
+use opencascade_sys::ffi;
 
 pub struct Face {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Face>,
@@ -18,14 +18,26 @@ impl AsRef<Face> for Face {
 }
 
 impl Face {
-    pub fn from_wire(wire: &Wire) -> Self {
-        let only_plane = false;
-        let make_face = ffi::BRepBuilderAPI_MakeFace_wire(&wire.inner, only_plane);
-
+    fn from_make_face(make_face: UniquePtr<ffi::BRepBuilderAPI_MakeFace>) -> Self {
         let face = make_face.Face();
         let inner = ffi::TopoDS_Face_to_owned(face);
 
         Self { inner }
+    }
+
+    pub fn from_wire(wire: &Wire) -> Self {
+        let only_plane = false;
+        let make_face = ffi::BRepBuilderAPI_MakeFace_wire(&wire.inner, only_plane);
+
+        Self::from_make_face(make_face)
+    }
+
+    pub fn from_surface(surface: &Surface) -> Self {
+        const EDGE_TOLERANCE: f64 = 0.0001;
+
+        let make_face = ffi::BRepBuilderAPI_MakeFace_surface(&surface.inner, EDGE_TOLERANCE);
+
+        Self::from_make_face(make_face)
     }
 
     pub fn extrude(&self, dir: DVec3) -> Solid {

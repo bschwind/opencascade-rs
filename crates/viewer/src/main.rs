@@ -42,6 +42,7 @@ struct ViewerApp {
 
 #[derive(Parser)]
 enum Example {
+    Airfoil,
     BoxShape,
     Chamfer,
     Gizmo,
@@ -54,6 +55,7 @@ enum Example {
 impl Example {
     pub fn shape(self) -> Shape {
         match self {
+            Example::Airfoil => examples::airfoil::shape(),
             Example::BoxShape => examples::box_shape::shape(),
             Example::Chamfer => examples::chamfer::shape(),
             Example::Gizmo => examples::gizmo::shape(),

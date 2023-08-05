@@ -1,7 +1,7 @@
 use crate::primitives::{make_axis_2, make_point};
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::ffi::{self};
+use opencascade_sys::ffi;
 
 pub struct Edge {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Edge>,
@@ -14,26 +14,27 @@ impl AsRef<Edge> for Edge {
 }
 
 impl Edge {
-    pub fn segment(p1: DVec3, p2: DVec3) -> Self {
-        let mut make_edge =
-            ffi::BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt(&make_point(p1), &make_point(p2));
+    fn from_make_edge(mut make_edge: UniquePtr<ffi::BRepBuilderAPI_MakeEdge>) -> Self {
         let edge = make_edge.pin_mut().Edge();
         let inner = ffi::TopoDS_Edge_to_owned(edge);
 
         Self { inner }
     }
 
+    pub fn segment(p1: DVec3, p2: DVec3) -> Self {
+        let make_edge =
+            ffi::BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt(&make_point(p1), &make_point(p2));
+
+        Self::from_make_edge(make_edge)
+    }
+
     pub fn circle(center: DVec3, normal: DVec3, radius: f64) -> Self {
         let axis = make_axis_2(center, normal);
 
         let make_circle = ffi::gp_Circ_ctor(&axis, radius);
+        let make_edge = ffi::BRepBuilderAPI_MakeEdge_circle(&make_circle);
 
-        let mut make_edge = ffi::BRepBuilderAPI_MakeEdge_circle(&make_circle);
-
-        let edge = make_edge.pin_mut().Edge();
-        let inner = ffi::TopoDS_Edge_to_owned(edge);
-
-        Self { inner }
+        Self::from_make_edge(make_edge)
     }
 
     pub fn ellipse() {}
@@ -47,16 +48,13 @@ impl Edge {
             &make_point(p3),
         );
 
-        let mut make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+        let make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
             &ffi::new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&ffi::GC_MakeArcOfCircle_Value(
                 &make_arc,
             )),
         );
 
-        let edge = make_edge.pin_mut().Edge();
-        let inner = ffi::TopoDS_Edge_to_owned(edge);
-
-        Self { inner }
+        Self::from_make_edge(make_edge)
     }
 
     pub fn start_point(&self) -> DVec3 {

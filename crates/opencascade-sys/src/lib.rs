@@ -57,6 +57,7 @@ pub mod ffi {
         type HandleGeomCurve;
         type HandleGeomTrimmedCurve;
         type HandleGeomSurface;
+        type HandleGeomBezierSurface;
         type HandleGeomPlane;
         type HandleGeom2d_Curve;
         type HandleGeom2d_Ellipse;
@@ -79,6 +80,7 @@ pub mod ffi {
         pub fn IsNull(self: &HandleGeomCurve) -> bool;
         pub fn IsNull(self: &HandleGeomTrimmedCurve) -> bool;
         pub fn IsNull(self: &HandleGeomSurface) -> bool;
+        pub fn IsNull(self: &HandleGeomBezierSurface) -> bool;
         pub fn IsNull(self: &HandleGeomPlane) -> bool;
         pub fn IsNull(self: &HandleGeom2d_Curve) -> bool;
         pub fn IsNull(self: &HandleGeom2d_Ellipse) -> bool;
@@ -161,9 +163,20 @@ pub mod ffi {
             index: i32,
         ) -> UniquePtr<gp_Dir>;
 
+        type TColgp_Array2OfPnt;
+        #[cxx_name = "construct_unique"]
+        pub fn TColgp_Array2OfPnt_ctor(
+            row_lower: i32,
+            row_upper: i32,
+            column_lower: i32,
+            column_upper: i32,
+        ) -> UniquePtr<TColgp_Array2OfPnt>;
+        pub fn SetValue(self: Pin<&mut TColgp_Array2OfPnt>, row: i32, column: i32, item: &gp_Pnt);
+
         // Geometry
         type Geom_TrimmedCurve;
         type Geom_CylindricalSurface;
+        type Geom_BezierSurface;
         type Geom2d_Ellipse;
         type Geom2d_Curve;
         type Geom2d_TrimmedCurve;
@@ -176,6 +189,13 @@ pub mod ffi {
         ) -> UniquePtr<HandleGeom_CylindricalSurface>;
         pub fn cylinder_to_surface(
             cylinder_handle: &HandleGeom_CylindricalSurface,
+        ) -> UniquePtr<HandleGeomSurface>;
+
+        pub fn Geom_BezierSurface_ctor(
+            poles: &TColgp_Array2OfPnt,
+        ) -> UniquePtr<HandleGeomBezierSurface>;
+        pub fn bezier_to_surface(
+            bezier_handle: &HandleGeomBezierSurface,
         ) -> UniquePtr<HandleGeomSurface>;
 
         pub fn Geom2d_Ellipse_ctor(
@@ -423,6 +443,11 @@ pub mod ffi {
         pub fn BRepBuilderAPI_MakeFace_wire(
             wire: &TopoDS_Wire,
             only_plane: bool,
+        ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
+        #[cxx_name = "construct_unique"]
+        pub fn BRepBuilderAPI_MakeFace_surface(
+            surface: &HandleGeomSurface,
+            edge_tolerance: f64,
         ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
 
         pub fn Face(self: &BRepBuilderAPI_MakeFace) -> &TopoDS_Face;
