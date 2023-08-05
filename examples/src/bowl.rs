@@ -1,10 +1,10 @@
 use glam::dvec3;
 use opencascade::{
-    primitives::{self, Direction, Solid},
+    primitives::{Direction, Shape, Solid},
     workplane::Workplane,
 };
 
-pub fn main() {
+pub fn shape() -> Shape {
     let bot_rad: f64 = 30.0;
     let top_rad: f64 = 40.0;
     let height: f64 = 30.0;
@@ -14,16 +14,16 @@ pub fn main() {
 
     // inner ( shell does not exist yest)
     let inner = bowly_shape(bot_rad - thickness, top_rad - thickness, height, thickness);
-    (loft, _) = loft.subtract_shape(&inner);
+    loft = loft.subtract(&inner).into();
 
     // rouind out the top
     let top_side = loft.faces().farthest(Direction::PosZ).edges();
     loft.fillet_edges(thickness / 2.0, top_side);
 
-    loft.write_stl("bowl.stl").unwrap();
+    loft
 }
 
-fn bowly_shape(bot_rad: f64, top_rad: f64, height: f64, offset: f64) -> primitives::Shape {
+fn bowly_shape(bot_rad: f64, top_rad: f64, height: f64, offset: f64) -> Shape {
     let bottom = Workplane::xy().circle(0.0, 0.0, bot_rad);
     let mut top = Workplane::xy().circle(0.0, 0.0, top_rad);
     top.translate(dvec3(0.0, 0.0, height));

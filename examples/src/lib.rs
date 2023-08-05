@@ -1,5 +1,7 @@
+pub mod bowl;
 pub mod box_shape;
 pub mod chamfer;
+pub mod flywheel;
 pub mod gizmo;
 pub mod high_level_bottle;
 pub mod keyboard_case;

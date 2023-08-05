@@ -47,7 +47,7 @@ impl GameApp for ViewerApp {
         // Model sourced from:
         // https://nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-0
         // let keycap = Shape::read_step("crates/viewer/models/nist_ftc_06.step").unwrap();
-        let keycap = examples::gizmo::shape();
+        let keycap = examples::flywheel::shape();
 
         let mesh = keycap.mesh();
         let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());

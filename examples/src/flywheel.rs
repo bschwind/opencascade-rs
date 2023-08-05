@@ -1,7 +1,7 @@
 use glam::dvec3;
 use opencascade::{angle::Angle, primitives::Shape, workplane::Workplane};
 
-pub fn main() {
+pub fn shape() -> Shape {
     let outer: f64 = 30.0;
     let height: f64 = 8.0;
     let thickness: f64 = 8.0;
@@ -10,14 +10,14 @@ pub fn main() {
 
     let ring = rim(outer, thickness, height);
     let sp = spokes(outer - thickness / 2.0, thickness / 2.0, spoke_count);
-    let (mut fly, smooth) = ring.union_shape(&sp);
-    fly.fillet_edges(1.0, smooth);
+    let mut fly = ring.union(&sp);
+    fly.fillet_new_edges(1.0);
 
     let the_hub = hub(hub_outer, thickness);
-    let (mut fly, hub_con) = fly.union_shape(&the_hub);
-    fly.fillet_edges(1.0, hub_con);
+    let mut fly = fly.union(&the_hub);
+    fly.fillet_new_edges(1.0);
 
-    fly.write_stl("flywheel.stl").unwrap();
+    fly.into()
 }
 
 fn rim(outer: f64, thickness: f64, height: f64) -> Shape {
@@ -25,7 +25,7 @@ fn rim(outer: f64, thickness: f64, height: f64) -> Shape {
     let mut ring = outer_wire.to_face().extrude(dvec3(0.0, 0.0, height)).to_shape();
     let inner_wire = Workplane::xy().circle(0.0, 0.0, outer - thickness / 2.0);
     let inner_ring = inner_wire.to_face().extrude(dvec3(0.0, 0.0, height)).to_shape();
-    (ring, _) = ring.subtract_shape(&inner_ring);
+    ring = ring.subtract(&inner_ring).into();
     ring.chamfer(0.1);
     ring
 }
@@ -51,7 +51,7 @@ fn spokes(length: f64, thickness: f64, count: usize) -> Shape {
     let mut first_s = spoke(length, thickness, 0.0);
     for i in 1..count {
         let s = spoke(length, thickness, incr * i as f64);
-        (first_s, _) = first_s.union_shape(&s);
+        first_s = first_s.union(&s).into();
     }
     first_s
 }
