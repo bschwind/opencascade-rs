@@ -6,7 +6,73 @@ use crate::{
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi::{self, IFSelect_ReturnStatus};
-use std::path::Path;
+use std::{
+    ops::{Deref, DerefMut},
+    path::Path,
+};
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum ShapeType {
+    /// Abstract topological data structure describes a basic entity.
+    Shape,
+
+    /// A zero-dimensional shape corresponding to a point in geometry.
+    Vertex,
+
+    /// A single dimensional shape correspondingto a curve, and bound
+    /// by a vertex at each extremity.
+    Edge,
+
+    /// A sequence of edges connected by their vertices. It can be open
+    /// or closed depending on whether the edges are linked or not.
+    Wire,
+
+    /// Part of a plane (in 2D geometry) or a surface(in 3D geometry)
+    /// bounded by a closed wire. Its geometry is constrained (trimmed)
+    /// by contours.
+    Face,
+
+    /// A set of faces connected by some of the
+    /// edges of their wire boundaries. A shell can be open or closed.
+    Shell,
+
+    /// A part of 3D space bounded by shells.
+    Solid,
+
+    /// A set of solids connected by their faces. This expands
+    /// the notions of Wire and Shell to solids.
+    CompoundSolid,
+
+    /// A group of any of the shapes below.
+    Compound,
+}
+
+impl From<ffi::TopAbs_ShapeEnum> for ShapeType {
+    fn from(shape_enum: ffi::TopAbs_ShapeEnum) -> Self {
+        match shape_enum {
+            ffi::TopAbs_ShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
+            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
+            ffi::TopAbs_ShapeEnum::TopAbs_EDGE => ShapeType::Edge,
+            ffi::TopAbs_ShapeEnum::TopAbs_WIRE => ShapeType::Wire,
+            ffi::TopAbs_ShapeEnum::TopAbs_FACE => ShapeType::Face,
+            ffi::TopAbs_ShapeEnum::TopAbs_SHELL => ShapeType::Shell,
+            ffi::TopAbs_ShapeEnum::TopAbs_SOLID => ShapeType::Solid,
+            ffi::TopAbs_ShapeEnum::TopAbs_COMPSOLID => ShapeType::CompoundSolid,
+            ffi::TopAbs_ShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
+            ffi::TopAbs_ShapeEnum { repr } => panic!("Unexpected shape type: {repr}"),
+        }
+    }
+}
+
+pub trait IntoShape {
+    fn into_shape(self) -> Shape;
+}
+
+impl<T: Into<Shape>> IntoShape for T {
+    fn into_shape(self) -> Shape {
+        self.into()
+    }
+}
 
 pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
     ffi::new_point(p.x, p.y, p.z)
@@ -29,7 +95,7 @@ pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
 }
 
 pub struct Vertex {
-    _inner: UniquePtr<ffi::TopoDS_Vertex>,
+    inner: UniquePtr<ffi::TopoDS_Vertex>,
 }
 
 // You'll see several of these `impl AsRef` blocks for the various primitive
@@ -54,7 +120,7 @@ impl Vertex {
         let vertex = make_vertex.pin_mut().Vertex();
         let inner = ffi::TopoDS_Vertex_to_owned(vertex);
 
-        Self { _inner: inner }
+        Self { inner }
     }
 }
 
@@ -236,7 +302,7 @@ impl Wire {
 
     pub fn fillet(&mut self, radius: f64) {
         // Create a face from this wire
-        let mut face = Face::from_wire(self);
+        let mut face: Face = Face::from_wire(self);
         face.fillet(radius);
         let wire = ffi::outer_wire(&face.inner);
 
@@ -285,13 +351,6 @@ impl Wire {
         let inner = ffi::TopoDS_Face_to_owned(face);
 
         Face { inner }
-    }
-
-    pub fn to_shape(self) -> Shape {
-        let inner_shape = ffi::cast_wire_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner_shape);
-
-        Shape { inner }
     }
 
     // Create a closure-based API
@@ -661,13 +720,6 @@ impl AsRef<Solid> for Solid {
 }
 
 impl Solid {
-    pub fn to_shape(self) -> Shape {
-        let inner_shape = ffi::cast_solid_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner_shape);
-
-        Shape { inner }
-    }
-
     // TODO(bschwind) - Do some cool stuff from this link:
     // https://neweopencascade.wordpress.com/2018/10/17/lets-talk-about-fillets/
     // Key takeaway: Use the `SectionEdges` function to retrieve edges that were
@@ -722,7 +774,7 @@ impl Solid {
         }
     }
 
-    pub fn subtract(&mut self, other: &Solid) -> (Shape, Vec<Edge>) {
+    pub fn subtract(&self, other: &Solid) -> BooleanShape {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
@@ -731,21 +783,21 @@ impl Solid {
         let edge_list = cut_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let cut_shape = cut_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(cut_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 
-    pub fn union(&self, other: &Solid) -> (Shape, Vec<Edge>) {
+    pub fn union(&self, other: &Solid) -> BooleanShape {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
@@ -753,18 +805,18 @@ impl Solid {
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(fuse_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 }
 
@@ -788,13 +840,6 @@ impl Compound {
 
         shape
     }
-
-    pub fn to_shape(self) -> Shape {
-        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner_shape);
-
-        Shape { inner }
-    }
 }
 
 pub struct Shape {
@@ -807,7 +852,65 @@ impl AsRef<Shape> for Shape {
     }
 }
 
+impl From<Vertex> for Shape {
+    fn from(vertex: Vertex) -> Self {
+        let shape = ffi::cast_vertex_to_shape(&vertex.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Edge> for Shape {
+    fn from(edge: Edge) -> Self {
+        let shape = ffi::cast_edge_to_shape(&edge.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Wire> for Shape {
+    fn from(wire: Wire) -> Self {
+        let shape = ffi::cast_wire_to_shape(&wire.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Face> for Shape {
+    fn from(face: Face) -> Self {
+        let shape = ffi::cast_face_to_shape(&face.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Solid> for Shape {
+    fn from(solid: Solid) -> Self {
+        let shape = ffi::cast_solid_to_shape(&solid.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
+impl From<Compound> for Shape {
+    fn from(compound: Compound) -> Self {
+        let shape = ffi::cast_compound_to_shape(&compound.inner);
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Shape { inner }
+    }
+}
+
 impl Shape {
+    pub fn shape_type(&self) -> ShapeType {
+        self.inner.ShapeType().into()
+    }
+
     pub fn fillet_edge(&mut self, radius: f64, edge: &Edge) {
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
         make_fillet.pin_mut().add_edge(radius, &edge.inner);
@@ -868,47 +971,24 @@ impl Shape {
         self.chamfer_edges(distance, self.edges());
     }
 
-    pub fn subtract(&mut self, other: &Solid) -> (Shape, Vec<Edge>) {
-        let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
-
-        let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, other_inner_shape);
-
-        let edge_list = cut_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
-
-        let mut edges = vec![];
-        for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
-            let inner = ffi::TopoDS_Edge_to_owned(edge);
-            let edge = Edge { inner };
-            edges.push(edge);
-        }
-
-        let cut_shape = cut_operation.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(cut_shape);
-
-        (Shape { inner }, edges)
-    }
-
-    // TODO(bschwind) - Deduplicate with the above function.
-    pub fn subtract_shape(&mut self, other: &Shape) -> (Shape, Vec<Edge>) {
+    pub fn subtract(&self, other: &Shape) -> BooleanShape {
         let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
 
         let edge_list = cut_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let cut_shape = cut_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(cut_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 
     pub fn read_step(path: impl AsRef<Path>) -> Result<Self, Error> {
@@ -945,45 +1025,23 @@ impl Shape {
         Ok(())
     }
 
-    pub fn union(&self, other: &Solid) -> (Shape, Vec<Edge>) {
-        let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
-
-        let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, other_inner_shape);
-        let edge_list = fuse_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
-
-        let mut edges = vec![];
-        for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
-            let inner = ffi::TopoDS_Edge_to_owned(edge);
-            let edge = Edge { inner };
-            edges.push(edge);
-        }
-
-        let fuse_shape = fuse_operation.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(fuse_shape);
-
-        (Shape { inner }, edges)
-    }
-
-    // TODO(bschwind) - Unify this later
-    pub fn union_shape(&self, other: &Shape) -> (Shape, Vec<Edge>) {
+    pub fn union(&self, other: &Shape) -> BooleanShape {
         let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
-        let mut edges = vec![];
+        let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
             let inner = ffi::TopoDS_Edge_to_owned(edge);
             let edge = Edge { inner };
-            edges.push(edge);
+            new_edges.push(edge);
         }
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
         let inner = ffi::TopoDS_Shape_to_owned(fuse_shape);
 
-        (Shape { inner }, edges)
+        BooleanShape { shape: Shape { inner }, new_edges }
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
@@ -1063,6 +1121,41 @@ impl Shape {
         }
 
         results
+    }
+}
+
+/// The result of running a boolean operation (union, subtraction, intersection)
+/// on two shapes.
+pub struct BooleanShape {
+    pub shape: Shape,
+    pub new_edges: Vec<Edge>,
+}
+
+impl Deref for BooleanShape {
+    type Target = Shape;
+
+    fn deref(&self) -> &Self::Target {
+        &self.shape
+    }
+}
+
+impl DerefMut for BooleanShape {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.shape
+    }
+}
+
+impl BooleanShape {
+    pub fn new_edges(&self) -> impl Iterator<Item = &Edge> {
+        self.new_edges.iter()
+    }
+
+    pub fn fillet_new_edges(&mut self, radius: f64) {
+        self.shape.fillet_edges(radius, &self.new_edges);
+    }
+
+    pub fn chamfer_new_edges(&mut self, distance: f64) {
+        self.shape.chamfer_edges(distance, &self.new_edges);
     }
 }
 

@@ -277,6 +277,8 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Face_ctor() -> UniquePtr<TopoDS_Face>;
 
+        pub fn cast_vertex_to_shape(wire: &TopoDS_Vertex) -> &TopoDS_Shape;
+        pub fn cast_edge_to_shape(wire: &TopoDS_Edge) -> &TopoDS_Shape;
         pub fn cast_wire_to_shape(wire: &TopoDS_Wire) -> &TopoDS_Shape;
         pub fn cast_face_to_shape(wire: &TopoDS_Face) -> &TopoDS_Shape;
         pub fn cast_solid_to_shape(wire: &TopoDS_Solid) -> &TopoDS_Shape;

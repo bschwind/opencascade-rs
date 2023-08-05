@@ -5,7 +5,7 @@ use crate::{
 use glam::{dvec3, vec3, DVec3, Mat4};
 use opencascade::{
     angle::{RVec, ToAngle},
-    primitives::{Face, Shape, Solid, Wire},
+    primitives::{Face, IntoShape, Shape, Solid, Wire},
     workplane::Workplane,
 };
 use simple_game::{
@@ -221,7 +221,7 @@ fn cube() -> Shape {
     let rect = Wire::rect(10.0, 10.0);
     let face = Face::from_wire(&rect);
 
-    face.extrude(dvec3(0.0, 0.0, 10.0)).to_shape()
+    face.extrude(dvec3(0.0, 0.0, 10.0)).into_shape()
 }
 
 #[allow(unused)]
@@ -316,8 +316,8 @@ fn keycap() -> Shape {
         Solid::loft([&scoop_right, &scoop_mid, &scoop_left])
     };
 
-    let (mut keycap, edges) = keycap.subtract(&scoop);
-    keycap.fillet_edges(0.6, &edges);
+    let mut keycap = keycap.subtract(&scoop);
+    keycap.fillet_new_edges(0.6);
 
     let shell_bottom = Workplane::xy().rect(bx - thickness * 2.0, by - thickness * 2.0);
 
@@ -329,11 +329,11 @@ fn keycap() -> Shape {
         .transformed(dvec3(0.0, 0.0, height - height / 4.0 - 4.5), RVec::x(angle))
         .rect(tx - thickness * 2.0 + 0.5, ty - thickness * 2.0 + 0.5);
 
-    let shell = Solid::loft([&shell_bottom, &shell_mid, &shell_top]);
+    let shell: Shape = Solid::loft([&shell_bottom, &shell_mid, &shell_top]).into();
 
-    let (keycap, _edges) = keycap.subtract(&shell);
+    let keycap = keycap.subtract(&shell);
 
-    keycap
+    keycap.shape
 }
 
 #[allow(unused)]
@@ -350,17 +350,12 @@ fn gizmo() -> Shape {
         let cone_top =
             workplane.translated(DVec3::new(0.0, 0.0, arrow_length)).circle(0.0, 0.0, 0.05);
         let cone = Solid::loft([&cone_base, &cone_top].into_iter());
-        let (arrow_shape, _) = shaft.union(&cone);
+        let arrow_shape = shaft.union(&cone);
 
-        arrow_shape
+        arrow_shape.shape
     };
 
-    // TODO(bschwind) - Make it easier to chain union operations together.
-    arrow(Workplane::yz())
-        .union_shape(&arrow(Workplane::xz()))
-        .0
-        .union_shape(&arrow(Workplane::xy()))
-        .0
+    arrow(Workplane::yz()).union(&arrow(Workplane::xz())).union(&arrow(Workplane::xy())).shape
 }
 
 fn main() {
