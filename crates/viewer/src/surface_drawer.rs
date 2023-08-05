@@ -1,6 +1,6 @@
 use bytemuck::{Pod, Zeroable};
 use glam::Mat4;
-use opencascade::primitives::Mesh;
+use opencascade::mesh::Mesh;
 use simple_game::graphics::GraphicsDevice;
 use wgpu::{self, util::DeviceExt, Buffer, RenderPipeline};
 

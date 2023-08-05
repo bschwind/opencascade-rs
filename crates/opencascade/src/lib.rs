@@ -2,6 +2,7 @@ use thiserror::Error;
 
 pub mod adhoc;
 pub mod angle;
+pub mod mesh;
 pub mod primitives;
 pub mod workplane;
 
