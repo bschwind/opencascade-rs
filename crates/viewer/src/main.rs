@@ -2,7 +2,9 @@ use crate::{
     edge_drawer::{EdgeDrawer, LineBuilder, LineVertex3, RenderedLine},
     surface_drawer::{CadMesh, SurfaceDrawer},
 };
+use clap::Parser;
 use glam::{vec3, DVec3, Mat4};
+use opencascade::primitives::Shape;
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
@@ -38,25 +40,48 @@ struct ViewerApp {
     scale: f32,
 }
 
+#[derive(Parser)]
+enum Example {
+    BoxShape,
+    Chamfer,
+    Gizmo,
+    HighLevelBottle,
+    KeyboardCase,
+    Keycap,
+    RoundedChamfer,
+}
+
+impl Example {
+    pub fn shape(self) -> Shape {
+        match self {
+            Example::BoxShape => examples::box_shape::shape(),
+            Example::Chamfer => examples::chamfer::shape(),
+            Example::Gizmo => examples::gizmo::shape(),
+            Example::HighLevelBottle => examples::high_level_bottle::shape(),
+            Example::KeyboardCase => examples::keyboard_case::shape(),
+            Example::Keycap => examples::keycap::shape(),
+            Example::RoundedChamfer => examples::rounded_chamfer::shape(),
+        }
+    }
+}
+
 impl GameApp for ViewerApp {
     fn window_title() -> &'static str {
         "Viewer"
     }
 
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
-        // Model sourced from:
-        // https://nist.gov/ctl/smart-connected-systems-division/smart-connected-manufacturing-systems-group/mbe-pmi-0
-        // let keycap = Shape::read_step("crates/viewer/models/nist_ftc_06.step").unwrap();
-        let keycap = examples::gizmo::shape();
+        let example = Example::parse();
+        let shape = example.shape();
 
-        let mesh = keycap.mesh();
+        let mesh = shape.mesh();
         let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
 
         // Pre-render the model edges.
         let line_thickness = 3.0;
         let mut line_builder = LineBuilder::new();
 
-        for edge in keycap.edges() {
+        for edge in shape.edges() {
             let mut segments = vec![];
 
             let mut last_point: Option<DVec3> = None;
