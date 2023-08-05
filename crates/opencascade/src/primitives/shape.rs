@@ -304,4 +304,29 @@ impl Shape {
 
         results
     }
+
+    pub fn hollow<T: AsRef<Face>>(
+        self,
+        offset: f64,
+        faces_to_remove: impl IntoIterator<Item = T>,
+    ) -> Self {
+        let mut faces_list = ffi::new_list_of_shape();
+
+        for face in faces_to_remove.into_iter() {
+            ffi::shape_list_append_face(faces_list.pin_mut(), &face.as_ref().inner);
+        }
+
+        let mut solid_maker = ffi::BRepOffsetAPI_MakeThickSolid_ctor();
+        ffi::MakeThickSolidByJoin(solid_maker.pin_mut(), &self.inner, &faces_list, offset, 0.001);
+
+        let hollowed_shape = solid_maker.pin_mut().Shape();
+        let inner = ffi::TopoDS_Shape_to_owned(hollowed_shape);
+
+        Self { inner }
+    }
+
+    pub fn offset_surface(self, offset: f64) -> Self {
+        let faces_to_remove: [Face; 0] = [];
+        self.hollow(offset, faces_to_remove)
+    }
 }
