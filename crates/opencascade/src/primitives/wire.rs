@@ -1,6 +1,6 @@
 use crate::{
     angle::{Angle, ToAngle},
-    primitives::{make_dir, make_point, make_vec, Edge, Face, Shape},
+    primitives::{make_dir, make_point, make_vec, Edge, Face},
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
@@ -131,13 +131,6 @@ impl Wire {
         let inner = ffi::TopoDS_Face_to_owned(face);
 
         Face { inner }
-    }
-
-    pub fn to_shape(self) -> Shape {
-        let inner_shape = ffi::cast_wire_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner_shape);
-
-        Shape { inner }
     }
 
     // Create a closure-based API

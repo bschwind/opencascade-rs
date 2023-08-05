@@ -22,11 +22,4 @@ impl Compound {
 
         shape
     }
-
-    pub fn to_shape(self) -> Shape {
-        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner_shape);
-
-        Shape { inner }
-    }
 }
