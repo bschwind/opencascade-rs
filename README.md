@@ -60,12 +60,12 @@ The [higher level examples](./crates/opencascade/examples) use more ergonomic Ru
 
 ## Viewer Application
 
-There is currently an experimental viewer application based on WGPU, which will probably become the "main" way people use this crate. It currently visualizes a hardcoded model produced in Rust code, but will expand to be capable of loading Rust model code compiled to WASM, allowing faster compile times and more interactive inspection of the sketches and models.
+There is currently an experimental viewer application based on WGPU, which will probably become the "main" way people use this crate. It currently visualizes one of the examples, but will expand to be capable of loading Rust model code compiled to WASM, allowing faster compile times and more interactive inspection of the sketches and models.
 
-You can run the current viewer app with
+To e.g. visualize the keycap example, you can run the current viewer app with
 
 ```
-$ cargo run --release --bin viewer
+$ cargo run --release --bin viewer -- keycap
 ```
 
 ## Code Formatting
