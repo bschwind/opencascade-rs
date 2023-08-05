@@ -64,6 +64,16 @@ impl From<ffi::TopAbs_ShapeEnum> for ShapeType {
     }
 }
 
+pub trait IntoShape {
+    fn into_shape(self) -> Shape;
+}
+
+impl<T: Into<Shape>> IntoShape for T {
+    fn into_shape(self) -> Shape {
+        self.into()
+    }
+}
+
 pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
     ffi::new_point(p.x, p.y, p.z)
 }
@@ -341,13 +351,6 @@ impl Wire {
         let inner = ffi::TopoDS_Face_to_owned(face);
 
         Face { inner }
-    }
-
-    pub fn to_shape(self) -> Shape {
-        let inner_shape = ffi::cast_wire_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner_shape);
-
-        Shape { inner }
     }
 
     // Create a closure-based API
@@ -717,13 +720,6 @@ impl AsRef<Solid> for Solid {
 }
 
 impl Solid {
-    pub fn to_shape(self) -> Shape {
-        let inner_shape = ffi::cast_solid_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner_shape);
-
-        Shape { inner }
-    }
-
     // TODO(bschwind) - Do some cool stuff from this link:
     // https://neweopencascade.wordpress.com/2018/10/17/lets-talk-about-fillets/
     // Key takeaway: Use the `SectionEdges` function to retrieve edges that were
@@ -843,13 +839,6 @@ impl Compound {
         shape.clean();
 
         shape
-    }
-
-    pub fn to_shape(self) -> Shape {
-        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner_shape);
-
-        Shape { inner }
     }
 }
 

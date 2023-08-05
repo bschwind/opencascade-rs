@@ -5,7 +5,7 @@ use crate::{
 use glam::{dvec3, vec3, DVec3, Mat4};
 use opencascade::{
     angle::{RVec, ToAngle},
-    primitives::{Face, Shape, Solid, Wire},
+    primitives::{Face, IntoShape, Shape, Solid, Wire},
     workplane::Workplane,
 };
 use simple_game::{
@@ -221,7 +221,7 @@ fn cube() -> Shape {
     let rect = Wire::rect(10.0, 10.0);
     let face = Face::from_wire(&rect);
 
-    face.extrude(dvec3(0.0, 0.0, 10.0)).to_shape()
+    face.extrude(dvec3(0.0, 0.0, 10.0)).into_shape()
 }
 
 #[allow(unused)]
