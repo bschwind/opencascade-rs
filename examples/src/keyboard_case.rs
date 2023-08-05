@@ -1,5 +1,5 @@
 use glam::{DVec2, DVec3};
-use opencascade::adhoc::AdHocShape;
+use opencascade::{adhoc::AdHocShape, primitives::Shape};
 
 // All units are in millimeters.
 // The top/bottom/left/right conventions relate to 2D rectangles in
@@ -264,7 +264,7 @@ fn pcb_usb_overhang() -> AdHocShape {
     )
 }
 
-fn main() {
+pub fn shape() -> Shape {
     let mut outer_box = case_outer_box();
     let inner_box = case_inner_box();
     let top_shelf = pcb_top_shelf();
@@ -311,5 +311,5 @@ fn main() {
 
     // outer_box.intersect(&right_half);
 
-    outer_box.write_stl("keyboard_case.stl");
+    outer_box.into()
 }
