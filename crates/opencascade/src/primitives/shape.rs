@@ -236,7 +236,7 @@ impl Shape {
         triangulation_tolerance: f64,
     ) -> Result<(), Error> {
         let mut stl_writer = ffi::StlAPI_Writer_ctor();
-        let mesher = Mesher::new(self, triangulation_tolerance);
+        let mesher = Mesher::try_new(self, triangulation_tolerance)?;
         let success = ffi::write_stl(
             stl_writer.pin_mut(),
             mesher.inner.Shape(),
@@ -270,24 +270,22 @@ impl Shape {
         self.inner.pin_mut().set_global_translation(&location, false);
     }
 
-    pub fn mesh(&self) -> Mesh {
+    pub fn mesh(&self) -> Result<Mesh, Error> {
         self.mesh_with_tolerance(0.01)
     }
 
-    pub fn mesh_with_tolerance(&self, triangulation_tolerance: f64) -> Mesh {
-        let mesher = Mesher::new(self, triangulation_tolerance);
+    pub fn mesh_with_tolerance(&self, triangulation_tolerance: f64) -> Result<Mesh, Error> {
+        let mesher = Mesher::try_new(self, triangulation_tolerance)?;
         mesher.mesh()
     }
 
     pub fn edges(&self) -> EdgeIterator {
         let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbs_ShapeEnum::TopAbs_EDGE);
-
         EdgeIterator { explorer }
     }
 
     pub fn faces(&self) -> FaceIterator {
         let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbs_ShapeEnum::TopAbs_FACE);
-
         FaceIterator { explorer }
     }
 

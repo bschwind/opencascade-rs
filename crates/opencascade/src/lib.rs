@@ -14,4 +14,8 @@ pub enum Error {
     StepReadFailed,
     #[error("failed to write STEP file")]
     StepWriteFailed,
+    #[error("failed to triangulate Shape")]
+    TriangulationFailed,
+    #[error("encountered a face with no triangulation")]
+    UntriangulatedFace,
 }

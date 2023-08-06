@@ -1,4 +1,7 @@
-use crate::primitives::{FaceOrientation, Shape};
+use crate::{
+    primitives::{FaceOrientation, Shape},
+    Error,
+};
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi;
@@ -16,18 +19,16 @@ pub struct Mesher {
 }
 
 impl Mesher {
-    pub fn new(shape: &Shape, triangulation_tolerance: f64) -> Self {
+    pub fn try_new(shape: &Shape, triangulation_tolerance: f64) -> Result<Self, Error> {
         let inner = ffi::BRepMesh_IncrementalMesh_ctor(&shape.inner, triangulation_tolerance);
 
-        if !inner.IsDone() {
-            // TODO(bschwind) - Add proper Error type and return Result.
-            panic!("Call to ffi::BRepMesh_IncrementalMesh_ctor failed");
+        match inner.IsDone() {
+            true => Ok(Self { inner }),
+            false => Err(Error::TriangulationFailed),
         }
-
-        Self { inner }
     }
 
-    pub fn mesh(mut self) -> Mesh {
+    pub fn mesh(mut self) -> Result<Mesh, Error> {
         let mut vertices = vec![];
         let mut uvs = vec![];
         let mut normals = vec![];
@@ -42,12 +43,8 @@ impl Mesher {
             let triangulation_handle =
                 ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
 
-            let Ok(triangulation) = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle)
-            else {
-                // TODO(bschwind) - Do better error handling, use Results.
-                println!("Encountered a face with no triangulation");
-                continue;
-            };
+            let triangulation = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle)
+                .map_err(|_| Error::UntriangulatedFace)?;
 
             let index_offset = vertices.len();
             let face_point_count = triangulation.NbNodes();
@@ -114,6 +111,6 @@ impl Mesher {
             }
         }
 
-        Mesh { vertices, uvs, normals, indices }
+        Ok(Mesh { vertices, uvs, normals, indices })
     }
 }

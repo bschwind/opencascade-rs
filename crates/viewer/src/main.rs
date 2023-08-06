@@ -76,7 +76,7 @@ impl GameApp for ViewerApp {
         let example = Example::parse();
         let shape = example.shape();
 
-        let mesh = shape.mesh();
+        let mesh = shape.mesh().unwrap();
         let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
 
         // Pre-render the model edges.
