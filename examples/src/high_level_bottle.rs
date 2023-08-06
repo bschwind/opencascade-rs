@@ -34,7 +34,7 @@ pub fn shape() -> Shape {
     let neck_radius = thickness / 4.0;
     let neck_height = height / 10.0;
 
-    let mut neck = AdHocShape::make_cylinder(dvec3(0.0, 0.0, height), neck_radius, neck_height);
+    let neck = AdHocShape::make_cylinder(dvec3(0.0, 0.0, height), neck_radius, neck_height);
     neck.union(&body);
 
     let bottle = neck.0;

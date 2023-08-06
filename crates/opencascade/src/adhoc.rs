@@ -2,10 +2,7 @@ use crate::primitives::Shape;
 use cxx::UniquePtr;
 use glam::DVec3;
 use opencascade_sys::ffi;
-use std::{
-    ops::{Deref, DerefMut},
-    path::Path,
-};
+use std::ops::{Deref, DerefMut};
 
 /// Wrapper for the [`Shape`] struct that provides an "ad-hoc" API. New code is encouraged
 /// to use more fine-grained API in the [`primitives`] module.
@@ -133,70 +130,5 @@ impl AdHocShape {
         // Self { shape }
 
         self.inner = ffi::TopoDS_Shape_to_owned(make_hole.pin_mut().Shape());
-    }
-
-    pub fn write_stl<P: AsRef<Path>>(&self, path: P) {
-        let mut stl_writer = ffi::StlAPI_Writer_ctor();
-        let triangulation = ffi::BRepMesh_IncrementalMesh_ctor(&self.inner, 0.001);
-        let success = ffi::write_stl(
-            stl_writer.pin_mut(),
-            triangulation.Shape(),
-            path.as_ref().to_string_lossy().to_string(),
-        );
-
-        println!("Done! Success = {success}");
-    }
-
-    pub fn fillet_edges(&mut self, radius: f64) {
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
-        let mut edge_explorer =
-            ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbs_ShapeEnum::TopAbs_EDGE);
-
-        while edge_explorer.More() {
-            let edge = ffi::TopoDS_cast_to_edge(edge_explorer.Current());
-            make_fillet.pin_mut().add_edge(radius, edge);
-            edge_explorer.pin_mut().Next();
-        }
-
-        let filleted_shape = make_fillet.pin_mut().Shape();
-
-        self.inner = ffi::TopoDS_Shape_to_owned(filleted_shape);
-    }
-
-    pub fn chamfer_edges(&mut self, distance: f64) {
-        let mut make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
-        let mut edge_explorer =
-            ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbs_ShapeEnum::TopAbs_EDGE);
-
-        while edge_explorer.More() {
-            let edge = ffi::TopoDS_cast_to_edge(edge_explorer.Current());
-            make_chamfer.pin_mut().add_edge(distance, edge);
-            edge_explorer.pin_mut().Next();
-        }
-
-        let filleted_shape = make_chamfer.pin_mut().Shape();
-
-        self.inner = ffi::TopoDS_Shape_to_owned(filleted_shape);
-    }
-
-    pub fn subtract(&mut self, other: &Shape) {
-        let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
-
-        let cut_shape = cut_operation.pin_mut().Shape();
-        self.inner = ffi::TopoDS_Shape_to_owned(cut_shape);
-    }
-
-    pub fn union(&mut self, other: &Shape) {
-        let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
-
-        let cut_shape = fuse_operation.pin_mut().Shape();
-        self.inner = ffi::TopoDS_Shape_to_owned(cut_shape);
-    }
-
-    pub fn intersect(&mut self, other: &Shape) {
-        let mut common_operation = ffi::BRepAlgoAPI_Common_ctor(&self.inner, &other.inner);
-
-        let cut_shape = common_operation.pin_mut().Shape();
-        self.inner = ffi::TopoDS_Shape_to_owned(cut_shape);
     }
 }

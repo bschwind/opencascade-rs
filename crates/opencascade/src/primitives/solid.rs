@@ -1,10 +1,6 @@
-use crate::{
-    primitives::{BooleanShape, Compound, Edge, Shape, Wire},
-    Error,
-};
+use crate::primitives::{BooleanShape, Compound, Edge, Shape, Wire};
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
-use std::path::Path;
 
 pub struct Solid {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Solid>,
@@ -51,24 +47,6 @@ impl Solid {
         let inner = ffi::TopoDS_Solid_to_owned(solid);
 
         Self { inner }
-    }
-
-    pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
-        let inner_shape = ffi::cast_solid_to_shape(&self.inner);
-
-        let mut stl_writer = ffi::StlAPI_Writer_ctor();
-        let triangulation = ffi::BRepMesh_IncrementalMesh_ctor(inner_shape, 0.001);
-        let success = ffi::write_stl(
-            stl_writer.pin_mut(),
-            triangulation.Shape(),
-            path.as_ref().to_string_lossy().to_string(),
-        );
-
-        if success {
-            Ok(())
-        } else {
-            Err(Error::StlWriteFailed)
-        }
     }
 
     pub fn subtract(&self, other: &Solid) -> BooleanShape {

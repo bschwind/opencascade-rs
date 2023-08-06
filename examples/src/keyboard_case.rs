@@ -73,7 +73,7 @@ impl SupportPost {
         let top_z = TOP_PLATE_BOTTOM_Z;
 
         let pos = DVec3::from((self.pos, CASE_FLOOR_Z));
-        let mut cylinder = AdHocShape::make_cylinder(pos, SUPPORT_POST_RADIUS, top_z - bottom_z);
+        let cylinder = AdHocShape::make_cylinder(pos, SUPPORT_POST_RADIUS, top_z - bottom_z);
         let m2_drill_hole =
             AdHocShape::make_cylinder(pos, SUPPORT_POST_DRILL_RADIUS, top_z - bottom_z);
 
@@ -215,7 +215,7 @@ fn pcb_bottom_shelf() -> AdHocShape {
     let corner_1 = DVec3::new(PCB_LEFT, PCB_BOTTOM + PCB_SHELF_THICKNESS_BOTTOM, CASE_FLOOR_Z);
     let corner_2 = DVec3::new(PCB_RIGHT, PCB_BOTTOM, CASE_FLOOR_Z + PCB_SHELF_HEIGHT);
 
-    let mut bottom_shelf = AdHocShape::make_box_point_point(corner_1, corner_2);
+    let bottom_shelf = AdHocShape::make_box_point_point(corner_1, corner_2);
 
     // Cut out gaps for the space bar stabilizer.
 
@@ -246,7 +246,7 @@ fn usb_connector_cutout() -> AdHocShape {
 
     let mut shape = AdHocShape::make_box_point_point(corner_1, corner_2);
 
-    shape.fillet_edges(2.0);
+    shape.fillet(2.0);
     shape
 }
 
@@ -272,7 +272,7 @@ pub fn shape() -> Shape {
     let usb_cutout = usb_connector_cutout();
 
     outer_box.subtract(&inner_box);
-    outer_box.fillet_edges(1.3);
+    outer_box.fillet(1.3);
 
     outer_box.union(&top_shelf);
     outer_box.union(&bottom_shelf);
