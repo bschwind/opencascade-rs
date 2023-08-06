@@ -17,13 +17,6 @@ impl AsRef<Solid> for Solid {
 }
 
 impl Solid {
-    pub fn to_shape(self) -> Shape {
-        let inner_shape = ffi::cast_solid_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner_shape);
-
-        Shape { inner }
-    }
-
     // TODO(bschwind) - Do some cool stuff from this link:
     // https://neweopencascade.wordpress.com/2018/10/17/lets-talk-about-fillets/
     // Key takeaway: Use the `SectionEdges` function to retrieve edges that were
