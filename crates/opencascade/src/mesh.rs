@@ -12,12 +12,12 @@ pub struct Mesh {
 }
 
 pub struct Mesher {
-    inner: UniquePtr<ffi::BRepMesh_IncrementalMesh>,
+    pub(crate) inner: UniquePtr<ffi::BRepMesh_IncrementalMesh>,
 }
 
 impl Mesher {
-    pub fn new(shape: &Shape) -> Self {
-        let inner = ffi::BRepMesh_IncrementalMesh_ctor(&shape.inner, 0.01);
+    pub fn new(shape: &Shape, triangulation_tolerance: f64) -> Self {
+        let inner = ffi::BRepMesh_IncrementalMesh_ctor(&shape.inner, triangulation_tolerance);
 
         if !inner.IsDone() {
             // TODO(bschwind) - Add proper Error type and return Result.

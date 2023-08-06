@@ -227,11 +227,19 @@ impl Shape {
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
+        self.write_stl_with_tolerance(path, 0.001)
+    }
+
+    pub fn write_stl_with_tolerance<P: AsRef<Path>>(
+        &self,
+        path: P,
+        triangulation_tolerance: f64,
+    ) -> Result<(), Error> {
         let mut stl_writer = ffi::StlAPI_Writer_ctor();
-        let triangulation = ffi::BRepMesh_IncrementalMesh_ctor(&self.inner, 0.001);
+        let mesher = Mesher::new(self, triangulation_tolerance);
         let success = ffi::write_stl(
             stl_writer.pin_mut(),
-            triangulation.Shape(),
+            mesher.inner.Shape(),
             path.as_ref().to_string_lossy().to_string(),
         );
 
@@ -263,7 +271,11 @@ impl Shape {
     }
 
     pub fn mesh(&self) -> Mesh {
-        let mesher = Mesher::new(self);
+        self.mesh_with_tolerance(0.01)
+    }
+
+    pub fn mesh_with_tolerance(&self, triangulation_tolerance: f64) -> Mesh {
+        let mesher = Mesher::new(self, triangulation_tolerance);
         mesher.mesh()
     }
 
