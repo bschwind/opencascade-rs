@@ -42,8 +42,6 @@ fn main() {
     if let "windows" = std::env::consts::OS {
         let current = std::env::current_dir().unwrap();
         build.include(current.parent().unwrap());
-    } else {
-        build.include("include");
     }
 
     build
@@ -51,6 +49,7 @@ fn main() {
         .flag_if_supported("-std=c++11")
         .define("_USE_MATH_DEFINES", "TRUE")
         .include(occt_include_path())
+        .include("include")
         .compile("wrapper");
 
     println!("cargo:rustc-link-lib=static=wrapper");
