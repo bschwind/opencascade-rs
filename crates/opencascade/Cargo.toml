@@ -3,12 +3,12 @@ name = "opencascade"
 description = "A high level Rust wrapper to build 3D models in code, using the OpenCascade CAD kernel"
 authors = ["Brian Schwind <brianmschwind@gmail.com>"]
 license = "LGPL-2.1"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 repository = "https://github.com/bschwind/opencascade-rs"
 
 [dependencies]
 cxx = "1"
-opencascade-sys = { version = "0.1", path = "../opencascade-sys" }
+opencascade-sys = { version = "0.2", path = "../opencascade-sys" }
 glam = { version = "0.23", features = ["bytemuck"] }
 thiserror = "1"

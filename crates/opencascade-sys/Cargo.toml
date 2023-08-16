@@ -3,7 +3,7 @@ name = "opencascade-sys"
 description = "Rust bindings to the OpenCascade CAD Kernel"
 authors = ["Brian Schwind <brianmschwind@gmail.com>"]
 license = "LGPL-2.1"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 repository = "https://github.com/bschwind/opencascade-rs"
 
