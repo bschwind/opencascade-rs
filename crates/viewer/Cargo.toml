@@ -1,6 +1,6 @@
 [package]
 name = "viewer"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
@@ -8,7 +8,7 @@ bytemuck = { version = "1", features = ["derive"] }
 clap = { version = "4.3.19", features = ["derive"] }
 examples = { path = "../../examples" }
 glam = { version = "0.23", features = ["bytemuck"] }
-opencascade = { version = "0.1", path = "../opencascade" }
+opencascade = { version = "0.2", path = "../opencascade" }
 simple-game = { git = "https://github.com/bschwind/simple-game.git" }
 smaa = "0.10"
 wgpu = "0.16"
