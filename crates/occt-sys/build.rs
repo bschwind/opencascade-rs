@@ -29,12 +29,5 @@ fn main() {
         .define("INSTALL_DIR_INCLUDE", INCLUDE_DIR)
         .build();
 
-    println!(
-        "cargo:rustc-env=OCCT_LIB_PATH={}",
-        dst.join(LIB_DIR).to_str().expect("path is valid Unicode")
-    );
-    println!(
-        "cargo:rustc-env=OCCT_INCLUDE_PATH={}",
-        dst.join(INCLUDE_DIR).to_str().expect("path is valid Unicode")
-    );
+    println!("cargo:rustc-env=OCCT_PATH={}", dst.to_str().expect("path is valid Unicode"));
 }

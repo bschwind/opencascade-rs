@@ -3,9 +3,15 @@ name = "occt-sys"
 description = "Static build of the C++ OpenCascade CAD Kernel for use as a Rust dependency"
 authors = ["Brian Schwind <brianmschwind@gmail.com>", "Matěj Laitl <matej@laitl.cz>"]
 license = "LGPL-2.1"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 repository = "https://github.com/bschwind/opencascade-rs"
+
+# Adding an empty workspace table so occt-sys doesn't believe
+# it's in the parent workspace. This crate is excluded from
+# the top-level workspace because it takes quite awhile to
+# build and the crate doesn't change very often.
+[workspace]
 
 # Desperately trying to reduce the crate size here...
 # Sorted by file size
