@@ -48,16 +48,18 @@ There are other benefits:
 
 ### Using pre-installed OpenCASCADE
 
-If you have `OCCT` library already installed via package manager you may use it to save huge amout of building time. By default `builtin` feature is enabled which means compiling OCCT from embedded sources. You can disable it via command line or using manifest:
+If you have the `OCCT` library already installed via a package manager, you can dynamically link to it which will significantly decrease build times. By default, the `builtin` feature is enabled which means compiling OCCT from source. You can disable it via the command line:
 
 `cargo build --no-default-features`
 
+or by specifying `default-features = false` in your `Cargo.toml`:
+
 ```
 [dependencies]
-opencascade = { version = "0.1", default-features = false, features = [] }
+opencascade = { version = "0.2", default-features = false }
 ```
 
-NOTE: If you have installed `OCCT` manually you may need specify path to it via `DEP_OCCT_ROOT` environment variable. Specified root directory usually expected contains `include` and `lib` directories.
+NOTE: If you have installed `OCCT` manually you may need specify the path to it via the `DEP_OCCT_ROOT` environment variable. The specified root directory usually contains `include` and `lib` directories.
 
 ## Run Examples
 
