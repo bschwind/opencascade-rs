@@ -6,9 +6,9 @@ edition = "2021"
 [dependencies]
 bytemuck = { version = "1", features = ["derive"] }
 clap = { version = "4.3.19", features = ["derive"] }
-examples = { path = "../../examples" }
+examples = { path = "../../examples", default-features = false }
 glam = { version = "0.23", features = ["bytemuck"] }
-opencascade = { version = "0.2", path = "../opencascade" }
+opencascade = { version = "0.2", path = "../opencascade", default-features = false }
 simple-game = { git = "https://github.com/bschwind/simple-game.git" }
 smaa = "0.10"
 wgpu = "0.16"
@@ -16,3 +16,7 @@ winit = "0.28"
 
 [build-dependencies]
 naga = { version = "0.12", features = ["validate", "wgsl-in"] }
+
+[features]
+default = ["builtin"]
+builtin = ["opencascade/builtin", "examples/builtin"]
