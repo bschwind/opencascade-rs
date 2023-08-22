@@ -22,9 +22,10 @@ impl Mesher {
     pub fn try_new(shape: &Shape, triangulation_tolerance: f64) -> Result<Self, Error> {
         let inner = ffi::BRepMesh_IncrementalMesh_ctor(&shape.inner, triangulation_tolerance);
 
-        match inner.IsDone() {
-            true => Ok(Self { inner }),
-            false => Err(Error::TriangulationFailed),
+        if inner.IsDone() {
+            Ok(Self { inner })
+        } else {
+            Err(Error::TriangulationFailed)
         }
     }
 
