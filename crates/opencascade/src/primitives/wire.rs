@@ -1,3 +1,5 @@
+use std::iter::once;
+
 use crate::{
     angle::{Angle, ToAngle},
     primitives::{make_dir, make_point, make_vec, Edge, Face, Shape},
@@ -41,6 +43,19 @@ impl Wire {
 
     fn from_make_wire(mut make_wire: UniquePtr<ffi::BRepBuilderAPI_MakeWire>) -> Self {
         Self::from_wire(make_wire.pin_mut().Wire())
+    }
+
+    pub fn from_ordered_points(points: &[DVec3]) -> Self {
+        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+
+        if let (Some(first), Some(last)) = (points.first(), points.last()) {
+            for window in points.windows(2).chain(once([*last, *first].as_slice())) {
+                let edge = Edge::segment(window[0], window[1]);
+                make_wire.pin_mut().add_edge(&edge.inner);
+            }
+        }
+
+        Self::from_make_wire(make_wire)
     }
 
     pub fn from_edges<'a>(edges: impl IntoIterator<Item = &'a Edge>) -> Self {
