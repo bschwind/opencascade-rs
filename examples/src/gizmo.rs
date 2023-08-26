@@ -16,7 +16,7 @@ pub fn shape() -> Shape {
             workplane.translated(DVec3::new(0.0, 0.0, shaft_length)).circle(0.0, 0.0, 1.0);
         let cone_top =
             workplane.translated(DVec3::new(0.0, 0.0, arrow_length)).circle(0.0, 0.0, 0.05);
-        let cone = Solid::loft([&cone_base, &cone_top].into_iter());
+        let cone = Solid::loft([&cone_base, &cone_top]);
         let arrow_shape = shaft.union(&cone);
 
         arrow_shape.shape
