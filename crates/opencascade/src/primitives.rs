@@ -1,5 +1,5 @@
 use cxx::UniquePtr;
-use glam::DVec3;
+use glam::{DVec2, DVec3};
 use opencascade_sys::ffi;
 
 mod boolean_shape;
@@ -89,6 +89,10 @@ impl<T: Into<Shape>> IntoShape for T {
 
 pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
     ffi::new_point(p.x, p.y, p.z)
+}
+
+pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::gp_Pnt2d> {
+    ffi::new_point_2d(p.x, p.y)
 }
 
 fn make_dir(p: DVec3) -> UniquePtr<ffi::gp_Dir> {
