@@ -95,6 +95,18 @@ impl Shape {
     }
 
     #[must_use]
+    pub fn variable_fillet_edge(
+        &self,
+        radius_values: impl IntoIterator<Item = (f64, f64)>,
+        edge: &Edge,
+    ) -> Self {
+        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
+        make_fillet.pin_mut().add_edge(radius, &edge.inner);
+
+        Self::from_shape(make_fillet.pin_mut().Shape())
+    }
+
+    #[must_use]
     pub fn chamfer_edge(&self, distance: f64, edge: &Edge) -> Self {
         let mut make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
         make_chamfer.pin_mut().add_edge(distance, &edge.inner);
