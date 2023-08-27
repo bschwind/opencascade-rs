@@ -176,6 +176,7 @@ pub mod ffi {
             array: &TColgp_Array1OfPnt2d,
             index: i32,
         ) -> UniquePtr<gp_Pnt2d>;
+        pub fn SetValue(self: Pin<&mut TColgp_Array1OfPnt2d>, index: i32, item: &gp_Pnt2d);
 
         type TColgp_Array2OfPnt;
         #[cxx_name = "construct_unique"]

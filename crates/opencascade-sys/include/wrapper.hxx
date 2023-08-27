@@ -413,6 +413,10 @@ inline std::unique_ptr<gp_Dir> TColgp_Array1OfDir_Value(const TColgp_Array1OfDir
   return std::unique_ptr<gp_Dir>(new gp_Dir(array.Value(index)));
 }
 
+inline std::unique_ptr<gp_Pnt2d> TColgp_Array1OfPnt2d_Value(const TColgp_Array1OfPnt2d &array, Standard_Integer index) {
+  return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(array.Value(index)));
+}
+
 inline void connect_edges_to_wires(Handle_TopTools_HSequenceOfShape &edges, const Standard_Real toler,
                                    const Standard_Boolean shared, Handle_TopTools_HSequenceOfShape &wires) {
   ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, toler, shared, wires);
