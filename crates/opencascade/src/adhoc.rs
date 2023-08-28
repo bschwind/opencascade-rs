@@ -23,18 +23,17 @@ impl DerefMut for AdHocShape {
 }
 
 impl AdHocShape {
-    /// Internal helper to create [Self] from the FFI inner type.
-    fn from_inner(inner: UniquePtr<ffi::TopoDS_Shape>) -> Self {
-        Self(Shape { inner })
+    /// Internal helper to create [Self] from the FFI shape type.
+    fn from_shape(shape: &ffi::TopoDS_Shape) -> Self {
+        Self(Shape::from_shape(shape))
     }
 
     /// Make a box with a corner at (0,0,0) and with size (x,y,z)
     pub fn make_box(x: f64, y: f64, z: f64) -> Self {
         let point = ffi::new_point(0.0, 0.0, 0.0);
         let mut my_box = ffi::BRepPrimAPI_MakeBox_ctor(&point, x, y, z);
-        let inner = ffi::TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
 
-        Self::from_inner(inner)
+        Self::from_shape(my_box.pin_mut().Shape())
     }
 
     /// Make a box with one corner at p1, and the opposite corner
@@ -46,9 +45,8 @@ impl AdHocShape {
         let point = ffi::new_point(min_corner.x, min_corner.y, min_corner.z);
         let diff = max_corner - min_corner;
         let mut my_box = ffi::BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
-        let inner = ffi::TopoDS_Shape_to_owned(my_box.pin_mut().Shape());
 
-        Self::from_inner(inner)
+        Self::from_shape(my_box.pin_mut().Shape())
     }
 
     /// Make a cylinder with its bottom at point p, with radius r and height h.
@@ -58,9 +56,8 @@ impl AdHocShape {
         let cylinder_coord_system = ffi::gp_Ax2_ctor(&point, cylinder_axis);
 
         let mut cylinder = ffi::BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
-        let inner = ffi::TopoDS_Shape_to_owned(cylinder.pin_mut().Shape());
 
-        Self::from_inner(inner)
+        Self::from_shape(cylinder.pin_mut().Shape())
     }
 
     /// Purposefully underpowered for now, this simply takes a list of points,
@@ -102,21 +99,16 @@ impl AdHocShape {
             true,
         );
 
-        let inner = ffi::TopoDS_Shape_to_owned(extrusion.pin_mut().Shape());
-
-        Self::from_inner(inner)
+        Self::from_shape(extrusion.pin_mut().Shape())
     }
 
     /// Drills a cylindrical hole starting at point p, pointing down the Z axis
     /// (this will later change to be an arbitrary axis).
-    pub fn drill_hole(&mut self, p: DVec3, dir: DVec3, radius: f64) {
+    pub fn drill_hole(&self, p: DVec3, dir: DVec3, radius: f64) -> Self {
         let point = ffi::new_point(p.x, p.y, p.z);
         let dir = ffi::gp_Dir_ctor(dir.x, dir.y, dir.z);
 
         let hole_axis = ffi::gp_Ax1_ctor(&point, &dir);
-
-        // let cylinder_axis = ffi::gp_DZ();
-        // let cylinder_coord_system = ffi::gp_Ax2_ctor(&point, cylinder_axis);
 
         let mut make_hole = ffi::BRepFeat_MakeCylindricalHole_ctor();
         make_hole.pin_mut().Init(&self.inner, &hole_axis);
@@ -124,11 +116,6 @@ impl AdHocShape {
         make_hole.pin_mut().Perform(radius);
         make_hole.pin_mut().Build();
 
-        // let mut cylinder = ffi::BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
-        // let shape = ffi::TopoDS_Shape_to_owned(cylinder.pin_mut().Shape());
-
-        // Self { shape }
-
-        self.inner = ffi::TopoDS_Shape_to_owned(make_hole.pin_mut().Shape());
+        Self::from_shape(make_hole.pin_mut().Shape())
     }
 }

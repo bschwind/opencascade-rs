@@ -13,14 +13,17 @@ impl AsRef<Compound> for Compound {
 }
 
 impl Compound {
-    pub fn clean(&mut self) -> Shape {
-        let inner = ffi::cast_compound_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner);
-        let mut shape = Shape { inner };
+    pub(crate) fn from_compound(compound: &ffi::TopoDS_Compound) -> Self {
+        let inner = ffi::TopoDS_Compound_to_owned(compound);
 
-        shape.clean();
+        Self { inner }
+    }
 
-        shape
+    #[must_use]
+    pub fn clean(&self) -> Shape {
+        let shape = ffi::cast_compound_to_shape(&self.inner);
+
+        Shape::from_shape(shape).clean()
     }
 
     pub fn from_shapes<T: AsRef<Shape>>(shapes: impl IntoIterator<Item = T>) -> Self {
@@ -34,9 +37,7 @@ impl Compound {
             builder.Add(compound_shape.pin_mut(), &shape.as_ref().inner);
         }
 
-        let inner = ffi::TopoDS_cast_to_compound(&compound_shape);
-        let inner = ffi::TopoDS_Compound_to_owned(inner);
-
-        Self { inner }
+        let compound = ffi::TopoDS_cast_to_compound(&compound_shape);
+        Self::from_compound(compound)
     }
 }

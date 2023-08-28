@@ -35,8 +35,7 @@ impl Mesher {
         let mut normals = vec![];
         let mut indices = vec![];
 
-        let triangulated_shape = ffi::TopoDS_Shape_to_owned(self.inner.pin_mut().Shape());
-        let triangulated_shape = Shape { inner: triangulated_shape };
+        let triangulated_shape = Shape::from_shape(self.inner.pin_mut().Shape());
 
         for face in triangulated_shape.faces() {
             let mut location = ffi::TopLoc_Location_ctor();

@@ -27,11 +27,13 @@ impl BooleanShape {
         self.new_edges.iter()
     }
 
-    pub fn fillet_new_edges(&mut self, radius: f64) {
-        self.shape.fillet_edges(radius, &self.new_edges);
+    #[must_use]
+    pub fn fillet_new_edges(&self, radius: f64) -> Shape {
+        self.shape.fillet_edges(radius, &self.new_edges)
     }
 
-    pub fn chamfer_new_edges(&mut self, distance: f64) {
-        self.shape.chamfer_edges(distance, &self.new_edges);
+    #[must_use]
+    pub fn chamfer_new_edges(&self, distance: f64) -> Shape {
+        self.shape.chamfer_edges(distance, &self.new_edges)
     }
 }

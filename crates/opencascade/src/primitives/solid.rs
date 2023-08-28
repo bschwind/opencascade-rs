@@ -13,10 +13,17 @@ impl AsRef<Solid> for Solid {
 }
 
 impl Solid {
+    pub(crate) fn from_solid(solid: &ffi::TopoDS_Solid) -> Self {
+        let inner = ffi::TopoDS_Solid_to_owned(solid);
+
+        Self { inner }
+    }
+
     // TODO(bschwind) - Do some cool stuff from this link:
     // https://neweopencascade.wordpress.com/2018/10/17/lets-talk-about-fillets/
     // Key takeaway: Use the `SectionEdges` function to retrieve edges that were
     // the result of combining two shapes.
+    #[must_use]
     pub fn fillet_edge(&self, radius: f64, edge: &Edge) -> Compound {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
 
@@ -25,12 +32,12 @@ impl Solid {
 
         let filleted_shape = make_fillet.pin_mut().Shape();
 
-        let compund = ffi::TopoDS_cast_to_compound(filleted_shape);
-        let inner = ffi::TopoDS_Compound_to_owned(compund);
+        let compound = ffi::TopoDS_cast_to_compound(filleted_shape);
 
-        Compound { inner }
+        Compound::from_compound(compound)
     }
 
+    #[must_use]
     pub fn loft<T: AsRef<Wire>>(wires: impl IntoIterator<Item = T>) -> Self {
         let is_solid = true;
         let mut make_loft = ffi::BRepOffsetAPI_ThruSections_ctor(is_solid);
@@ -44,11 +51,11 @@ impl Solid {
 
         let shape = make_loft.pin_mut().Shape();
         let solid = ffi::TopoDS_cast_to_solid(shape);
-        let inner = ffi::TopoDS_Solid_to_owned(solid);
 
-        Self { inner }
+        Self::from_solid(solid)
     }
 
+    #[must_use]
     pub fn subtract(&self, other: &Solid) -> BooleanShape {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
@@ -61,17 +68,15 @@ impl Solid {
         let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
-            let inner = ffi::TopoDS_Edge_to_owned(edge);
-            let edge = Edge { inner };
-            new_edges.push(edge);
+            new_edges.push(Edge::from_edge(edge));
         }
 
-        let cut_shape = cut_operation.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(cut_shape);
+        let shape = Shape::from_shape(cut_operation.pin_mut().Shape());
 
-        BooleanShape { shape: Shape { inner }, new_edges }
+        BooleanShape { shape, new_edges }
     }
 
+    #[must_use]
     pub fn union(&self, other: &Solid) -> BooleanShape {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
@@ -83,14 +88,11 @@ impl Solid {
         let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
-            let inner = ffi::TopoDS_Edge_to_owned(edge);
-            let edge = Edge { inner };
-            new_edges.push(edge);
+            new_edges.push(Edge::from_edge(edge));
         }
 
-        let fuse_shape = fuse_operation.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(fuse_shape);
+        let shape = Shape::from_shape(fuse_operation.pin_mut().Shape());
 
-        BooleanShape { shape: Shape { inner }, new_edges }
+        BooleanShape { shape, new_edges }
     }
 }
