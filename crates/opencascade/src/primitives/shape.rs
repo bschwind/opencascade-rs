@@ -1,5 +1,4 @@
 use crate::{
-    adhoc::AdHocShape,
     mesh::{Mesh, Mesher},
     primitives::{
         make_dir, make_point, make_vec, BooleanShape, Compound, Edge, EdgeIterator, Face,
@@ -73,12 +72,6 @@ impl From<Compound> for Shape {
 impl From<BooleanShape> for Shape {
     fn from(boolean_shape: BooleanShape) -> Self {
         boolean_shape.shape
-    }
-}
-
-impl From<AdHocShape> for Shape {
-    fn from(adhoc_shape: AdHocShape) -> Self {
-        adhoc_shape.0
     }
 }
 
