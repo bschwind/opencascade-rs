@@ -34,6 +34,33 @@ impl Wire {
         Self::from_make_wire(make_wire)
     }
 
+    pub fn from_unordered_edges<'a>(unordered_edges: impl IntoIterator<Item = &'a Edge>) -> Self {
+        let mut edges = ffi::new_Handle_TopTools_HSequenceOfShape();
+
+        for edge in unordered_edges {
+            let edge_shape = ffi::cast_edge_to_shape(&edge.inner);
+            ffi::TopTools_HSequenceOfShape_append(edges.pin_mut(), edge_shape);
+        }
+
+        let mut wires = ffi::new_Handle_TopTools_HSequenceOfShape();
+
+        let shared = false;
+        ffi::connect_edges_to_wires(edges.pin_mut(), 0.001, shared, wires.pin_mut());
+
+        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+
+        let wire_len = ffi::TopTools_HSequenceOfShape_length(&wires);
+
+        for index in 0..wire_len {
+            let wire_shape = ffi::TopTools_HSequenceOfShape_value(&wires, index);
+            let wire = ffi::TopoDS_cast_to_wire(wire_shape);
+
+            make_wire.pin_mut().add_wire(wire);
+        }
+
+        Self::from_make_wire(make_wire)
+    }
+
     pub fn from_wires<'a>(wires: impl IntoIterator<Item = &'a Wire>) -> Self {
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 
