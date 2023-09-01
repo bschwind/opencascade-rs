@@ -1,3 +1,4 @@
+use opencascade::primitives::Shape;
 use anyhow::{anyhow, Result};
 use glam::DVec3;
 
@@ -14,7 +15,7 @@ fn main() -> Result<()> {
     // let outline: Face = Into::<Face>::into(&board.graphic_rects[0]);
 
     let solid = outline.extrude(DVec3 { x: 0.0, y: 0.0, z: 10.0 });
-    let mut shape = solid.to_shape();
+    let mut shape: Shape = solid.into();
     shape.clean();
     shape.write_stl("outline.stl")?;
 

@@ -101,7 +101,7 @@ impl<'a> From<&'a BoardLayer> for &'a str {
             BoardLayer::In2Cu => "In2.Cu",
             BoardLayer::In3Cu => "In3.Cu",
             BoardLayer::In4Cu => "In4.Cu",
-            BoardLayer::User(ref s) => &s,
+            BoardLayer::User(ref s) => s,
         }
     }
 }
@@ -201,8 +201,7 @@ impl KicadBoard {
     }
 
     pub fn outline(&self, _offset: f64) -> Face {
-        let outline = self.layer_face(BoardLayer::EdgeCuts);
         // TODO apply offset around the face
-        outline
+        self.layer_face(BoardLayer::EdgeCuts)
     }
 }
