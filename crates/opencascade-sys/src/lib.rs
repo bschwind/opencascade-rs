@@ -87,6 +87,7 @@ pub mod ffi {
         pub fn IsNull(self: &HandleGeom2d_Ellipse) -> bool;
         pub fn IsNull(self: &HandleGeom2d_TrimmedCurve) -> bool;
         pub fn IsNull(self: &HandleGeom_CylindricalSurface) -> bool;
+        pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
 
         pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
 
@@ -176,7 +177,8 @@ pub mod ffi {
 
         type TopTools_HSequenceOfShape;
 
-        #[cxx_name = "construct_unique"]
+        pub fn Length(self: &TopTools_HSequenceOfShape) -> i32;
+
         pub fn new_Handle_TopTools_HSequenceOfShape() -> UniquePtr<Handle_TopTools_HSequenceOfShape>;
         pub fn TopTools_HSequenceOfShape_append(
             handle: Pin<&mut Handle_TopTools_HSequenceOfShape>,
@@ -188,6 +190,11 @@ pub mod ffi {
             handle: &Handle_TopTools_HSequenceOfShape,
             index: i32,
         ) -> &TopoDS_Shape;
+
+        #[cxx_name = "handle_try_deref"]
+        pub fn Handle_TopTools_HSequenceOfShape_Get(
+            handle: &Handle_TopTools_HSequenceOfShape,
+        ) -> Result<&TopTools_HSequenceOfShape>;
 
         // Geometry
         type Geom_TrimmedCurve;

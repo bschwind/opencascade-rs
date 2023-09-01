@@ -51,7 +51,7 @@ impl Wire {
 
         let wire_len = ffi::TopTools_HSequenceOfShape_length(&wires);
 
-        for index in 0..wire_len {
+        for index in 1..=wire_len {
             let wire_shape = ffi::TopTools_HSequenceOfShape_value(&wires, index);
             let wire = ffi::TopoDS_cast_to_wire(wire_shape);
 

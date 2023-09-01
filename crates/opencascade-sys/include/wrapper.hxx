@@ -58,6 +58,7 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
+#include <TopTools_HSequenceOfShape.hxx>
 #include <gp.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Ax3.hxx>
@@ -421,20 +422,18 @@ inline void connect_edges_to_wires(
   ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, toler, shared, wires);
 }
 
-
-
-
-
-
 inline std::unique_ptr<Handle_TopTools_HSequenceOfShape> new_Handle_TopTools_HSequenceOfShape() {
-  return std::unique_ptr<Handle_TopTools_HSequenceOfShape>(new opencascade::handle<TopTools_HSequenceOfShape>());
+  auto sequence = new TopTools_HSequenceOfShape();
+  auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);
+
+  return std::unique_ptr<Handle_TopTools_HSequenceOfShape>(handle);
 }
 
 inline void TopTools_HSequenceOfShape_append(Handle_TopTools_HSequenceOfShape &handle, const TopoDS_Shape &shape) {
   handle->Append(shape);
 }
 
-inline Standard_Integer TopTools_HSequenceOfShape_length(const Handle_TopTools_HSequenceOfShape &handle) {
+inline Standard_Integer TopTools_HSequenceOfShape_length(const Handle(TopTools_HSequenceOfShape) &handle) {
   return handle->Length();
 }
 
