@@ -16,6 +16,22 @@ impl AsRef<Wire> for Wire {
     }
 }
 
+/// Provides control over how an edge is considered "connected" to another edge.
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum EdgeConnection {
+    /// The edges must share the same exact vertices to be considered connected.
+    Exact,
+
+    /// The endpoints of two edges must be with `tolerance` distance to be considered connected.
+    Fuzzy { tolerance: f64 },
+}
+
+impl Default for EdgeConnection {
+    fn default() -> Self {
+        Self::Fuzzy { tolerance: 0.001 }
+    }
+}
+
 impl Wire {
     fn from_make_wire(mut make_wire: UniquePtr<ffi::BRepBuilderAPI_MakeWire>) -> Self {
         let wire = make_wire.pin_mut().Wire();
@@ -34,7 +50,10 @@ impl Wire {
         Self::from_make_wire(make_wire)
     }
 
-    pub fn from_unordered_edges<'a>(unordered_edges: impl IntoIterator<Item = &'a Edge>) -> Self {
+    pub fn from_unordered_edges<'a>(
+        unordered_edges: impl IntoIterator<Item = &'a Edge>,
+        edge_connection: EdgeConnection,
+    ) -> Self {
         let mut edges = ffi::new_Handle_TopTools_HSequenceOfShape();
 
         for edge in unordered_edges {
@@ -44,8 +63,12 @@ impl Wire {
 
         let mut wires = ffi::new_Handle_TopTools_HSequenceOfShape();
 
-        let shared = false;
-        ffi::connect_edges_to_wires(edges.pin_mut(), 0.001, shared, wires.pin_mut());
+        let (tolerance, shared) = match edge_connection {
+            EdgeConnection::Exact => (0.0, true),
+            EdgeConnection::Fuzzy { tolerance } => (tolerance, false),
+        };
+
+        ffi::connect_edges_to_wires(edges.pin_mut(), tolerance, shared, wires.pin_mut());
 
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 
