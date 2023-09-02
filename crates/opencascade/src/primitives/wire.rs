@@ -16,6 +16,22 @@ impl AsRef<Wire> for Wire {
     }
 }
 
+/// Provides control over how an edge is considered "connected" to another edge.
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum EdgeConnection {
+    /// The edges must share the same exact vertices to be considered connected.
+    Exact,
+
+    /// The endpoints of two edges must be with `tolerance` distance to be considered connected.
+    Fuzzy { tolerance: f64 },
+}
+
+impl Default for EdgeConnection {
+    fn default() -> Self {
+        Self::Fuzzy { tolerance: 0.001 }
+    }
+}
+
 impl Wire {
     fn from_make_wire(mut make_wire: UniquePtr<ffi::BRepBuilderAPI_MakeWire>) -> Self {
         let wire = make_wire.pin_mut().Wire();
@@ -29,6 +45,40 @@ impl Wire {
 
         for edge in edges.into_iter() {
             make_wire.pin_mut().add_edge(&edge.inner);
+        }
+
+        Self::from_make_wire(make_wire)
+    }
+
+    pub fn from_unordered_edges<'a>(
+        unordered_edges: impl IntoIterator<Item = &'a Edge>,
+        edge_connection: EdgeConnection,
+    ) -> Self {
+        let mut edges = ffi::new_Handle_TopTools_HSequenceOfShape();
+
+        for edge in unordered_edges {
+            let edge_shape = ffi::cast_edge_to_shape(&edge.inner);
+            ffi::TopTools_HSequenceOfShape_append(edges.pin_mut(), edge_shape);
+        }
+
+        let mut wires = ffi::new_Handle_TopTools_HSequenceOfShape();
+
+        let (tolerance, shared) = match edge_connection {
+            EdgeConnection::Exact => (0.0, true),
+            EdgeConnection::Fuzzy { tolerance } => (tolerance, false),
+        };
+
+        ffi::connect_edges_to_wires(edges.pin_mut(), tolerance, shared, wires.pin_mut());
+
+        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+
+        let wire_len = ffi::TopTools_HSequenceOfShape_length(&wires);
+
+        for index in 1..=wire_len {
+            let wire_shape = ffi::TopTools_HSequenceOfShape_value(&wires, index);
+            let wire = ffi::TopoDS_cast_to_wire(wire_shape);
+
+            make_wire.pin_mut().add_wire(wire);
         }
 
         Self::from_make_wire(make_wire)

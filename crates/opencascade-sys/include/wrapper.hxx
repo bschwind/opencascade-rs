@@ -47,12 +47,14 @@
 #include <Poly_Connect.hxx>
 #include <STEPControl_Reader.hxx>
 #include <STEPControl_Writer.hxx>
+#include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
 #include <StlAPI_Writer.hxx>
 #include <TColgp_Array1OfDir.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp_Explorer.hxx>
+#include <TopTools_HSequenceOfShape.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
@@ -88,6 +90,7 @@ typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
 typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
 typedef opencascade::handle<Poly_Triangulation> Handle_Poly_Triangulation;
+typedef opencascade::handle<TopTools_HSequenceOfShape> Handle_TopTools_HSequenceOfShape;
 
 // Handle stuff
 template <typename T> const T &handle_try_deref(const opencascade::handle<T> &handle) {
@@ -408,4 +411,29 @@ inline void map_shapes_and_unique_ancestors(const TopoDS_Shape &S, const TopAbs_
 
 inline std::unique_ptr<gp_Dir> TColgp_Array1OfDir_Value(const TColgp_Array1OfDir &array, Standard_Integer index) {
   return std::unique_ptr<gp_Dir>(new gp_Dir(array.Value(index)));
+}
+
+inline void connect_edges_to_wires(Handle_TopTools_HSequenceOfShape &edges, const Standard_Real toler,
+                                   const Standard_Boolean shared, Handle_TopTools_HSequenceOfShape &wires) {
+  ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, toler, shared, wires);
+}
+
+inline std::unique_ptr<Handle_TopTools_HSequenceOfShape> new_Handle_TopTools_HSequenceOfShape() {
+  auto sequence = new TopTools_HSequenceOfShape();
+  auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);
+
+  return std::unique_ptr<Handle_TopTools_HSequenceOfShape>(handle);
+}
+
+inline void TopTools_HSequenceOfShape_append(Handle_TopTools_HSequenceOfShape &handle, const TopoDS_Shape &shape) {
+  handle->Append(shape);
+}
+
+inline Standard_Integer TopTools_HSequenceOfShape_length(const Handle_TopTools_HSequenceOfShape &handle) {
+  return handle->Length();
+}
+
+inline const TopoDS_Shape &TopTools_HSequenceOfShape_value(const Handle_TopTools_HSequenceOfShape &handle,
+                                                           Standard_Integer index) {
+  return handle->Value(index);
 }

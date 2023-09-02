@@ -63,6 +63,7 @@ pub mod ffi {
         type HandleGeom2d_Ellipse;
         type HandleGeom2d_TrimmedCurve;
         type HandleGeom_CylindricalSurface;
+        type Handle_TopTools_HSequenceOfShape;
 
         pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
@@ -86,6 +87,7 @@ pub mod ffi {
         pub fn IsNull(self: &HandleGeom2d_Ellipse) -> bool;
         pub fn IsNull(self: &HandleGeom2d_TrimmedCurve) -> bool;
         pub fn IsNull(self: &HandleGeom_CylindricalSurface) -> bool;
+        pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
 
         pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
 
@@ -172,6 +174,27 @@ pub mod ffi {
             column_upper: i32,
         ) -> UniquePtr<TColgp_Array2OfPnt>;
         pub fn SetValue(self: Pin<&mut TColgp_Array2OfPnt>, row: i32, column: i32, item: &gp_Pnt);
+
+        type TopTools_HSequenceOfShape;
+
+        pub fn Length(self: &TopTools_HSequenceOfShape) -> i32;
+
+        pub fn new_Handle_TopTools_HSequenceOfShape() -> UniquePtr<Handle_TopTools_HSequenceOfShape>;
+        pub fn TopTools_HSequenceOfShape_append(
+            handle: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+            shape: &TopoDS_Shape,
+        );
+
+        pub fn TopTools_HSequenceOfShape_length(handle: &Handle_TopTools_HSequenceOfShape) -> i32;
+        pub fn TopTools_HSequenceOfShape_value(
+            handle: &Handle_TopTools_HSequenceOfShape,
+            index: i32,
+        ) -> &TopoDS_Shape;
+
+        #[cxx_name = "handle_try_deref"]
+        pub fn Handle_TopTools_HSequenceOfShape_Get(
+            handle: &Handle_TopTools_HSequenceOfShape,
+        ) -> Result<&TopTools_HSequenceOfShape>;
 
         // Geometry
         type Geom_TrimmedCurve;
@@ -1013,5 +1036,12 @@ pub mod ffi {
         pub fn AllowInternalEdges(self: Pin<&mut ShapeUpgrade_UnifySameDomain>, allow: bool);
         pub fn Build(self: Pin<&mut ShapeUpgrade_UnifySameDomain>);
         pub fn Shape(self: &ShapeUpgrade_UnifySameDomain) -> &TopoDS_Shape;
+
+        pub fn connect_edges_to_wires(
+            edges: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+            tolerance: f64,
+            shared: bool,
+            wires: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+        );
     }
 }
