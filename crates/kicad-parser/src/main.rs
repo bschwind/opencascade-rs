@@ -1,6 +1,6 @@
-use opencascade::primitives::Shape;
 use anyhow::{anyhow, Result};
 use glam::DVec3;
+use opencascade::primitives::Shape;
 
 mod board;
 mod graphics;
