@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Context, Result};
-use opencascade::primitives::{Edge, Face, Wire};
+use opencascade::primitives::{Edge, EdgeConnection, Face, Wire};
 use sexp::{Atom, Sexp};
 use std::path::Path;
 
@@ -193,7 +193,7 @@ impl KicadBoard {
     }
 
     pub fn layer_wire(&self, layer: BoardLayer) -> Wire {
-        Wire::from_edges(&self.layer_edges(layer))
+        Wire::from_unordered_edges(&self.layer_edges(layer), EdgeConnection::default())
     }
 
     pub fn layer_face(&self, layer: BoardLayer) -> Face {
