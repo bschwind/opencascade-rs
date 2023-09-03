@@ -1,4 +1,7 @@
-use crate::primitives::{FaceOrientation, Shape};
+use crate::{
+    primitives::{FaceOrientation, Shape},
+    Error,
+};
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade_sys::ffi;
@@ -12,29 +15,27 @@ pub struct Mesh {
 }
 
 pub struct Mesher {
-    inner: UniquePtr<ffi::BRepMesh_IncrementalMesh>,
+    pub(crate) inner: UniquePtr<ffi::BRepMesh_IncrementalMesh>,
 }
 
 impl Mesher {
-    pub fn new(shape: &Shape) -> Self {
-        let inner = ffi::BRepMesh_IncrementalMesh_ctor(&shape.inner, 0.01);
+    pub fn try_new(shape: &Shape, triangulation_tolerance: f64) -> Result<Self, Error> {
+        let inner = ffi::BRepMesh_IncrementalMesh_ctor(&shape.inner, triangulation_tolerance);
 
-        if !inner.IsDone() {
-            // TODO(bschwind) - Add proper Error type and return Result.
-            panic!("Call to ffi::BRepMesh_IncrementalMesh_ctor failed");
+        if inner.IsDone() {
+            Ok(Self { inner })
+        } else {
+            Err(Error::TriangulationFailed)
         }
-
-        Self { inner }
     }
 
-    pub fn mesh(mut self) -> Mesh {
+    pub fn mesh(mut self) -> Result<Mesh, Error> {
         let mut vertices = vec![];
         let mut uvs = vec![];
         let mut normals = vec![];
         let mut indices = vec![];
 
-        let triangulated_shape = ffi::TopoDS_Shape_to_owned(self.inner.pin_mut().Shape());
-        let triangulated_shape = Shape { inner: triangulated_shape };
+        let triangulated_shape = Shape::from_shape(self.inner.pin_mut().Shape());
 
         for face in triangulated_shape.faces() {
             let mut location = ffi::TopLoc_Location_ctor();
@@ -42,12 +43,8 @@ impl Mesher {
             let triangulation_handle =
                 ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
 
-            let Ok(triangulation) = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle)
-            else {
-                // TODO(bschwind) - Do better error handling, use Results.
-                println!("Encountered a face with no triangulation");
-                continue;
-            };
+            let triangulation = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle)
+                .map_err(|_| Error::UntriangulatedFace)?;
 
             let index_offset = vertices.len();
             let face_point_count = triangulation.NbNodes();
@@ -114,6 +111,6 @@ impl Mesher {
             }
         }
 
-        Mesh { vertices, uvs, normals, indices }
+        Ok(Mesh { vertices, uvs, normals, indices })
     }
 }

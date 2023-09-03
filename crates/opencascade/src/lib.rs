@@ -8,10 +8,14 @@ pub mod workplane;
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Failed to write STL file")]
+    #[error("failed to write STL file")]
     StlWriteFailed,
-    #[error("Failed to read STEP file")]
+    #[error("failed to read STEP file")]
     StepReadFailed,
-    #[error("Failed to write STEP file")]
+    #[error("failed to write STEP file")]
     StepWriteFailed,
+    #[error("failed to triangulate Shape")]
+    TriangulationFailed,
+    #[error("encountered a face with no triangulation")]
+    UntriangulatedFace,
 }

@@ -1,5 +1,4 @@
 use crate::{
-    adhoc::AdHocShape,
     mesh::{Mesh, Mesher},
     primitives::{
         make_dir, make_point, make_vec, BooleanShape, Compound, Edge, EdgeIterator, Face,
@@ -25,54 +24,48 @@ impl AsRef<Shape> for Shape {
 impl From<Vertex> for Shape {
     fn from(vertex: Vertex) -> Self {
         let shape = ffi::cast_vertex_to_shape(&vertex.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(shape);
 
-        Shape { inner }
+        Self::from_shape(shape)
     }
 }
 
 impl From<Edge> for Shape {
     fn from(edge: Edge) -> Self {
         let shape = ffi::cast_edge_to_shape(&edge.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(shape);
 
-        Shape { inner }
+        Self::from_shape(shape)
     }
 }
 
 impl From<Wire> for Shape {
     fn from(wire: Wire) -> Self {
         let shape = ffi::cast_wire_to_shape(&wire.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(shape);
 
-        Shape { inner }
+        Self::from_shape(shape)
     }
 }
 
 impl From<Face> for Shape {
     fn from(face: Face) -> Self {
         let shape = ffi::cast_face_to_shape(&face.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(shape);
 
-        Shape { inner }
+        Self::from_shape(shape)
     }
 }
 
 impl From<Solid> for Shape {
     fn from(solid: Solid) -> Self {
         let shape = ffi::cast_solid_to_shape(&solid.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(shape);
 
-        Shape { inner }
+        Self::from_shape(shape)
     }
 }
 
 impl From<Compound> for Shape {
     fn from(compound: Compound) -> Self {
         let shape = ffi::cast_compound_to_shape(&compound.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(shape);
 
-        Shape { inner }
+        Self::from_shape(shape)
     }
 }
 
@@ -82,77 +75,76 @@ impl From<BooleanShape> for Shape {
     }
 }
 
-impl From<AdHocShape> for Shape {
-    fn from(adhoc_shape: AdHocShape) -> Self {
-        adhoc_shape.0
-    }
-}
-
 impl Shape {
+    pub(crate) fn from_shape(shape: &ffi::TopoDS_Shape) -> Self {
+        let inner = ffi::TopoDS_Shape_to_owned(shape);
+
+        Self { inner }
+    }
+
     pub fn shape_type(&self) -> ShapeType {
         self.inner.ShapeType().into()
     }
 
-    pub fn fillet_edge(&mut self, radius: f64, edge: &Edge) {
+    #[must_use]
+    pub fn fillet_edge(&self, radius: f64, edge: &Edge) -> Self {
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
         make_fillet.pin_mut().add_edge(radius, &edge.inner);
 
-        let filleted_shape = make_fillet.pin_mut().Shape();
-
-        self.inner = ffi::TopoDS_Shape_to_owned(filleted_shape);
+        Self::from_shape(make_fillet.pin_mut().Shape())
     }
 
-    pub fn chamfer_edge(&mut self, distance: f64, edge: &Edge) {
+    #[must_use]
+    pub fn chamfer_edge(&self, distance: f64, edge: &Edge) -> Self {
         let mut make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
         make_chamfer.pin_mut().add_edge(distance, &edge.inner);
 
-        let chamfered_shape = make_chamfer.pin_mut().Shape();
-
-        self.inner = ffi::TopoDS_Shape_to_owned(chamfered_shape);
+        Self::from_shape(make_chamfer.pin_mut().Shape())
     }
 
+    #[must_use]
     pub fn fillet_edges<T: AsRef<Edge>>(
-        &mut self,
+        &self,
         radius: f64,
         edges: impl IntoIterator<Item = T>,
-    ) {
+    ) -> Self {
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
 
         for edge in edges.into_iter() {
             make_fillet.pin_mut().add_edge(radius, &edge.as_ref().inner);
         }
 
-        let filleted_shape = make_fillet.pin_mut().Shape();
-
-        self.inner = ffi::TopoDS_Shape_to_owned(filleted_shape);
+        Self::from_shape(make_fillet.pin_mut().Shape())
     }
 
+    #[must_use]
     pub fn chamfer_edges<T: AsRef<Edge>>(
-        &mut self,
+        &self,
         distance: f64,
         edges: impl IntoIterator<Item = T>,
-    ) {
+    ) -> Self {
         let mut make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
 
         for edge in edges.into_iter() {
             make_chamfer.pin_mut().add_edge(distance, &edge.as_ref().inner);
         }
 
-        let chamfered_shape = make_chamfer.pin_mut().Shape();
-
-        self.inner = ffi::TopoDS_Shape_to_owned(chamfered_shape);
+        Self::from_shape(make_chamfer.pin_mut().Shape())
     }
 
     /// Performs fillet of `radius` on all edges of the shape
-    pub fn fillet(&mut self, radius: f64) {
-        self.fillet_edges(radius, self.edges());
+    #[must_use]
+    pub fn fillet(&self, radius: f64) -> Self {
+        self.fillet_edges(radius, self.edges())
     }
 
     /// Performs chamfer of `distance` on all edges of the shape
-    pub fn chamfer(&mut self, distance: f64) {
-        self.chamfer_edges(distance, self.edges());
+    #[must_use]
+    pub fn chamfer(&self, distance: f64) -> Self {
+        self.chamfer_edges(distance, self.edges())
     }
 
+    #[must_use]
     pub fn subtract(&self, other: &Shape) -> BooleanShape {
         let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
 
@@ -162,15 +154,12 @@ impl Shape {
         let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
-            let inner = ffi::TopoDS_Edge_to_owned(edge);
-            let edge = Edge { inner };
-            new_edges.push(edge);
+            new_edges.push(Edge::from_edge(edge));
         }
 
-        let cut_shape = cut_operation.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(cut_shape);
+        let shape = Self::from_shape(cut_operation.pin_mut().Shape());
 
-        BooleanShape { shape: Shape { inner }, new_edges }
+        BooleanShape { shape, new_edges }
     }
 
     pub fn read_step(path: impl AsRef<Path>) -> Result<Self, Error> {
@@ -207,6 +196,7 @@ impl Shape {
         Ok(())
     }
 
+    #[must_use]
     pub fn union(&self, other: &Shape) -> BooleanShape {
         let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
@@ -215,23 +205,28 @@ impl Shape {
         let mut new_edges = vec![];
         for shape in vec.iter() {
             let edge = ffi::TopoDS_cast_to_edge(shape);
-            let inner = ffi::TopoDS_Edge_to_owned(edge);
-            let edge = Edge { inner };
-            new_edges.push(edge);
+            new_edges.push(Edge::from_edge(edge));
         }
 
-        let fuse_shape = fuse_operation.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(fuse_shape);
+        let shape = Self::from_shape(fuse_operation.pin_mut().Shape());
 
-        BooleanShape { shape: Shape { inner }, new_edges }
+        BooleanShape { shape, new_edges }
     }
 
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
+        self.write_stl_with_tolerance(path, 0.001)
+    }
+
+    pub fn write_stl_with_tolerance<P: AsRef<Path>>(
+        &self,
+        path: P,
+        triangulation_tolerance: f64,
+    ) -> Result<(), Error> {
         let mut stl_writer = ffi::StlAPI_Writer_ctor();
-        let triangulation = ffi::BRepMesh_IncrementalMesh_ctor(&self.inner, 0.001);
+        let mesher = Mesher::try_new(self, triangulation_tolerance)?;
         let success = ffi::write_stl(
             stl_writer.pin_mut(),
-            triangulation.Shape(),
+            mesher.inner.Shape(),
             path.as_ref().to_string_lossy().to_string(),
         );
 
@@ -242,14 +237,13 @@ impl Shape {
         }
     }
 
-    pub fn clean(&mut self) {
+    #[must_use]
+    pub fn clean(&self) -> Self {
         let mut upgrader = ffi::ShapeUpgrade_UnifySameDomain_ctor(&self.inner, true, true, true);
         upgrader.pin_mut().AllowInternalEdges(false);
         upgrader.pin_mut().Build();
 
-        let upgraded_shape = upgrader.Shape();
-
-        self.inner = ffi::TopoDS_Shape_to_owned(upgraded_shape);
+        Self::from_shape(upgrader.Shape())
     }
 
     pub fn set_global_translation(&mut self, translation: DVec3) {
@@ -262,20 +256,22 @@ impl Shape {
         self.inner.pin_mut().set_global_translation(&location, false);
     }
 
-    pub fn mesh(&self) -> Mesh {
-        let mesher = Mesher::new(self);
+    pub fn mesh(&self) -> Result<Mesh, Error> {
+        self.mesh_with_tolerance(0.01)
+    }
+
+    pub fn mesh_with_tolerance(&self, triangulation_tolerance: f64) -> Result<Mesh, Error> {
+        let mesher = Mesher::try_new(self, triangulation_tolerance)?;
         mesher.mesh()
     }
 
     pub fn edges(&self) -> EdgeIterator {
         let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbs_ShapeEnum::TopAbs_EDGE);
-
         EdgeIterator { explorer }
     }
 
     pub fn faces(&self) -> FaceIterator {
         let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbs_ShapeEnum::TopAbs_FACE);
-
         FaceIterator { explorer }
     }
 
@@ -293,9 +289,8 @@ impl Shape {
 
         while intersector.More() {
             let face = ffi::BRepIntCurveSurface_Inter_face(&intersector);
+            let face = Face::from_face(&face);
             let point = ffi::BRepIntCurveSurface_Inter_point(&intersector);
-
-            let face = Face { inner: ffi::TopoDS_Face_to_owned(&face) };
 
             results.push((face, dvec3(point.X(), point.Y(), point.Z())));
 
@@ -305,8 +300,9 @@ impl Shape {
         results
     }
 
+    #[must_use]
     pub fn hollow<T: AsRef<Face>>(
-        self,
+        &self,
         offset: f64,
         faces_to_remove: impl IntoIterator<Item = T>,
     ) -> Self {
@@ -319,13 +315,11 @@ impl Shape {
         let mut solid_maker = ffi::BRepOffsetAPI_MakeThickSolid_ctor();
         ffi::MakeThickSolidByJoin(solid_maker.pin_mut(), &self.inner, &faces_list, offset, 0.001);
 
-        let hollowed_shape = solid_maker.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(hollowed_shape);
-
-        Self { inner }
+        Self::from_shape(solid_maker.pin_mut().Shape())
     }
 
-    pub fn offset_surface(self, offset: f64) -> Self {
+    #[must_use]
+    pub fn offset_surface(&self, offset: f64) -> Self {
         let faces_to_remove: [Face; 0] = [];
         self.hollow(offset, faces_to_remove)
     }

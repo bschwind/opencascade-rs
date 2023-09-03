@@ -14,11 +14,14 @@ impl AsRef<Edge> for Edge {
 }
 
 impl Edge {
-    fn from_make_edge(mut make_edge: UniquePtr<ffi::BRepBuilderAPI_MakeEdge>) -> Self {
-        let edge = make_edge.pin_mut().Edge();
+    pub(crate) fn from_edge(edge: &ffi::TopoDS_Edge) -> Self {
         let inner = ffi::TopoDS_Edge_to_owned(edge);
 
         Self { inner }
+    }
+
+    fn from_make_edge(mut make_edge: UniquePtr<ffi::BRepBuilderAPI_MakeEdge>) -> Self {
+        Self::from_edge(make_edge.pin_mut().Edge())
     }
 
     pub fn segment(p1: DVec3, p2: DVec3) -> Self {

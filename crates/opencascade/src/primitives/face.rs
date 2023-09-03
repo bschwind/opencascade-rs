@@ -18,11 +18,14 @@ impl AsRef<Face> for Face {
 }
 
 impl Face {
-    fn from_make_face(make_face: UniquePtr<ffi::BRepBuilderAPI_MakeFace>) -> Self {
-        let face = make_face.Face();
+    pub(crate) fn from_face(face: &ffi::TopoDS_Face) -> Self {
         let inner = ffi::TopoDS_Face_to_owned(face);
 
         Self { inner }
+    }
+
+    fn from_make_face(make_face: UniquePtr<ffi::BRepBuilderAPI_MakeFace>) -> Self {
+        Self::from_face(make_face.Face())
     }
 
     pub fn from_wire(wire: &Wire) -> Self {
@@ -40,6 +43,7 @@ impl Face {
         Self::from_make_face(make_face)
     }
 
+    #[must_use]
     pub fn extrude(&self, dir: DVec3) -> Solid {
         let prism_vec = make_vec(dir);
 
@@ -51,11 +55,11 @@ impl Face {
             ffi::BRepPrimAPI_MakePrism_ctor(inner_shape, &prism_vec, copy, canonize);
         let extruded_shape = make_solid.pin_mut().Shape();
         let solid = ffi::TopoDS_cast_to_solid(extruded_shape);
-        let inner = ffi::TopoDS_Solid_to_owned(solid);
 
-        Solid { inner }
+        Solid::from_solid(solid)
     }
 
+    #[must_use]
     pub fn extrude_to_face(&self, shape_with_face: &Shape, face: &Face) -> Shape {
         let profile_base = &self.inner;
         let sketch_base = ffi::TopoDS_Face_ctor();
@@ -75,12 +79,10 @@ impl Face {
         let until_face = ffi::cast_face_to_shape(&face.inner);
         make_prism.pin_mut().perform_until_face(until_face);
 
-        let extruded_shape = make_prism.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(extruded_shape);
-
-        Shape { inner }
+        Shape::from_shape(make_prism.pin_mut().Shape())
     }
 
+    #[must_use]
     pub fn subtractive_extrude(&self, shape_with_face: &Shape, height: f64) -> Shape {
         let profile_base = &self.inner;
         let sketch_base = ffi::TopoDS_Face_ctor();
@@ -99,12 +101,10 @@ impl Face {
 
         make_prism.pin_mut().perform_with_height(height);
 
-        let extruded_shape = make_prism.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(extruded_shape);
-
-        Shape { inner }
+        Shape::from_shape(make_prism.pin_mut().Shape())
     }
 
+    #[must_use]
     pub fn revolve(&self, origin: DVec3, axis: DVec3, angle: Option<Angle>) -> Solid {
         let revol_vec = make_axis_1(origin, axis);
 
@@ -115,13 +115,13 @@ impl Face {
         let mut make_solid = ffi::BRepPrimAPI_MakeRevol_ctor(inner_shape, &revol_vec, angle, copy);
         let revolved_shape = make_solid.pin_mut().Shape();
         let solid = ffi::TopoDS_cast_to_solid(revolved_shape);
-        let inner = ffi::TopoDS_Solid_to_owned(solid);
 
-        Solid { inner }
+        Solid::from_solid(solid)
     }
 
     /// Fillets the face edges by a given radius at each vertex
-    pub fn fillet(&mut self, radius: f64) {
+    #[must_use]
+    pub fn fillet(&self, radius: f64) -> Self {
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
 
         let face_shape = ffi::cast_face_to_shape(&self.inner);
@@ -140,11 +140,12 @@ impl Face {
         let result_shape = make_fillet.pin_mut().Shape();
         let result_face = ffi::TopoDS_cast_to_face(result_shape);
 
-        self.inner = ffi::TopoDS_Face_to_owned(result_face);
+        Self::from_face(result_face)
     }
 
     /// Chamfer the wire edges at each vertex by a given distance
-    pub fn chamfer(&mut self, distance_1: f64) {
+    #[must_use]
+    pub fn chamfer(&self, distance_1: f64) -> Self {
         // TODO - Support asymmetric chamfers.
         let distance_2 = distance_1;
 
@@ -181,7 +182,7 @@ impl Face {
         let filleted_shape = make_fillet.pin_mut().Shape();
         let result_face = ffi::TopoDS_cast_to_face(filleted_shape);
 
-        self.inner = ffi::TopoDS_Face_to_owned(result_face);
+        Self::from_face(result_face)
     }
 
     pub fn edges(&self) -> EdgeIterator {
@@ -253,20 +254,12 @@ impl Face {
         let fuse_shape = fuse_operation.pin_mut().Shape();
 
         let compound = ffi::TopoDS_cast_to_compound(fuse_shape);
-        let inner = ffi::TopoDS_Compound_to_owned(compound);
 
-        CompoundFace { inner }
+        CompoundFace::from_compound(compound)
     }
 
     pub fn orientation(&self) -> FaceOrientation {
         FaceOrientation::from(self.inner.Orientation())
-    }
-
-    pub fn from_shape(shape: &Shape) -> Self {
-        let face = ffi::TopoDS_cast_to_face(&shape.inner);
-        let inner = ffi::TopoDS_Face_to_owned(face);
-
-        Self { inner }
     }
 }
 
@@ -281,19 +274,23 @@ impl AsRef<CompoundFace> for CompoundFace {
 }
 
 impl CompoundFace {
-    pub fn clean(&mut self) -> Self {
-        let inner = ffi::cast_compound_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner);
-        let mut shape = Shape { inner };
-
-        shape.clean();
-
-        let inner = ffi::TopoDS_cast_to_compound(&shape.inner);
-        let inner = ffi::TopoDS_Compound_to_owned(inner);
+    pub(crate) fn from_compound(compound: &ffi::TopoDS_Compound) -> Self {
+        let inner = ffi::TopoDS_Compound_to_owned(compound);
 
         Self { inner }
     }
 
+    #[must_use]
+    pub fn clean(&self) -> Self {
+        let shape = ffi::cast_compound_to_shape(&self.inner);
+        let shape = Shape::from_shape(shape).clean();
+
+        let compound = ffi::TopoDS_cast_to_compound(&shape.inner);
+
+        Self::from_compound(compound)
+    }
+
+    #[must_use]
     pub fn extrude(&self, dir: DVec3) -> Shape {
         let prism_vec = make_vec(dir);
 
@@ -305,11 +302,11 @@ impl CompoundFace {
         let mut make_solid =
             ffi::BRepPrimAPI_MakePrism_ctor(inner_shape, &prism_vec, copy, canonize);
         let extruded_shape = make_solid.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(extruded_shape);
 
-        Shape { inner }
+        Shape::from_shape(extruded_shape)
     }
 
+    #[must_use]
     pub fn revolve(&self, origin: DVec3, axis: DVec3, angle: Option<Angle>) -> Shape {
         let revol_axis = make_axis_1(origin, axis);
 
@@ -320,22 +317,18 @@ impl CompoundFace {
 
         let mut make_solid = ffi::BRepPrimAPI_MakeRevol_ctor(inner_shape, &revol_axis, angle, copy);
         let revolved_shape = make_solid.pin_mut().Shape();
-        let inner = ffi::TopoDS_Shape_to_owned(revolved_shape);
 
-        Shape { inner }
+        Shape::from_shape(revolved_shape)
     }
 
     pub fn set_global_translation(&mut self, translation: DVec3) {
-        let inner = ffi::cast_compound_to_shape(&self.inner);
-        let inner = ffi::TopoDS_Shape_to_owned(inner);
-        let mut shape = Shape { inner };
+        let shape = ffi::cast_compound_to_shape(&self.inner);
+        let mut shape = Shape::from_shape(shape);
 
         shape.set_global_translation(translation);
 
         let compound = ffi::TopoDS_cast_to_compound(&shape.inner);
-        let compound = ffi::TopoDS_Compound_to_owned(compound);
-
-        self.inner = compound;
+        *self = Self::from_compound(compound);
     }
 }
 

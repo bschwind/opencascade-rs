@@ -33,26 +33,26 @@ pub fn shape() -> Shape {
     let tx = bx - top_diff;
     let ty = by - top_diff;
 
-    let mut base = Workplane::xy().rect(bx, by);
-    base.fillet(bottom_fillet);
+    let base = Workplane::xy().rect(bx, by).fillet(bottom_fillet);
 
-    let mut mid = Workplane::xy().rect(bx, by);
-    mid.fillet((top_fillet - bottom_fillet) / 3.0);
-    mid.transform(dvec3(0.0, 0.0, height / 4.0), dvec3(1.0, 0.0, 0.0), angle / 4.0);
+    let mid = Workplane::xy().rect(bx, by).fillet((top_fillet - bottom_fillet) / 3.0).transform(
+        dvec3(0.0, 0.0, height / 4.0),
+        dvec3(1.0, 0.0, 0.0),
+        angle / 4.0,
+    );
 
     // We should use `ConnectEdgesToWires` for `Wire::from_edges`, as it
     // likely puts these arcs in the order we want.
-    let mut top_wire = Workplane::xy()
+    let top_wire = Workplane::xy()
         .sketch()
         .arc((curve, curve * tension), (0.0, ty / 2.0), (curve, ty - curve * tension))
         .arc((curve, ty - curve * tension), (tx / 2.0, ty), (tx - curve, ty - curve * tension))
         .arc((tx - curve, ty - curve * tension), (tx, ty / 2.0), (tx - curve, curve * tension))
         .arc((tx - curve, curve * tension), (tx / 2.0, 0.0), (curve, curve * tension))
-        .wire();
-
-    top_wire.fillet(top_fillet);
-    top_wire.translate(dvec3(-tx / 2.0, -ty / 2.0, 0.0));
-    top_wire.transform(dvec3(0.0, 0.0, height), dvec3(1.0, 0.0, 0.0), angle);
+        .wire()
+        .fillet(top_fillet)
+        .translate(dvec3(-tx / 2.0, -ty / 2.0, 0.0))
+        .transform(dvec3(0.0, 0.0, height), dvec3(1.0, 0.0, 0.0), angle);
 
     let keycap = Solid::loft([&base, &mid, &top_wire]);
 
@@ -99,8 +99,7 @@ pub fn shape() -> Shape {
         Solid::loft([&scoop_right, &scoop_mid, &scoop_left])
     };
 
-    let mut keycap = keycap.subtract(&scoop);
-    keycap.fillet_new_edges(0.6);
+    let keycap = keycap.subtract(&scoop).fillet_new_edges(0.6);
 
     let shell_bottom = Workplane::xy().rect(bx - thickness * 2.0, by - thickness * 2.0);
 
@@ -201,7 +200,7 @@ pub fn shape() -> Shape {
     }
 
     // TODO(bschwind) - This should probably be done after every union...
-    keycap.clean();
+    let mut keycap = keycap.clean();
 
     for (x, y) in &stem_points {
         let bottom_face = keycap.faces().farthest(Direction::NegZ);
@@ -222,7 +221,7 @@ pub fn shape() -> Shape {
         let (face_target, _) = faces.get(0).expect("We should have a face to extrude to");
         let post = circle.extrude_to_face(&keycap, face_target);
 
-        keycap = keycap.union(&post);
+        keycap = keycap.union(&post).into();
     }
 
     let r1 = Face::from_wire(&Workplane::xy().rect(4.15, 1.27));
@@ -234,11 +233,10 @@ pub fn shape() -> Shape {
         cross.set_global_translation(dvec3(x, y, 0.0));
         let cross = cross.extrude(dvec3(0.0, 0.0, 4.6));
 
-        keycap = keycap.subtract(&cross);
-        keycap.chamfer_new_edges(0.2);
+        keycap = keycap.subtract(&cross).chamfer_new_edges(0.2);
     }
 
-    keycap.into()
+    keycap
 }
 
 fn round_digits(num: f64, digits: i32) -> f64 {
