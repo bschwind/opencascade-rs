@@ -165,6 +165,19 @@ pub mod ffi {
             index: i32,
         ) -> UniquePtr<gp_Dir>;
 
+        type TColgp_Array1OfPnt2d;
+        #[cxx_name = "construct_unique"]
+        pub fn TColgp_Array1OfPnt2d_ctor(
+            lower_bound: i32,
+            upper_bound: i32,
+        ) -> UniquePtr<TColgp_Array1OfPnt2d>;
+        pub fn Length(self: &TColgp_Array1OfPnt2d) -> i32;
+        pub fn TColgp_Array1OfPnt2d_Value(
+            array: &TColgp_Array1OfPnt2d,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt2d>;
+        pub fn SetValue(self: Pin<&mut TColgp_Array1OfPnt2d>, index: i32, item: &gp_Pnt2d);
+
         type TColgp_Array2OfPnt;
         #[cxx_name = "construct_unique"]
         pub fn TColgp_Array2OfPnt_ctor(
@@ -590,6 +603,14 @@ pub mod ffi {
 
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
+
+        #[rust_name = "variable_add_edge"]
+        pub fn Add(
+            self: Pin<&mut BRepFilletAPI_MakeFillet>,
+            radius_values: &TColgp_Array1OfPnt2d,
+            edge: &TopoDS_Edge,
+        );
+
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepFilletAPI_MakeFillet) -> bool;

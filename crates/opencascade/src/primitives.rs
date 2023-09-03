@@ -1,5 +1,5 @@
 use cxx::UniquePtr;
-use glam::DVec3;
+use glam::{DVec2, DVec3};
 use opencascade_sys::ffi;
 
 mod boolean_shape;
@@ -89,6 +89,10 @@ impl<T: Into<Shape>> IntoShape for T {
 
 pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
     ffi::new_point(p.x, p.y, p.z)
+}
+
+pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::gp_Pnt2d> {
+    ffi::new_point_2d(p.x, p.y)
 }
 
 fn make_dir(p: DVec3) -> UniquePtr<ffi::gp_Dir> {
@@ -190,4 +194,27 @@ impl Iterator for FaceIterator {
             None
         }
     }
+}
+
+/// Given n and func, returns an iterator of (t, f(t)) values
+/// where t is in the range [0, 1].
+/// Note that n + 1 values are returned.
+pub fn approximate_function<F: FnMut(f64) -> f64>(
+    n: usize,
+    mut func: F,
+) -> impl Iterator<Item = (f64, f64)> {
+    let mut count = 0;
+
+    std::iter::from_fn(move || {
+        if count > n {
+            return None;
+        }
+
+        let t = count as f64 / n as f64;
+        count += 1;
+
+        let val = func(t);
+
+        Some((t, val))
+    })
 }

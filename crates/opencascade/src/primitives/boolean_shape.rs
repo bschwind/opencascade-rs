@@ -33,6 +33,14 @@ impl BooleanShape {
     }
 
     #[must_use]
+    pub fn variable_fillet_new_edges(
+        &self,
+        radius_values: impl IntoIterator<Item = (f64, f64)>,
+    ) -> Shape {
+        self.shape.variable_fillet_edges(radius_values, &self.new_edges)
+    }
+
+    #[must_use]
     pub fn chamfer_new_edges(&self, distance: f64) -> Shape {
         self.shape.chamfer_edges(distance, &self.new_edges)
     }
