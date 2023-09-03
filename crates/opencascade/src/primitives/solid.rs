@@ -37,7 +37,6 @@ impl Solid {
         Compound::from_compound(compound)
     }
 
-    #[must_use]
     pub fn loft<T: AsRef<Wire>>(wires: impl IntoIterator<Item = T>) -> Self {
         let is_solid = true;
         let mut make_loft = ffi::BRepOffsetAPI_ThruSections_ctor(is_solid);
