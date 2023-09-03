@@ -84,7 +84,7 @@ impl Wire {
     }
 
     #[must_use]
-    pub fn fillet(&mut self, radius: f64) -> Wire {
+    pub fn fillet(&self, radius: f64) -> Wire {
         // Create a face from this wire
         let face = Face::from_wire(self).fillet(radius);
         let inner = ffi::outer_wire(&face.inner);
@@ -94,7 +94,7 @@ impl Wire {
 
     /// Chamfer the wire edges at each vertex by a given distance.
     #[must_use]
-    pub fn chamfer(&mut self, distance_1: f64) -> Wire {
+    pub fn chamfer(&self, distance_1: f64) -> Wire {
         let face = Face::from_wire(self).chamfer(distance_1);
         let inner = ffi::outer_wire(&face.inner);
 
