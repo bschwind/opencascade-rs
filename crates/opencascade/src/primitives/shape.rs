@@ -88,10 +88,7 @@ impl Shape {
 
     #[must_use]
     pub fn fillet_edge(&self, radius: f64, edge: &Edge) -> Self {
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
-        make_fillet.pin_mut().add_edge(radius, &edge.inner);
-
-        Self::from_shape(make_fillet.pin_mut().Shape())
+        self.fillet_edges(radius, [edge])
     }
 
     #[must_use]
@@ -100,25 +97,12 @@ impl Shape {
         radius_values: impl IntoIterator<Item = (f64, f64)>,
         edge: &Edge,
     ) -> Self {
-        let radius_values: Vec<_> = radius_values.into_iter().collect();
-        let mut array = ffi::TColgp_Array1OfPnt2d_ctor(1, radius_values.len() as i32);
-
-        for (index, (t, radius)) in radius_values.into_iter().enumerate() {
-            array.pin_mut().SetValue(index as i32 + 1, &make_point2d(dvec2(t, radius)));
-        }
-
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
-        make_fillet.pin_mut().variable_add_edge(&array, &edge.inner);
-
-        Self::from_shape(make_fillet.pin_mut().Shape())
+        self.variable_fillet_edges(radius_values, [edge])
     }
 
     #[must_use]
     pub fn chamfer_edge(&self, distance: f64, edge: &Edge) -> Self {
-        let mut make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
-        make_chamfer.pin_mut().add_edge(distance, &edge.inner);
-
-        Self::from_shape(make_chamfer.pin_mut().Shape())
+        self.chamfer_edges(distance, [edge])
     }
 
     #[must_use]
