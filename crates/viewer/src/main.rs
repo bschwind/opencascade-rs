@@ -2,9 +2,9 @@ use crate::{
     edge_drawer::{EdgeDrawer, LineBuilder, LineVertex3, RenderedLine},
     surface_drawer::{CadMesh, SurfaceDrawer},
 };
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use glam::{vec3, DVec3, Mat4};
-use opencascade::primitives::Shape;
+use opencascade::{adhoc::AdHocShape, primitives::Shape};
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
@@ -14,6 +14,7 @@ use simple_game::{
     GameApp,
 };
 use smaa::{SmaaMode, SmaaTarget};
+use std::path::PathBuf;
 use winit::{
     event::{KeyboardInput, VirtualKeyCode, WindowEvent},
     event_loop::ControlFlow,
@@ -40,7 +41,16 @@ struct ViewerApp {
     scale: f32,
 }
 
-#[derive(Parser)]
+#[derive(Parser, Debug, Clone)]
+struct AppArgs {
+    #[arg(long, group = "model")]
+    step_file: Option<PathBuf>,
+
+    #[arg(long, value_enum, group = "model")]
+    example: Option<Example>,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, ValueEnum)]
 enum Example {
     Airfoil,
     BoxShape,
@@ -75,8 +85,16 @@ impl GameApp for ViewerApp {
     }
 
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
-        let example = Example::parse();
-        let shape = example.shape();
+        let args = AppArgs::parse();
+
+        let shape = if let Some(step_file) = args.step_file {
+            Shape::read_step(step_file).expect("Failed to read STEP file, {step_file}")
+        } else if let Some(example) = args.example {
+            example.shape()
+        } else {
+            println!("Warning - no example or STEP file specified, you get a default cube.");
+            AdHocShape::make_box(50.0, 50.0, 50.0)
+        };
 
         let mesh = shape.mesh().expect("example shape should yield a valid triangulation");
         let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
