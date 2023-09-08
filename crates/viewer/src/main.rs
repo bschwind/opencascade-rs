@@ -92,7 +92,7 @@ impl GameApp for ViewerApp {
         } else if let Some(example) = args.example {
             example.shape()
         } else {
-            println!("Warning - no example or STEP file specified, you get a default cube.");
+            eprintln!("Warning - no example or STEP file specified, you get a default cube.");
             AdHocShape::make_box(50.0, 50.0, 50.0)
         };
 
