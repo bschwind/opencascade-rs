@@ -1,6 +1,8 @@
-use crate::primitives::Shape;
-use cxx::UniquePtr;
-use glam::DVec3;
+use crate::{
+    primitives::{Face, Shape, Solid, Wire},
+    Error,
+};
+use glam::{dvec3, DVec3};
 use opencascade_sys::ffi;
 
 /// Collections of helper functions for the [`Shape`] struct that provides an "ad-hoc"
@@ -43,43 +45,12 @@ impl AdHocShape {
     /// Purposefully underpowered for now, this simply takes a list of points,
     /// creates a face out of them, and then extrudes it by h in the positive Z
     /// direction.
-    pub fn extrude_polygon(points: &[DVec3], h: f64) -> Shape {
-        assert!(points.len() >= 3);
-
-        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
-
-        let add_segment =
-            |p1: DVec3, p2: DVec3, make_wire: &mut UniquePtr<ffi::BRepBuilderAPI_MakeWire>| {
-                let p1 = ffi::new_point(p1.x, p1.y, p1.z);
-                let p2 = ffi::new_point(p2.x, p2.y, p2.z);
-
-                let segment = ffi::GC_MakeSegment_point_point(&p1, &p2);
-                let mut edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
-                    &ffi::new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
-                        &ffi::GC_MakeSegment_Value(&segment),
-                    ),
-                );
-
-                make_wire.pin_mut().add_edge(edge.pin_mut().Edge());
-            };
-
-        for window in points.windows(2) {
-            add_segment(window[0], window[1], &mut make_wire);
-        }
-
-        add_segment(*points.last().unwrap(), points[0], &mut make_wire);
-
-        let wire_profile = make_wire.pin_mut().Wire();
-        let mut face_profile = ffi::BRepBuilderAPI_MakeFace_wire(wire_profile, false);
-        let prism_vec = ffi::new_vec(0.0, 0.0, h);
-        let mut extrusion = ffi::BRepPrimAPI_MakePrism_ctor(
-            face_profile.pin_mut().Shape(),
-            &prism_vec,
-            false,
-            true,
-        );
-
-        Shape::from_shape(extrusion.pin_mut().Shape())
+    pub fn extrude_polygon(
+        points: impl IntoIterator<Item = DVec3>,
+        h: f64,
+    ) -> Result<Solid, Error> {
+        let wire = Wire::from_ordered_points(points)?;
+        Ok(Face::from_wire(&wire).extrude(dvec3(0.0, 0.0, h)))
     }
 
     /// Drills a cylindrical hole starting at point p, pointing down the Z axis

@@ -18,4 +18,6 @@ pub enum Error {
     TriangulationFailed,
     #[error("encountered a face with no triangulation")]
     UntriangulatedFace,
+    #[error("at least 2 points are required for creating a wire")]
+    NotEnoughPoints,
 }
