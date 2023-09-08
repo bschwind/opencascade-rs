@@ -3,6 +3,7 @@ use std::iter::once;
 use crate::{
     angle::{Angle, ToAngle},
     primitives::{make_dir, make_point, make_vec, Edge, Face, Shape},
+    Error,
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
@@ -45,18 +46,21 @@ impl Wire {
         Self::from_wire(make_wire.pin_mut().Wire())
     }
 
-    pub fn from_ordered_points(points: impl IntoIterator<Item = DVec3>) -> Self {
+    pub fn from_ordered_points(points: impl IntoIterator<Item = DVec3>) -> Result<Self, Error> {
         let points: Vec<_> = points.into_iter().collect();
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 
-        if let (Some(first), Some(last)) = (points.first(), points.last()) {
-            for window in points.windows(2).chain(once([*last, *first].as_slice())) {
-                let edge = Edge::segment(window[0], window[1]);
-                make_wire.pin_mut().add_edge(&edge.inner);
-            }
+        if points.len() < 3 {
+            return Err(Error::NotEnoughPoints);
         }
 
-        Self::from_make_wire(make_wire)
+        let (first, last) = (points.first().unwrap(), points.last().unwrap());
+        for window in points.windows(2).chain(once([*last, *first].as_slice())) {
+            let edge = Edge::segment(window[0], window[1]);
+            make_wire.pin_mut().add_edge(&edge.inner);
+        }
+
+        Ok(Self::from_make_wire(make_wire))
     }
 
     pub fn from_edges<'a>(edges: impl IntoIterator<Item = &'a Edge>) -> Self {

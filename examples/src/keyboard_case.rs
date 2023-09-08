@@ -259,6 +259,7 @@ fn pcb_usb_overhang() -> Shape {
         ],
         PCB_THICKNESS + 0.5,
     )
+    .unwrap()
     .into()
 }
 
