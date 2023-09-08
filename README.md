@@ -65,6 +65,8 @@ NOTE: If you have installed `OCCT` manually you may need specify the path to it 
 
 * `cargo run --release --example bottle`
 
+The program will output `bottle.stl` in the current working directory.
+
 ### Lower Level
 
 There are low level examples which are more or less directly calling OpenCascade functions, such as the classic OpenCascade [bottle](./crates/opencascade-sys/examples/bottle.rs) example, or a [simpler](./crates/opencascade-sys/examples/simple.rs) one.
@@ -80,7 +82,13 @@ There is currently an experimental viewer application based on WGPU, which will 
 To e.g. visualize the keycap example, you can run the current viewer app with
 
 ```
-$ cargo run --release --bin viewer -- keycap
+$ cargo run --release --bin viewer -- --example keycap
+```
+
+To view a STEP file:
+
+```
+$ cargo run --release --bin viewer -- --step-file SOME_FILE.step
 ```
 
 ## Code Formatting
