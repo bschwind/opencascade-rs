@@ -48,16 +48,20 @@ impl Wire {
 
     pub fn from_ordered_points(points: impl IntoIterator<Item = DVec3>) -> Result<Self, Error> {
         let points: Vec<_> = points.into_iter().collect();
-        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
-
-        if points.len() < 3 {
+        if points.len() < 2 {
             return Err(Error::NotEnoughPoints);
         }
 
         let (first, last) = (points.first().unwrap(), points.last().unwrap());
-        for window in points.windows(2).chain(once([*last, *first].as_slice())) {
-            let edge = Edge::segment(window[0], window[1]);
-            make_wire.pin_mut().add_edge(&edge.inner);
+        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+
+        if points.len() == 2 {
+            make_wire.pin_mut().add_edge(&Edge::segment(*first, *last).inner);
+        } else {
+            for window in points.windows(2).chain(once([*last, *first].as_slice())) {
+                let edge = Edge::segment(window[0], window[1]);
+                make_wire.pin_mut().add_edge(&edge.inner);
+            }
         }
 
         Ok(Self::from_make_wire(make_wire))
