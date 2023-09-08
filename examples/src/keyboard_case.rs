@@ -251,7 +251,7 @@ fn usb_connector_cutout() -> Shape {
 // extend forward into the case.
 fn pcb_usb_overhang() -> Shape {
     AdHocShape::extrude_polygon(
-        &[
+        [
             DVec3::new(19.05, 0.0, PCB_BOTTOM_Z),
             DVec3::new(21.431, 2.381, PCB_BOTTOM_Z),
             DVec3::new(30.596, 2.381, PCB_BOTTOM_Z),

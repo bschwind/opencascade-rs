@@ -42,9 +42,7 @@ impl AdHocShape {
     /// Purposefully underpowered for now, this simply takes a list of points,
     /// creates a face out of them, and then extrudes it by h in the positive Z
     /// direction.
-    pub fn extrude_polygon(points: &[DVec3], h: f64) -> Solid {
-        assert!(points.len() >= 3);
-
+    pub fn extrude_polygon(points: impl IntoIterator<Item = DVec3>, h: f64) -> Solid {
         let wire = Wire::from_ordered_points(points);
         Face::from_wire(&wire).extrude(dvec3(0.0, 0.0, h))
     }

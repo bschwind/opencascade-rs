@@ -45,7 +45,8 @@ impl Wire {
         Self::from_wire(make_wire.pin_mut().Wire())
     }
 
-    pub fn from_ordered_points(points: &[DVec3]) -> Self {
+    pub fn from_ordered_points(points: impl IntoIterator<Item = DVec3>) -> Self {
+        let points: Vec<_> = points.into_iter().collect();
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 
         if let (Some(first), Some(last)) = (points.first(), points.last()) {
