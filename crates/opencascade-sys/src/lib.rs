@@ -765,6 +765,21 @@ pub mod ffi {
         );
         pub fn IsDone(self: &BRepOffsetAPI_MakeThickSolid) -> bool;
 
+        type BRepOffsetAPI_MakePipeShell;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepOffsetAPI_MakePipeShell_ctor(
+            wire: &TopoDS_Wire,
+        ) -> UniquePtr<BRepOffsetAPI_MakePipeShell>;
+
+        pub fn Add(
+            self: Pin<&mut BRepOffsetAPI_MakePipeShell>,
+            profile: &TopoDS_Shape,
+            with_contact: bool,
+            with_correction: bool,
+        );
+        pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakePipeShell>) -> &TopoDS_Shape;
+
         // Lofting
         type BRepOffsetAPI_ThruSections;
 
