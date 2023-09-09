@@ -1,4 +1,4 @@
-use glam::{vec3, Mat3, Mat4, Vec3};
+use glam::{vec3, Mat3, Mat4, Quat, Vec3};
 
 const MIN_ZOOM_FACTOR: f32 = 0.05;
 
@@ -68,10 +68,12 @@ impl Camera {
 
     /// Orbit around the target while keeping the distance.
     pub fn rotate(&mut self, yaw: f32, pitch: f32) {
-        let backward = self.position - self.target;
-        let yaw_rotation = Mat3::from_rotation_z(yaw);
-        let pitch_rotation = Mat3::from_rotation_x(pitch);
-        self.position = self.target + yaw_rotation * pitch_rotation * backward
+        let backward = (self.position - self.target).normalize();
+        let leftward = self.upward.cross(backward);
+        let rotation =
+            Quat::from_axis_angle(self.upward, yaw) * Quat::from_axis_angle(leftward, pitch);
+        self.position = (self.target + rotation * backward) * backward.length();
+        self.upward = rotation * self.upward;
     }
 
     pub fn matrix(&self) -> Mat4 {
