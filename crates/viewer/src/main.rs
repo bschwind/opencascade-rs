@@ -202,55 +202,108 @@ impl GameApp for ViewerApp {
     fn render(&mut self, graphics_device: &mut GraphicsDevice, _window: &Window) {
         let mut frame_encoder = graphics_device.begin_frame();
 
+        let (width, height) = frame_encoder.surface_dimensions();
+
         let smaa_render_target = self.smaa_target.start_frame(
             graphics_device.device(),
             graphics_device.queue(),
             &frame_encoder.backbuffer_view,
         );
 
-        let camera_matrix = self.camera.matrix();
+        let left_camera_matrix = self.camera.matrix(true);
+        let right_camera_matrix = self.camera.matrix(false);
         let transform = Mat4::from_rotation_z(self.angle)
             * Mat4::from_scale(vec3(self.scale, self.scale, self.scale));
 
+        let mut render_encoder = graphics_device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         self.surface_drawer.render(
-            &mut frame_encoder.encoder,
+            &mut render_encoder,
             &smaa_render_target,
             &self.depth_texture.view,
             graphics_device.queue(),
             &self.cad_mesh,
-            camera_matrix,
+            left_camera_matrix,
             transform,
+            width,
+            height,
+            true,
         );
+        graphics_device.queue().submit(Some(render_encoder.finish()));
+
+        let mut render_encoder = graphics_device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        self.surface_drawer.render(
+            &mut render_encoder,
+            &smaa_render_target,
+            &self.depth_texture.view,
+            graphics_device.queue(),
+            &self.cad_mesh,
+            right_camera_matrix,
+            transform,
+            width,
+            height,
+            false,
+        );
+        graphics_device.queue().submit(Some(render_encoder.finish()));
 
         let dash_size = 0.5;
         let gap_size = 0.5;
 
+        let mut render_encoder = graphics_device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         self.line_drawer.draw(
             &self.rendered_edges,
-            &mut frame_encoder.encoder,
+            &mut render_encoder,
             &smaa_render_target,
             Some(&self.depth_texture.view),
             graphics_device.queue(),
-            camera_matrix,
+            left_camera_matrix,
             transform,
             dash_size,
             gap_size,
+            width,
+            height,
+            true,
         );
+        graphics_device.queue().submit(Some(render_encoder.finish()));
 
-        self.text_system.render_horizontal(
-            TextAlignment {
-                x: AxisAlign::Start(10),
-                y: AxisAlign::Start(10),
-                max_width: None,
-                max_height: None,
-            },
-            &[StyledText::default_styling(&format!("FPS: {}", self.fps_counter.fps()))],
-            &mut frame_encoder.encoder,
+        let mut render_encoder = graphics_device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+        self.line_drawer.draw(
+            &self.rendered_edges,
+            &mut render_encoder,
             &smaa_render_target,
+            Some(&self.depth_texture.view),
             graphics_device.queue(),
+            right_camera_matrix,
+            transform,
+            dash_size,
+            gap_size,
+            width,
+            height,
+            false,
         );
+        graphics_device.queue().submit(Some(render_encoder.finish()));
 
-        graphics_device.queue().submit(Some(frame_encoder.encoder.finish()));
+        // self.text_system.render_horizontal(
+        //     TextAlignment {
+        //         x: AxisAlign::Start(10),
+        //         y: AxisAlign::Start(10),
+        //         max_width: None,
+        //         max_height: None,
+        //     },
+        //     &[StyledText::default_styling(&format!("FPS: {}", self.fps_counter.fps()))],
+        //     &mut render_encoder,
+        //     &smaa_render_target,
+        //     graphics_device.queue(),
+        // );
+
+        // graphics_device.queue().submit(Some(render_encoder.finish()));
 
         smaa_render_target.resolve();
         frame_encoder.frame.present();

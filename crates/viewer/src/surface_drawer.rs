@@ -5,8 +5,10 @@ use simple_game::graphics::GraphicsDevice;
 use wgpu::{self, util::DeviceExt, Buffer, RenderPipeline};
 
 pub struct SurfaceDrawer {
-    vertex_uniform: wgpu::Buffer,
-    uniform_bind_group: wgpu::BindGroup,
+    left_vertex_uniform: wgpu::Buffer,
+    right_vertex_uniform: wgpu::Buffer,
+    left_uniform_bind_group: wgpu::BindGroup,
+    right_uniform_bind_group: wgpu::BindGroup,
     pipeline: RenderPipeline,
 }
 
@@ -19,7 +21,13 @@ impl SurfaceDrawer {
         // Uniform buffer
         let cad_mesh_uniforms = CadMeshUniforms::default();
 
-        let vertex_uniform = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let left_vertex_uniform = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Line drawer vertex shader uniform buffer"),
+            contents: bytemuck::bytes_of(&cad_mesh_uniforms),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
+        let right_vertex_uniform = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Line drawer vertex shader uniform buffer"),
             contents: bytemuck::bytes_of(&cad_mesh_uniforms),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
@@ -104,16 +112,31 @@ impl SurfaceDrawer {
             multiview: None,
         });
 
-        let uniform_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        let left_uniform_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             layout: &pipeline.get_bind_group_layout(0),
             entries: &[wgpu::BindGroupEntry {
                 binding: 0,
-                resource: vertex_uniform.as_entire_binding(),
+                resource: left_vertex_uniform.as_entire_binding(),
             }],
             label: None,
         });
 
-        Self { vertex_uniform, uniform_bind_group, pipeline }
+        let right_uniform_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &pipeline.get_bind_group_layout(0),
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: right_vertex_uniform.as_entire_binding(),
+            }],
+            label: None,
+        });
+
+        Self {
+            left_vertex_uniform,
+            right_vertex_uniform,
+            left_uniform_bind_group,
+            right_uniform_bind_group,
+            pipeline,
+        }
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -126,10 +149,17 @@ impl SurfaceDrawer {
         cad_mesh: &CadMesh,
         camera_matrix: Mat4,
         transform: Mat4,
+        width: u32,
+        height: u32,
+        render_left: bool,
     ) {
         let uniforms = CadMeshUniforms { proj: camera_matrix, transform };
 
-        queue.write_buffer(&self.vertex_uniform, 0, bytemuck::bytes_of(&uniforms));
+        if render_left {
+            queue.write_buffer(&self.left_vertex_uniform, 0, bytemuck::bytes_of(&uniforms));
+        } else {
+            queue.write_buffer(&self.right_vertex_uniform, 0, bytemuck::bytes_of(&uniforms));
+        }
 
         let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("CadMesh render pass"),
@@ -137,19 +167,42 @@ impl SurfaceDrawer {
                 view: render_target,
                 resolve_target: None,
                 ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.3, g: 0.3, b: 0.3, a: 1.0 }),
+                    load: if render_left {
+                        wgpu::LoadOp::Clear(wgpu::Color { r: 0.3, g: 0.3, b: 0.3, a: 1.0 })
+                    } else {
+                        wgpu::LoadOp::Load
+                    },
                     store: true,
                 },
             })],
             depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                 view: depth_view,
-                depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Clear(1.0), store: true }),
+                depth_ops: Some(wgpu::Operations {
+                    load: if render_left { wgpu::LoadOp::Clear(1.0) } else { wgpu::LoadOp::Load },
+                    store: true,
+                }),
                 stencil_ops: None,
             }),
         });
 
+        let half_width = width as f32 / 2.0;
+
+        if render_left {
+            render_pass.set_viewport(0.0, 0.0, half_width, height as f32, 0.0, 1.0);
+        } else {
+            render_pass.set_viewport(half_width, 0.0, half_width, height as f32, 0.0, 1.0);
+        }
+
         render_pass.set_pipeline(&self.pipeline);
-        render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
+        render_pass.set_bind_group(
+            0,
+            if render_left {
+                &self.left_uniform_bind_group
+            } else {
+                &self.right_uniform_bind_group
+            },
+            &[],
+        );
         render_pass.set_index_buffer(cad_mesh.index_buf.slice(..), wgpu::IndexFormat::Uint32);
         render_pass.set_vertex_buffer(0, cad_mesh.vertex_buf.slice(..));
         render_pass.draw_indexed(0..(cad_mesh.num_indices as u32), 0, 0..1);

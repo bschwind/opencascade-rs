@@ -81,6 +81,9 @@ impl EdgeDrawer {
         transform: Mat4,
         dash_size: f32,
         gap_size: f32,
+        width: u32,
+        height: u32,
+        render_left: bool,
     ) {
         // Write dashed uniforms
         let mut uniforms = LineUniforms {
@@ -120,20 +123,28 @@ impl EdgeDrawer {
                 }),
             });
 
+            let half_width = width as f32 / 2.0;
+
+            if render_left {
+                render_pass.set_viewport(0.0, 0.0, half_width, height as f32, 0.0, 1.0);
+            } else {
+                render_pass.set_viewport(half_width, 0.0, half_width, height as f32, 0.0, 1.0);
+            }
+
             // Render dashed line strips
-            render_pass.set_pipeline(&self.dashed_line_strip_pipeline);
+            // render_pass.set_pipeline(&self.dashed_line_strip_pipeline);
             render_pass.set_vertex_buffer(0, self.buffers.round_strip_geometry.slice(..));
             render_pass.set_vertex_buffer(1, rendered_line.vertex_buf.slice(..));
-            render_pass.set_bind_group(0, &self.bind_groups.dashed_vertex_uniform, &[]);
+            // render_pass.set_bind_group(0, &self.bind_groups.dashed_vertex_uniform, &[]);
 
-            let mut offset = 0usize;
-            let vertex_count = self.buffers.round_strip_geometry_len as u32;
+            // let mut offset = 0usize;
+            // let vertex_count = self.buffers.round_strip_geometry_len as u32;
 
-            for line_strip_size in &rendered_line.line_sizes {
-                let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
-                offset += line_strip_size;
-                render_pass.draw(0..vertex_count, range);
-            }
+            // for line_strip_size in &rendered_line.line_sizes {
+            //     let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
+            //     offset += line_strip_size;
+            //     render_pass.draw(0..vertex_count, range);
+            // }
 
             // Render solid line strips
             render_pass.set_pipeline(&self.solid_line_strip_pipeline);

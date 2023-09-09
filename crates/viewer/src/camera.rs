@@ -19,7 +19,7 @@ impl Camera {
     }
 
     pub fn resize(&mut self, width: u32, height: u32) {
-        self.aspect_ratio = width as f32 / height as f32;
+        self.aspect_ratio = (width as f32 / 2.0) / height as f32;
     }
 
     pub fn use_perspective(&mut self) {
@@ -30,7 +30,7 @@ impl Camera {
         self.projection = Projection::Orthographic;
     }
 
-    pub fn matrix(&self) -> Mat4 {
+    pub fn matrix(&self, is_left: bool) -> Mat4 {
         // These magic numbers are configured so that the particular model we are loading is
         // visible in its entirety. They will be dynamically computed eventually when we have "fit
         // to view" function or alike.
@@ -48,10 +48,15 @@ impl Camera {
             },
         };
 
+        let ipd = 60.0;
+        let x_offset = if is_left { -ipd / 2.0 } else { ipd / 2.0 };
+
+        // let eye_offset = Mat4::from_translation(vec3(x_offset, 0.0, 0.0));
+
         let view = Mat4::look_at_rh(
-            vec3(20.0, -30.0, 20.0), // Eye position
-            vec3(0.0, 0.0, 0.0),     // Look-at target
-            vec3(0.0, 0.0, 1.0),     // Up vector of the camera
+            vec3(x_offset, -800.0, 300.0), // Eye position
+            vec3(0.0, 0.0, 0.0),           // Look-at target
+            vec3(0.0, 0.0, 1.0),           // Up vector of the camera
         );
 
         proj * view
