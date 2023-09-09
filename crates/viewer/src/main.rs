@@ -28,12 +28,13 @@ mod camera;
 mod edge_drawer;
 mod surface_drawer;
 
-// Multipliers to convert mouse position deltas to a more sane camera perspective change.
+// Multipliers to convert mouse position deltas to a more intuitve camera perspective change.
 const ZOOM_MULTIPLIER: f32 = 5.0;
-const TOUCHPAD_ZOOM_MULTIPLIER: f32 = 2.0;
-const ROTATE_MULTIPLIER: f32 = 5.0;
-const TOUCHPAD_ROTATE_MULTIPLIER: f32 = 0.05;
-const PAN_MULTIPLIER: f32 = 100.0;
+const TOUCHPAD_ZOOM_MULTIPLIER: f32 = 0.5;
+const ROTATE_MULTIPLIER: f32 = -5.0;
+const TOUCHPAD_ROTATE_MULTIPLIER: f32 = -0.05;
+const PAN_MULTIPLIER: f32 = 150.0;
+const TOUCHPAD_PAN_MULTIPLIER: f32 = 100.0;
 
 #[derive(Default)]
 struct MouseState {
@@ -240,9 +241,13 @@ impl GameApp for ViewerApp {
                 self.mouse_state.input(*button, *state)
             },
             WindowEvent::MouseWheel { delta: PixelDelta(delta), .. } => {
+                // winit can not distinguish mouse wheel and touchpad pan events unfortunately.
+                // Because of that, we assign pan operation to MouseWheel events. For mice, you
+                // need to instead use mouse move while holding down the right button.
                 let delta_x = delta.x as f32 / self.client_rect.x;
                 let delta_y = delta.y as f32 / self.client_rect.y;
-                self.camera.pan(delta_x * PAN_MULTIPLIER, delta_y * PAN_MULTIPLIER);
+                self.camera
+                    .pan(delta_x * TOUCHPAD_PAN_MULTIPLIER, delta_y * TOUCHPAD_PAN_MULTIPLIER);
             },
             WindowEvent::TouchpadMagnify { delta, .. } => {
                 self.camera.zoom(*delta as f32 * TOUCHPAD_ZOOM_MULTIPLIER);
