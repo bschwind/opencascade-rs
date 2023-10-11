@@ -40,6 +40,20 @@ pub mod ffi {
         BOPAlgo_GlueFull,
     }
 
+    #[derive(Debug)]
+    #[repr(u32)]
+    pub enum GeomAbs_CurveType {
+        GeomAbs_Line,
+        GeomAbs_Circle,
+        GeomAbs_Ellipse,
+        GeomAbs_Hyperbola,
+        GeomAbs_Parabola,
+        GeomAbs_BezierCurve,
+        GeomAbs_BSplineCurve,
+        GeomAbs_OffsetCurve,
+        GeomAbs_OtherCurve,
+    }
+
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -282,6 +296,9 @@ pub mod ffi {
         pub fn Y(self: &gp_Vec) -> f64;
         pub fn Z(self: &gp_Vec) -> f64;
 
+        // Edge types
+        type GeomAbs_CurveType;
+
         // Segments
         type GC_MakeSegment;
         type GCE2d_MakeSegment;
@@ -499,6 +516,7 @@ pub mod ffi {
         pub fn FirstParameter(self: &BRepAdaptor_Curve) -> f64;
         pub fn LastParameter(self: &BRepAdaptor_Curve) -> f64;
         pub fn BRepAdaptor_Curve_value(curve: &BRepAdaptor_Curve, u: f64) -> UniquePtr<gp_Pnt>;
+        pub fn GetType(self: &BRepAdaptor_Curve) -> GeomAbs_CurveType;
 
         // Primitives
         type BRepPrimAPI_MakePrism;

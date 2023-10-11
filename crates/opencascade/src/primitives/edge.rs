@@ -3,6 +3,36 @@ use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys::ffi;
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum EdgeType {
+    Line,
+    Circle,
+    Ellipse,
+    Hyperbola,
+    Parabola,
+    BezierCurve,
+    BSplineCurve,
+    OffsetCurve,
+    OtherCurve,
+}
+
+impl From<ffi::GeomAbs_CurveType> for EdgeType {
+    fn from(curve_type: ffi::GeomAbs_CurveType) -> Self {
+        match curve_type {
+            ffi::GeomAbs_CurveType::GeomAbs_Line => Self::Line,
+            ffi::GeomAbs_CurveType::GeomAbs_Circle => Self::Circle,
+            ffi::GeomAbs_CurveType::GeomAbs_Ellipse => Self::Ellipse,
+            ffi::GeomAbs_CurveType::GeomAbs_Hyperbola => Self::Hyperbola,
+            ffi::GeomAbs_CurveType::GeomAbs_Parabola => Self::Parabola,
+            ffi::GeomAbs_CurveType::GeomAbs_BezierCurve => Self::BezierCurve,
+            ffi::GeomAbs_CurveType::GeomAbs_BSplineCurve => Self::BSplineCurve,
+            ffi::GeomAbs_CurveType::GeomAbs_OffsetCurve => Self::OffsetCurve,
+            ffi::GeomAbs_CurveType::GeomAbs_OtherCurve => Self::OtherCurve,
+            ffi::GeomAbs_CurveType { repr } => panic!("Unexpected curve type: {repr}"),
+        }
+    }
+}
+
 pub struct Edge {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Edge>,
 }
@@ -84,6 +114,12 @@ impl Edge {
     }
 
     pub fn tangent_arc(_p1: DVec3, _tangent: DVec3, _p3: DVec3) {}
+
+    pub fn edge_type(&self) -> EdgeType {
+        let curve = ffi::BRepAdaptor_Curve_ctor(&self.inner);
+
+        EdgeType::from(curve.GetType())
+    }
 }
 
 pub struct ApproximationSegmentIterator {
