@@ -258,6 +258,16 @@ impl Face {
         CompoundFace::from_compound(compound)
     }
 
+    pub fn surface_area(&self) -> f64 {
+        let mut props = ffi::GProp_GProps_ctor();
+
+        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        ffi::BRepGProp_SurfaceProperties(inner_shape, props.pin_mut());
+
+        // Returns surface area, obviously.
+        props.Mass()
+    }
+
     pub fn orientation(&self) -> FaceOrientation {
         FaceOrientation::from(self.inner.Orientation())
     }
