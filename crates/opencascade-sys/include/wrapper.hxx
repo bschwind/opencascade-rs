@@ -36,8 +36,8 @@
 #include <GProp_GProps.hxx>
 #include <Geom2d_Ellipse.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <GeomAbs_CurveType.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
+#include <GeomAbs_CurveType.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom_Plane.hxx>
