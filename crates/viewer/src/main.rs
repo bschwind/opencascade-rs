@@ -60,6 +60,7 @@ enum Example {
     KeyboardCase,
     Keycap,
     RoundedChamfer,
+    TurnersCube,
     VariableFillet,
 }
 
@@ -74,6 +75,7 @@ impl Example {
             Example::KeyboardCase => examples::keyboard_case::shape(),
             Example::Keycap => examples::keycap::shape(),
             Example::RoundedChamfer => examples::rounded_chamfer::shape(),
+            Example::TurnersCube => examples::turners_cube::shape(),
             Example::VariableFillet => examples::variable_fillet::shape(),
         }
     }

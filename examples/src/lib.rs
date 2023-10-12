@@ -6,4 +6,5 @@ pub mod high_level_bottle;
 pub mod keyboard_case;
 pub mod keycap;
 pub mod rounded_chamfer;
+pub mod turners_cube;
 pub mod variable_fillet;
