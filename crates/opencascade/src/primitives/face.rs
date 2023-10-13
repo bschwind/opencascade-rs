@@ -258,6 +258,16 @@ impl Face {
         CompoundFace::from_compound(compound)
     }
 
+    pub fn surface_area(&self) -> f64 {
+        let mut props = ffi::GProp_GProps_ctor();
+
+        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        ffi::BRepGProp_SurfaceProperties(inner_shape, props.pin_mut());
+
+        // Returns surface area, obviously.
+        props.Mass()
+    }
+
     pub fn orientation(&self) -> FaceOrientation {
         FaceOrientation::from(self.inner.Orientation())
     }
@@ -351,5 +361,20 @@ impl From<ffi::TopAbs_Orientation> for FaceOrientation {
                 panic!("TopAbs_Orientation had an unrepresentable value: {repr}")
             },
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add() {
+        let face = Workplane::xy().rect(7.0, 5.0).to_face();
+        assert!(
+            (face.surface_area() - 35.0).abs() <= 0.00001,
+            "Expected surface_area() to be ~35.0, was actually {}",
+            face.surface_area()
+        );
     }
 }
