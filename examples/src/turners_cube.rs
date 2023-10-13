@@ -27,27 +27,14 @@ fn edge_len_from_circum_diam(d: f64) -> f64 {
 }
 
 fn hollow_cube(edge_length: f64, hole_diameter: f64, wall_thickness: f64) -> Shape {
-    let p1 = rolling_pin(
-        &Workplane::xy(),
-        0.5 * hole_diameter,
-        edge_length,
-        0.5 * edge_length - wall_thickness,
-        edge_length - 2.0 * wall_thickness,
-    );
-    let p2 = rolling_pin(
-        &Workplane::yz(),
-        0.5 * hole_diameter,
-        edge_length,
-        0.5 * edge_length - wall_thickness,
-        edge_length - 2.0 * wall_thickness,
-    );
-    let p3 = rolling_pin(
-        &Workplane::zx(),
-        0.5 * hole_diameter,
-        edge_length,
-        0.5 * edge_length - wall_thickness,
-        edge_length - 2.0 * wall_thickness,
-    );
+    let r1 = 0.5 * hole_diameter;
+    let h1 = edge_length;
+    let r2 = 0.5 * edge_length - wall_thickness;
+    let h2 = edge_length - 2.0 * wall_thickness;
+
+    let p1 = rolling_pin(&Workplane::xy(), r1, h1, r2, h2);
+    let p2 = rolling_pin(&Workplane::yz(), r1, h1, r2, h2);
+    let p3 = rolling_pin(&Workplane::zx(), r1, h1, r2, h2);
 
     let cutout = p1.union(&p2).union(&p3).into_shape();
 
