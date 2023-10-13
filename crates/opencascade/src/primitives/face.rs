@@ -363,3 +363,18 @@ impl From<ffi::TopAbs_Orientation> for FaceOrientation {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add() {
+        let face = Workplane::xy().rect(7.0, 5.0).to_face();
+        assert!(
+            (face.surface_area() - 35.0).abs() <= 0.00001,
+            "Expected surface_area() to be ~35.0, was actually {}",
+            face.surface_area()
+        );
+    }
+}
