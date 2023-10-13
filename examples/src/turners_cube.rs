@@ -1,22 +1,32 @@
 use glam::DVec3;
 use opencascade::{
-    primitives::{BooleanShape, IntoShape, Shape, Solid},
+    primitives::{IntoShape, Shape},
     workplane::Workplane,
 };
 
 pub fn shape() -> Shape {
-    let cube = hollow_cube(48.0, 23.0, 5.0);
+    let edge_length_1 = 48.0;
+    let hole_diamet_1 = 23.0;
+    let wall_thickn_1 = 5.0;
 
-    cube
+    let edge_length_2 = edge_len_from_circum_diam(edge_length_1 - 2.0 * wall_thickn_1);
+    let hole_diamet_2 = 11.0;
+    let wall_thickn_2 = 4.0;
+
+    let edge_length_3 = edge_len_from_circum_diam(edge_length_2 - 2.0 * wall_thickn_2);
+
+    let c1 = hollow_cube(edge_length_1, hole_diamet_1, wall_thickn_1);
+    let c2 = hollow_cube(edge_length_2, hole_diamet_2, wall_thickn_2);
+    let c3 = cube(edge_length_3);
+
+    c1.union(&c2).union(&c3).into_shape()
+}
+
+fn edge_len_from_circum_diam(d: f64) -> f64 {
+    d / f64::sqrt(2.0)
 }
 
 fn hollow_cube(edge_length: f64, hole_diameter: f64, wall_thickness: f64) -> Shape {
-    let wp = Workplane::xy();
-    let wp = wp.translated(DVec3::new(0.0, 0.0, -0.5 * edge_length));
-
-    let wire = wp.rect(edge_length, edge_length);
-    let cube = wire.to_face().extrude(DVec3::new(0.0, 0.0, edge_length)).into_shape();
-
     let p1 = rolling_pin(
         &Workplane::xy(),
         0.5 * hole_diameter,
@@ -41,7 +51,14 @@ fn hollow_cube(edge_length: f64, hole_diameter: f64, wall_thickness: f64) -> Sha
 
     let cutout = p1.union(&p2).union(&p3).into_shape();
 
-    cube.subtract(&cutout).into_shape()
+    cube(edge_length).subtract(&cutout).into_shape()
+}
+
+fn cube(edge_length: f64) -> Shape {
+    let wp = Workplane::xy();
+    let wp = wp.translated(DVec3::new(0.0, 0.0, -0.5 * edge_length));
+    let wire = wp.rect(edge_length, edge_length);
+    wire.to_face().extrude(DVec3::new(0.0, 0.0, edge_length)).into_shape()
 }
 
 fn rolling_pin(wp: &Workplane, r1: f64, h1: f64, r2: f64, h2: f64) -> Shape {
