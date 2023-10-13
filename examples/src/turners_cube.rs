@@ -49,8 +49,8 @@ fn cube(edge_length: f64) -> Shape {
 }
 
 fn rolling_pin(wp: &Workplane, r1: f64, h1: f64, r2: f64, h2: f64) -> Shape {
-    let c_long = cylinder(&wp, r1, h1);
-    let c_wide = cylinder(&wp, r2, h2);
+    let c_long = cylinder(wp, r1, h1);
+    let c_wide = cylinder(wp, r2, h2);
     c_long.union(&c_wide).into_shape()
 }
 
