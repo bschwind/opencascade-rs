@@ -90,6 +90,50 @@ impl Shape {
         Self { inner }
     }
 
+    /// Make a box with one corner at corner_1, and the opposite corner
+    /// at corner_2.
+    pub fn box_from_corners(corner_1: DVec3, corner_2: DVec3) -> Self {
+        let min_corner = corner_1.min(corner_2);
+        let max_corner = corner_1.max(corner_2);
+
+        let point = ffi::new_point(min_corner.x, min_corner.y, min_corner.z);
+        let diff = max_corner - min_corner;
+        let mut my_box = ffi::BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
+
+        Self::from_shape(my_box.pin_mut().Shape())
+    }
+
+    /// Make a box with `width` (x), `depth` (y), and `height` (z)
+    /// centered around the origin.
+    pub fn box_centered(width: f64, depth: f64, height: f64) -> Self {
+        let half_width = width / 2.0;
+        let half_depth = depth / 2.0;
+        let half_height = height / 2.0;
+
+        let corner_1 = dvec3(-half_width, -half_depth, -half_height);
+        let corner_2 = dvec3(half_width, half_depth, half_height);
+        Self::box_from_corners(corner_1, corner_2)
+    }
+
+    /// Make a box with `width` (x), `depth` (y), and `height` (z)
+    /// extending into the positive axes
+    pub fn box_with_dimensions(width: f64, depth: f64, height: f64) -> Self {
+        let corner_1 = DVec3::ZERO;
+        let corner_2 = dvec3(width, depth, height);
+        Self::box_from_corners(corner_1, corner_2)
+    }
+
+    /// Make a cube with side length of `size`
+    /// extending into the positive axes
+    pub fn cube(size: f64) -> Self {
+        Self::box_with_dimensions(size, size, size)
+    }
+
+    /// Make a centered cube with side length of `size`
+    pub fn cube_centered(size: f64) -> Self {
+        Self::box_centered(size, size, size)
+    }
+
     pub fn shape_type(&self) -> ShapeType {
         self.inner.ShapeType().into()
     }

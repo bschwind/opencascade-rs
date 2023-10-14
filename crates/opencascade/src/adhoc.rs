@@ -10,27 +10,6 @@ use opencascade_sys::ffi;
 pub struct AdHocShape;
 
 impl AdHocShape {
-    /// Make a box with a corner at (0,0,0) and with size (x,y,z)
-    pub fn make_box(x: f64, y: f64, z: f64) -> Shape {
-        let point = ffi::new_point(0.0, 0.0, 0.0);
-        let mut my_box = ffi::BRepPrimAPI_MakeBox_ctor(&point, x, y, z);
-
-        Shape::from_shape(my_box.pin_mut().Shape())
-    }
-
-    /// Make a box with one corner at p1, and the opposite corner
-    /// at p2.
-    pub fn make_box_point_point(p1: DVec3, p2: DVec3) -> Shape {
-        let min_corner = p1.min(p2);
-        let max_corner = p1.max(p2);
-
-        let point = ffi::new_point(min_corner.x, min_corner.y, min_corner.z);
-        let diff = max_corner - min_corner;
-        let mut my_box = ffi::BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
-
-        Shape::from_shape(my_box.pin_mut().Shape())
-    }
-
     /// Make a cylinder with its bottom at point p, with radius r and height h.
     pub fn make_cylinder(p: DVec3, r: f64, h: f64) -> Shape {
         let point = ffi::new_point(p.x, p.y, p.z);
