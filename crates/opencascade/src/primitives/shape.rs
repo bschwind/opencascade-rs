@@ -1,8 +1,8 @@
 use crate::{
     mesh::{Mesh, Mesher},
     primitives::{
-        make_dir, make_point, make_point2d, make_vec, BooleanShape, Compound, Edge, EdgeIterator,
-        Face, FaceIterator, ShapeType, Shell, Solid, Vertex, Wire,
+        make_axis_2, make_dir, make_point, make_point2d, make_vec, BooleanShape, Compound, Edge,
+        EdgeIterator, Face, FaceIterator, ShapeType, Shell, Solid, Vertex, Wire,
     },
     Error,
 };
@@ -132,6 +132,35 @@ impl Shape {
     /// Make a centered cube with side length of `size`
     pub fn cube_centered(size: f64) -> Self {
         Self::box_centered(size, size, size)
+    }
+
+    /// Make a cylinder with base at point `p`, radius `r`, and height `h`.
+    /// Extends from `p` along axis `dir`.
+    pub fn cylinder(p: DVec3, r: f64, dir: DVec3, h: f64) -> Self {
+        let cylinder_coord_system = make_axis_2(p, dir);
+        let mut cylinder = ffi::BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
+
+        Self::from_shape(cylinder.pin_mut().Shape())
+    }
+
+    /// Make a "default" cylinder with radius `r` and height `h`.
+    /// The base is at the coordinate origin, and extends along the Z axis.
+    pub fn cylinder_radius_height(r: f64, h: f64) -> Self {
+        Self::cylinder(DVec3::ZERO, r, DVec3::Z, h)
+    }
+
+    /// Make a cylinder from start point `p1` and end point `p2`,
+    /// with radius `r`.
+    pub fn cylinder_from_points(p1: DVec3, p2: DVec3, r: f64) -> Self {
+        let dir = p2 - p1;
+        Self::cylinder(p1, r, dir, dir.length())
+    }
+
+    /// Make a cylinder centered at point `p`, with radius `r`, and height `h`.
+    /// Extends along axis `dir`.
+    pub fn cylinder_centered(p: DVec3, r: f64, dir: DVec3, h: f64) -> Self {
+        let p = p - (dir.normalize() * (h / 2.0));
+        Self::cylinder(p, r, dir, h)
     }
 
     pub fn shape_type(&self) -> ShapeType {

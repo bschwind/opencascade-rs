@@ -76,9 +76,9 @@ impl SupportPost {
         let top_z = TOP_PLATE_BOTTOM_Z;
 
         let pos = DVec3::from((self.pos, CASE_FLOOR_Z));
-        let cylinder = AdHocShape::make_cylinder(pos, SUPPORT_POST_RADIUS, top_z - bottom_z);
+        let cylinder = Shape::cylinder(pos, SUPPORT_POST_RADIUS, DVec3::Z, top_z - bottom_z);
         let m2_drill_hole =
-            AdHocShape::make_cylinder(pos, SUPPORT_POST_DRILL_RADIUS, top_z - bottom_z);
+            Shape::cylinder(pos, SUPPORT_POST_DRILL_RADIUS, DVec3::Z, top_z - bottom_z);
 
         let box_part = match self.direction {
             PostDirection::Up => {

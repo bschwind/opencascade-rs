@@ -10,17 +10,6 @@ use opencascade_sys::ffi;
 pub struct AdHocShape;
 
 impl AdHocShape {
-    /// Make a cylinder with its bottom at point p, with radius r and height h.
-    pub fn make_cylinder(p: DVec3, r: f64, h: f64) -> Shape {
-        let point = ffi::new_point(p.x, p.y, p.z);
-        let cylinder_axis = ffi::gp_DZ();
-        let cylinder_coord_system = ffi::gp_Ax2_ctor(&point, cylinder_axis);
-
-        let mut cylinder = ffi::BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
-
-        Shape::from_shape(cylinder.pin_mut().Shape())
-    }
-
     /// Purposefully underpowered for now, this simply takes a list of points,
     /// creates a face out of them, and then extrudes it by h in the positive Z
     /// direction.
