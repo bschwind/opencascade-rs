@@ -2,7 +2,7 @@ use crate::{
     mesh::{Mesh, Mesher},
     primitives::{
         make_dir, make_point, make_point2d, make_vec, BooleanShape, Compound, Edge, EdgeIterator,
-        Face, FaceIterator, ShapeType, Solid, Vertex, Wire,
+        Face, FaceIterator, ShapeType, Shell, Solid, Vertex, Wire,
     },
     Error,
 };
@@ -48,6 +48,14 @@ impl From<Wire> for Shape {
 impl From<Face> for Shape {
     fn from(face: Face) -> Self {
         let shape = ffi::cast_face_to_shape(&face.inner);
+
+        Self::from_shape(shape)
+    }
+}
+
+impl From<Shell> for Shape {
+    fn from(shell: Shell) -> Self {
+        let shape = ffi::cast_shell_to_shape(&shell.inner);
 
         Self::from_shape(shape)
     }

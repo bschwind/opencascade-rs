@@ -354,6 +354,7 @@ pub mod ffi {
         pub fn cast_edge_to_shape(wire: &TopoDS_Edge) -> &TopoDS_Shape;
         pub fn cast_wire_to_shape(wire: &TopoDS_Wire) -> &TopoDS_Shape;
         pub fn cast_face_to_shape(wire: &TopoDS_Face) -> &TopoDS_Shape;
+        pub fn cast_shell_to_shape(wire: &TopoDS_Shell) -> &TopoDS_Shape;
         pub fn cast_solid_to_shape(wire: &TopoDS_Solid) -> &TopoDS_Shape;
         pub fn cast_compound_to_shape(wire: &TopoDS_Compound) -> &TopoDS_Shape;
 
@@ -361,6 +362,7 @@ pub mod ffi {
         pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
         pub fn TopoDS_cast_to_edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
         pub fn TopoDS_cast_to_face(shape: &TopoDS_Shape) -> &TopoDS_Face;
+        pub fn TopoDS_cast_to_shell(shape: &TopoDS_Shape) -> &TopoDS_Shell;
         pub fn TopoDS_cast_to_solid(shape: &TopoDS_Shape) -> &TopoDS_Solid;
         pub fn TopoDS_cast_to_compound(shape: &TopoDS_Shape) -> &TopoDS_Compound;
 
