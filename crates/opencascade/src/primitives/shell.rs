@@ -28,7 +28,7 @@ impl Shell {
             make_loft.pin_mut().AddWire(&wire.as_ref().inner);
         }
 
-        // Set to CheckCompatibility to `true` to avoid twisted results.
+        // Set CheckCompatibility to `true` to avoid twisted results.
         make_loft.pin_mut().CheckCompatibility(true);
 
         let shape = make_loft.pin_mut().Shape();
