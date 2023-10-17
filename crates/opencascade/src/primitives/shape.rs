@@ -1,8 +1,9 @@
 use crate::{
     mesh::{Mesh, Mesher},
     primitives::{
-        make_axis_2, make_dir, make_point, make_point2d, make_vec, BooleanShape, Compound, Edge,
-        EdgeIterator, Face, FaceIterator, ShapeType, Shell, Solid, Vertex, Wire,
+        ffi::BRepPrimAPI_MakeSphere_ctor, make_axis_2, make_dir, make_point, make_point2d,
+        make_vec, BooleanShape, Compound, Edge, EdgeIterator, Face, FaceIterator, ShapeType, Shell,
+        Solid, Vertex, Wire,
     },
     Error,
 };
@@ -80,6 +81,31 @@ impl From<Compound> for Shape {
 impl From<BooleanShape> for Shape {
     fn from(boolean_shape: BooleanShape) -> Self {
         boolean_shape.shape
+    }
+}
+
+pub struct SphereBuilder {
+    center: DVec3,
+    radius: f64,
+    z_angle: f64,
+}
+
+impl SphereBuilder {
+    pub fn build(self) -> Shape {
+        let axis = make_axis_2(self.center, DVec3::Z);
+        let mut make_shere = BRepPrimAPI_MakeSphere_ctor(&axis, self.radius, self.z_angle);
+
+        Shape::from_shape(make_shere.pin_mut().Shape())
+    }
+
+    pub fn at(mut self, center: DVec3) -> Self {
+        self.center = center;
+        self
+    }
+
+    pub fn z_angle(mut self, z_angle: f64) -> Self {
+        self.z_angle = z_angle;
+        self
     }
 }
 
@@ -161,6 +187,10 @@ impl Shape {
     pub fn cylinder_centered(p: DVec3, r: f64, dir: DVec3, h: f64) -> Self {
         let p = p - (dir.normalize() * (h / 2.0));
         Self::cylinder(p, r, dir, h)
+    }
+
+    pub fn sphere(radius: f64) -> SphereBuilder {
+        SphereBuilder { center: DVec3::ZERO, radius, z_angle: std::f64::consts::PI / 2.0 }
     }
 
     pub fn shape_type(&self) -> ShapeType {
