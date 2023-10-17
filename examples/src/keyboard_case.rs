@@ -1,8 +1,5 @@
 use glam::{DVec2, DVec3};
-use opencascade::{
-    adhoc::AdHocShape,
-    primitives::{IntoShape, Shape},
-};
+use opencascade::primitives::{IntoShape, Shape, Solid};
 
 // All units are in millimeters.
 // The top/bottom/left/right conventions relate to 2D rectangles in
@@ -250,7 +247,7 @@ fn usb_connector_cutout() -> Shape {
 // This is the little trapezoidal PCB shape which helps the USB C connector
 // extend forward into the case.
 fn pcb_usb_overhang() -> Shape {
-    AdHocShape::extrude_polygon(
+    Solid::extrude_polygon(
         [
             DVec3::new(19.05, 0.0, PCB_BOTTOM_Z),
             DVec3::new(21.431, 2.381, PCB_BOTTOM_Z),
