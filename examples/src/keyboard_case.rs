@@ -289,14 +289,14 @@ pub fn shape() -> Shape {
         let pos = DVec3::from((*feet_cutout, CASE_FLOOR_Z));
         let dir = DVec3::new(0.0, 0.0, -1.0);
 
-        shape = AdHocShape::drill_hole(&shape, pos, dir, BOTTOM_CUTOUT_RADIUS);
+        shape = shape.drill_hole(pos, dir, BOTTOM_CUTOUT_RADIUS);
     }
 
     for pinhole_pos in PINHOLE_LOCATIONS {
         let pos = DVec3::from((*pinhole_pos, CASE_FLOOR_Z));
         let dir = DVec3::new(0.0, 0.0, -1.0);
 
-        shape = AdHocShape::drill_hole(&shape, pos, dir, PINHOLE_BUTTON_RADIUS);
+        shape = shape.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
     }
 
     // For exporting to smaller 3D printers

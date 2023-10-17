@@ -1,9 +1,9 @@
 use crate::{
     mesh::{Mesh, Mesher},
     primitives::{
-        ffi::BRepPrimAPI_MakeSphere_ctor, make_axis_2, make_dir, make_point, make_point2d,
-        make_vec, BooleanShape, Compound, Edge, EdgeIterator, Face, FaceIterator, ShapeType, Shell,
-        Solid, Vertex, Wire,
+        ffi::BRepPrimAPI_MakeSphere_ctor, make_axis_1, make_axis_2, make_dir, make_point,
+        make_point2d, make_vec, BooleanShape, Compound, Edge, EdgeIterator, Face, FaceIterator,
+        ShapeType, Shell, Solid, Vertex, Wire,
     },
     Error,
 };
@@ -190,7 +190,7 @@ impl Shape {
     }
 
     pub fn sphere(radius: f64) -> SphereBuilder {
-        SphereBuilder { center: DVec3::ZERO, radius, z_angle: std::f64::consts::PI / 2.0 }
+        SphereBuilder { center: DVec3::ZERO, radius, z_angle: std::f64::consts::TAU }
     }
 
     pub fn shape_type(&self) -> ShapeType {
@@ -458,5 +458,20 @@ impl Shape {
     pub fn offset_surface(&self, offset: f64) -> Self {
         let faces_to_remove: [Face; 0] = [];
         self.hollow(offset, faces_to_remove)
+    }
+
+    /// Drill a cylindrical hole along the line defined by point `p`
+    /// and direction `dir`, with `radius`.
+    #[must_use]
+    pub fn drill_hole(&self, p: DVec3, dir: DVec3, radius: f64) -> Self {
+        let hole_axis = make_axis_1(p, dir);
+
+        let mut make_hole = ffi::BRepFeat_MakeCylindricalHole_ctor();
+        make_hole.pin_mut().Init(&self.inner, &hole_axis);
+
+        make_hole.pin_mut().Perform(radius);
+        make_hole.pin_mut().Build();
+
+        Self::from_shape(make_hole.pin_mut().Shape())
     }
 }

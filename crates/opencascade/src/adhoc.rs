@@ -1,9 +1,8 @@
 use crate::{
-    primitives::{Face, Shape, Solid, Wire},
+    primitives::{Face, Solid, Wire},
     Error,
 };
 use glam::{dvec3, DVec3};
-use opencascade_sys::ffi;
 
 /// Collections of helper functions for the [`Shape`] struct that provides an "ad-hoc"
 /// API. New code is encouraged to use more fine-grained API in the [`primitives`] module.
@@ -19,22 +18,5 @@ impl AdHocShape {
     ) -> Result<Solid, Error> {
         let wire = Wire::from_ordered_points(points)?;
         Ok(Face::from_wire(&wire).extrude(dvec3(0.0, 0.0, h)))
-    }
-
-    /// Drills a cylindrical hole starting at point p, pointing down the Z axis
-    /// (this will later change to be an arbitrary axis).
-    pub fn drill_hole(shape: &Shape, p: DVec3, dir: DVec3, radius: f64) -> Shape {
-        let point = ffi::new_point(p.x, p.y, p.z);
-        let dir = ffi::gp_Dir_ctor(dir.x, dir.y, dir.z);
-
-        let hole_axis = ffi::gp_Ax1_ctor(&point, &dir);
-
-        let mut make_hole = ffi::BRepFeat_MakeCylindricalHole_ctor();
-        make_hole.pin_mut().Init(&shape.inner, &hole_axis);
-
-        make_hole.pin_mut().Perform(radius);
-        make_hole.pin_mut().Build();
-
-        Shape::from_shape(make_hole.pin_mut().Shape())
     }
 }
