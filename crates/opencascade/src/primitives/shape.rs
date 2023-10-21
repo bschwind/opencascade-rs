@@ -1,9 +1,8 @@
 use crate::{
     mesh::{Mesh, Mesher},
     primitives::{
-        ffi::BRepPrimAPI_MakeSphere_ctor, make_axis_1, make_axis_2, make_dir, make_point,
-        make_point2d, make_vec, BooleanShape, Compound, Edge, EdgeIterator, Face, FaceIterator,
-        ShapeType, Shell, Solid, Vertex, Wire,
+        make_axis_1, make_axis_2, make_dir, make_point, make_point2d, make_vec, BooleanShape,
+        Compound, Edge, EdgeIterator, Face, FaceIterator, ShapeType, Shell, Solid, Vertex, Wire,
     },
     Error,
 };
@@ -93,13 +92,61 @@ pub struct SphereBuilder {
 impl SphereBuilder {
     pub fn build(self) -> Shape {
         let axis = make_axis_2(self.center, DVec3::Z);
-        let mut make_shere = BRepPrimAPI_MakeSphere_ctor(&axis, self.radius, self.z_angle);
+        let mut make_shere = ffi::BRepPrimAPI_MakeSphere_ctor(&axis, self.radius, self.z_angle);
 
         Shape::from_shape(make_shere.pin_mut().Shape())
     }
 
     pub fn at(mut self, center: DVec3) -> Self {
         self.center = center;
+        self
+    }
+
+    pub fn z_angle(mut self, z_angle: f64) -> Self {
+        self.z_angle = z_angle;
+        self
+    }
+}
+
+pub struct ConeBuilder {
+    pos: DVec3,
+    height: f64,
+    bottom_radius: f64,
+    top_radius: f64,
+    z_angle: f64,
+}
+
+impl ConeBuilder {
+    pub fn build(self) -> Shape {
+        let axis = make_axis_2(self.pos, DVec3::Z);
+        let mut make_cone = ffi::BRepPrimAPI_MakeCone_ctor(
+            &axis,
+            self.bottom_radius,
+            self.top_radius,
+            self.height,
+            self.z_angle,
+        );
+
+        Shape::from_shape(make_cone.pin_mut().Shape())
+    }
+
+    pub fn at(mut self, pos: DVec3) -> Self {
+        self.pos = pos;
+        self
+    }
+
+    pub fn bottom_radius(mut self, bottom_radius: f64) -> Self {
+        self.bottom_radius = bottom_radius;
+        self
+    }
+
+    pub fn top_radius(mut self, top_radius: f64) -> Self {
+        self.top_radius = top_radius;
+        self
+    }
+
+    pub fn height(mut self, height: f64) -> Self {
+        self.height = height;
         self
     }
 
@@ -191,6 +238,16 @@ impl Shape {
 
     pub fn sphere(radius: f64) -> SphereBuilder {
         SphereBuilder { center: DVec3::ZERO, radius, z_angle: std::f64::consts::TAU }
+    }
+
+    pub fn cone() -> ConeBuilder {
+        ConeBuilder {
+            pos: DVec3::ZERO,
+            height: 1.0,
+            bottom_radius: 1.0,
+            top_radius: 0.0,
+            z_angle: std::f64::consts::TAU,
+        }
     }
 
     pub fn shape_type(&self) -> ShapeType {

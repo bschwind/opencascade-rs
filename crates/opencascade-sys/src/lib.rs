@@ -614,6 +614,21 @@ pub mod ffi {
         pub fn Build(self: Pin<&mut BRepPrimAPI_MakeSphere>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakeSphere) -> bool;
 
+        type BRepPrimAPI_MakeCone;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepPrimAPI_MakeCone_ctor(
+            axis: &gp_Ax2,
+            r1: f64,
+            r2: f64,
+            h: f64,
+            angle: f64,
+        ) -> UniquePtr<BRepPrimAPI_MakeCone>;
+
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCone>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeCone>, progress: &Message_ProgressRange);
+        pub fn IsDone(self: &BRepPrimAPI_MakeCone) -> bool;
+
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
 
