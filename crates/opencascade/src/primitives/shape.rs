@@ -156,6 +156,67 @@ impl ConeBuilder {
     }
 }
 
+pub struct TorusBuilder {
+    pos: DVec3,
+    z_axis: DVec3,
+    radius_1: f64,
+    radius_2: f64,
+    angle_1: f64,
+    angle_2: f64,
+    z_angle: f64,
+}
+
+impl TorusBuilder {
+    pub fn build(self) -> Shape {
+        let axis = make_axis_2(self.pos, self.z_axis);
+        let mut make_torus = ffi::BRepPrimAPI_MakeTorus_ctor(
+            &axis,
+            self.radius_1,
+            self.radius_2,
+            self.angle_1,
+            self.angle_2,
+            self.z_angle,
+        );
+
+        Shape::from_shape(make_torus.pin_mut().Shape())
+    }
+
+    pub fn at(mut self, pos: DVec3) -> Self {
+        self.pos = pos;
+        self
+    }
+
+    pub fn z_axis(mut self, z_axis: DVec3) -> Self {
+        self.z_axis = z_axis;
+        self
+    }
+
+    pub fn radius_1(mut self, radius_1: f64) -> Self {
+        self.radius_1 = radius_1;
+        self
+    }
+
+    pub fn radius_2(mut self, radius_2: f64) -> Self {
+        self.radius_2 = radius_2;
+        self
+    }
+
+    pub fn angle_1(mut self, angle_1: f64) -> Self {
+        self.angle_1 = angle_1;
+        self
+    }
+
+    pub fn angle_2(mut self, angle_2: f64) -> Self {
+        self.angle_2 = angle_2;
+        self
+    }
+
+    pub fn z_angle(mut self, z_angle: f64) -> Self {
+        self.z_angle = z_angle;
+        self
+    }
+}
+
 impl Shape {
     pub(crate) fn from_shape(shape: &ffi::TopoDS_Shape) -> Self {
         let inner = ffi::TopoDS_Shape_to_owned(shape);
@@ -246,6 +307,18 @@ impl Shape {
             height: 1.0,
             bottom_radius: 1.0,
             top_radius: 0.0,
+            z_angle: std::f64::consts::TAU,
+        }
+    }
+
+    pub fn torus() -> TorusBuilder {
+        TorusBuilder {
+            pos: DVec3::ZERO,
+            z_axis: DVec3::Z,
+            radius_1: 20.0,
+            radius_2: 10.0,
+            angle_1: -std::f64::consts::PI,
+            angle_2: std::f64::consts::PI,
             z_angle: std::f64::consts::TAU,
         }
     }
