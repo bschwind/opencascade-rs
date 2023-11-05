@@ -218,3 +218,31 @@ pub fn approximate_function<F: FnMut(f64) -> f64>(
         Some((t, val))
     })
 }
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum JoinType {
+    Arc,
+    Tangent,
+    Intersection,
+}
+
+impl From<ffi::GeomAbs_JoinType> for JoinType {
+    fn from(value: ffi::GeomAbs_JoinType) -> Self {
+        match value {
+            ffi::GeomAbs_JoinType::GeomAbs_Arc => Self::Arc,
+            ffi::GeomAbs_JoinType::GeomAbs_Tangent => Self::Tangent,
+            ffi::GeomAbs_JoinType::GeomAbs_Intersection => Self::Intersection,
+            ffi::GeomAbs_JoinType { repr } => panic!("Unexpected join type: {repr}"),
+        }
+    }
+}
+
+impl From<JoinType> for ffi::GeomAbs_JoinType {
+    fn from(value: JoinType) -> Self {
+        match value {
+            JoinType::Arc => ffi::GeomAbs_JoinType::GeomAbs_Arc,
+            JoinType::Tangent => ffi::GeomAbs_JoinType::GeomAbs_Tangent,
+            JoinType::Intersection => ffi::GeomAbs_JoinType::GeomAbs_Intersection,
+        }
+    }
+}

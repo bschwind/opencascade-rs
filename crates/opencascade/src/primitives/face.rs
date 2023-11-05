@@ -1,6 +1,8 @@
 use crate::{
     angle::Angle,
-    primitives::{make_axis_1, make_point, make_vec, EdgeIterator, Shape, Solid, Surface, Wire},
+    primitives::{
+        make_axis_1, make_point, make_vec, EdgeIterator, JoinType, Shape, Solid, Surface, Wire,
+    },
     workplane::Workplane,
 };
 use cxx::UniquePtr;
@@ -187,8 +189,9 @@ impl Face {
 
     /// Offset the face by a given distance and join settings
     #[must_use]
-    pub fn offset(&self, distance: f64) -> Self {
-        let mut make_offset = ffi::BRepOffsetAPI_MakeOffset_face_ctor(&self.inner);
+    pub fn offset(&self, distance: f64, join_type: JoinType) -> Self {
+        let mut make_offset =
+            ffi::BRepOffsetAPI_MakeOffset_face_ctor(&self.inner, join_type.into());
         make_offset.pin_mut().Perform(distance, 0.0);
 
         let offset_shape = make_offset.pin_mut().Shape();
