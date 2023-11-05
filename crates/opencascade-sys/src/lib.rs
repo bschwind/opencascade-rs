@@ -683,16 +683,19 @@ pub mod ffi {
         type BRepOffsetAPI_MakeOffset;
 
         #[cxx_name = "construct_unique"]
-        pub fn BRepOffsetAPI_MakeOffset_face_ctor(face: &TopoDS_Face) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
+        pub fn BRepOffsetAPI_MakeOffset_face_ctor(
+            face: &TopoDS_Face,
+        ) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
 
         #[cxx_name = "construct_unique"]
-        pub fn BRepOffsetAPI_MakeOffset_wire_ctor(wire: &TopoDS_Wire) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
+        pub fn BRepOffsetAPI_MakeOffset_wire_ctor(
+            wire: &TopoDS_Wire,
+        ) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
+
+        pub fn Perform(self: Pin<&mut BRepOffsetAPI_MakeOffset>, offset: f64, alt: f64);
 
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeOffset>) -> &TopoDS_Shape;
-        pub fn Build(
-            self: Pin<&mut BRepOffsetAPI_MakeOffset>,
-            progress: &Message_ProgressRange,
-        );
+        pub fn Build(self: Pin<&mut BRepOffsetAPI_MakeOffset>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepOffsetAPI_MakeOffset) -> bool;
 
         // Solids

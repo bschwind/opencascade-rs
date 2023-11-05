@@ -185,17 +185,17 @@ impl Face {
         Self::from_face(result_face)
     }
 
-    /// Offset the wires by a given distance and join settings
+    /// Offset the face by a given distance and join settings
     #[must_use]
     pub fn offset(&self, distance: f64) -> Self {
-        let face_shape = ffi::cast_face_to_shape(&self.inner);
-
-        let mut make_offset = ffi::BRepOffsetAPI_MakeOffset_ctor(&self.inner);
+        let mut make_offset = ffi::BRepOffsetAPI_MakeOffset_face_ctor(&self.inner);
+        make_offset.pin_mut().Perform(distance, 0.0);
 
         let offset_shape = make_offset.pin_mut().Shape();
-        let result_face = ffi::TopoDS_cast_to_face(offset_shape);
+        let result_wire = ffi::TopoDS_cast_to_wire(offset_shape);
+        let wire = Wire::from_wire(result_wire);
 
-        Self::from_face(result_face)
+        wire.to_face()
     }
 
     pub fn edges(&self) -> EdgeIterator {

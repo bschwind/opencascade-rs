@@ -175,6 +175,18 @@ impl Wire {
         Self { inner }
     }
 
+    /// Offset the wire by a given distance and join settings
+    #[must_use]
+    pub fn offset(&self, distance: f64) -> Self {
+        let mut make_offset = ffi::BRepOffsetAPI_MakeOffset_wire_ctor(&self.inner);
+        make_offset.pin_mut().Perform(distance, 0.0);
+
+        let offset_shape = make_offset.pin_mut().Shape();
+        let result_wire = ffi::TopoDS_cast_to_wire(offset_shape);
+
+        Self::from_wire(result_wire)
+    }
+
     #[must_use]
     pub fn translate(&self, offset: DVec3) -> Self {
         self.transform(offset, dvec3(1.0, 0.0, 0.0), 0.degrees())
