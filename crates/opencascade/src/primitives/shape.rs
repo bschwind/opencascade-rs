@@ -1,8 +1,8 @@
 use crate::{
     mesh::{Mesh, Mesher},
     primitives::{
-        make_dir, make_point, make_point2d, make_vec, BooleanShape, Compound, Edge, EdgeIterator,
-        Face, FaceIterator, ShapeType, Shell, Solid, Vertex, Wire,
+        make_axis_1, make_axis_2, make_dir, make_point, make_point2d, make_vec, BooleanShape,
+        Compound, Edge, EdgeIterator, Face, FaceIterator, ShapeType, Shell, Solid, Vertex, Wire,
     },
     Error,
 };
@@ -83,11 +83,244 @@ impl From<BooleanShape> for Shape {
     }
 }
 
+pub struct SphereBuilder {
+    center: DVec3,
+    radius: f64,
+    z_angle: f64,
+}
+
+impl SphereBuilder {
+    pub fn build(self) -> Shape {
+        let axis = make_axis_2(self.center, DVec3::Z);
+        let mut make_shere = ffi::BRepPrimAPI_MakeSphere_ctor(&axis, self.radius, self.z_angle);
+
+        Shape::from_shape(make_shere.pin_mut().Shape())
+    }
+
+    pub fn at(mut self, center: DVec3) -> Self {
+        self.center = center;
+        self
+    }
+
+    pub fn z_angle(mut self, z_angle: f64) -> Self {
+        self.z_angle = z_angle;
+        self
+    }
+}
+
+pub struct ConeBuilder {
+    pos: DVec3,
+    height: f64,
+    bottom_radius: f64,
+    top_radius: f64,
+    z_angle: f64,
+}
+
+impl ConeBuilder {
+    pub fn build(self) -> Shape {
+        let axis = make_axis_2(self.pos, DVec3::Z);
+        let mut make_cone = ffi::BRepPrimAPI_MakeCone_ctor(
+            &axis,
+            self.bottom_radius,
+            self.top_radius,
+            self.height,
+            self.z_angle,
+        );
+
+        Shape::from_shape(make_cone.pin_mut().Shape())
+    }
+
+    pub fn at(mut self, pos: DVec3) -> Self {
+        self.pos = pos;
+        self
+    }
+
+    pub fn bottom_radius(mut self, bottom_radius: f64) -> Self {
+        self.bottom_radius = bottom_radius;
+        self
+    }
+
+    pub fn top_radius(mut self, top_radius: f64) -> Self {
+        self.top_radius = top_radius;
+        self
+    }
+
+    pub fn height(mut self, height: f64) -> Self {
+        self.height = height;
+        self
+    }
+
+    pub fn z_angle(mut self, z_angle: f64) -> Self {
+        self.z_angle = z_angle;
+        self
+    }
+}
+
+pub struct TorusBuilder {
+    pos: DVec3,
+    z_axis: DVec3,
+    radius_1: f64,
+    radius_2: f64,
+    angle_1: f64,
+    angle_2: f64,
+    z_angle: f64,
+}
+
+impl TorusBuilder {
+    pub fn build(self) -> Shape {
+        let axis = make_axis_2(self.pos, self.z_axis);
+        let mut make_torus = ffi::BRepPrimAPI_MakeTorus_ctor(
+            &axis,
+            self.radius_1,
+            self.radius_2,
+            self.angle_1,
+            self.angle_2,
+            self.z_angle,
+        );
+
+        Shape::from_shape(make_torus.pin_mut().Shape())
+    }
+
+    pub fn at(mut self, pos: DVec3) -> Self {
+        self.pos = pos;
+        self
+    }
+
+    pub fn z_axis(mut self, z_axis: DVec3) -> Self {
+        self.z_axis = z_axis;
+        self
+    }
+
+    pub fn radius_1(mut self, radius_1: f64) -> Self {
+        self.radius_1 = radius_1;
+        self
+    }
+
+    pub fn radius_2(mut self, radius_2: f64) -> Self {
+        self.radius_2 = radius_2;
+        self
+    }
+
+    pub fn angle_1(mut self, angle_1: f64) -> Self {
+        self.angle_1 = angle_1;
+        self
+    }
+
+    pub fn angle_2(mut self, angle_2: f64) -> Self {
+        self.angle_2 = angle_2;
+        self
+    }
+
+    pub fn z_angle(mut self, z_angle: f64) -> Self {
+        self.z_angle = z_angle;
+        self
+    }
+}
+
 impl Shape {
     pub(crate) fn from_shape(shape: &ffi::TopoDS_Shape) -> Self {
         let inner = ffi::TopoDS_Shape_to_owned(shape);
 
         Self { inner }
+    }
+
+    /// Make a box with one corner at corner_1, and the opposite corner
+    /// at corner_2.
+    pub fn box_from_corners(corner_1: DVec3, corner_2: DVec3) -> Self {
+        let min_corner = corner_1.min(corner_2);
+        let max_corner = corner_1.max(corner_2);
+
+        let point = ffi::new_point(min_corner.x, min_corner.y, min_corner.z);
+        let diff = max_corner - min_corner;
+        let mut my_box = ffi::BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
+
+        Self::from_shape(my_box.pin_mut().Shape())
+    }
+
+    /// Make a box with `width` (x), `depth` (y), and `height` (z)
+    /// centered around the origin.
+    pub fn box_centered(width: f64, depth: f64, height: f64) -> Self {
+        let half_width = width / 2.0;
+        let half_depth = depth / 2.0;
+        let half_height = height / 2.0;
+
+        let corner_1 = dvec3(-half_width, -half_depth, -half_height);
+        let corner_2 = dvec3(half_width, half_depth, half_height);
+        Self::box_from_corners(corner_1, corner_2)
+    }
+
+    /// Make a box with `width` (x), `depth` (y), and `height` (z)
+    /// extending into the positive axes
+    pub fn box_with_dimensions(width: f64, depth: f64, height: f64) -> Self {
+        let corner_1 = DVec3::ZERO;
+        let corner_2 = dvec3(width, depth, height);
+        Self::box_from_corners(corner_1, corner_2)
+    }
+
+    /// Make a cube with side length of `size`
+    /// extending into the positive axes
+    pub fn cube(size: f64) -> Self {
+        Self::box_with_dimensions(size, size, size)
+    }
+
+    /// Make a centered cube with side length of `size`
+    pub fn cube_centered(size: f64) -> Self {
+        Self::box_centered(size, size, size)
+    }
+
+    /// Make a cylinder with base at point `p`, radius `r`, and height `h`.
+    /// Extends from `p` along axis `dir`.
+    pub fn cylinder(p: DVec3, r: f64, dir: DVec3, h: f64) -> Self {
+        let cylinder_coord_system = make_axis_2(p, dir);
+        let mut cylinder = ffi::BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
+
+        Self::from_shape(cylinder.pin_mut().Shape())
+    }
+
+    /// Make a "default" cylinder with radius `r` and height `h`.
+    /// The base is at the coordinate origin, and extends along the Z axis.
+    pub fn cylinder_radius_height(r: f64, h: f64) -> Self {
+        Self::cylinder(DVec3::ZERO, r, DVec3::Z, h)
+    }
+
+    /// Make a cylinder from start point `p1` and end point `p2`,
+    /// with radius `r`.
+    pub fn cylinder_from_points(p1: DVec3, p2: DVec3, r: f64) -> Self {
+        let dir = p2 - p1;
+        Self::cylinder(p1, r, dir, dir.length())
+    }
+
+    /// Make a cylinder centered at point `p`, with radius `r`, and height `h`.
+    /// Extends along axis `dir`.
+    pub fn cylinder_centered(p: DVec3, r: f64, dir: DVec3, h: f64) -> Self {
+        let p = p - (dir.normalize() * (h / 2.0));
+        Self::cylinder(p, r, dir, h)
+    }
+
+    pub fn sphere(radius: f64) -> SphereBuilder {
+        SphereBuilder { center: DVec3::ZERO, radius, z_angle: std::f64::consts::TAU }
+    }
+
+    pub fn cone() -> ConeBuilder {
+        ConeBuilder {
+            pos: DVec3::ZERO,
+            height: 1.0,
+            bottom_radius: 1.0,
+            top_radius: 0.0,
+            z_angle: std::f64::consts::TAU,
+        }
+    }
+
+    pub fn torus() -> TorusBuilder {
+        TorusBuilder {
+            pos: DVec3::ZERO,
+            z_axis: DVec3::Z,
+            radius_1: 20.0,
+            radius_2: 10.0,
+            angle_1: -std::f64::consts::PI,
+            angle_2: std::f64::consts::PI,
+            z_angle: std::f64::consts::TAU,
+        }
     }
 
     pub fn shape_type(&self) -> ShapeType {
@@ -355,5 +588,20 @@ impl Shape {
     pub fn offset_surface(&self, offset: f64) -> Self {
         let faces_to_remove: [Face; 0] = [];
         self.hollow(offset, faces_to_remove)
+    }
+
+    /// Drill a cylindrical hole along the line defined by point `p`
+    /// and direction `dir`, with `radius`.
+    #[must_use]
+    pub fn drill_hole(&self, p: DVec3, dir: DVec3, radius: f64) -> Self {
+        let hole_axis = make_axis_1(p, dir);
+
+        let mut make_hole = ffi::BRepFeat_MakeCylindricalHole_ctor();
+        make_hole.pin_mut().Init(&self.inner, &hole_axis);
+
+        make_hole.pin_mut().Perform(radius);
+        make_hole.pin_mut().Build();
+
+        Self::from_shape(make_hole.pin_mut().Shape())
     }
 }

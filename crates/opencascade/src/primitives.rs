@@ -107,7 +107,7 @@ fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax1> {
     ffi::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
 }
 
-fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
+pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
     ffi::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
 }
 

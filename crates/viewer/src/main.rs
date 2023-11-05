@@ -4,7 +4,7 @@ use crate::{
 };
 use clap::{Parser, ValueEnum};
 use glam::{vec3, DVec3, Mat4};
-use opencascade::{adhoc::AdHocShape, primitives::Shape};
+use opencascade::primitives::Shape;
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
@@ -95,7 +95,7 @@ impl GameApp for ViewerApp {
             example.shape()
         } else {
             eprintln!("Warning - no example or STEP file specified, you get a default cube.");
-            AdHocShape::make_box(50.0, 50.0, 50.0)
+            Shape::cube_centered(50.0)
         };
 
         let mesh = shape.mesh().expect("example shape should yield a valid triangulation");

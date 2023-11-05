@@ -604,11 +604,46 @@ pub mod ffi {
         type BRepPrimAPI_MakeSphere;
 
         #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeSphere_ctor(r: f64) -> UniquePtr<BRepPrimAPI_MakeSphere>;
+        pub fn BRepPrimAPI_MakeSphere_ctor(
+            axis: &gp_Ax2,
+            r: f64,
+            angle_1: f64,
+        ) -> UniquePtr<BRepPrimAPI_MakeSphere>;
 
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeSphere>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepPrimAPI_MakeSphere>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakeSphere) -> bool;
+
+        type BRepPrimAPI_MakeCone;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepPrimAPI_MakeCone_ctor(
+            axis: &gp_Ax2,
+            r1: f64,
+            r2: f64,
+            h: f64,
+            angle: f64,
+        ) -> UniquePtr<BRepPrimAPI_MakeCone>;
+
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCone>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeCone>, progress: &Message_ProgressRange);
+        pub fn IsDone(self: &BRepPrimAPI_MakeCone) -> bool;
+
+        type BRepPrimAPI_MakeTorus;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepPrimAPI_MakeTorus_ctor(
+            axis: &gp_Ax2,
+            r1: f64,
+            r2: f64,
+            angle_1: f64,
+            angle_2: f64,
+            angle_3: f64,
+        ) -> UniquePtr<BRepPrimAPI_MakeTorus>;
+
+        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeTorus>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeTorus>, progress: &Message_ProgressRange);
+        pub fn IsDone(self: &BRepPrimAPI_MakeTorus) -> bool;
 
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;

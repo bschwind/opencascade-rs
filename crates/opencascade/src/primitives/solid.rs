@@ -1,5 +1,9 @@
-use crate::primitives::{BooleanShape, Compound, Edge, Shape, Wire};
+use crate::{
+    primitives::{BooleanShape, Compound, Edge, Face, Shape, Wire},
+    Error,
+};
 use cxx::UniquePtr;
+use glam::{dvec3, DVec3};
 use opencascade_sys::ffi;
 
 pub struct Solid {
@@ -93,5 +97,16 @@ impl Solid {
         let shape = Shape::from_shape(fuse_operation.pin_mut().Shape());
 
         BooleanShape { shape, new_edges }
+    }
+
+    /// Purposefully underpowered for now, this simply takes a list of points,
+    /// creates a face out of them, and then extrudes it by h in the positive Z
+    /// direction.
+    pub fn extrude_polygon(
+        points: impl IntoIterator<Item = DVec3>,
+        h: f64,
+    ) -> Result<Solid, Error> {
+        let wire = Wire::from_ordered_points(points)?;
+        Ok(Face::from_wire(&wire).extrude(dvec3(0.0, 0.0, h)))
     }
 }

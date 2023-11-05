@@ -1,8 +1,5 @@
-use glam::dvec3;
-use opencascade::{
-    adhoc::AdHocShape,
-    primitives::{Direction::PosZ, Edge, Face, IntoShape, Shape, Wire},
-};
+use glam::{dvec3, DVec3};
+use opencascade::primitives::{Direction::PosZ, Edge, Face, IntoShape, Shape, Wire};
 
 pub fn shape() -> Shape {
     let height = 70.0;
@@ -32,7 +29,7 @@ pub fn shape() -> Shape {
     let neck_radius = thickness / 4.0;
     let neck_height = height / 10.0;
 
-    let neck = AdHocShape::make_cylinder(dvec3(0.0, 0.0, height), neck_radius, neck_height);
+    let neck = Shape::cylinder(dvec3(0.0, 0.0, height), neck_radius, DVec3::Z, neck_height);
     let bottle = neck.union(&body);
 
     let top_face = bottle.faces().farthest(PosZ);
