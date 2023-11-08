@@ -618,8 +618,9 @@ pub struct LineFaceHitPoint {
     pub face: Face,
     /// The T parameter along the line
     pub t: f64,
-    /// The U and V parameters on the face
+    /// The U parameter on the face
     pub u: f64,
+    /// The V parameter on the face
     pub v: f64,
     /// The intersection point
     pub point: DVec3,
