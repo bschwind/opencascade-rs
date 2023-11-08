@@ -940,6 +940,9 @@ pub mod ffi {
         pub fn BRepIntCurveSurface_Inter_point(
             intersector: &BRepIntCurveSurface_Inter,
         ) -> UniquePtr<gp_Pnt>;
+        pub fn U(self: &BRepIntCurveSurface_Inter) -> f64;
+        pub fn V(self: &BRepIntCurveSurface_Inter) -> f64;
+        pub fn W(self: &BRepIntCurveSurface_Inter) -> f64;
 
         // BRepFeat
         type BRepFeat_MakeCylindricalHole;

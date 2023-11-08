@@ -210,16 +210,12 @@ pub fn shape() -> Shape {
 
         // TODO(bschwind) - Abstract all this into a "extrude_to_next_face" function.
         let origin = workplane.to_world_pos(dvec3(*x, *y, 0.0));
-        let mut faces = keycap.faces_along_ray(origin, workplane.normal());
-        faces.sort_by(|(_, a_point), (_, b_point)| {
-            let a_dist = (*a_point - origin).length();
-            let b_dist = (*b_point - origin).length();
-
-            a_dist.total_cmp(&b_dist)
-        });
-
-        let (face_target, _) = faces.get(0).expect("We should have a face to extrude to");
-        let post = circle.extrude_to_face(&keycap, face_target);
+        let faces = keycap.faces_along_ray(origin, workplane.normal());
+        let nearest_hit = faces
+            .iter()
+            .min_by(|hit_a, hit_b| hit_a.t.partial_cmp(&hit_b.t).unwrap())
+            .expect("We should have a face to extrude to");
+        let post = circle.extrude_to_face(&keycap, &nearest_hit.face);
 
         keycap = keycap.union(&post).into();
     }
