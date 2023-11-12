@@ -210,7 +210,7 @@ pub fn shape() -> Shape {
 
         // TODO(bschwind) - Abstract all this into a "extrude_to_next_face" function.
         let origin = workplane.to_world_pos(dvec3(*x, *y, 0.0));
-        let faces = keycap.faces_along_ray(origin, workplane.normal());
+        let faces = keycap.faces_along_line(origin, workplane.normal());
         let nearest_hit = faces
             .iter()
             .min_by(|hit_a, hit_b| hit_a.t.partial_cmp(&hit_b.t).unwrap())

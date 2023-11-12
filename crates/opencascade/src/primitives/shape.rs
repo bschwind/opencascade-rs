@@ -542,12 +542,12 @@ impl Shape {
     }
 
     // TODO(bschwind) - Convert the return type to an iterator.
-    pub fn faces_along_ray(&self, ray_start: DVec3, ray_dir: DVec3) -> Vec<LineFaceHitPoint> {
+    pub fn faces_along_line(&self, line_origin: DVec3, line_dir: DVec3) -> Vec<LineFaceHitPoint> {
         let mut intersector = ffi::BRepIntCurveSurface_Inter_ctor();
         let tolerance = 0.0001;
         intersector.pin_mut().Init(
             &self.inner,
-            &ffi::gp_Lin_ctor(&make_point(ray_start), &make_dir(ray_dir)),
+            &ffi::gp_Lin_ctor(&make_point(line_origin), &make_dir(line_dir)),
             tolerance,
         );
 
