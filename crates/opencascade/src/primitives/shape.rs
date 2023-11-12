@@ -479,6 +479,23 @@ impl Shape {
         BooleanShape { shape, new_edges }
     }
 
+    #[must_use]
+    pub fn intersect(&self, other: &Shape) -> BooleanShape {
+        let mut fuse_operation = ffi::BRepAlgoAPI_Common_ctor(&self.inner, &other.inner);
+        let edge_list = fuse_operation.pin_mut().SectionEdges();
+        let vec = ffi::shape_list_to_vector(edge_list);
+
+        let mut new_edges = vec![];
+        for shape in vec.iter() {
+            let edge = ffi::TopoDS_cast_to_edge(shape);
+            new_edges.push(Edge::from_edge(edge));
+        }
+
+        let shape = Self::from_shape(fuse_operation.pin_mut().Shape());
+
+        BooleanShape { shape, new_edges }
+    }
+
     pub fn write_stl<P: AsRef<Path>>(&self, path: P) -> Result<(), Error> {
         self.write_stl_with_tolerance(path, 0.001)
     }

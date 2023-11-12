@@ -25,7 +25,7 @@ const PCB_DIMENSION_TOLERANCE: f64 = 0.0;
 const ORIGIN: DVec3 = DVec3::new(0.0, 0.0, 0.0);
 
 // Case
-const CASE_WALL_THICKNESS: f64 = 3.0;
+const CASE_WALL_THICKNESS: f64 = 3.5;
 const CASE_LIP_HEIGHT: f64 = 1.0;
 
 const CASE_TOP: f64 = PCB_TOP + CASE_WALL_THICKNESS;
@@ -334,7 +334,7 @@ pub fn shape() -> Shape {
         .filter(|e| e.start_point().y > 0.0) // Only chamfer edges on the exterior of the case
         .collect();
 
-    let shape = shape.chamfer_edges(0.5, new_edges);
+    let shape = shape.chamfer_edges(1.0, new_edges);
 
     let mut shape = shape.into_shape();
     // .chamfer_new_edges(0.5)
@@ -363,17 +363,17 @@ pub fn shape() -> Shape {
     }
 
     // For exporting to smaller 3D printers
-    // let corner_1 = DVec3::new(CASE_LEFT, CASE_BOTTOM, CASE_BOTTOM_Z);
-    // let corner_2 = DVec3::new(CASE_RIGHT / 2.0, CASE_TOP, CASE_TOP_Z);
-    // let left_half = Shape::box_from_corners(corner_1, corner_2);
+    let corner_1 = DVec3::new(CASE_LEFT, CASE_BOTTOM, CASE_BOTTOM_Z);
+    let corner_2 = DVec3::new(CASE_RIGHT / 2.0, CASE_TOP, CASE_TOP_Z);
+    let left_half = Shape::box_from_corners(corner_1, corner_2);
 
     // let corner_1 = DVec3::new(CASE_RIGHT / 2.0, CASE_BOTTOM, CASE_BOTTOM_Z);
     // let corner_2 = DVec3::new(CASE_RIGHT, CASE_TOP, CASE_TOP_Z);
     // let right_half = Shape::box_from_corners(corner_1, corner_2);
 
-    // outer_box.intersect(&right_half);
+    let shape = shape.intersect(&left_half);
 
     shape.write_stl("lol.stl").unwrap();
 
-    shape
+    shape.into()
 }
