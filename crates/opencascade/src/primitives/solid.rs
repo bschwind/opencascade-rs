@@ -99,6 +99,26 @@ impl Solid {
         BooleanShape { shape, new_edges }
     }
 
+    #[must_use]
+    pub fn intersect(&self, other: &Solid) -> BooleanShape {
+        let inner_shape = ffi::cast_solid_to_shape(&self.inner);
+        let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
+
+        let mut fuse_operation = ffi::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+        let edge_list = fuse_operation.pin_mut().SectionEdges();
+        let vec = ffi::shape_list_to_vector(edge_list);
+
+        let mut new_edges = vec![];
+        for shape in vec.iter() {
+            let edge = ffi::TopoDS_cast_to_edge(shape);
+            new_edges.push(Edge::from_edge(edge));
+        }
+
+        let shape = Shape::from_shape(fuse_operation.pin_mut().Shape());
+
+        BooleanShape { shape, new_edges }
+    }
+
     /// Purposefully underpowered for now, this simply takes a list of points,
     /// creates a face out of them, and then extrudes it by h in the positive Z
     /// direction.
