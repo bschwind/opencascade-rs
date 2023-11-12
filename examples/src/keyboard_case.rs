@@ -221,7 +221,8 @@ fn case_inner_box() -> Shape {
         .close()
         .fillet(PCB_FILLET_RADIUS)
         .to_face()
-        .extrude(dvec3(0.0, 0.0, CASE_TOP_Z - CASE_FLOOR_Z))
+        // 0.1 is a fudge factor to retrieve edges from boolean subtraction
+        .extrude(dvec3(0.0, 0.0, CASE_TOP_Z + 0.1 - CASE_FLOOR_Z))
         .into_shape()
 }
 
@@ -306,6 +307,7 @@ pub fn shape() -> Shape {
 
     let shape = case_outer_box()
         .subtract(&inner_box)
+        .fillet_new_edges(0.3)
         .union(&top_shelf)
         .union(&bottom_shelf)
         .subtract(&usb_cutout);
