@@ -60,6 +60,7 @@ const SUPPORT_POST_RADIUS: f64 = 2.25;
 const SUPPORT_POST_DRILL_RADIUS: f64 = 0.8;
 const SUPPORT_POST_DIST_FROM_EDGE: f64 = 2.5;
 
+#[allow(unused)]
 enum PostDirection {
     Up,
     Down,
@@ -169,7 +170,7 @@ const FEET_CUTOUTS: &[DVec2] = &[
 ];
 
 // USB C Connector Cutout
-const USB_CUTOUT_PADDING: f64 = 0.5;
+const USB_CUTOUT_PADDING: f64 = 0.1;
 const USB_WIDTH: f64 = 9.0;
 const USB_HEIGHT: f64 = 7.45;
 const USB_DEPTH: f64 = 3.26;
@@ -215,7 +216,9 @@ fn case_outer_box() -> Shape {
         .into_shape();
 
     let top_edges = shape.faces().farthest(Direction::PosZ).edges();
-    shape.chamfer_edges(1.5, top_edges)
+    let bottom_edges = shape.faces().farthest(Direction::NegZ).edges();
+
+    shape.chamfer_edges(1.5, top_edges.chain(bottom_edges))
 }
 
 fn case_inner_box() -> Shape {
@@ -269,16 +272,14 @@ fn pcb_bottom_shelf() -> Shape {
 }
 
 fn usb_connector_cutout() -> Shape {
-    // let corner_1 = DVec3::new(
-    //     USB_LEFT - USB_CUTOUT_PADDING,
-    //     CASE_TOP + USB_CUTOUT_PADDING,
-    //     PCB_BOTTOM_Z - USB_DEPTH - USB_CUTOUT_PADDING,
-    // );
-    // let corner_2 = DVec3::new(
-    //     USB_RIGHT + USB_CUTOUT_PADDING,
-    //     USB_BOTTOM - USB_CUTOUT_PADDING,
-    //     PCB_BOTTOM_Z + USB_CUTOUT_PADDING,
-    // );
+    let corner_1 = DVec3::new(USB_LEFT - USB_CUTOUT_PADDING, 2.3, PCB_BOTTOM_Z - (USB_DEPTH / 2.0));
+    let corner_2 = DVec3::new(
+        USB_RIGHT + USB_CUTOUT_PADDING,
+        USB_BOTTOM - USB_CUTOUT_PADDING,
+        PCB_BOTTOM_Z + USB_CUTOUT_PADDING,
+    );
+
+    let squared_shape = Shape::box_from_corners(corner_1, corner_2);
 
     let mut usb_workplane = Workplane::xz();
     usb_workplane.set_translation(dvec3(
@@ -288,25 +289,28 @@ fn usb_connector_cutout() -> Shape {
     ));
     usb_workplane
         .rect(USB_WIDTH, USB_DEPTH)
-        // .fillet(USB_RADIUS)
+        .fillet(USB_RADIUS)
         .to_face()
         .extrude(dvec3(0.0, USB_HEIGHT + CASE_WALL_THICKNESS, 0.0))
+        .into_shape()
+        .union(&squared_shape)
         .into()
-
-    // Shape::box_from_corners(corner_1, corner_2).fillet(2.0)
 }
 
 // This is the little trapezoidal PCB shape which helps the USB C connector
 // extend forward into the case.
 fn pcb_usb_overhang() -> Shape {
+    let start = CASE_FLOOR_Z;
     Solid::extrude_polygon(
         [
-            DVec3::new(19.05, 0.0, PCB_BOTTOM_Z),
-            DVec3::new(21.431, 2.381, PCB_BOTTOM_Z),
-            DVec3::new(30.596, 2.381, PCB_BOTTOM_Z),
-            DVec3::new(33.337, 0.0, PCB_BOTTOM_Z),
+            DVec3::new(19.05, 0.0, start),
+            DVec3::new(USB_LEFT - 0.3, 2.381, start),
+            DVec3::new(USB_RIGHT + 0.3, 2.381, start),
+            DVec3::new(33.337, 0.0, start),
+            DVec3::new(33.337, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
+            DVec3::new(19.05, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
         ],
-        PCB_THICKNESS + 0.5,
+        PCB_TOP_Z - start, // PCB_THICKNESS + 0.5,
     )
     .unwrap()
     .into()
@@ -330,7 +334,7 @@ pub fn shape() -> Shape {
         .filter(|e| e.start_point().y > 0.0) // Only chamfer edges on the exterior of the case
         .collect();
 
-    let shape = shape.chamfer_edges(1.0, new_edges);
+    let shape = shape.chamfer_edges(0.5, new_edges);
 
     let mut shape = shape.into_shape();
     // .chamfer_new_edges(0.5)
