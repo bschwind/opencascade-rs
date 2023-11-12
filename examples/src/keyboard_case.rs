@@ -139,14 +139,6 @@ const SUPPORT_POSTS: &[SupportPost] = &[
         pos: DVec2::new(204.75, PCB_TOP - SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Up,
     },
-    // SupportPost {
-    //     pos: DVec2::new(PCB_LEFT + SUPPORT_POST_DIST_FROM_EDGE, -57.15),
-    //     direction: PostDirection::Left,
-    // },
-    // SupportPost {
-    //     pos: DVec2::new(PCB_RIGHT - SUPPORT_POST_DIST_FROM_EDGE, -57.15),
-    //     direction: PostDirection::Right,
-    // },
     SupportPost {
         pos: DVec2::new(80.95, PCB_BOTTOM + SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Down,
@@ -195,11 +187,6 @@ const PINHOLE_BUTTON_RADIUS: f64 = 1.1;
 const PINHOLE_LOCATIONS: &[DVec2] = &[DVec2::new(35.85, -53.95), DVec2::new(8.425, -86.075)];
 
 fn case_outer_box() -> Shape {
-    // let corner_1 = DVec3::new(CASE_LEFT, CASE_TOP, CASE_BOTTOM_Z);
-    // let corner_2 = DVec3::new(CASE_RIGHT, CASE_BOTTOM, CASE_TOP_Z);
-
-    // let shape = Shape::box_from_corners(corner_1, corner_2);
-
     let mut workplane = Workplane::xy();
     workplane.set_translation(dvec3(0.0, 0.0, CASE_BOTTOM_Z));
 
@@ -222,11 +209,6 @@ fn case_outer_box() -> Shape {
 }
 
 fn case_inner_box() -> Shape {
-    // let corner_1 = DVec3::new(PCB_LEFT, PCB_TOP, CASE_FLOOR_Z);
-    // let corner_2 = DVec3::new(PCB_RIGHT, PCB_BOTTOM, CASE_TOP_Z);
-
-    // Shape::box_from_corners(corner_1, corner_2)
-
     let mut workplane = Workplane::xy();
     workplane.set_translation(dvec3(0.0, 0.0, CASE_FLOOR_Z));
 
@@ -310,7 +292,7 @@ fn pcb_usb_overhang() -> Shape {
             DVec3::new(33.337, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
             DVec3::new(19.05, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
         ],
-        PCB_TOP_Z - start, // PCB_THICKNESS + 0.5,
+        PCB_TOP_Z - start,
     )
     .unwrap()
     .into()
@@ -324,7 +306,6 @@ pub fn shape() -> Shape {
 
     let shape = case_outer_box()
         .subtract(&inner_box)
-        // .fillet(1.3)
         .union(&top_shelf)
         .union(&bottom_shelf)
         .subtract(&usb_cutout);
@@ -337,8 +318,6 @@ pub fn shape() -> Shape {
     let shape = shape.chamfer_edges(1.0, new_edges);
 
     let mut shape = shape.into_shape();
-    // .chamfer_new_edges(0.5)
-    // .into_shape();
 
     for support_post in SUPPORT_POSTS {
         shape = shape.union(&support_post.shape()).into();
