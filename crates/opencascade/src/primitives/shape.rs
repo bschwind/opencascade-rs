@@ -542,12 +542,12 @@ impl Shape {
     }
 
     // TODO(bschwind) - Convert the return type to an iterator.
-    pub fn faces_along_ray(&self, ray_start: DVec3, ray_dir: DVec3) -> Vec<(Face, DVec3)> {
+    pub fn faces_along_line(&self, line_origin: DVec3, line_dir: DVec3) -> Vec<LineFaceHitPoint> {
         let mut intersector = ffi::BRepIntCurveSurface_Inter_ctor();
         let tolerance = 0.0001;
         intersector.pin_mut().Init(
             &self.inner,
-            &ffi::gp_Lin_ctor(&make_point(ray_start), &make_dir(ray_dir)),
+            &ffi::gp_Lin_ctor(&make_point(line_origin), &make_dir(line_dir)),
             tolerance,
         );
 
@@ -558,7 +558,13 @@ impl Shape {
             let face = Face::from_face(&face);
             let point = ffi::BRepIntCurveSurface_Inter_point(&intersector);
 
-            results.push((face, dvec3(point.X(), point.Y(), point.Z())));
+            results.push(LineFaceHitPoint {
+                face,
+                t: intersector.W(),
+                u: intersector.U(),
+                v: intersector.V(),
+                point: dvec3(point.X(), point.Y(), point.Z()),
+            });
 
             intersector.pin_mut().Next();
         }
@@ -604,4 +610,18 @@ impl Shape {
 
         Self::from_shape(make_hole.pin_mut().Shape())
     }
+}
+
+/// Information about a point where a line hits (i.e. intersects) a face
+pub struct LineFaceHitPoint {
+    /// The face that is hit
+    pub face: Face,
+    /// The T parameter along the line
+    pub t: f64,
+    /// The U parameter on the face
+    pub u: f64,
+    /// The V parameter on the face
+    pub v: f64,
+    /// The intersection point
+    pub point: DVec3,
 }
