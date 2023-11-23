@@ -9,7 +9,7 @@ clap = { version = "4.3.19", features = ["derive"] }
 examples = { path = "../../examples", default-features = false }
 glam = { version = "0.23", features = ["bytemuck"] }
 opencascade = { version = "0.2", path = "../opencascade", default-features = false }
-simple-game = { git = "https://github.com/bschwind/simple-game.git", default-features = false }
+simple-game = { git = "https://github.com/bschwind/simple-game.git", rev = "3bcfc6f16173ece8981845266a293890a2afff98", default-features = false }
 smaa = "0.10"
 wgpu = "0.16"
 winit = "0.28"
