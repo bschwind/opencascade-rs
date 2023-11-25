@@ -2,6 +2,7 @@ use crate::{
     edge_drawer::{EdgeDrawer, LineBuilder, LineVertex3, RenderedLine},
     surface_drawer::{CadMesh, SurfaceDrawer},
 };
+use anyhow::Error;
 use clap::{Parser, ValueEnum};
 use glam::{vec3, DVec3, Mat4};
 use opencascade::primitives::Shape;
@@ -16,8 +17,9 @@ use simple_game::{
 use smaa::{SmaaMode, SmaaTarget};
 use std::path::PathBuf;
 use winit::{
-    event::{KeyboardInput, VirtualKeyCode, WindowEvent},
-    event_loop::ControlFlow,
+    event::{KeyEvent, WindowEvent},
+    event_loop::EventLoopWindowTarget,
+    keyboard::{KeyCode, PhysicalKey},
     window::Window,
 };
 
@@ -179,7 +181,11 @@ impl GameApp for ViewerApp {
         self.smaa_target.resize(graphics_device.device(), width, height);
     }
 
-    fn handle_window_event(&mut self, event: &WindowEvent, control_flow: &mut ControlFlow) {
+    fn handle_window_event(
+        &mut self,
+        event: &WindowEvent,
+        window_target: &EventLoopWindowTarget<()>,
+    ) {
         match event {
             WindowEvent::TouchpadRotate { delta, .. } => {
                 self.angle += 2.0 * delta * std::f32::consts::PI / 180.0;
@@ -189,12 +195,12 @@ impl GameApp for ViewerApp {
                 self.scale = self.scale.max(MIN_SCALE);
             },
             WindowEvent::KeyboardInput {
-                input: KeyboardInput { virtual_keycode: Some(keycode), .. },
+                event: KeyEvent { physical_key: PhysicalKey::Code(key_code), .. },
                 ..
-            } => match keycode {
-                VirtualKeyCode::Escape => *control_flow = ControlFlow::Exit,
-                VirtualKeyCode::P => self.camera.use_perspective(),
-                VirtualKeyCode::O => self.camera.use_orthographic(),
+            } => match key_code {
+                KeyCode::Escape => window_target.exit(),
+                KeyCode::KeyP => self.camera.use_perspective(),
+                KeyCode::KeyO => self.camera.use_orthographic(),
                 _ => {},
             },
             _ => {},
@@ -263,6 +269,7 @@ impl GameApp for ViewerApp {
     }
 }
 
-fn main() {
-    simple_game::run_game_app::<ViewerApp>();
+fn main() -> Result<(), Error> {
+    simple_game::run_game_app::<ViewerApp>()?;
+    Ok(())
 }

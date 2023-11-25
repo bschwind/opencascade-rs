@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 opencascade = { version = "0.2", path = "../crates/opencascade", default-features = false }
-glam = { version = "0.23", features = ["bytemuck"] }
+glam = { version = "0.24", features = ["bytemuck"] }
 
 [features]
 default = ["builtin"]
