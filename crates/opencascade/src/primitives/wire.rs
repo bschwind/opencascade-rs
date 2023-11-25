@@ -2,7 +2,7 @@ use std::iter::once;
 
 use crate::{
     angle::{Angle, ToAngle},
-    primitives::{make_dir, make_point, make_vec, Edge, Face, Shape},
+    primitives::{make_dir, make_point, make_vec, Edge, Face, JoinType, Shape},
     Error,
 };
 use cxx::UniquePtr;
@@ -173,6 +173,19 @@ impl Wire {
         let inner = ffi::outer_wire(&face.inner);
 
         Self { inner }
+    }
+
+    /// Offset the wire by a given distance and join settings
+    #[must_use]
+    pub fn offset(&self, distance: f64, join_type: JoinType) -> Self {
+        let mut make_offset =
+            ffi::BRepOffsetAPI_MakeOffset_wire_ctor(&self.inner, join_type.into());
+        make_offset.pin_mut().Perform(distance, 0.0);
+
+        let offset_shape = make_offset.pin_mut().Shape();
+        let result_wire = ffi::TopoDS_cast_to_wire(offset_shape);
+
+        Self::from_wire(result_wire)
     }
 
     #[must_use]

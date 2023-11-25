@@ -54,6 +54,14 @@ pub mod ffi {
         GeomAbs_OtherCurve,
     }
 
+    #[repr(u32)]
+    #[derive(Debug)]
+    pub enum GeomAbs_JoinType {
+        GeomAbs_Arc,
+        GeomAbs_Tangent,
+        GeomAbs_Intersection,
+    }
+
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -713,6 +721,29 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeChamfer>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepFilletAPI_MakeChamfer>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepFilletAPI_MakeChamfer) -> bool;
+
+        // Offset
+        type BRepOffsetAPI_MakeOffset;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepOffsetAPI_MakeOffset_face_ctor(
+            face: &TopoDS_Face,
+            join: GeomAbs_JoinType,
+        ) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepOffsetAPI_MakeOffset_wire_ctor(
+            wire: &TopoDS_Wire,
+            join: GeomAbs_JoinType,
+        ) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
+
+        pub fn Perform(self: Pin<&mut BRepOffsetAPI_MakeOffset>, offset: f64, alt: f64);
+
+        pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeOffset>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepOffsetAPI_MakeOffset>, progress: &Message_ProgressRange);
+        pub fn IsDone(self: &BRepOffsetAPI_MakeOffset) -> bool;
+
+        type GeomAbs_JoinType;
 
         // Solids
         type BRepOffsetAPI_MakeThickSolid;
