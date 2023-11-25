@@ -201,6 +201,12 @@ impl Face {
         wire.to_face()
     }
 
+    /// Sweep the face along a path to produce a solid
+    #[must_use]
+    pub fn sweep_along(&self, path: &Wire) -> Solid {
+        todo!()
+    }
+
     pub fn edges(&self) -> EdgeIterator {
         let explorer = ffi::TopExp_Explorer_ctor(
             ffi::cast_face_to_shape(&self.inner),
