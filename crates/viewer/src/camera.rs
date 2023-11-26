@@ -10,17 +10,17 @@ enum Projection {
     Perspective,
 }
 
-pub struct Camera {
+pub struct OrbitCamera {
     projection: Projection,
     aspect_ratio: f32,
     // Zoom factor used for orthographic projection.
     zoom_factor: f32,
-    // Position of the camera.
-    position: Vec3,
-    // The upward vector of the camera, determining its orientation.
-    upward: Vec3,
     // The look-at target, in the center of the view.
     target: Vec3,
+    // The radius of the orbit
+    radius: f32,
+    // The orientation of the camera around the target point
+    orientation: Quat,
 }
 
 impl Camera {
@@ -67,13 +67,8 @@ impl Camera {
     }
 
     /// Orbit around the target while keeping the distance.
-    pub fn rotate(&mut self, yaw: f32, pitch: f32) {
-        let backward = (self.position - self.target).normalize();
-        let leftward = self.upward.cross(backward);
-        let rotation =
-            Quat::from_axis_angle(self.upward, yaw) * Quat::from_axis_angle(leftward, pitch);
-        self.position = (self.target + rotation * backward) * backward.length();
-        self.upward = rotation * self.upward;
+    pub fn rotate(&mut self, rotator: Quat) {
+        self.orientation *= rotator;
     }
 
     pub fn matrix(&self) -> Mat4 {
