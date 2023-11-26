@@ -60,8 +60,9 @@ enum Example {
     KeyboardCase,
     Keycap,
     Offset2d,
-    Pipe,
     RoundedChamfer,
+    SweptFace,
+    SweptWire,
     TurnersCube,
     VariableFillet,
 }
@@ -77,8 +78,9 @@ impl Example {
             Example::KeyboardCase => examples::keyboard_case::shape(),
             Example::Keycap => examples::keycap::shape(),
             Example::Offset2d => examples::offset_2d::shape(),
-            Example::Pipe => examples::pipe::shape(),
             Example::RoundedChamfer => examples::rounded_chamfer::shape(),
+            Example::SweptFace => examples::swept_face::shape(),
+            Example::SweptWire => examples::swept_wire::shape(),
             Example::TurnersCube => examples::turners_cube::shape(),
             Example::VariableFillet => examples::variable_fillet::shape(),
         }

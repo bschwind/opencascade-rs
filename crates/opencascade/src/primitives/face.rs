@@ -204,7 +204,13 @@ impl Face {
     /// Sweep the face along a path to produce a solid
     #[must_use]
     pub fn sweep_along(&self, path: &Wire) -> Solid {
-        todo!()
+        let profile_shape = ffi::cast_face_to_shape(&self.inner);
+        let mut make_pipe = ffi::BRepOffsetAPI_MakePipe_ctor(&path.inner, &profile_shape);
+
+        let pipe_shape = make_pipe.pin_mut().Shape();
+        let result_solid = ffi::TopoDS_cast_to_solid(pipe_shape);
+
+        Solid::from_solid(&result_solid)
     }
 
     pub fn edges(&self) -> EdgeIterator {

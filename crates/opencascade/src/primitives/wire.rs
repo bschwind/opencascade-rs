@@ -193,12 +193,8 @@ impl Wire {
     /// Sweep the wire along a path to produce a shell
     #[must_use]
     pub fn sweep_along(&self, path: &Wire) -> Shell {
-        let mut make_pipe = ffi::BRepOffsetAPI_MakePipeShell_ctor(&path.inner);
-
         let profile_shape = ffi::cast_wire_to_shape(&self.inner);
-        let with_contact = false;
-        let with_correction = false;
-        make_pipe.pin_mut().Add(profile_shape, with_contact, with_correction);
+        let mut make_pipe = ffi::BRepOffsetAPI_MakePipe_ctor(&path.inner, &profile_shape);
 
         let pipe_shape = make_pipe.pin_mut().Shape();
         let result_shell = ffi::TopoDS_cast_to_shell(pipe_shape);
