@@ -109,15 +109,20 @@ impl EdgeDrawer {
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: render_target,
                     resolve_target: None,
-                    ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: true },
+                    ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store },
                 })],
                 depth_stencil_attachment: depth_view.map(|view| {
                     wgpu::RenderPassDepthStencilAttachment {
                         view,
-                        depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Load, store: true }),
+                        depth_ops: Some(wgpu::Operations {
+                            load: wgpu::LoadOp::Load,
+                            store: wgpu::StoreOp::Store,
+                        }),
                         stencil_ops: None,
                     }
                 }),
+                occlusion_query_set: None,
+                timestamp_writes: None,
             });
 
             // Render dashed line strips
