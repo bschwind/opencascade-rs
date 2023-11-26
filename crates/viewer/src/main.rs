@@ -32,7 +32,7 @@ mod surface_drawer;
 // Multipliers to convert mouse position deltas to a more intuitve camera perspective change.
 const ZOOM_MULTIPLIER: f32 = 5.0;
 const TOUCHPAD_ZOOM_MULTIPLIER: f32 = 0.5;
-const POINTER_DRAG_ROTATE_MULTIPLIER: f32 = 8.0;
+const ROTATE_MULTIPLIER: f32 = 8.0;
 const TOUCHPAD_ROTATE_MULTIPLIER: f32 = -0.05;
 const PAN_MULTIPLIER: f32 = 150.0;
 const TOUCHPAD_PAN_MULTIPLIER: f32 = 100.0;
@@ -220,6 +220,8 @@ impl GameApp for ViewerApp {
         event: &WindowEvent,
         window_target: &EventLoopWindowTarget<()>,
     ) {
+        let screen_diagonal = self.client_rect.length();
+
         match event {
             WindowEvent::TouchpadRotate { delta, .. } => {
                 let axis = Vec3::new(0.0, 0.0, 1.0);
@@ -228,27 +230,24 @@ impl GameApp for ViewerApp {
             },
             WindowEvent::CursorMoved { position, .. } => {
                 let delta = self.mouse_state.delta(*position);
-                let delta_x = delta.0 as f32 / self.client_rect.x;
-                let delta_y = delta.1 as f32 / self.client_rect.y;
+                // On the screen, Y is DOWN, but in camera space, it's UP
+                let camera_space_delta =
+                    Vec2::new(delta.0 as f32, -delta.1 as f32) / screen_diagonal;
                 if self.mouse_state.left_button_down {
-                    // On the screen, Y is DOWN, but in camera space, it's UP
-                    let camera_space_delta = Vec2::new(delta_x, -delta_y);
                     // Construct the camera space rotation axis perpendicular to delta
                     let axis = Vec3::new(camera_space_delta.y, -camera_space_delta.x, 0.0);
                     let magnitude = axis.length();
                     if magnitude > 0.0 {
-                        let rotator = Quat::from_axis_angle(
-                            axis.normalize(),
-                            POINTER_DRAG_ROTATE_MULTIPLIER * magnitude,
-                        );
+                        let rotator =
+                            Quat::from_axis_angle(axis.normalize(), ROTATE_MULTIPLIER * magnitude);
                         self.camera.rotate(rotator);
                     }
                 }
                 if self.mouse_state.middle_button_down {
-                    self.camera.pan(delta_x * PAN_MULTIPLIER, delta_y * PAN_MULTIPLIER);
+                    self.camera.pan(PAN_MULTIPLIER * camera_space_delta);
                 }
                 if self.mouse_state.right_button_down {
-                    self.camera.zoom(delta_y * ZOOM_MULTIPLIER);
+                    self.camera.zoom(camera_space_delta.y * ZOOM_MULTIPLIER);
                 }
             },
             WindowEvent::MouseInput { state, button, .. } => {
@@ -258,10 +257,12 @@ impl GameApp for ViewerApp {
                 // winit can not distinguish mouse wheel and touchpad pan events unfortunately.
                 // Because of that, we assign pan operation to MouseWheel events. For mice, you
                 // need to instead use mouse move while holding down the right button.
-                let delta_x = delta.x as f32 / self.client_rect.x;
-                let delta_y = delta.y as f32 / self.client_rect.y;
-                self.camera
-                    .pan(delta_x * TOUCHPAD_PAN_MULTIPLIER, delta_y * TOUCHPAD_PAN_MULTIPLIER);
+
+                // On the screen, Y is DOWN, but in camera space, it's UP
+                let camera_space_delta =
+                    Vec2::new(delta.x as f32, -delta.y as f32) / screen_diagonal;
+
+                self.camera.pan(TOUCHPAD_PAN_MULTIPLIER * camera_space_delta);
             },
             WindowEvent::TouchpadMagnify { delta, .. } => {
                 self.camera.zoom(*delta as f32 * TOUCHPAD_ZOOM_MULTIPLIER);

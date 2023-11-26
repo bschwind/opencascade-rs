@@ -1,4 +1,4 @@
-use glam::{vec3, Mat3, Mat4, Quat, Vec3};
+use glam::{vec3, Mat3, Mat4, Quat, Vec2, Vec3};
 
 const MIN_ZOOM_FACTOR: f32 = 0.05;
 
@@ -53,7 +53,9 @@ impl OrbitCamera {
 
     /// Pan the camera view horizontally and vertically. Look-at target will move along with the
     /// camera.
-    pub fn pan(&mut self, x: f32, y: f32) {}
+    pub fn pan(&mut self, delta: Vec2) {
+        self.target -= self.get_local_frame() * delta.extend(0.0);
+    }
 
     /// Zoom in or out, while looking at the same target.
     pub fn zoom(&mut self, zoom_delta: f32) {}
