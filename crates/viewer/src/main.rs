@@ -63,6 +63,8 @@ enum Example {
     Keycap,
     Offset2d,
     RoundedChamfer,
+    SweptFace,
+    SweptWire,
     TurnersCube,
     VariableFillet,
 }
@@ -79,6 +81,8 @@ impl Example {
             Example::Keycap => examples::keycap::shape(),
             Example::Offset2d => examples::offset_2d::shape(),
             Example::RoundedChamfer => examples::rounded_chamfer::shape(),
+            Example::SweptFace => examples::swept_face::shape(),
+            Example::SweptWire => examples::swept_wire::shape(),
             Example::TurnersCube => examples::turners_cube::shape(),
             Example::VariableFillet => examples::variable_fillet::shape(),
         }

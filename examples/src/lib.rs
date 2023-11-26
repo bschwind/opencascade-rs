@@ -7,5 +7,7 @@ pub mod keyboard_case;
 pub mod keycap;
 pub mod offset_2d;
 pub mod rounded_chamfer;
+pub mod swept_face;
+pub mod swept_wire;
 pub mod turners_cube;
 pub mod variable_fillet;
