@@ -265,7 +265,8 @@ impl GameApp for ViewerApp {
                 self.camera.pan(TOUCHPAD_PAN_MULTIPLIER * camera_space_delta);
             },
             WindowEvent::TouchpadMagnify { delta, .. } => {
-                self.camera.zoom(*delta as f32 * TOUCHPAD_ZOOM_MULTIPLIER);
+                let zoom_delta = *delta as f32 * TOUCHPAD_ZOOM_MULTIPLIER;
+                self.camera.zoom(-zoom_delta);
             },
             WindowEvent::KeyboardInput {
                 event: KeyEvent { physical_key: PhysicalKey::Code(key_code), .. },

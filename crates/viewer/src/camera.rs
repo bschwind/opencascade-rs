@@ -58,7 +58,9 @@ impl OrbitCamera {
     }
 
     /// Zoom in or out, while looking at the same target.
-    pub fn zoom(&mut self, zoom_delta: f32) {}
+    pub fn zoom(&mut self, zoom_delta: f32) {
+        self.radius = f32::max(self.radius * f32::exp(zoom_delta), f32::EPSILON);
+    }
 
     /// Orbit around the target while keeping the distance.
     pub fn rotate(&mut self, rotator: Quat) {
