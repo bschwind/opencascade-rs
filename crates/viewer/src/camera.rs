@@ -1,4 +1,4 @@
-use glam::{vec3, Mat4, Quat, Vec3};
+use glam::{vec3, Mat3, Mat4, Quat, Vec3};
 
 const MIN_ZOOM_FACTOR: f32 = 0.05;
 
@@ -23,15 +23,15 @@ pub struct OrbitCamera {
     orientation: Quat,
 }
 
-impl Camera {
+impl OrbitCamera {
     pub fn new(width: u32, height: u32) -> Self {
         Self {
             projection: Projection::Orthographic,
             aspect_ratio: width as f32 / height as f32,
             zoom_factor: 1.0,
-            position: vec3(20.0, -30.0, 20.0),
-            upward: vec3(0.0, 0.0, 1.0),
             target: vec3(0.0, 0.0, 0.0),
+            radius: 100.0,
+            orientation: Quat::IDENTITY,
         }
     }
 
@@ -47,24 +47,16 @@ impl Camera {
         self.projection = Projection::Orthographic;
     }
 
-    /// Pan the camera view horizontally and vertically. Look-at target will move along with the
-    /// camera.
-    pub fn pan(&mut self, x: f32, y: f32) {
-        let forward = self.target - self.position;
-        let rightward = self.upward.cross(forward).normalize();
-        let translation = rightward * x + self.upward * y;
-        self.position += translation;
-        self.target += translation;
+    fn get_local_frame(&self) -> Mat3 {
+        Mat3::from_quat(self.orientation)
     }
 
+    /// Pan the camera view horizontally and vertically. Look-at target will move along with the
+    /// camera.
+    pub fn pan(&mut self, x: f32, y: f32) {}
+
     /// Zoom in or out, while looking at the same target.
-    pub fn zoom(&mut self, zoom_delta: f32) {
-        // Change the camera position for perspective projection.
-        let forward = self.target - self.position;
-        self.position += forward * zoom_delta;
-        // Update the zoom factor for orthographic projection.
-        self.zoom_factor = (self.zoom_factor - zoom_delta).max(MIN_ZOOM_FACTOR);
-    }
+    pub fn zoom(&mut self, zoom_delta: f32) {}
 
     /// Orbit around the target while keeping the distance.
     pub fn rotate(&mut self, rotator: Quat) {
@@ -89,7 +81,10 @@ impl Camera {
             },
         };
 
-        let view = Mat4::look_at_rh(self.position, self.target, self.upward);
+        let local_frame = self.get_local_frame();
+        let position = self.target + self.radius * local_frame.z_axis;
+        let upward = local_frame.y_axis;
+        let view = Mat4::look_at_rh(position, self.target, upward);
 
         proj * view
     }

@@ -3,8 +3,9 @@ use crate::{
     surface_drawer::{CadMesh, SurfaceDrawer},
 };
 use anyhow::Error;
+use camera::OrbitCamera;
 use clap::{Parser, ValueEnum};
-use glam::{vec2, vec3, DVec3, Mat4, Vec2};
+use glam::{vec2, vec3, DVec3, Mat4, Quat, Vec2, Vec3};
 use opencascade::primitives::Shape;
 use simple_game::{
     graphics::{
@@ -31,7 +32,7 @@ mod surface_drawer;
 // Multipliers to convert mouse position deltas to a more intuitve camera perspective change.
 const ZOOM_MULTIPLIER: f32 = 5.0;
 const TOUCHPAD_ZOOM_MULTIPLIER: f32 = 0.5;
-const ROTATE_MULTIPLIER: f32 = -5.0;
+const POINTER_DRAG_ROTATE_MULTIPLIER: f32 = 8.0;
 const TOUCHPAD_ROTATE_MULTIPLIER: f32 = -0.05;
 const PAN_MULTIPLIER: f32 = 150.0;
 const TOUCHPAD_PAN_MULTIPLIER: f32 = 100.0;
@@ -63,7 +64,7 @@ impl MouseState {
 
 struct ViewerApp {
     client_rect: Vec2,
-    camera: camera::Camera,
+    camera: OrbitCamera,
     depth_texture: DepthTexture,
     text_system: TextSystem,
     fps_counter: FPSCounter,
@@ -182,7 +183,7 @@ impl GameApp for ViewerApp {
 
         Self {
             client_rect: vec2(width as f32, height as f32),
-            camera: camera::Camera::new(width, height),
+            camera: OrbitCamera::new(width, height),
             depth_texture,
             text_system: TextSystem::new(device, surface_texture_format, width, height),
             fps_counter: FPSCounter::new(),
@@ -221,14 +222,27 @@ impl GameApp for ViewerApp {
     ) {
         match event {
             WindowEvent::TouchpadRotate { delta, .. } => {
-                self.camera.rotate(delta * TOUCHPAD_ROTATE_MULTIPLIER, 0.0);
+                let axis = Vec3::new(0.0, 0.0, 1.0);
+                let rotator = Quat::from_axis_angle(axis, TOUCHPAD_ROTATE_MULTIPLIER * delta);
+                self.camera.rotate(rotator);
             },
             WindowEvent::CursorMoved { position, .. } => {
                 let delta = self.mouse_state.delta(*position);
                 let delta_x = delta.0 as f32 / self.client_rect.x;
                 let delta_y = delta.1 as f32 / self.client_rect.y;
                 if self.mouse_state.left_button_down {
-                    self.camera.rotate(delta_x * ROTATE_MULTIPLIER, delta_y * ROTATE_MULTIPLIER);
+                    // On the screen, Y is DOWN, but in camera space, it's UP
+                    let camera_space_delta = Vec2::new(delta_x, -delta_y);
+                    // Construct the camera space rotation axis perpendicular to delta
+                    let axis = Vec3::new(camera_space_delta.y, -camera_space_delta.x, 0.0);
+                    let magnitude = axis.length();
+                    if magnitude > 0.0 {
+                        let rotator = Quat::from_axis_angle(
+                            axis.normalize(),
+                            POINTER_DRAG_ROTATE_MULTIPLIER * magnitude,
+                        );
+                        self.camera.rotate(rotator);
+                    }
                 }
                 if self.mouse_state.middle_button_down {
                     self.camera.pan(delta_x * PAN_MULTIPLIER, delta_y * PAN_MULTIPLIER);
