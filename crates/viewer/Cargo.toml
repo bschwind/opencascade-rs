@@ -11,9 +11,7 @@ examples = { path = "../../examples", default-features = false }
 glam = { version = "0.24", features = ["bytemuck"] }
 opencascade = { version = "0.2", path = "../opencascade", default-features = false }
 simple-game = { git = "https://github.com/bschwind/simple-game.git", rev = "651a57a9f28b0707afbb5a43fe1cbc8f6755169c", default-features = false }
-
-# TODO(bschwind) - Update to version 0.12 when it's published
-smaa = { git = "https://github.com/bschwind/smaa-rs.git", branch = "update-wgpu" }
+smaa = "0.12"
 wgpu = "0.18"
 winit = { version = "0.29", features = ["rwh_05"] }
 
