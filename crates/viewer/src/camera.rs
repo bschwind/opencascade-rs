@@ -1,4 +1,4 @@
-use glam::{vec3, Mat3, Mat4, Quat, Vec2, Vec3};
+use glam::{Mat3, Mat4, Quat, Vec2, Vec3, Vec3Swizzles};
 
 const MIN_ZOOM_FACTOR: f32 = 0.05;
 
@@ -24,14 +24,18 @@ pub struct OrbitCamera {
 }
 
 impl OrbitCamera {
-    pub fn new(width: u32, height: u32) -> Self {
+    pub fn new(width: u32, height: u32, init_pos: Vec3) -> Self {
+        let target = Vec3::ZERO;
+        let radius = init_pos.length();
+        let look_at_matrix = Mat4::look_at_rh(init_pos, target, Vec3::Z);
+        let orientation = Quat::from_mat4(&look_at_matrix).inverse();
         Self {
             projection: Projection::Orthographic,
             aspect_ratio: width as f32 / height as f32,
             zoom_factor: 1.0,
-            target: vec3(0.0, 0.0, 0.0),
-            radius: 100.0,
-            orientation: Quat::IDENTITY,
+            target,
+            radius,
+            orientation,
         }
     }
 

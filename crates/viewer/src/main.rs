@@ -183,7 +183,7 @@ impl GameApp for ViewerApp {
 
         Self {
             client_rect: vec2(width as f32, height as f32),
-            camera: OrbitCamera::new(width, height),
+            camera: OrbitCamera::new(width, height, Vec3::new(40.0, -40.0, 20.0)),
             depth_texture,
             text_system: TextSystem::new(device, surface_texture_format, width, height),
             fps_counter: FPSCounter::new(),
