@@ -1,4 +1,4 @@
-use glam::{Mat3, Mat4, Quat, Vec2, Vec3, Vec3Swizzles};
+use glam::{Mat3, Mat4, Quat, Vec2, Vec3};
 
 const MIN_ZOOM_FACTOR: f32 = 0.05;
 
