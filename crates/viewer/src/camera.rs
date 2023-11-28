@@ -68,7 +68,7 @@ impl OrbitCamera {
 
     /// Orbit around the target while keeping the distance.
     pub fn rotate(&mut self, rotator: Quat) {
-        self.orientation *= rotator;
+        self.orientation = (self.orientation * rotator).normalize();
     }
 
     pub fn matrix(&self) -> Mat4 {
