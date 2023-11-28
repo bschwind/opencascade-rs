@@ -100,9 +100,11 @@ impl OrbitCamera {
         };
 
         let local_frame = self.get_local_frame();
-        let upward = local_frame.y_axis;
         let position = self.target + effective_radius * local_frame.z_axis;
-        let view = Mat4::look_at_rh(position, self.target, upward);
+
+        // NOTE(mkovaxx): This is computing inverse(translation * orientation), but more efficiently
+        let view =
+            Mat4::from_quat(self.orientation.conjugate()) * Mat4::from_translation(-position);
 
         proj * view
     }
