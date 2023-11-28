@@ -92,8 +92,8 @@ impl OrbitCamera {
                 let proj = Mat4::perspective_rh(
                     std::f32::consts::PI / 2.0,
                     self.aspect_ratio,
-                    0.01,
-                    1000.0,
+                    10.0,
+                    10_000.0,
                 );
                 (proj, self.zoom_factor * self.radius)
             },
