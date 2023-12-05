@@ -907,6 +907,20 @@ pub mod ffi {
         #[cxx_name = "SetTranslationPart"]
         pub fn set_translation_vec(self: Pin<&mut gp_Trsf>, translation: &gp_Vec);
 
+        type BRepBuilderAPI_MakeShapeOnMesh;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepBuilderAPI_MakeShapeOnMesh_ctor(
+            mesh: &Handle_Poly_Triangulation,
+        ) -> UniquePtr<BRepBuilderAPI_MakeShapeOnMesh>;
+
+        pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeShapeOnMesh>) -> &TopoDS_Shape;
+        pub fn Build(
+            self: Pin<&mut BRepBuilderAPI_MakeShapeOnMesh>,
+            progress: &Message_ProgressRange,
+        );
+        pub fn IsDone(self: &BRepBuilderAPI_MakeShapeOnMesh) -> bool;
+
         type BRepBuilderAPI_Transform;
 
         #[cxx_name = "construct_unique"]
@@ -1065,6 +1079,11 @@ pub mod ffi {
         pub fn TopLoc_Location_Transformation(location: &TopLoc_Location) -> UniquePtr<gp_Trsf>;
 
         type Handle_Poly_Triangulation;
+        #[cxx_name = "construct_unique"]
+        pub fn Handle_Poly_Triangulation_ctor(
+            triangulation: &Handle_Poly_Triangulation,
+        ) -> UniquePtr<Handle_Poly_Triangulation>;
+
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
         #[cxx_name = "handle_try_deref"]
         pub fn Handle_Poly_Triangulation_Get(
@@ -1072,11 +1091,26 @@ pub mod ffi {
         ) -> Result<&Poly_Triangulation>;
 
         type Poly_Triangulation;
+        #[cxx_name = "construct_unique"]
+        pub fn Poly_Triangulation_ctor(
+            nb_nodes: i32,
+            nb_triangles: i32,
+            has_uv: bool,
+            has_normals: bool,
+        ) -> UniquePtr<Poly_Triangulation>;
         pub fn NbNodes(self: &Poly_Triangulation) -> i32;
         pub fn NbTriangles(self: &Poly_Triangulation) -> i32;
         pub fn HasNormals(self: &Poly_Triangulation) -> bool;
         pub fn HasUVNodes(self: &Poly_Triangulation) -> bool;
         pub fn Triangle(self: &Poly_Triangulation, index: i32) -> &Poly_Triangle;
+        pub fn SetTriangle(
+            self: Pin<&mut Poly_Triangulation>,
+            index: i32,
+            triangle: &Poly_Triangle,
+        );
+        pub fn SetNode(self: Pin<&mut Poly_Triangulation>, index: i32, node: &gp_Pnt);
+        pub fn SetNormal(self: Pin<&mut Poly_Triangulation>, index: i32, dir: &gp_Dir);
+        pub fn SetUVNode(self: Pin<&mut Poly_Triangulation>, index: i32, uv: &gp_Pnt2d);
         pub fn Poly_Triangulation_Normal(
             triangulation: &Poly_Triangulation,
             index: i32,
@@ -1091,6 +1125,8 @@ pub mod ffi {
         ) -> UniquePtr<gp_Pnt2d>;
 
         type Poly_Triangle;
+        #[cxx_name = "construct_unique"]
+        pub fn Poly_Triangle_ctor(node1: i32, node2: i32, node3: i32) -> UniquePtr<Poly_Triangle>;
         pub fn Value(self: &Poly_Triangle, index: i32) -> i32;
 
         type Poly_Connect;
