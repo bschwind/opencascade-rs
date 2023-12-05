@@ -426,6 +426,8 @@ pub mod ffi {
             compound: UniquePtr<TopoDS_Compound>,
         ) -> UniquePtr<TopoDS_Shape>;
 
+        pub fn TopoDS_Shell_as_shape(shell: UniquePtr<TopoDS_Shell>) -> UniquePtr<TopoDS_Shape>;
+
         type BRep_Builder;
         type TopoDS_Builder;
 
@@ -433,10 +435,14 @@ pub mod ffi {
         pub fn TopoDS_Compound_ctor() -> UniquePtr<TopoDS_Compound>;
 
         #[cxx_name = "construct_unique"]
+        pub fn TopoDS_Shell_ctor() -> UniquePtr<TopoDS_Shell>;
+
+        #[cxx_name = "construct_unique"]
         pub fn BRep_Builder_ctor() -> UniquePtr<BRep_Builder>;
 
         pub fn BRep_Builder_upcast_to_topods_builder(builder: &BRep_Builder) -> &TopoDS_Builder;
         pub fn MakeCompound(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Compound>);
+        pub fn MakeShell(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Shell>);
         pub fn Add(self: &TopoDS_Builder, shape: Pin<&mut TopoDS_Shape>, compound: &TopoDS_Shape);
 
         // BRepBuilder
@@ -907,6 +913,17 @@ pub mod ffi {
         #[cxx_name = "SetTranslationPart"]
         pub fn set_translation_vec(self: Pin<&mut gp_Trsf>, translation: &gp_Vec);
 
+        type BRepBuilderAPI_MakeSolid;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepBuilderAPI_MakeSolid_ctor(
+            shell: &TopoDS_Shell,
+        ) -> UniquePtr<BRepBuilderAPI_MakeSolid>;
+
+        pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeSolid>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeSolid>, progress: &Message_ProgressRange);
+        pub fn IsDone(self: &BRepBuilderAPI_MakeSolid) -> bool;
+
         type BRepBuilderAPI_MakeShapeOnMesh;
 
         #[cxx_name = "construct_unique"]
@@ -1079,9 +1096,12 @@ pub mod ffi {
         pub fn TopLoc_Location_Transformation(location: &TopLoc_Location) -> UniquePtr<gp_Trsf>;
 
         type Handle_Poly_Triangulation;
+
+        /// # Safety
+        /// This method is safe assuming that `triangulation` points to a valid constructed object or is a null pointer.
         #[cxx_name = "construct_unique"]
-        pub fn Handle_Poly_Triangulation_ctor(
-            triangulation: &Handle_Poly_Triangulation,
+        pub unsafe fn Handle_Poly_Triangulation_ctor(
+            triangulation: *const Poly_Triangulation,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
 
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
