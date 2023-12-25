@@ -1,5 +1,4 @@
-use anyhow::{anyhow, Context, Result};
-use opencascade::primitives::{Edge, EdgeConnection, Face, Wire};
+use crate::Error;
 use sexp::{Atom, Sexp};
 use std::path::Path;
 
@@ -115,17 +114,16 @@ pub struct KicadBoard {
 }
 
 impl KicadBoard {
-    pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Self> {
-        let kicad_board_str = std::fs::read_to_string(&file)
-            .context(format!("Reading {:?}", file.as_ref().to_string_lossy()))?;
+    pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Self, Error> {
+        let kicad_board_str = std::fs::read_to_string(&file)?;
         let sexp = sexp::parse(&kicad_board_str)?;
 
         let Sexp::List(list) = sexp else {
-            return Err(anyhow!("Top level file wasn't a list"));
+            return Err(Error::TopLevelObjectNotList);
         };
 
         let Sexp::Atom(Atom::S(head)) = &list[0] else {
-            return Err(anyhow!("First element in the top level list should be a string"));
+            return Err(Error::FirstElementInListNotString);
         };
 
         match head.as_str() {
@@ -133,11 +131,27 @@ impl KicadBoard {
                 let board_fields = &list[1..];
                 Ok(Self::handle_board_fields(board_fields)?)
             },
-            _ => Err(anyhow!("Invalid top-level file type - expected 'kicad_pcb'")),
+            _ => Err(Error::NotKicadPcbFile),
         }
     }
 
-    fn handle_board_fields(fields: &[Sexp]) -> Result<Self> {
+    pub fn lines(&self) -> impl Iterator<Item = &GraphicLine> {
+        self.graphic_lines.iter()
+    }
+
+    pub fn arcs(&self) -> impl Iterator<Item = &GraphicArc> {
+        self.graphic_arcs.iter()
+    }
+
+    pub fn circles(&self) -> impl Iterator<Item = &GraphicCircle> {
+        self.graphic_circles.iter()
+    }
+
+    pub fn rects(&self) -> impl Iterator<Item = &GraphicRect> {
+        self.graphic_rects.iter()
+    }
+
+    fn handle_board_fields(fields: &[Sexp]) -> Result<Self, Error> {
         let mut board = Self::default();
 
         for field in fields {
@@ -179,29 +193,5 @@ impl KicadBoard {
         }
 
         Ok(board)
-    }
-
-    pub fn layer_edges(&self, layer: BoardLayer) -> Vec<Edge> {
-        self.graphic_lines
-            .iter()
-            .filter(|line| line.layer() == layer)
-            .map(Into::<Edge>::into)
-            .chain(
-                self.graphic_arcs.iter().filter(|arc| arc.layer() == layer).map(Into::<Edge>::into),
-            )
-            .collect()
-    }
-
-    pub fn layer_wire(&self, layer: BoardLayer) -> Wire {
-        Wire::from_unordered_edges(&self.layer_edges(layer), EdgeConnection::default())
-    }
-
-    pub fn layer_face(&self, layer: BoardLayer) -> Face {
-        Face::from_wire(&self.layer_wire(layer))
-    }
-
-    pub fn outline(&self, _offset: f64) -> Face {
-        // TODO apply offset around the face
-        self.layer_face(BoardLayer::EdgeCuts)
     }
 }

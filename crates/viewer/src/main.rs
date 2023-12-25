@@ -5,8 +5,8 @@ use crate::{
 use anyhow::Error;
 use camera::OrbitCamera;
 use clap::{Parser, ValueEnum};
-use glam::{vec2, vec3, DVec3, Mat4, Quat, Vec2, Vec3};
-use opencascade::primitives::Shape;
+use glam::{dvec3, vec2, vec3, DVec3, Mat4, Quat, Vec2, Vec3};
+use opencascade::{kicad::KicadPcb, primitives::Shape};
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
@@ -81,6 +81,9 @@ struct AppArgs {
     #[arg(long, group = "model")]
     step_file: Option<PathBuf>,
 
+    #[arg(long, group = "model")]
+    kicad_file: Option<PathBuf>,
+
     #[arg(long, value_enum, group = "model")]
     example: Option<Example>,
 }
@@ -132,6 +135,12 @@ impl GameApp for ViewerApp {
 
         let shape = if let Some(step_file) = args.step_file {
             Shape::read_step(step_file).expect("Failed to read STEP file, {step_file}")
+        } else if let Some(kicad_file) = args.kicad_file {
+            // Parse the kicad file, turn it into a face, extrude it by 1.6mm
+            let pcb =
+                KicadPcb::from_file(kicad_file).expect("Failed to read KiCAD PCB file, kicad_file");
+
+            pcb.edge_cuts().to_face().extrude(dvec3(0.0, 0.0, 1.6)).into()
         } else if let Some(example) = args.example {
             example.shape()
         } else {

@@ -1,9 +1,4 @@
-use anyhow::{anyhow, Result};
-use glam::{dvec3, DVec3};
-use opencascade::{
-    primitives::{Edge, Face},
-    workplane::Workplane,
-};
+use crate::Error;
 use sexp::{Atom, Sexp};
 
 use crate::board::BoardLayer;
@@ -16,7 +11,7 @@ pub struct GraphicLine {
 }
 
 impl GraphicLine {
-    pub fn from_list(list: &[Sexp]) -> Result<Self> {
+    pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
         let mut line = Self::default();
 
         for field in list {
@@ -51,22 +46,16 @@ impl GraphicLine {
         Ok(line)
     }
 
-    pub fn start_point(&self) -> DVec3 {
-        dvec3(self.start.0, self.start.1, 0.0)
+    pub fn start_point(&self) -> (f64, f64) {
+        self.start
     }
 
-    pub fn end_point(&self) -> DVec3 {
-        dvec3(self.end.0, self.end.1, 0.0)
+    pub fn end_point(&self) -> (f64, f64) {
+        self.end
     }
 
     pub fn layer(&self) -> BoardLayer {
         BoardLayer::from(self.layer.as_str())
-    }
-}
-
-impl Into<Edge> for &GraphicLine {
-    fn into(self) -> Edge {
-        Edge::segment(self.start_point(), self.end_point())
     }
 }
 
@@ -79,7 +68,7 @@ pub struct GraphicArc {
 }
 
 impl GraphicArc {
-    pub fn from_list(list: &[Sexp]) -> Result<Self> {
+    pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
         let mut line = Self::default();
 
         for field in list {
@@ -118,26 +107,20 @@ impl GraphicArc {
         Ok(line)
     }
 
-    pub fn start_point(&self) -> DVec3 {
-        dvec3(self.start.0, self.start.1, 0.0)
+    pub fn start_point(&self) -> (f64, f64) {
+        self.start
     }
 
-    pub fn mid_point(&self) -> DVec3 {
-        dvec3(self.mid.0, self.mid.1, 0.0)
+    pub fn mid_point(&self) -> (f64, f64) {
+        self.mid
     }
 
-    pub fn end_point(&self) -> DVec3 {
-        dvec3(self.end.0, self.end.1, 0.0)
+    pub fn end_point(&self) -> (f64, f64) {
+        self.end
     }
 
     pub fn layer(&self) -> BoardLayer {
         BoardLayer::from(self.layer.as_str())
-    }
-}
-
-impl Into<Edge> for &GraphicArc {
-    fn into(self) -> Edge {
-        Edge::arc(self.start_point(), self.mid_point(), self.end_point())
     }
 }
 
@@ -149,7 +132,7 @@ pub struct GraphicCircle {
 }
 
 impl GraphicCircle {
-    pub fn from_list(list: &[Sexp]) -> Result<Self> {
+    pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
         let mut line = Self::default();
 
         for field in list {
@@ -184,28 +167,16 @@ impl GraphicCircle {
         Ok(line)
     }
 
-    pub fn center_point(&self) -> DVec3 {
-        dvec3(self.center.0, self.center.1, 0.0)
+    pub fn center_point(&self) -> (f64, f64) {
+        self.center
     }
 
-    pub fn end_point(&self) -> DVec3 {
-        dvec3(self.end.0, self.end.1, 0.0)
+    pub fn end_point(&self) -> (f64, f64) {
+        self.end
     }
 
     pub fn layer(&self) -> BoardLayer {
         BoardLayer::from(self.layer.as_str())
-    }
-}
-
-impl Into<Face> for &GraphicCircle {
-    fn into(self) -> Face {
-        let delta_x = (self.center.0 - self.end.0).abs();
-        let delta_y = (self.center.1 - self.end.1).abs();
-        let radius = (delta_x * delta_x + delta_y * delta_y).sqrt();
-        Workplane::xy()
-            .translated(self.center_point())
-            .circle(self.center.0, self.center.1, radius)
-            .to_face()
     }
 }
 
@@ -217,7 +188,7 @@ pub struct GraphicRect {
 }
 
 impl GraphicRect {
-    pub fn from_list(list: &[Sexp]) -> Result<Self> {
+    pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
         let mut line = Self::default();
 
         for field in list {
@@ -252,35 +223,19 @@ impl GraphicRect {
         Ok(line)
     }
 
-    pub fn start_point(&self) -> DVec3 {
-        dvec3(self.start.0, self.start.1, 0.0)
-    }
-
-    pub fn end_point(&self) -> DVec3 {
-        dvec3(self.end.0, self.end.1, 0.0)
-    }
-
     pub fn layer(&self) -> BoardLayer {
         BoardLayer::from(self.layer.as_str())
     }
 }
 
-impl Into<Face> for &GraphicRect {
-    fn into(self) -> Face {
-        let height = (self.end.1 - self.start.1).abs();
-        let width = (self.end.0 - self.start.0).abs();
-        Workplane::xy().translated(self.start_point()).rect(height, width).to_face()
-    }
-}
-
-fn extract_coords(x: &Sexp, y: &Sexp) -> Result<(f64, f64)> {
+fn extract_coords(x: &Sexp, y: &Sexp) -> Result<(f64, f64), Error> {
     Ok((extract_number(x)?, extract_number(y)?))
 }
 
-fn extract_number(num: &Sexp) -> Result<f64> {
+fn extract_number(num: &Sexp) -> Result<f64, Error> {
     match num {
         Sexp::Atom(Atom::F(float)) => Ok(*float),
         Sexp::Atom(Atom::I(int)) => Ok(*int as f64),
-        _ => Err(anyhow!("Expected a number to be a float or integer")),
+        _ => Err(Error::NumberShouldBeFloatOrInt),
     }
 }

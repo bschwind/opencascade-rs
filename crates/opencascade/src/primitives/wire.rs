@@ -79,14 +79,14 @@ impl Wire {
         Self::from_make_wire(make_wire)
     }
 
-    pub fn from_unordered_edges<'a>(
-        unordered_edges: impl IntoIterator<Item = &'a Edge>,
+    pub fn from_unordered_edges<T: AsRef<Edge>>(
+        unordered_edges: impl IntoIterator<Item = T>,
         edge_connection: EdgeConnection,
     ) -> Self {
         let mut edges = ffi::new_Handle_TopTools_HSequenceOfShape();
 
         for edge in unordered_edges {
-            let edge_shape = ffi::cast_edge_to_shape(&edge.inner);
+            let edge_shape = ffi::cast_edge_to_shape(&edge.as_ref().inner);
             ffi::TopTools_HSequenceOfShape_append(edges.pin_mut(), edge_shape);
         }
 
