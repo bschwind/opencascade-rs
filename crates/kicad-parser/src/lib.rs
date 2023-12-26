@@ -8,7 +8,7 @@ pub mod graphics;
 pub enum Error {
     #[error("IO Error: {0}")]
     IoError(#[from] std::io::Error),
-    #[error("IO Error: {0}")]
+    #[error("S-Expression Parse Error: {0}")]
     SexpParseError(#[from] Box<sexp::Error>),
     #[error("Top level object is not a list")]
     TopLevelObjectNotList,
