@@ -4,7 +4,7 @@ use crate::{
     workplane::Workplane,
     Error,
 };
-use glam::{dvec3, DVec2};
+use glam::DVec2;
 use kicad_parser::{
     board::{BoardLayer, KicadBoard},
     graphics::{GraphicArc, GraphicCircle, GraphicLine, GraphicRect},
@@ -13,18 +13,18 @@ use std::path::Path;
 
 impl From<&GraphicLine> for Edge {
     fn from(line: &GraphicLine) -> Edge {
-        let start = line.start_point();
-        let end = line.end_point();
-        Edge::segment(dvec3(start.0, start.1, 0.0), dvec3(end.0, end.1, 0.0))
+        let start = DVec2::from(line.start_point());
+        let end = DVec2::from(line.end_point());
+        Edge::segment(start.extend(0.0), end.extend(0.0))
     }
 }
 
 impl From<&GraphicArc> for Edge {
     fn from(arc: &GraphicArc) -> Edge {
-        let start = arc.start_point();
-        let mid = arc.mid_point();
-        let end = arc.end_point();
-        Edge::arc(dvec3(start.0, start.1, 0.0), dvec3(mid.0, mid.1, 0.0), dvec3(end.0, end.1, 0.0))
+        let start = DVec2::from(arc.start_point());
+        let mid = DVec2::from(arc.mid_point());
+        let end = DVec2::from(arc.end_point());
+        Edge::arc(start.extend(0.0), mid.extend(0.0), end.extend(0.0))
     }
 }
 
