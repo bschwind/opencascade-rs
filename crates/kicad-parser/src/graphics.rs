@@ -223,6 +223,14 @@ impl GraphicRect {
         Ok(line)
     }
 
+    pub fn start_point(&self) -> (f64, f64) {
+        self.start
+    }
+
+    pub fn end_point(&self) -> (f64, f64) {
+        self.end
+    }
+
     pub fn layer(&self) -> BoardLayer {
         BoardLayer::from(self.layer.as_str())
     }

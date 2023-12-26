@@ -1,12 +1,13 @@
 use crate::{
     angle::ToAngle,
-    primitives::{Edge, EdgeConnection, Wire},
+    primitives::{Edge, EdgeConnection, Face, Wire},
+    workplane::Workplane,
     Error,
 };
 use glam::{dvec3, DVec2};
 use kicad_parser::{
     board::{BoardLayer, KicadBoard},
-    graphics::{GraphicArc, GraphicLine},
+    graphics::{GraphicArc, GraphicCircle, GraphicLine, GraphicRect},
 };
 use std::path::Path;
 
@@ -27,25 +28,27 @@ impl From<&GraphicArc> for Edge {
     }
 }
 
-// impl From<&GraphicCircle> for Face {
-//     fn from(circle: &GraphicCircle) -> Face {
-//         let delta_x = (circle.center.0 - circle.end.0).abs();
-//         let delta_y = (circle.center.1 - circle.end.1).abs();
-//         let radius = (delta_x * delta_x + delta_y * delta_y).sqrt();
-//         Workplane::xy()
-//             .translated(circle.center_point())
-//             .circle(circle.center.0, circle.center.1, radius)
-//             .to_face()
-//     }
-// }
+impl From<&GraphicCircle> for Face {
+    fn from(circle: &GraphicCircle) -> Face {
+        let center = DVec2::from(circle.center_point());
+        let end = DVec2::from(circle.end_point());
 
-// impl From<&GraphicRect> for Face {
-//     fn from(rect: &GraphicRect) -> Face {
-//         let height = (rect.end.1 - rect.start.1).abs();
-//         let width = (rect.end.0 - rect.start.0).abs();
-//         Workplane::xy().translated(rect.start_point()).rect(height, width).to_face()
-//     }
-// }
+        let delta = (center - end).abs();
+
+        let radius = (delta.x * delta.x + delta.y * delta.y).sqrt();
+        Workplane::xy().translated(center.extend(0.0)).circle(center.x, center.y, radius).to_face()
+    }
+}
+
+impl From<&GraphicRect> for Face {
+    fn from(rect: &GraphicRect) -> Face {
+        let start = DVec2::from(rect.start_point());
+        let end = DVec2::from(rect.end_point());
+
+        let dimensions = (end - start).abs();
+        Workplane::xy().translated(start.extend(0.0)).rect(dimensions.x, dimensions.y).to_face()
+    }
+}
 
 pub struct KicadPcb {
     board: KicadBoard,
@@ -106,17 +109,4 @@ impl KicadPcb {
             .chain(self.board.arcs().filter(|arc| arc.layer() == *layer).map(Edge::from))
             .chain(footprint_edges)
     }
-
-    // pub fn layer_wire(&self, layer: BoardLayer) -> Wire {
-    //     Wire::from_unordered_edges(&self.layer_edges(layer), EdgeConnection::default())
-    // }
-
-    // pub fn layer_face(&self, layer: BoardLayer) -> Face {
-    //     Face::from_wire(&self.layer_wire(layer))
-    // }
-
-    // pub fn outline(&self, _offset: f64) -> Face {
-    //     // TODO apply offset around the face
-    //     self.layer_face(BoardLayer::EdgeCuts)
-    // }
 }
