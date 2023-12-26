@@ -5,8 +5,12 @@ use crate::{
 use anyhow::Error;
 use camera::OrbitCamera;
 use clap::{Parser, ValueEnum};
-use glam::{dvec3, vec2, vec3, DVec3, Mat4, Quat, Vec2, Vec3};
-use opencascade::{kicad::KicadPcb, primitives::Shape};
+use glam::{vec2, vec3, DVec3, Mat4, Quat, Vec2, Vec3};
+use kicad_parser::board::BoardLayer;
+use opencascade::{
+    kicad::KicadPcb,
+    primitives::{IntoShape, Shape},
+};
 use simple_game::{
     graphics::{
         text::{AxisAlign, StyledText, TextAlignment, TextSystem},
@@ -140,7 +144,11 @@ impl GameApp for ViewerApp {
             let pcb =
                 KicadPcb::from_file(kicad_file).expect("Failed to read KiCAD PCB file, kicad_file");
 
-            pcb.edge_cuts().to_face().extrude(dvec3(0.0, 0.0, 1.6)).into()
+            // Temporary - Unions all edges together to display without connecting them.
+            let edges = pcb.layer_edges(&BoardLayer::EdgeCuts);
+            edges.map(|edge| edge.into_shape()).reduce(|acc, edge| acc.union(&edge).into()).unwrap()
+
+            // pcb.edge_cuts().to_face().extrude(glam::dvec3(0.0, 0.0, 1.6)).into()
         } else if let Some(example) = args.example {
             example.shape()
         } else {

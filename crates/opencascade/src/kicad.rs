@@ -1,8 +1,9 @@
 use crate::{
+    angle::ToAngle,
     primitives::{Edge, EdgeConnection, Wire},
     Error,
 };
-use glam::dvec3;
+use glam::{dvec3, DVec2};
 use kicad_parser::{
     board::{BoardLayer, KicadBoard},
     graphics::{GraphicArc, GraphicLine},
@@ -62,12 +63,48 @@ impl KicadPcb {
         )
     }
 
-    fn layer_edges<'a>(&'a self, layer: &'a BoardLayer) -> impl Iterator<Item = Edge> + '_ {
+    pub fn layer_edges<'a>(&'a self, layer: &'a BoardLayer) -> impl Iterator<Item = Edge> + '_ {
+        let footprint_edges = self.board.footprints().flat_map(|footprint| {
+            let angle = footprint.rotation_degrees.degrees();
+            let angle_vec = DVec2::from_angle(-angle.radians());
+            let translate = DVec2::from(footprint.location);
+
+            footprint
+                .lines()
+                .filter(|line| line.layer() == *layer)
+                .map(move |line| {
+                    let start = line.start_point();
+                    let end = line.end_point();
+                    let start = DVec2::from(start);
+                    let end = DVec2::from(end);
+
+                    let start = translate + angle_vec.rotate(start);
+                    let end = translate + angle_vec.rotate(end);
+
+                    Edge::segment(start.extend(0.0), end.extend(0.0))
+                })
+                .chain(footprint.arcs().filter(|arc| arc.layer() == *layer).map(move |arc| {
+                    let start = arc.start_point();
+                    let mid = arc.mid_point();
+                    let end = arc.end_point();
+                    let start = DVec2::from(start);
+                    let mid = DVec2::from(mid);
+                    let end = DVec2::from(end);
+
+                    let start = translate + angle_vec.rotate(start);
+                    let mid = translate + angle_vec.rotate(mid);
+                    let end = translate + angle_vec.rotate(end);
+
+                    Edge::arc(start.extend(0.0), mid.extend(0.0), end.extend(0.0))
+                }))
+        });
+
         self.board
             .lines()
             .filter(|line| line.layer() == *layer)
             .map(Edge::from)
             .chain(self.board.arcs().filter(|arc| arc.layer() == *layer).map(Edge::from))
+            .chain(footprint_edges)
     }
 
     // pub fn layer_wire(&self, layer: BoardLayer) -> Wire {
