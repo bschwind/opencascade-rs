@@ -1,6 +1,7 @@
 use thiserror::Error;
 
 pub mod angle;
+pub mod kicad;
 pub mod mesh;
 pub mod primitives;
 pub mod workplane;
@@ -11,6 +12,8 @@ pub enum Error {
     StlWriteFailed,
     #[error("failed to read STEP file")]
     StepReadFailed,
+    #[error("failed to read KiCAD PCB file: {0}")]
+    KicadReadFailed(#[from] kicad_parser::Error),
     #[error("failed to write STEP file")]
     StepWriteFailed,
     #[error("failed to triangulate Shape")]
