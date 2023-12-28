@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-glam = { version = "0.23", features = ["bytemuck"] }
+glam = { version = "0.24", features = ["bytemuck"] }
