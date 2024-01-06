@@ -1097,11 +1097,8 @@ pub mod ffi {
 
         type Handle_Poly_Triangulation;
 
-        /// # Safety
-        /// This method is safe assuming that `triangulation` points to a valid constructed object or is a null pointer.
-        #[cxx_name = "construct_unique"]
-        pub unsafe fn Handle_Poly_Triangulation_ctor(
-            triangulation: *const Poly_Triangulation,
+        pub fn Handle_Poly_Triangulation_ctor(
+            triangulation: &Poly_Triangulation,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
 
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
