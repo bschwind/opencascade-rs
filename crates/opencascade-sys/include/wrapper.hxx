@@ -8,6 +8,7 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeShapeOnMesh.hxx>
+#include <BRepBuilderAPI_MakeSolid.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
@@ -256,6 +257,8 @@ inline std::unique_ptr<TopoDS_Shape> TopoDS_Compound_as_shape(std::unique_ptr<To
   return compound;
 }
 
+inline std::unique_ptr<TopoDS_Shape> TopoDS_Shell_as_shape(std::unique_ptr<TopoDS_Shell> shell) { return shell; }
+
 inline const TopoDS_Builder &BRep_Builder_upcast_to_topods_builder(const BRep_Builder &builder) { return builder; }
 
 // Transforms
@@ -274,6 +277,11 @@ inline std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex &vertex) {
 
 inline std::unique_ptr<gp_Trsf> TopLoc_Location_Transformation(const TopLoc_Location &location) {
   return std::unique_ptr<gp_Trsf>(new gp_Trsf(location.Transformation()));
+}
+
+inline std::unique_ptr<Handle_Poly_Triangulation>
+Handle_Poly_Triangulation_ctor(const Poly_Triangulation &triangulation) {
+  return std::unique_ptr<Handle_Poly_Triangulation>(new Handle_Poly_Triangulation(&triangulation));
 }
 
 inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
