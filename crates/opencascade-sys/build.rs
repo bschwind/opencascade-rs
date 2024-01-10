@@ -76,6 +76,8 @@ struct OcctConfig {
 impl OcctConfig {
     /// Find OpenCASCADE library using cmake
     fn detect() -> Self {
+        println!("cargo:rerun-if-env-changed=DEP_OCCT_ROOT");
+
         // Add path to builtin OCCT
         #[cfg(feature = "builtin")]
         {
