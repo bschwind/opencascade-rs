@@ -1098,7 +1098,7 @@ pub mod ffi {
         type Handle_Poly_Triangulation;
 
         pub fn Handle_Poly_Triangulation_ctor(
-            triangulation: &Poly_Triangulation,
+            triangulation: UniquePtr<Poly_Triangulation>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
 
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
