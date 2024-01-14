@@ -290,12 +290,18 @@ impl GameApp for ViewerApp {
                 self.camera.zoom(-zoom_delta);
             },
             WindowEvent::KeyboardInput {
-                event: KeyEvent { physical_key: PhysicalKey::Code(key_code), .. },
+                event:
+                    KeyEvent {
+                        physical_key: PhysicalKey::Code(key_code),
+                        state: ElementState::Pressed,
+                        ..
+                    },
                 ..
             } => match key_code {
                 KeyCode::Escape => window_target.exit(),
                 KeyCode::KeyP => self.camera.use_perspective(),
                 KeyCode::KeyO => self.camera.use_orthographic(),
+                KeyCode::KeyX => self.line_drawer.toggle_back_edge_drawing(),
                 _ => {},
             },
             _ => {},
