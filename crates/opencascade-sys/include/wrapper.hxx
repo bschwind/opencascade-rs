@@ -280,8 +280,8 @@ inline std::unique_ptr<gp_Trsf> TopLoc_Location_Transformation(const TopLoc_Loca
 }
 
 inline std::unique_ptr<Handle_Poly_Triangulation>
-Handle_Poly_Triangulation_ctor(const Poly_Triangulation &triangulation) {
-  return std::unique_ptr<Handle_Poly_Triangulation>(new Handle_Poly_Triangulation(&triangulation));
+Handle_Poly_Triangulation_ctor(std::unique_ptr<Poly_Triangulation> triangulation) {
+  return std::unique_ptr<Handle_Poly_Triangulation>(new Handle_Poly_Triangulation(triangulation.release()));
 }
 
 inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
