@@ -1,5 +1,7 @@
-use std::path::{Path, PathBuf};
-use std::env::var;
+use std::{
+    env::var,
+    path::{Path, PathBuf},
+};
 
 const LIB_DIR: &str = "lib";
 const INCLUDE_DIR: &str = "include";
