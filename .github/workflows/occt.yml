@@ -6,6 +6,10 @@ on:
 
 name: Cargo Build OCCT
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Cargo Build OCCT
@@ -22,7 +26,7 @@ jobs:
           toolchain: stable
       - name: Cache Rust Dependencies
         uses: Swatinem/rust-cache@v2
-      - run: cargo build -p opencascade-sys --features builtin
+      - run: cargo build -p opencascade-sys --features builtin -vv
   build-wasm:
     name: Cargo Build OCCT WASM
     runs-on: ubuntu-latest
@@ -37,4 +41,4 @@ jobs:
           targets: wasm32-unknown-emscripten
       - name: Cache Rust Dependencies
         uses: Swatinem/rust-cache@v2
-      - run: cargo build -p opencascade-sys --features builtin --target wasm32-unknown-emscripten
+      - run: cargo build -p opencascade-sys --features builtin --target wasm32-unknown-emscripten -vv
