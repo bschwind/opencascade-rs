@@ -1,8 +1,8 @@
 on:
-  push:
-    branches:
-      - main
   pull_request:
+    paths:
+      - 'crates/occt-sys/**'
+      - 'crates/opencascade-sys/**'
 
 name: Cargo Build OCCT
 
