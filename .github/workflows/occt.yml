@@ -1,0 +1,42 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+name: Cargo Build OCCT
+
+jobs:
+  build:
+    name: Cargo Build OCCT
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+      - run: cargo build -p opencascade-sys --features builtin
+  build-wasm:
+    name: Cargo Build OCCT WASM
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+      - uses: lovasoa/setup-emscripten@master
+        with:
+          emscripten-version: '3.1.51'
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-emscripten
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+      - run: cargo build -p opencascade-sys --features builtin --target wasm32-unknown-emscripten

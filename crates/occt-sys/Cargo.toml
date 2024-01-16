@@ -3,7 +3,7 @@ name = "occt-sys"
 description = "Static build of the C++ OpenCascade CAD Kernel for use as a Rust dependency"
 authors = ["Brian Schwind <brianmschwind@gmail.com>", "Matěj Laitl <matej@laitl.cz>"]
 license = "LGPL-2.1"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 repository = "https://github.com/bschwind/opencascade-rs"
 
@@ -148,7 +148,7 @@ exclude = [
     # "OCCT/src/BRepCheck/*",
     # "OCCT/src/MAT2d/*",
     "OCCT/src/ExpToCasExe/*",
-    # "OCCT/src/STEPControl/*",
+    "OCCT/src/STEPControl/*",
     # "OCCT/src/GeomPlate/*",
     # "OCCT/src/IntCurveSurface/*",
     # "OCCT/src/GeomLib/*",
@@ -409,12 +409,4 @@ exclude = [
 ]
 
 [dependencies]
-
-[build-dependencies]
 cmake = "0.1"
-
-# Adding an empty workspace table so occt-sys doesn't believe
-# it's in the parent workspace. This crate is excluded from
-# the top-level workspace because it takes quite awhile to
-# build and the crate doesn't change very often.
-[workspace]
