@@ -32,7 +32,7 @@ jobs:
           submodules: "recursive"
       - uses: lovasoa/setup-emscripten@master
         with:
-          emscripten-version: '3.1.51'
+          emscripten-version: '3.1.39'
       - uses: dtolnay/rust-toolchain@v1
         with:
           toolchain: stable
