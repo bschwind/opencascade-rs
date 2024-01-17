@@ -30,7 +30,7 @@ jobs:
         env:
           CMAKE_BUILD_PARALLEL_LEVEL: 4
   build-wasm:
-    name: Cargo Build OCCT WASM
+    name: Cargo Build OCCT (wasm32)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

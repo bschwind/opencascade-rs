@@ -1,6 +1,6 @@
 use std::{
     env::var,
-    fs,
+    fs, io,
     path::{Path, PathBuf},
 };
 
@@ -19,11 +19,14 @@ pub fn occt_path() -> PathBuf {
 
 /// Build the OCCT library.
 pub fn build_occt() {
-    let _ = fs::create_dir_all(occt_path());
-    let _ = fs::create_dir_all(occt_path().join(LIB_DIR));
-    let _ = fs::create_dir_all(occt_path().join(INCLUDE_DIR));
+    if fs::read_dir(occt_path().join(LIB_DIR)).is_ok()
+        && fs::read_dir(occt_path().join(INCLUDE_DIR)).is_ok()
+    {
+        // skip rebuild if it already exists
+        return;
+    }
 
-    cmake::Config::new(Path::new(env!("OCCT_SRC_DIR")))
+    let dir = cmake::Config::new(Path::new(env!("OCCT_SRC_DIR")))
         .define("BUILD_PATCH", Path::new(env!("OCCT_PATCH_DIR")))
         .define("BUILD_LIBRARY_TYPE", "Static")
         .define("BUILD_MODULE_ApplicationFramework", "FALSE")
@@ -45,6 +48,21 @@ pub fn build_occt() {
         .define("USE_XLIB", "FALSE")
         .define("INSTALL_DIR_LIB", LIB_DIR)
         .define("INSTALL_DIR_INCLUDE", INCLUDE_DIR)
-        .out_dir(occt_path())
         .build();
+
+    copy_dir_all(dir, occt_path()).expect("failed to copy files");
+}
+
+fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
+    fs::create_dir_all(&dst)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let ty = entry.file_type()?;
+        if ty.is_dir() {
+            copy_dir_all(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        } else {
+            fs::copy(entry.path(), dst.as_ref().join(entry.file_name()))?;
+        }
+    }
+    Ok(())
 }
