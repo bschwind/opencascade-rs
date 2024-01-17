@@ -1,5 +1,6 @@
 use std::{
     env::var,
+    fs,
     path::{Path, PathBuf},
 };
 
@@ -18,6 +19,10 @@ pub fn occt_path() -> PathBuf {
 
 /// Build the OCCT library.
 pub fn build_occt() {
+    let _ = fs::create_dir_all(occt_path());
+    let _ = fs::create_dir_all(occt_path().join(LIB_DIR));
+    let _ = fs::create_dir_all(occt_path().join(INCLUDE_DIR));
+
     cmake::Config::new(Path::new(env!("OCCT_SRC_DIR")))
         .define("BUILD_PATCH", Path::new(env!("OCCT_PATCH_DIR")))
         .define("BUILD_LIBRARY_TYPE", "Static")
