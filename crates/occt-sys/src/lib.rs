@@ -1,6 +1,5 @@
 use std::{
     env::var,
-    fs, io,
     path::{Path, PathBuf},
 };
 
@@ -12,9 +11,9 @@ const INCLUDE_DIR: &str = "include";
 ///
 /// Only valid during build (`cargo clean` removes these files).
 pub fn occt_path() -> PathBuf {
-    // moves the output into target/TARGET/PROFILE/build/OCCT
+    // moves the output into target/TARGET/OCCT
     // this way its less likely to be rebuilt without a cargo clean
-    Path::new(&var("OUT_DIR").expect("missing OUT_DIR")).join("../../OCCT")
+    Path::new(&var("OUT_DIR").expect("missing OUT_DIR")).join("../../../../OCCT")
 }
 
 /// Build the OCCT library.
@@ -41,6 +40,7 @@ pub fn build_occt() {
         .define("USE_XLIB", "FALSE")
         .define("INSTALL_DIR_LIB", LIB_DIR)
         .define("INSTALL_DIR_INCLUDE", INCLUDE_DIR)
+        .profile("Release")
         .out_dir(occt_path())
         .build();
 }
