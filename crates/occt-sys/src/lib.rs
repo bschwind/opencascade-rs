@@ -50,7 +50,9 @@ pub fn build_occt() {
         .define("INSTALL_DIR_INCLUDE", INCLUDE_DIR)
         .build();
 
-    copy_dir_all(dir, occt_path()).expect("failed to copy files");
+    copy_dir_all(dir.join(LIB_DIR), occt_path().join(LIB_DIR)).expect("failed to copy lib files");
+    copy_dir_all(dir.join(INCLUDE_DIR), occt_path().join(INCLUDE_DIR))
+        .expect("failed to copy include files");
 }
 
 fn copy_dir_all(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> io::Result<()> {
