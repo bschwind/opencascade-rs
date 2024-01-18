@@ -285,7 +285,7 @@ HandlePoly_Triangulation_ctor(std::unique_ptr<Poly_Triangulation> triangulation)
 }
 
 inline std::unique_ptr<HandlePoly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
-                                                                          TopLoc_Location &location) {
+                                                                         TopLoc_Location &location) {
   return std::unique_ptr<HandlePoly_Triangulation>(
       new opencascade::handle<Poly_Triangulation>(BRep_Tool::Triangulation(face, location)));
 }
