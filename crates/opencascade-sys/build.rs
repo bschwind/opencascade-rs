@@ -161,7 +161,7 @@ fn find_mingw_dll(file: &str) -> Vec<String> {
     let output = std::process::Command::new("find")
         .args(["/usr", "-name", file])
         .output()
-        .expect("No install mingw-w64.");
+        .unwrap();
     String::from_utf8_lossy(&output.stdout)
         .split('\n')
         .map(|path| path.to_string())
