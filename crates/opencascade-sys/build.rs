@@ -51,6 +51,29 @@ fn main() {
 
     if is_windows_gnu {
         build.define("OCC_CONVERT_SIGNALS", "TRUE");
+        let out_dir = std::env::var("OUT_DIR").expect("No OUT_DIR environment variable defined");
+        let out_dir = std::path::Path::new(&out_dir).join("../../..");
+        let mut dll_paths = vec![];
+        for dll in [
+            "libgcc_s_seh-1.dll",
+            "libstdc++-6.dll",
+            "libwinpthread-1.dll",
+        ] {
+            for path in find_mingw_dll(dll) {
+                dll_paths.push(path);
+            }
+        }
+        let dll_paths = dll_paths
+            .into_iter()
+            .filter(|path| path.contains("x86_64"))
+            .collect::<Vec<_>>();
+        for dll in dll_paths {
+            let path = std::path::Path::new(&dll);
+            let name = path.file_name().unwrap().to_str().unwrap();
+            if !out_dir.join(name).exists() {
+                std::fs::copy(&path, out_dir.join(name)).unwrap();
+            }
+        }
     }
 
     if let "windows" = std::env::consts::OS {
@@ -138,4 +161,15 @@ impl OcctConfig {
             panic!("OpenCASCADE library found but something wrong with config.");
         }
     }
+}
+
+fn find_mingw_dll(file: &str) -> Vec<String> {
+    let output = std::process::Command::new("find")
+        .args(["/usr", "-name", file])
+        .output()
+        .expect("No install mingw-w64.");
+    String::from_utf8_lossy(&output.stdout)
+        .split("\n")
+        .map(|path| path.to_string())
+        .collect::<Vec<_>>()
 }
