@@ -158,10 +158,7 @@ impl OcctConfig {
 }
 
 fn find_mingw_dll(file: &str) -> Vec<String> {
-    let output = std::process::Command::new("find")
-        .args(["/usr", "-name", file])
-        .output()
-        .unwrap();
+    let output = std::process::Command::new("find").args(["/usr", "-name", file]).output().unwrap();
     String::from_utf8_lossy(&output.stdout)
         .split('\n')
         .map(|path| path.to_string())
