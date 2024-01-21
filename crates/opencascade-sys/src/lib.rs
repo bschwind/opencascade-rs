@@ -85,7 +85,7 @@ pub mod ffi {
         type HandleGeom2d_Ellipse;
         type HandleGeom2d_TrimmedCurve;
         type HandleGeom_CylindricalSurface;
-        type Handle_TopTools_HSequenceOfShape;
+        type HandleTopTools_HSequenceOfShape;
 
         pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
@@ -109,7 +109,7 @@ pub mod ffi {
         pub fn IsNull(self: &HandleGeom2d_Ellipse) -> bool;
         pub fn IsNull(self: &HandleGeom2d_TrimmedCurve) -> bool;
         pub fn IsNull(self: &HandleGeom_CylindricalSurface) -> bool;
-        pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
+        pub fn IsNull(self: &HandleTopTools_HSequenceOfShape) -> bool;
 
         pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
 
@@ -214,21 +214,21 @@ pub mod ffi {
 
         pub fn Length(self: &TopTools_HSequenceOfShape) -> i32;
 
-        pub fn new_Handle_TopTools_HSequenceOfShape() -> UniquePtr<Handle_TopTools_HSequenceOfShape>;
+        pub fn new_HandleTopTools_HSequenceOfShape() -> UniquePtr<HandleTopTools_HSequenceOfShape>;
         pub fn TopTools_HSequenceOfShape_append(
-            handle: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+            handle: Pin<&mut HandleTopTools_HSequenceOfShape>,
             shape: &TopoDS_Shape,
         );
 
-        pub fn TopTools_HSequenceOfShape_length(handle: &Handle_TopTools_HSequenceOfShape) -> i32;
+        pub fn TopTools_HSequenceOfShape_length(handle: &HandleTopTools_HSequenceOfShape) -> i32;
         pub fn TopTools_HSequenceOfShape_value(
-            handle: &Handle_TopTools_HSequenceOfShape,
+            handle: &HandleTopTools_HSequenceOfShape,
             index: i32,
         ) -> &TopoDS_Shape;
 
         #[cxx_name = "handle_try_deref"]
-        pub fn Handle_TopTools_HSequenceOfShape_Get(
-            handle: &Handle_TopTools_HSequenceOfShape,
+        pub fn HandleTopTools_HSequenceOfShape_Get(
+            handle: &HandleTopTools_HSequenceOfShape,
         ) -> Result<&TopTools_HSequenceOfShape>;
 
         // Geometry
@@ -928,7 +928,7 @@ pub mod ffi {
 
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeShapeOnMesh_ctor(
-            mesh: &Handle_Poly_Triangulation,
+            mesh: &HandlePoly_Triangulation,
         ) -> UniquePtr<BRepBuilderAPI_MakeShapeOnMesh>;
 
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeShapeOnMesh>) -> &TopoDS_Shape;
@@ -994,7 +994,7 @@ pub mod ffi {
         pub fn BRep_Tool_Triangulation(
             face: &TopoDS_Face,
             location: Pin<&mut TopLoc_Location>,
-        ) -> UniquePtr<Handle_Poly_Triangulation>;
+        ) -> UniquePtr<HandlePoly_Triangulation>;
 
         type BRepIntCurveSurface_Inter;
 
@@ -1095,16 +1095,16 @@ pub mod ffi {
 
         pub fn TopLoc_Location_Transformation(location: &TopLoc_Location) -> UniquePtr<gp_Trsf>;
 
-        type Handle_Poly_Triangulation;
+        type HandlePoly_Triangulation;
 
-        pub fn Handle_Poly_Triangulation_ctor(
+        pub fn HandlePoly_Triangulation_ctor(
             triangulation: UniquePtr<Poly_Triangulation>,
-        ) -> UniquePtr<Handle_Poly_Triangulation>;
+        ) -> UniquePtr<HandlePoly_Triangulation>;
 
-        pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
+        pub fn IsNull(self: &HandlePoly_Triangulation) -> bool;
         #[cxx_name = "handle_try_deref"]
-        pub fn Handle_Poly_Triangulation_Get(
-            handle: &Handle_Poly_Triangulation,
+        pub fn HandlePoly_Triangulation_Get(
+            handle: &HandlePoly_Triangulation,
         ) -> Result<&Poly_Triangulation>;
 
         type Poly_Triangulation;
@@ -1149,10 +1149,10 @@ pub mod ffi {
         type Poly_Connect;
         #[cxx_name = "construct_unique"]
         pub fn Poly_Connect_ctor(
-            triangulation: &Handle_Poly_Triangulation,
+            triangulation: &HandlePoly_Triangulation,
         ) -> UniquePtr<Poly_Connect>;
 
-        pub fn compute_normals(face: &TopoDS_Face, triangulation: &Handle_Poly_Triangulation);
+        pub fn compute_normals(face: &TopoDS_Face, triangulation: &HandlePoly_Triangulation);
 
         // Edge approximation
         type GCPnts_TangentialDeflection;
@@ -1213,10 +1213,10 @@ pub mod ffi {
         pub fn Shape(self: &ShapeUpgrade_UnifySameDomain) -> &TopoDS_Shape;
 
         pub fn connect_edges_to_wires(
-            edges: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+            edges: Pin<&mut HandleTopTools_HSequenceOfShape>,
             tolerance: f64,
             shared: bool,
-            wires: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+            wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
         );
     }
 }
