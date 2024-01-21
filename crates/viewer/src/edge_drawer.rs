@@ -29,6 +29,7 @@ pub struct EdgeDrawer {
     bind_groups: BindGroups,
     screen_width: u32,
     screen_height: u32,
+    draw_back_edges: bool,
 }
 
 impl EdgeDrawer {
@@ -61,12 +62,17 @@ impl EdgeDrawer {
             bind_groups,
             screen_width,
             screen_height,
+            draw_back_edges: false,
         }
     }
 
     pub fn resize(&mut self, screen_width: u32, screen_height: u32) {
         self.screen_width = screen_width;
         self.screen_height = screen_height;
+    }
+
+    pub fn toggle_back_edge_drawing(&mut self) {
+        self.draw_back_edges = !self.draw_back_edges;
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -125,19 +131,22 @@ impl EdgeDrawer {
                 timestamp_writes: None,
             });
 
-            // Render dashed line strips
-            render_pass.set_pipeline(&self.dashed_line_strip_pipeline);
             render_pass.set_vertex_buffer(0, self.buffers.round_strip_geometry.slice(..));
             render_pass.set_vertex_buffer(1, rendered_line.vertex_buf.slice(..));
-            render_pass.set_bind_group(0, &self.bind_groups.dashed_vertex_uniform, &[]);
 
-            let mut offset = 0usize;
-            let vertex_count = self.buffers.round_strip_geometry_len as u32;
+            // Render dashed line strips
+            if self.draw_back_edges {
+                render_pass.set_pipeline(&self.dashed_line_strip_pipeline);
+                render_pass.set_bind_group(0, &self.bind_groups.dashed_vertex_uniform, &[]);
 
-            for line_strip_size in &rendered_line.line_sizes {
-                let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
-                offset += line_strip_size;
-                render_pass.draw(0..vertex_count, range);
+                let mut offset = 0usize;
+                let vertex_count = self.buffers.round_strip_geometry_len as u32;
+
+                for line_strip_size in &rendered_line.line_sizes {
+                    let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
+                    offset += line_strip_size;
+                    render_pass.draw(0..vertex_count, range);
+                }
             }
 
             // Render solid line strips
