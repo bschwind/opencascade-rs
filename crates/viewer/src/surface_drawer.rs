@@ -1,13 +1,14 @@
 use bytemuck::{Pod, Zeroable};
 use glam::Mat4;
 use opencascade::mesh::Mesh;
-use simple_game::graphics::GraphicsDevice;
+use simple_game::graphics::{FullscreenQuad, GraphicsDevice};
 use wgpu::{self, util::DeviceExt, Buffer, RenderPipeline};
 
 pub struct SurfaceDrawer {
     vertex_uniform: wgpu::Buffer,
     uniform_bind_group: wgpu::BindGroup,
     pipeline: RenderPipeline,
+    fullscreen_quad: FullscreenQuad,
 }
 
 impl SurfaceDrawer {
@@ -16,6 +17,8 @@ impl SurfaceDrawer {
         target_format: wgpu::TextureFormat,
         depth_format: wgpu::TextureFormat,
     ) -> Self {
+        let fullscreen_quad = FullscreenQuad::new(device, target_format);
+
         // Uniform buffer
         let cad_mesh_uniforms = CadMeshUniforms::default();
 
@@ -72,7 +75,7 @@ impl SurfaceDrawer {
                 topology: wgpu::PrimitiveTopology::TriangleList,
                 // strip_index_format: Some(wgpu::IndexFormat::Uint32),
                 front_face: wgpu::FrontFace::Ccw,
-                cull_mode: Some(wgpu::Face::Back),
+                cull_mode: None,
                 polygon_mode: wgpu::PolygonMode::Fill,
                 conservative: false,
                 ..wgpu::PrimitiveState::default()
@@ -81,7 +84,20 @@ impl SurfaceDrawer {
                 format: depth_format,
                 depth_write_enabled: true,
                 depth_compare: wgpu::CompareFunction::Less,
-                stencil: wgpu::StencilState::default(),
+                stencil: wgpu::StencilState {
+                    front: wgpu::StencilFaceState {
+                        pass_op: wgpu::StencilOperation::DecrementWrap,
+                        depth_fail_op: wgpu::StencilOperation::DecrementWrap,
+                        ..wgpu::StencilFaceState::default()
+                    },
+                    back: wgpu::StencilFaceState {
+                        pass_op: wgpu::StencilOperation::IncrementWrap,
+                        depth_fail_op: wgpu::StencilOperation::IncrementWrap,
+                        ..wgpu::StencilFaceState::default()
+                    },
+                    read_mask: 0xff,
+                    write_mask: 0xff,
+                },
                 bias: wgpu::DepthBiasState::default(),
             }),
             multisample: wgpu::MultisampleState {
@@ -113,7 +129,7 @@ impl SurfaceDrawer {
             label: None,
         });
 
-        Self { vertex_uniform, uniform_bind_group, pipeline }
+        Self { vertex_uniform, uniform_bind_group, pipeline, fullscreen_quad }
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -147,17 +163,25 @@ impl SurfaceDrawer {
                     load: wgpu::LoadOp::Clear(1.0),
                     store: wgpu::StoreOp::Store,
                 }),
-                stencil_ops: None,
+                // stencil_ops: None,
+                stencil_ops: Some(wgpu::Operations {
+                    load: wgpu::LoadOp::Clear(128),
+                    store: wgpu::StoreOp::Store,
+                }),
             }),
             occlusion_query_set: None,
             timestamp_writes: None,
         });
+
+        render_pass.set_stencil_reference(128);
 
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
         render_pass.set_index_buffer(cad_mesh.index_buf.slice(..), wgpu::IndexFormat::Uint32);
         render_pass.set_vertex_buffer(0, cad_mesh.vertex_buf.slice(..));
         render_pass.draw_indexed(0..(cad_mesh.num_indices as u32), 0, 0..1);
+
+        self.fullscreen_quad.render_with_pass(&mut render_pass);
     }
 }
 

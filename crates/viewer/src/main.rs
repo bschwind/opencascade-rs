@@ -335,17 +335,17 @@ impl GameApp for ViewerApp {
         let dash_size = 0.5;
         let gap_size = 0.5;
 
-        self.line_drawer.draw(
-            &self.rendered_edges,
-            &mut frame_encoder.encoder,
-            &smaa_render_target,
-            Some(&self.depth_texture.view),
-            graphics_device.queue(),
-            camera_matrix,
-            transform,
-            dash_size,
-            gap_size,
-        );
+        // self.line_drawer.draw(
+        //     &self.rendered_edges,
+        //     &mut frame_encoder.encoder,
+        //     &smaa_render_target,
+        //     Some(&self.depth_texture.view),
+        //     graphics_device.queue(),
+        //     camera_matrix,
+        //     transform,
+        //     dash_size,
+        //     gap_size,
+        // );
 
         self.text_system.render_horizontal(
             TextAlignment {
