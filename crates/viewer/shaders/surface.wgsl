@@ -36,7 +36,7 @@ struct VertexOutput {
 fn vs_main(input: VertexInput) -> VertexOutput {
     var out: VertexOutput;
 
-    var plane = vec4<f32>(-1.0, 0.0, 0.0, 40.0);
+    var plane = vec4<f32>(-1.0, 0.8, 1.2, 40.0);
 
     out.uv = input.uv;
     out.normal = input.normal; // TODO(bschwind) - Need to transform this.

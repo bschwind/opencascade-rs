@@ -30,6 +30,7 @@ use winit::{
 };
 
 mod camera;
+mod clipping_plane;
 mod edge_drawer;
 mod surface_drawer;
 
@@ -199,7 +200,12 @@ impl GameApp for ViewerApp {
 
         let surface_texture_format = graphics_device.surface_texture_format();
 
-        let depth_texture = DepthTexture::new(device, width, height);
+        let depth_texture = DepthTexture::new_with_format(
+            device,
+            width,
+            height,
+            wgpu::TextureFormat::Depth24PlusStencil8,
+        );
         let depth_texture_format = depth_texture.format();
 
         Self {
@@ -230,7 +236,12 @@ impl GameApp for ViewerApp {
     fn resize(&mut self, graphics_device: &mut GraphicsDevice, width: u32, height: u32) {
         self.client_rect = vec2(width as f32, height as f32);
         self.camera.resize(width, height);
-        self.depth_texture = DepthTexture::new(graphics_device.device(), width, height);
+        self.depth_texture = DepthTexture::new_with_format(
+            graphics_device.device(),
+            width,
+            height,
+            wgpu::TextureFormat::Depth24PlusStencil8,
+        );
         self.text_system.resize(width, height);
         self.line_drawer.resize(width, height);
         self.smaa_target.resize(graphics_device.device(), width, height);

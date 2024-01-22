@@ -1,14 +1,15 @@
+use crate::clipping_plane::ClippingPlane;
 use bytemuck::{Pod, Zeroable};
 use glam::Mat4;
 use opencascade::mesh::Mesh;
-use simple_game::graphics::{FullscreenQuad, GraphicsDevice};
+use simple_game::graphics::GraphicsDevice;
 use wgpu::{self, util::DeviceExt, Buffer, RenderPipeline};
 
 pub struct SurfaceDrawer {
     vertex_uniform: wgpu::Buffer,
     uniform_bind_group: wgpu::BindGroup,
     pipeline: RenderPipeline,
-    fullscreen_quad: FullscreenQuad,
+    clipping_plane: ClippingPlane,
 }
 
 impl SurfaceDrawer {
@@ -17,7 +18,7 @@ impl SurfaceDrawer {
         target_format: wgpu::TextureFormat,
         depth_format: wgpu::TextureFormat,
     ) -> Self {
-        let fullscreen_quad = FullscreenQuad::new(device, target_format);
+        let clipping_plane = ClippingPlane::new(device, target_format, depth_format);
 
         // Uniform buffer
         let cad_mesh_uniforms = CadMeshUniforms::default();
@@ -129,7 +130,7 @@ impl SurfaceDrawer {
             label: None,
         });
 
-        Self { vertex_uniform, uniform_bind_group, pipeline, fullscreen_quad }
+        Self { vertex_uniform, uniform_bind_group, pipeline, clipping_plane }
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -181,7 +182,7 @@ impl SurfaceDrawer {
         render_pass.set_vertex_buffer(0, cad_mesh.vertex_buf.slice(..));
         render_pass.draw_indexed(0..(cad_mesh.num_indices as u32), 0, 0..1);
 
-        self.fullscreen_quad.render_with_pass(&mut render_pass);
+        self.clipping_plane.render(&mut render_pass);
     }
 }
 
