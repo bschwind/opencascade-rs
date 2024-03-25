@@ -1,21 +1,38 @@
 use glam::DVec3;
 use opencascade::{
-    angle::{RVec, ToAngle},
     primitives::{Face, IntoShape, Shape, Solid, Wire},
     workplane::Workplane,
 };
+use std::f64::consts::PI;
 
 pub fn shape() -> Shape {
-    let r = 10.0;
-    let a = 5.0;
+    let width = 20.0;
+    let thickness = 5.0;
+    let cable_radius = 20.0;
+    let leg_length = 30.0;
 
-    let face_profile: Face = Workplane::xz()
-        .rotated(RVec::z(45.0.degrees()))
-        .translated(DVec3::new(-r, 0.0, 0.0))
-        .rect(a, a)
+    let pre_bend_radius = thickness;
+
+    let bend_start = cable_radius + (thickness / 2.0) + pre_bend_radius;
+    let max_extent = bend_start + leg_length;
+
+    let face_profile: Face = Workplane::yz()
+        .translated(DVec3::new(0.0, 0.0, -max_extent))
+        .rect(width, thickness)
         .to_face();
 
-    let path: Wire = Workplane::xy().sketch().arc((-r, 0.0), (0.0, r), (r, 0.0)).wire();
+    let x = (PI / 4.0).cos() * pre_bend_radius;
+    let y = (1.0 - (PI / 4.0).sin()) * pre_bend_radius;
+
+    let path: Wire = Workplane::xz()
+        .sketch()
+        .move_to(-max_extent, 0.0)
+        .line_to(-bend_start, 0.0)
+        .three_point_arc((-bend_start + x, y), (-bend_start + pre_bend_radius, pre_bend_radius))
+        .three_point_arc((0.0, bend_start), (bend_start - pre_bend_radius, pre_bend_radius))
+        .three_point_arc((bend_start - x, y), (bend_start, 0.0))
+        .line_to(max_extent, 0.0)
+        .wire();
 
     let pipe_solid: Solid = face_profile.sweep_along(&path);
 
