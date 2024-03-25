@@ -62,10 +62,11 @@ pub fn shape() -> Shape {
             DVec3::Z,
             3.0,
         );
+
         bracket = bracket
             .drill_hole(dvec3(-x_pos, 0.0, 0.0), DVec3::Z, thumbtack_pin_radius)
             .subtract(&cylinder)
-            .into();
+            .chamfer_new_edges(0.3);
     }
 
     bracket.write_step("cable_bracket.step").unwrap();
