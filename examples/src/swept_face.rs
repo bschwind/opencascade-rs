@@ -1,18 +1,17 @@
-use glam::DVec3;
+use glam::{dvec3, DVec3};
 use opencascade::{
-    primitives::{Face, IntoShape, Shape, Solid, Wire},
+    primitives::{Direction, Face, IntoShape, Shape, Wire},
     workplane::Workplane,
 };
 use std::f64::consts::PI;
 
 pub fn shape() -> Shape {
     let width = 20.0;
-    let thickness = 5.0;
-    let cable_radius = 20.0;
-    let leg_length = 30.0;
+    let thickness = 4.0;
+    let cable_radius = 5.5;
+    let leg_length = 20.0;
 
     let pre_bend_radius = thickness;
-
     let bend_start = cable_radius + (thickness / 2.0) + pre_bend_radius;
     let max_extent = bend_start + leg_length;
 
@@ -34,7 +33,42 @@ pub fn shape() -> Shape {
         .line_to(max_extent, 0.0)
         .wire();
 
-    let pipe_solid: Solid = face_profile.sweep_along(&path);
+    let pipe_solid = face_profile.sweep_along(&path).into_shape();
 
-    pipe_solid.into_shape()
+    let left_edges = pipe_solid
+        .faces()
+        .farthest(Direction::NegX) // Get the face whose center of mass is the farthest in the negative Z direction
+        .edges()
+        .parallel_to(Direction::PosZ);
+
+    let right_edges = pipe_solid
+        .faces()
+        .farthest(Direction::PosX) // Get the face whose center of mass is the farthest in the negative Z direction
+        .edges()
+        .parallel_to(Direction::PosZ);
+
+    let mut bracket =
+        pipe_solid.fillet_edges(width / 2.5, left_edges.chain(right_edges)).fillet(1.0);
+
+    let drill_point = bend_start + (leg_length / 2.0);
+
+    let thumbtack_pin_radius = 1.2 / 2.0;
+    let thumbtack_base_radius = 10.1 / 2.0;
+
+    for x_pos in [drill_point, -drill_point] {
+        let cylinder = Shape::cylinder(
+            dvec3(x_pos, 0.0, (thickness / 2.0) - 1.0),
+            thumbtack_base_radius,
+            DVec3::Z,
+            3.0,
+        );
+        bracket = bracket
+            .drill_hole(dvec3(-x_pos, 0.0, 0.0), DVec3::Z, thumbtack_pin_radius)
+            .subtract(&cylinder)
+            .into();
+    }
+
+    bracket.write_step("cable_bracket.step").unwrap();
+
+    bracket
 }
