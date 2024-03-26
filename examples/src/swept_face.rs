@@ -6,10 +6,10 @@ use opencascade::{
 use std::f64::consts::PI;
 
 pub fn shape() -> Shape {
-    let width = 20.0;
-    let thickness = 4.0;
-    let cable_radius = 5.5;
-    let leg_length = 20.0;
+    let width = 15.0;
+    let thickness = 2.5;
+    let cable_radius = 6.0 / 2.0;
+    let leg_length = 15.0;
 
     let pre_bend_radius = thickness;
     let bend_start = cable_radius + (thickness / 2.0) + pre_bend_radius;
@@ -52,21 +52,23 @@ pub fn shape() -> Shape {
 
     let drill_point = bend_start + (leg_length / 2.0);
 
+    let indentation_height = 1.0;
     let thumbtack_pin_radius = 1.2 / 2.0;
     let thumbtack_base_radius = 10.1 / 2.0;
 
     for x_pos in [drill_point, -drill_point] {
         let cylinder = Shape::cylinder(
-            dvec3(x_pos, 0.0, (thickness / 2.0) - 1.0),
+            dvec3(x_pos, 0.0, (thickness / 2.0) - indentation_height),
             thumbtack_base_radius,
             DVec3::Z,
             3.0,
         );
 
-        bracket = bracket
-            .drill_hole(dvec3(-x_pos, 0.0, 0.0), DVec3::Z, thumbtack_pin_radius)
-            .subtract(&cylinder)
-            .chamfer_new_edges(0.3);
+        bracket = bracket.subtract(&cylinder).chamfer_new_edges(0.3);
+    }
+
+    for x_pos in [drill_point, -drill_point] {
+        bracket = bracket.drill_hole(dvec3(-x_pos, 0.0, 0.0), DVec3::Z, thumbtack_pin_radius);
     }
 
     bracket.write_step("cable_bracket.step").unwrap();
