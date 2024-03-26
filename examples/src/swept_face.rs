@@ -52,8 +52,8 @@ pub fn shape() -> Shape {
 
     let drill_point = bend_start + (leg_length / 2.0);
 
-    let indentation_height = 1.0;
-    let thumbtack_pin_radius = 1.2 / 2.0;
+    let indentation_height = thickness - 1.63;
+    let thumbtack_pin_radius = 3.15 / 2.0;
     let thumbtack_base_radius = 10.1 / 2.0;
 
     for x_pos in [drill_point, -drill_point] {
