@@ -35,17 +35,13 @@ pub fn shape() -> Shape {
 
     let pipe_solid = face_profile.sweep_along(&path).into_shape();
 
-    let left_edges = pipe_solid
-        .faces()
-        .farthest(Direction::NegX) // Get the face whose center of mass is the farthest in the negative Z direction
-        .edges()
-        .parallel_to(Direction::PosZ);
+    // Retrieve the vertical edges on the farthest left and right faces,
+    // we want to fillet them.
+    let left_edges =
+        pipe_solid.faces().farthest(Direction::NegX).edges().parallel_to(Direction::PosZ);
 
-    let right_edges = pipe_solid
-        .faces()
-        .farthest(Direction::PosX) // Get the face whose center of mass is the farthest in the negative Z direction
-        .edges()
-        .parallel_to(Direction::PosZ);
+    let right_edges =
+        pipe_solid.faces().farthest(Direction::PosX).edges().parallel_to(Direction::PosZ);
 
     let mut bracket =
         pipe_solid.fillet_edges(width / 2.5, left_edges.chain(right_edges)).fillet(1.0);
