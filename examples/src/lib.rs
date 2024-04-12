@@ -1,5 +1,6 @@
 pub mod airfoil;
 pub mod box_shape;
+pub mod cable_bracket;
 pub mod chamfer;
 pub mod gizmo;
 pub mod high_level_bottle;

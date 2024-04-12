@@ -95,6 +95,7 @@ struct AppArgs {
 #[derive(Debug, Copy, Clone, PartialEq, ValueEnum)]
 enum Example {
     Airfoil,
+    CableBracket,
     BoxShape,
     Chamfer,
     Gizmo,
@@ -113,6 +114,7 @@ impl Example {
     pub fn shape(self) -> Shape {
         match self {
             Example::Airfoil => examples::airfoil::shape(),
+            Example::CableBracket => examples::cable_bracket::shape(),
             Example::BoxShape => examples::box_shape::shape(),
             Example::Chamfer => examples::chamfer::shape(),
             Example::Gizmo => examples::gizmo::shape(),

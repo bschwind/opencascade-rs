@@ -132,6 +132,22 @@ impl Iterator for EdgeIterator {
     }
 }
 
+impl EdgeIterator {
+    pub fn parallel_to(
+        self,
+        direction: Direction,
+    ) -> impl Iterator<Item = <Self as Iterator>::Item> {
+        let normalized_dir = direction.normalized_vec();
+
+        self.filter(move |edge| {
+            edge.edge_type() == EdgeType::Line
+                && 1.0
+                    - (edge.end_point() - edge.start_point()).normalize().dot(normalized_dir).abs()
+                    < 0.0001
+        })
+    }
+}
+
 pub struct FaceIterator {
     explorer: UniquePtr<ffi::TopExp_Explorer>,
 }
@@ -169,7 +185,7 @@ impl FaceIterator {
     pub fn try_farthest(self, direction: Direction) -> Option<Face> {
         let normalized_dir = direction.normalized_vec();
 
-        Iterator::max_by(self, |face_1, face_2| {
+        self.max_by(|face_1, face_2| {
             let dist_1 = face_1.center_of_mass().dot(normalized_dir);
             let dist_2 = face_2.center_of_mass().dot(normalized_dir);
 
