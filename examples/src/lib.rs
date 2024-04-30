@@ -19,6 +19,7 @@ pub mod swept_wire;
 pub mod swept_wire_variable;
 pub mod turners_cube;
 pub mod variable_fillet;
+pub mod zbox_case;
 
 #[derive(Debug, Copy, Clone, PartialEq, ValueEnum)]
 pub enum Example {
@@ -40,6 +41,7 @@ pub enum Example {
     SweptWireVariable,
     TurnersCube,
     VariableFillet,
+    ZboxCase,
 }
 
 impl Example {
@@ -63,6 +65,7 @@ impl Example {
             Example::SweptWireVariable => swept_wire_variable::shape(),
             Example::TurnersCube => turners_cube::shape(),
             Example::VariableFillet => variable_fillet::shape(),
+            Example::ZboxCase => zbox_case::shape(),
         }
     }
 }
