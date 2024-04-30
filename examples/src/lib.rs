@@ -13,3 +13,4 @@ pub mod swept_face;
 pub mod swept_wire;
 pub mod turners_cube;
 pub mod variable_fillet;
+pub mod zbox_case;

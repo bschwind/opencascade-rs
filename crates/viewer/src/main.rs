@@ -109,6 +109,7 @@ enum Example {
     SweptWire,
     TurnersCube,
     VariableFillet,
+    ZboxCase,
 }
 
 impl Example {
@@ -129,6 +130,7 @@ impl Example {
             Example::SweptWire => examples::swept_wire::shape(),
             Example::TurnersCube => examples::turners_cube::shape(),
             Example::VariableFillet => examples::variable_fillet::shape(),
+            Example::ZboxCase => examples::zbox_case::shape(),
         }
     }
 }
