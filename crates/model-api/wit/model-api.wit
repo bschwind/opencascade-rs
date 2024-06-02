@@ -1,0 +1,27 @@
+package example:host;
+
+world model-world {
+  record point3 {
+    x: f64,
+    y: f64,
+    z: f64,
+  }
+
+  // resource wire-builder {
+  //   constructor();
+  //   add-edge: func(edge: u64);
+  //   build: func() -> u64;
+  // }
+
+  // WireBuilder
+  import new-wire-builder: func() -> u64;
+  import wire-builder-add-edge: func(builder: u64, edge: u64);
+  import wire-builder-build: func(builder: u64) -> u64;
+
+  import print: func(msg: string);
+
+  import new-line-segment: func(p1: point3, p2: point3) -> u64;
+
+  export init-model: func();
+  export run: func();
+}

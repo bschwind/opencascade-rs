@@ -1,0 +1,10 @@
+[package]
+name = "wasm-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+model-api = { path = "../model-api" }
+
+[lib]
+crate-type = ["cdylib"]

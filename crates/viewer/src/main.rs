@@ -1,6 +1,7 @@
 use crate::{
     edge_drawer::{EdgeDrawer, LineBuilder, LineVertex3, RenderedLine},
     surface_drawer::{CadMesh, SurfaceDrawer},
+    wasm_engine::WasmEngine,
 };
 use anyhow::Error;
 use camera::OrbitCamera;
@@ -32,6 +33,7 @@ use winit::{
 mod camera;
 mod edge_drawer;
 mod surface_drawer;
+mod wasm_engine;
 
 // Multipliers to convert mouse position deltas to a more intuitve camera perspective change.
 const ZOOM_MULTIPLIER: f32 = 5.0;
@@ -78,6 +80,7 @@ struct ViewerApp {
     rendered_edges: RenderedLine,
     cad_mesh: CadMesh,
     mouse_state: MouseState,
+    // wasm_engine: WasmEngine,
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -116,7 +119,11 @@ impl GameApp for ViewerApp {
             example.shape()
         } else {
             eprintln!("Warning - no example or STEP file specified, you get a default cube.");
-            Shape::cube_centered(50.0)
+
+            let wasm_engine = WasmEngine::new();
+            wasm_engine.shape()
+
+            // Shape::cube_centered(50.0)
         };
 
         let mesh = shape.mesh().expect("example shape should yield a valid triangulation");
@@ -187,6 +194,7 @@ impl GameApp for ViewerApp {
             cad_mesh,
             rendered_edges,
             mouse_state: Default::default(),
+            // wasm_engine,
         }
     }
 

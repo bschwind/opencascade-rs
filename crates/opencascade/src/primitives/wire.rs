@@ -239,3 +239,29 @@ impl Wire {
     // Create a closure-based API
     pub fn freeform() {}
 }
+
+pub struct WireBuilder {
+    inner: UniquePtr<ffi::BRepBuilderAPI_MakeWire>,
+}
+
+impl Default for WireBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl WireBuilder {
+    pub fn new() -> Self {
+        let make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+
+        Self { inner: make_wire }
+    }
+
+    pub fn add_edge(&mut self, edge: &Edge) {
+        self.inner.pin_mut().add_edge(&edge.inner);
+    }
+
+    pub fn build(self) -> Wire {
+        Wire::from_make_wire(self.inner)
+    }
+}
