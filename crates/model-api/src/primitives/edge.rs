@@ -1,10 +1,8 @@
-use crate::wasm::new_line_segment;
+use crate::wasm::WasmEdge;
 use glam::DVec3;
 
-pub struct EdgeId(pub(crate) u64);
-
 pub struct Edge {
-    pub(crate) inner: EdgeId,
+    pub(crate) inner: WasmEdge,
 }
 
 impl AsRef<Edge> for Edge {
@@ -15,8 +13,8 @@ impl AsRef<Edge> for Edge {
 
 impl Edge {
     pub fn segment(p1: DVec3, p2: DVec3) -> Self {
-        let id = new_line_segment(p1.into(), p2.into());
+        let inner = WasmEdge::segment(p1.into(), p2.into());
 
-        Self { inner: EdgeId(id) }
+        Edge { inner }
     }
 }

@@ -1,3 +1,5 @@
+use crate::primitives::Shape;
+
 pub mod angle;
 pub mod primitives;
 pub mod wasm;
@@ -8,5 +10,5 @@ pub trait Model: Send + Sync {
     where
         Self: Sized;
 
-    fn create_model(&mut self);
+    fn create_model(&mut self) -> Shape;
 }

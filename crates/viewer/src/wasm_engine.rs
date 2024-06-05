@@ -1,11 +1,35 @@
 use glam::DVec3;
-use opencascade::primitives::{Edge, Shape, Wire, WireBuilder};
+use opencascade::primitives::{Edge, Face, Shape, Wire, WireBuilder};
 use wasmtime::{
-    component::{bindgen, Component, Linker},
+    component::{Component, Linker, Resource, ResourceTable},
     Config, Engine, Store,
 };
 
-bindgen!("model-world" in "../model-api/wit");
+wasmtime::component::bindgen!({
+    path: "../model-api/wit",
+    with: {
+        "wasm-wire-builder": MyWireBuilder,
+        "wasm-edge": MyEdge,
+        "wasm-wire": MyWire,
+        "wasm-shape": MyShape,
+    },
+});
+
+pub struct MyWireBuilder {
+    builder: WireBuilder,
+}
+
+pub struct MyEdge {
+    edge: Edge,
+}
+
+pub struct MyWire {
+    wire: Wire,
+}
+
+pub struct MyShape {
+    shape: Shape,
+}
 
 impl From<Point3> for DVec3 {
     fn from(p: Point3) -> Self {
@@ -14,14 +38,91 @@ impl From<Point3> for DVec3 {
 }
 
 struct ModelHost {
-    edges: Vec<Edge>,
-    wires: Vec<Wire>,
-    wire_builders: Vec<WireBuilder>,
+    wire_builders: ResourceTable,
+    edges: ResourceTable,
+    wires: ResourceTable,
+    shapes: ResourceTable,
 }
 
 impl ModelHost {
     fn new() -> Self {
-        Self { edges: Vec::new(), wires: Vec::new(), wire_builders: Vec::new() }
+        Self {
+            wire_builders: ResourceTable::new(),
+            edges: ResourceTable::new(),
+            wires: ResourceTable::new(),
+            shapes: ResourceTable::new(),
+        }
+    }
+}
+
+impl HostWasmEdge for ModelHost {
+    fn segment(&mut self, p1: Point3, p2: Point3) -> Result<Resource<MyEdge>, anyhow::Error> {
+        Ok(self.edges.push(MyEdge { edge: Edge::segment(p1.into(), p2.into()) })?)
+    }
+
+    fn drop(&mut self, resource: Resource<MyEdge>) -> Result<(), anyhow::Error> {
+        let _ = self.wire_builders.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostWasmWireBuilder for ModelHost {
+    fn new(&mut self) -> Result<Resource<MyWireBuilder>, anyhow::Error> {
+        Ok(self.wire_builders.push(MyWireBuilder { builder: WireBuilder::new() })?)
+    }
+
+    fn add_edge(
+        &mut self,
+        builder_resource: Resource<MyWireBuilder>,
+        edge_resource: Resource<MyEdge>,
+    ) -> Result<(), anyhow::Error> {
+        let builder = &mut self.wire_builders.get_mut(&builder_resource)?.builder;
+        let edge = self.edges.get(&edge_resource)?;
+        builder.add_edge(&edge.edge);
+
+        Ok(())
+    }
+
+    fn build(
+        &mut self,
+        resource: Resource<MyWireBuilder>,
+    ) -> Result<Resource<MyWire>, anyhow::Error> {
+        let wire = self.wire_builders.delete(resource)?.builder.build();
+
+        let new_wire = self.wires.push(MyWire { wire })?;
+
+        Ok(new_wire)
+    }
+
+    fn drop(&mut self, resource: Resource<MyWireBuilder>) -> Result<(), anyhow::Error> {
+        let _ = self.wire_builders.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostWasmWire for ModelHost {
+    fn drop(&mut self, resource: Resource<MyWire>) -> Result<(), anyhow::Error> {
+        let _ = self.wires.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostWasmShape for ModelHost {
+    fn drop(&mut self, resource: Resource<MyShape>) -> Result<(), anyhow::Error> {
+        let _ = self.wires.delete(resource);
+        Ok(())
+    }
+
+    fn from_wire(
+        &mut self,
+        wire_resource: Resource<MyWire>,
+    ) -> Result<Resource<MyShape>, anyhow::Error> {
+        let wire = self.wires.get(&wire_resource)?;
+        let shape = Face::from_wire(&wire.wire).into();
+
+        let new_shape = self.shapes.push(MyShape { shape })?;
+
+        Ok(new_shape)
     }
 }
 
@@ -30,39 +131,6 @@ impl ModelHost {
 impl ModelWorldImports for ModelHost {
     fn print(&mut self, _msg: String) -> Result<(), wasmtime::Error> {
         Ok(())
-    }
-
-    fn new_line_segment(&mut self, p1: Point3, p2: Point3) -> Result<u64, anyhow::Error> {
-        let edge_id = self.edges.len();
-        self.edges.push(Edge::segment(p1.into(), p2.into()));
-
-        Ok(edge_id as u64)
-    }
-
-    fn new_wire_builder(&mut self) -> Result<u64, anyhow::Error> {
-        let builder_id = self.wire_builders.len();
-        self.wire_builders.push(WireBuilder::new());
-
-        Ok(builder_id as u64)
-    }
-
-    fn wire_builder_add_edge(
-        &mut self,
-        builder_id: u64,
-        edge_id: u64,
-    ) -> Result<(), anyhow::Error> {
-        let builder = &mut self.wire_builders[builder_id as usize];
-        builder.add_edge(&self.edges[edge_id as usize]);
-        Ok(())
-    }
-
-    fn wire_builder_build(&mut self, builder_id: u64) -> Result<u64, anyhow::Error> {
-        let builder = self.wire_builders.remove(builder_id as usize);
-        let wire = builder.build();
-
-        let wire_id = self.wires.len();
-        self.wires.push(wire);
-        Ok(wire_id as u64)
     }
 }
 
@@ -93,11 +161,11 @@ impl WasmEngine {
             ModelWorld::instantiate(&mut store, &self.component, &self.linker).unwrap();
 
         bindings.call_init_model(&mut store).unwrap();
-        bindings.call_run(&mut store).unwrap();
+        let shape = bindings.call_run(&mut store).unwrap();
 
         let mut data = store.into_data();
-        let last_wire = data.wires.remove(data.wires.len() - 1);
+        let shape = data.shapes.delete(shape).expect("Should have at least one shape returned");
 
-        last_wire.to_face().into()
+        shape.shape
     }
 }

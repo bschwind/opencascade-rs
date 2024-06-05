@@ -1,9 +1,7 @@
-use crate::{primitives::Edge, wasm};
-
-pub struct WireId(pub(crate) u64);
+use crate::{primitives::Edge, wasm, wasm::WasmWire};
 
 pub struct Wire {
-    pub(crate) inner: WireId,
+    pub(crate) inner: WasmWire,
 }
 
 impl AsRef<Wire> for Wire {
@@ -14,12 +12,12 @@ impl AsRef<Wire> for Wire {
 
 impl Wire {
     pub fn from_edges<'a>(edges: impl IntoIterator<Item = &'a Edge>) -> Self {
-        let wire_builder = wasm::new_wire_builder();
+        let wire_builder = wasm::WasmWireBuilder::new();
 
         for edge in edges.into_iter() {
-            wasm::wire_builder_add_edge(wire_builder, edge.inner.0);
+            wire_builder.add_edge(&edge.inner);
         }
 
-        Self { inner: WireId(wasm::wire_builder_build(wire_builder)) }
+        Self { inner: wire_builder.build() }
     }
 }

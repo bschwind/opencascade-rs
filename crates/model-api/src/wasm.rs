@@ -28,9 +28,11 @@ impl From<Point3> for DVec3 {
 pub struct CadModelCode;
 
 impl Guest for CadModelCode {
-    fn run() {
+    fn run() -> WasmShape {
         print("Hello, world!");
-        model().create_model();
+        let user_shape = model().create_model();
+
+        user_shape.inner
     }
 }
 

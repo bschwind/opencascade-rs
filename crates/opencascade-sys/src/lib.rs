@@ -1220,3 +1220,9 @@ pub mod ffi {
         );
     }
 }
+
+// Gross, but is this okay?
+unsafe impl Send for ffi::BRepBuilderAPI_MakeWire {}
+unsafe impl Send for ffi::TopoDS_Edge {}
+unsafe impl Send for ffi::TopoDS_Wire {}
+unsafe impl Send for ffi::TopoDS_Shape {}

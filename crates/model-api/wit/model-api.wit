@@ -1,27 +1,32 @@
 package example:host;
 
 world model-world {
+  import print: func(msg: string);
+
   record point3 {
     x: f64,
     y: f64,
     z: f64,
   }
 
-  // resource wire-builder {
-  //   constructor();
-  //   add-edge: func(edge: u64);
-  //   build: func() -> u64;
-  // }
+  resource wasm-wire-builder {
+    constructor();
+    add-edge: func(edge: borrow<wasm-edge>);
+    build: func() -> wasm-wire;
+  }
 
-  // WireBuilder
-  import new-wire-builder: func() -> u64;
-  import wire-builder-add-edge: func(builder: u64, edge: u64);
-  import wire-builder-build: func(builder: u64) -> u64;
+  resource wasm-wire {
 
-  import print: func(msg: string);
+  }
 
-  import new-line-segment: func(p1: point3, p2: point3) -> u64;
+  resource wasm-edge {
+    segment: static func(p1: point3, p2: point3) -> wasm-edge;
+  }
+
+  resource wasm-shape {
+    from-wire: static func(w: borrow<wasm-wire>) -> wasm-shape;
+  }
 
   export init-model: func();
-  export run: func();
+  export run: func() -> wasm-shape;
 }
