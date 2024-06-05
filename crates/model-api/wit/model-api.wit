@@ -19,6 +19,22 @@ world model-world {
 
   }
 
+  resource wasm-face {
+
+  }
+
+  resource wasm-shell {
+
+  }
+
+  resource wasm-solid {
+
+  }
+
+  resource wasm-compound {
+
+  }
+
   resource wasm-edge {
     segment: static func(p1: point3, p2: point3) -> wasm-edge;
   }

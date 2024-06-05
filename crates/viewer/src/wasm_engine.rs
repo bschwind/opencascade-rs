@@ -1,5 +1,5 @@
 use glam::DVec3;
-use opencascade::primitives::{Edge, Face, Shape, Wire, WireBuilder};
+use opencascade::primitives::{Compound, Edge, Face, Shape, Shell, Solid, Wire, WireBuilder};
 use wasmtime::{
     component::{Component, Linker, Resource, ResourceTable},
     Config, Engine, Store,
@@ -11,6 +11,10 @@ wasmtime::component::bindgen!({
         "wasm-wire-builder": MyWireBuilder,
         "wasm-edge": MyEdge,
         "wasm-wire": MyWire,
+        "wasm-face": MyFace,
+        "wasm-shell": MyShell,
+        "wasm-solid": MySolid,
+        "wasm-compound": MyCompound,
         "wasm-shape": MyShape,
     },
 });
@@ -27,6 +31,22 @@ pub struct MyWire {
     wire: Wire,
 }
 
+pub struct MyFace {
+    face: Face,
+}
+
+pub struct MyShell {
+    shell: Shell,
+}
+
+pub struct MySolid {
+    shell: Solid,
+}
+
+pub struct MyCompound {
+    compound: Compound,
+}
+
 pub struct MyShape {
     shape: Shape,
 }
@@ -41,6 +61,10 @@ struct ModelHost {
     wire_builders: ResourceTable,
     edges: ResourceTable,
     wires: ResourceTable,
+    faces: ResourceTable,
+    shells: ResourceTable,
+    solids: ResourceTable,
+    compounds: ResourceTable,
     shapes: ResourceTable,
 }
 
@@ -50,6 +74,10 @@ impl ModelHost {
             wire_builders: ResourceTable::new(),
             edges: ResourceTable::new(),
             wires: ResourceTable::new(),
+            faces: ResourceTable::new(),
+            shells: ResourceTable::new(),
+            solids: ResourceTable::new(),
+            compounds: ResourceTable::new(),
             shapes: ResourceTable::new(),
         }
     }
@@ -103,6 +131,34 @@ impl HostWasmWireBuilder for ModelHost {
 impl HostWasmWire for ModelHost {
     fn drop(&mut self, resource: Resource<MyWire>) -> Result<(), anyhow::Error> {
         let _ = self.wires.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostWasmFace for ModelHost {
+    fn drop(&mut self, resource: Resource<MyFace>) -> Result<(), anyhow::Error> {
+        let _ = self.faces.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostWasmShell for ModelHost {
+    fn drop(&mut self, resource: Resource<MyShell>) -> Result<(), anyhow::Error> {
+        let _ = self.shells.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostWasmSolid for ModelHost {
+    fn drop(&mut self, resource: Resource<MySolid>) -> Result<(), anyhow::Error> {
+        let _ = self.solids.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostWasmCompound for ModelHost {
+    fn drop(&mut self, resource: Resource<MyCompound>) -> Result<(), anyhow::Error> {
+        let _ = self.compounds.delete(resource);
         Ok(())
     }
 }
