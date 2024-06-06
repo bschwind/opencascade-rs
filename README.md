@@ -91,6 +91,16 @@ To view a STEP file:
 $ cargo run --release --bin viewer -- --step-file SOME_FILE.step
 ```
 
+## Example Model Writer
+
+You can write an example model to a file using the `write_model` binary in `examples`.
+
+For more information, run the following command:
+
+```
+cargo run --bin write_model -- --help
+```
+
 ## Code Formatting
 
 ### Rust Code
