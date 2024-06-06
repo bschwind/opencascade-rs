@@ -808,6 +808,13 @@ pub mod ffi {
             spine: &TopoDS_Wire,
         ) -> UniquePtr<BRepOffsetAPI_MakePipeShell>;
 
+        pub fn Add(
+            self: Pin<&mut BRepOffsetAPI_MakePipeShell>,
+            profile: &TopoDS_Shape,
+            with_contact: bool,
+            with_correction: bool,
+        );
+
         pub fn SetLaw(
             self: Pin<&mut BRepOffsetAPI_MakePipeShell>,
             profile: &TopoDS_Shape,
