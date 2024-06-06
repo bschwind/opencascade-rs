@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::Parser;
 use examples::Example;
 
-/// Save 
+/// Save an example model to a STEP file
 #[derive(Debug, Clone, Parser)]
 struct Args {
     /// Example to save
