@@ -9,8 +9,8 @@ struct Args {
     /// Example to save
     example: Example,
 
-    /// Output file path
-    #[clap(short, long, default_value = "output.step")]
+    /// Output file path, WITHOUT the extension
+    #[clap(short, long, default_value = "output")]
     output: PathBuf,
 
     /// Output format
@@ -28,7 +28,7 @@ fn main() {
     let args = Args::parse();
     let model = args.example.shape();
     match args.format {
-        Format::Step => model.write_step(&args.output).unwrap(),
-        Format::Stl => model.write_stl(&args.output).unwrap(),
+        Format::Step => model.write_step(&args.output.with_extension("step")).unwrap(),
+        Format::Stl => model.write_stl(&args.output.with_extension("stl")).unwrap(),
     }
 }
