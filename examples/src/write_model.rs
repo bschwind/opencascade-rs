@@ -28,7 +28,7 @@ fn main() {
     let args = Args::parse();
     let model = args.example.shape();
     match args.format {
-        Format::Step => model.write_step(&args.output.with_extension("step")).unwrap(),
-        Format::Stl => model.write_stl(&args.output.with_extension("stl")).unwrap(),
+        Format::Step => model.write_step(args.output.with_extension("step")).unwrap(),
+        Format::Stl => model.write_stl(args.output.with_extension("stl")).unwrap(),
     }
 }
