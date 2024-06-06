@@ -86,6 +86,7 @@ pub mod ffi {
         type HandleGeom2d_TrimmedCurve;
         type HandleGeom_CylindricalSurface;
         type Handle_TopTools_HSequenceOfShape;
+        type HandleLawFunction;
 
         pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
@@ -230,6 +231,23 @@ pub mod ffi {
         pub fn Handle_TopTools_HSequenceOfShape_Get(
             handle: &Handle_TopTools_HSequenceOfShape,
         ) -> Result<&TopTools_HSequenceOfShape>;
+
+        // Law Function
+        type Law_Function;
+
+        pub fn Law_Function_to_handle(law: UniquePtr<Law_Function>)
+            -> UniquePtr<HandleLawFunction>;
+
+        // Law Interpol
+
+        type Law_Interpol;
+
+        #[cxx_name = "construct_unique"]
+        pub fn Law_Interpol_ctor() -> UniquePtr<Law_Interpol>;
+        pub fn Law_Interpol_into_Law_Function(
+            interpol: UniquePtr<Law_Interpol>,
+        ) -> UniquePtr<Law_Function>;
+        pub fn Set(self: Pin<&mut Law_Interpol>, array: &TColgp_Array1OfPnt2d, periodic: bool);
 
         // Geometry
         type Geom_TrimmedCurve;
@@ -781,6 +799,24 @@ pub mod ffi {
         ) -> UniquePtr<BRepOffsetAPI_MakePipe>;
 
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakePipe>) -> &TopoDS_Shape;
+
+        // Sweeps with a law function
+        type BRepOffsetAPI_MakePipeShell;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepOffsetAPI_MakePipeShell_ctor(
+            spine: &TopoDS_Wire,
+        ) -> UniquePtr<BRepOffsetAPI_MakePipeShell>;
+
+        pub fn SetLaw(
+            self: Pin<&mut BRepOffsetAPI_MakePipeShell>,
+            profile: &TopoDS_Shape,
+            law: &HandleLawFunction,
+            with_contact: bool,
+            with_correction: bool,
+        );
+
+        pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakePipeShell>) -> &TopoDS_Shape;
 
         // Lofting
         type BRepOffsetAPI_ThruSections;
