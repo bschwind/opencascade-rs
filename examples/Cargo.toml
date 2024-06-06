@@ -17,5 +17,5 @@ name = "examples"
 path = "src/lib.rs"
 
 [[bin]]
-name = "save_step"
-path = "src/save_step.rs"
+name = "write_model"
+path = "src/write_model.rs"
