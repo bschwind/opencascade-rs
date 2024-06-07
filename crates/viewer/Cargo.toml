@@ -16,6 +16,7 @@ smaa = "0.12"
 wasmtime = "20"
 wgpu = "0.18"
 winit = { version = "0.29", features = ["rwh_05"] }
+wit-component = { version = "0.209", default-features = false }
 
 [build-dependencies]
 naga = { version = "0.14", features = ["validate", "wgsl-in"] }

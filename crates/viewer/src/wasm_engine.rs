@@ -1,5 +1,6 @@
 use glam::DVec3;
 use opencascade::primitives as occ;
+use std::path::Path;
 use wasmtime::{
     component::{Component, Linker, Resource, ResourceTable},
     Config, Engine, Store,
@@ -195,13 +196,20 @@ pub struct WasmEngine {
     component: Component,
 }
 
+fn convert_to_component(path: impl AsRef<Path>) -> Vec<u8> {
+    let bytes = &std::fs::read(&path).unwrap();
+    wit_component::ComponentEncoder::default().module(bytes).unwrap().encode().unwrap()
+}
+
 impl WasmEngine {
     pub fn new() -> Self {
         let mut config = Config::new();
         config.wasm_component_model(true);
         let engine = Engine::new(&config).unwrap();
 
-        let component = Component::from_file(&engine, "./my-component.wasm").unwrap();
+        let component_bytes =
+            convert_to_component("target/wasm32-unknown-unknown/release/wasm_example.wasm");
+        let component = Component::from_binary(&engine, &component_bytes).unwrap();
 
         let mut linker = Linker::new(&engine);
         ModelWorld::add_to_linker(&mut linker, |state: &mut ModelHost| state).unwrap();
