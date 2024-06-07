@@ -2,14 +2,12 @@ use std::iter::once;
 
 use crate::{
     angle::{Angle, ToAngle},
-    primitives::{make_dir, make_point, make_vec, Edge, Face, JoinType, Shape},
+    primitives::{make_dir, make_point, make_vec, Edge, Face, JoinType, Shape, Shell, Solid},
     Error,
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys::ffi;
-
-use crate::primitives::Shell;
 
 pub struct Wire {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Wire>,
@@ -197,6 +195,42 @@ impl Wire {
         let mut make_pipe = ffi::BRepOffsetAPI_MakePipe_ctor(&path.inner, profile_shape);
 
         let pipe_shape = make_pipe.pin_mut().Shape();
+        let result_shell = ffi::TopoDS_cast_to_shell(pipe_shape);
+
+        Shell::from_shell(result_shell)
+    }
+
+    /// Sweep the face along a path, modulated by a function, to produce a solid
+    #[must_use]
+    pub fn sweep_along_with_radius_values(
+        &self,
+        path: &Wire,
+        radius_values: impl IntoIterator<Item = (f64, f64)>,
+    ) -> Shell {
+        // let radius_values: Vec<_> = radius_values.into_iter().collect();
+        // let mut array = ffi::TColgp_Array1OfPnt2d_ctor(1, radius_values.len() as i32);
+
+        // for (index, (t, radius)) in radius_values.into_iter().enumerate() {
+        //     array.pin_mut().SetValue(index as i32 + 1, &make_point2d(dvec2(t, radius)));
+        // }
+
+        // let mut interpol = ffi::Law_Interpol_ctor();
+        // let is_periodic = false;
+        // interpol.pin_mut().Set(&array, is_periodic);
+        // let law_function = ffi::Law_Interpol_into_Law_Function(interpol);
+        // let law_handle = ffi::Law_Function_to_handle(law_function);
+
+        let profile_shape = ffi::cast_wire_to_shape(&self.inner);
+        let mut make_pipe_shell = ffi::BRepOffsetAPI_MakePipeShell_ctor(&path.inner);
+        make_pipe_shell.pin_mut().SetMode(false);
+        let with_contact = false;
+        let with_correction = true;
+        // make_pipe_shell.pin_mut().SetLaw(profile_shape, &law_handle, with_contact, with_correction);
+        println!("1 POTATO");
+        make_pipe_shell.pin_mut().Add(profile_shape, with_contact, with_correction);
+        println!("2 POTATO");
+
+        let pipe_shape = make_pipe_shell.pin_mut().Shape();
         let result_shell = ffi::TopoDS_cast_to_shell(pipe_shape);
 
         Shell::from_shell(result_shell)
