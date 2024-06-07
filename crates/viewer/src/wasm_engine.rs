@@ -140,6 +140,37 @@ impl HostWasmFace for ModelHost {
         let _ = self.faces.delete(resource);
         Ok(())
     }
+
+    fn fillet(
+        &mut self,
+        face_resource: Resource<MyFace>,
+        radius: f64,
+    ) -> Result<Resource<MyFace>, anyhow::Error> {
+        let face = self.faces.get(&face_resource)?;
+        let new_face = face.face.fillet(radius);
+        Ok(self.faces.push(MyFace { face: new_face })?)
+    }
+
+    fn from_wire(
+        &mut self,
+        wire_resource: Resource<MyWire>,
+    ) -> Result<Resource<MyFace>, anyhow::Error> {
+        let wire = self.wires.get(&wire_resource)?;
+        let face = Face::from_wire(&wire.wire);
+
+        let new_face = self.faces.push(MyFace { face })?;
+
+        Ok(new_face)
+    }
+
+    fn outer_wire(
+        &mut self,
+        face_resource: Resource<MyFace>,
+    ) -> Result<Resource<MyWire>, anyhow::Error> {
+        let face = self.faces.get(&face_resource)?;
+        let new_wire = face.face.outer_wire();
+        Ok(self.wires.push(MyWire { wire: new_wire })?)
+    }
 }
 
 impl HostWasmShell for ModelHost {

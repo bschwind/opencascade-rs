@@ -1,4 +1,8 @@
-use crate::{primitives::Edge, wasm, wasm::WasmWire};
+use crate::{
+    primitives::{Edge, Face},
+    wasm,
+    wasm::WasmWire,
+};
 
 pub struct Wire {
     pub(crate) inner: WasmWire,
@@ -19,5 +23,10 @@ impl Wire {
         }
 
         Self { inner: wire_builder.build() }
+    }
+
+    pub fn fillet(&self, radius: f64) -> Self {
+        let face = Face::from_wire(self).fillet(radius);
+        face.outer_wire()
     }
 }

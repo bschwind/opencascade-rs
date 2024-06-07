@@ -10,6 +10,4 @@ impl AsRef<Compound> for Compound {
     }
 }
 
-impl Compound {
-    
-}
+impl Compound {}

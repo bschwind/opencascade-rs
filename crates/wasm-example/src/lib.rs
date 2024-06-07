@@ -8,7 +8,7 @@ impl Model for CableBracket {
     }
 
     fn create_model(&mut self) -> Shape {
-        let wire = Workplane::xy().rect(16.0, 10.0);
+        let wire = Workplane::xy().rect(16.0, 10.0).fillet(1.0);
         Shape::from_wire(&wire)
     }
 }

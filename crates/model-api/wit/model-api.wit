@@ -20,7 +20,9 @@ world model-world {
   }
 
   resource wasm-face {
-
+    from-wire: static func(w: borrow<wasm-wire>) -> wasm-face;
+    fillet: func(radius: f64) -> wasm-face;
+    outer-wire: func() -> wasm-wire;
   }
 
   resource wasm-shell {
