@@ -1,8 +1,8 @@
-use crate::wasm::WasmEdge;
+use crate::wasm;
 use glam::DVec3;
 
 pub struct Edge {
-    pub(crate) inner: WasmEdge,
+    pub(crate) inner: wasm::Edge,
 }
 
 impl AsRef<Edge> for Edge {
@@ -13,7 +13,7 @@ impl AsRef<Edge> for Edge {
 
 impl Edge {
     pub fn segment(p1: DVec3, p2: DVec3) -> Self {
-        let inner = WasmEdge::segment(p1.into(), p2.into());
+        let inner = wasm::Edge::segment(p1.into(), p2.into());
 
         Edge { inner }
     }

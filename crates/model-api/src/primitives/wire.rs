@@ -1,11 +1,10 @@
 use crate::{
     primitives::{Edge, Face},
     wasm,
-    wasm::WasmWire,
 };
 
 pub struct Wire {
-    pub(crate) inner: WasmWire,
+    pub(crate) inner: wasm::Wire,
 }
 
 impl AsRef<Wire> for Wire {
@@ -16,7 +15,7 @@ impl AsRef<Wire> for Wire {
 
 impl Wire {
     pub fn from_edges<'a>(edges: impl IntoIterator<Item = &'a Edge>) -> Self {
-        let wire_builder = wasm::WasmWireBuilder::new();
+        let wire_builder = wasm::WireBuilder::new();
 
         for edge in edges.into_iter() {
             wire_builder.add_edge(&edge.inner);

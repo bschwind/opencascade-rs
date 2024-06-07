@@ -1,7 +1,7 @@
-use crate::{primitives::Edge, wasm, wasm::WasmSolid};
+use crate::wasm;
 
 pub struct Solid {
-    pub(crate) inner: WasmSolid,
+    pub(crate) inner: wasm::Solid,
 }
 
 impl AsRef<Solid> for Solid {

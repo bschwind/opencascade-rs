@@ -1,7 +1,7 @@
-use crate::{primitives::Edge, wasm, wasm::WasmShell};
+use crate::wasm;
 
 pub struct Shell {
-    pub(crate) inner: WasmShell,
+    pub(crate) inner: wasm::Shell,
 }
 
 impl AsRef<Shell> for Shell {

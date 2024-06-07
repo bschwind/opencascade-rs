@@ -1,7 +1,7 @@
-use crate::{primitives::Edge, wasm, wasm::WasmCompound};
+use crate::wasm;
 
 pub struct Compound {
-    pub(crate) inner: WasmCompound,
+    pub(crate) inner: wasm::Compound,
 }
 
 impl AsRef<Compound> for Compound {

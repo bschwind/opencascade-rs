@@ -1,7 +1,7 @@
-use crate::{primitives::Wire, wasm, wasm::WasmShape};
+use crate::{primitives::Wire, wasm};
 
 pub struct Shape {
-    pub(crate) inner: WasmShape,
+    pub(crate) inner: wasm::Shape,
 }
 
 impl AsRef<Shape> for Shape {
@@ -12,7 +12,7 @@ impl AsRef<Shape> for Shape {
 
 impl Shape {
     pub fn from_wire(wire: &Wire) -> Self {
-        let shape = wasm::WasmShape::from_wire(&wire.inner);
+        let shape = wasm::Shape::from_wire(&wire.inner);
 
         Self { inner: shape }
     }

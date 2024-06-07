@@ -9,42 +9,42 @@ world model-world {
     z: f64,
   }
 
-  resource wasm-wire-builder {
+  resource wire-builder {
     constructor();
-    add-edge: func(edge: borrow<wasm-edge>);
-    build: func() -> wasm-wire;
+    add-edge: func(edge: borrow<edge>);
+    build: func() -> wire;
   }
 
-  resource wasm-wire {
-
-  }
-
-  resource wasm-face {
-    from-wire: static func(w: borrow<wasm-wire>) -> wasm-face;
-    fillet: func(radius: f64) -> wasm-face;
-    outer-wire: func() -> wasm-wire;
-  }
-
-  resource wasm-shell {
+  resource wire {
 
   }
 
-  resource wasm-solid {
+  resource face {
+    from-wire: static func(w: borrow<wire>) -> face;
+    fillet: func(radius: f64) -> face;
+    outer-wire: func() -> wire;
+  }
+
+  resource shell {
 
   }
 
-  resource wasm-compound {
+  resource solid {
 
   }
 
-  resource wasm-edge {
-    segment: static func(p1: point3, p2: point3) -> wasm-edge;
+  resource compound {
+
   }
 
-  resource wasm-shape {
-    from-wire: static func(w: borrow<wasm-wire>) -> wasm-shape;
+  resource edge {
+    segment: static func(p1: point3, p2: point3) -> edge;
+  }
+
+  resource shape {
+    from-wire: static func(w: borrow<wire>) -> shape;
   }
 
   export init-model: func();
-  export run: func() -> wasm-shape;
+  export run: func() -> shape;
 }

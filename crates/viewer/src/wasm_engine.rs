@@ -1,5 +1,5 @@
 use glam::DVec3;
-use opencascade::primitives::{Compound, Edge, Face, Shape, Shell, Solid, Wire, WireBuilder};
+use opencascade::primitives as occ;
 use wasmtime::{
     component::{Component, Linker, Resource, ResourceTable},
     Config, Engine, Store,
@@ -8,48 +8,16 @@ use wasmtime::{
 wasmtime::component::bindgen!({
     path: "../model-api/wit",
     with: {
-        "wasm-wire-builder": MyWireBuilder,
-        "wasm-edge": MyEdge,
-        "wasm-wire": MyWire,
-        "wasm-face": MyFace,
-        "wasm-shell": MyShell,
-        "wasm-solid": MySolid,
-        "wasm-compound": MyCompound,
-        "wasm-shape": MyShape,
+        "wire-builder": occ::WireBuilder,
+        "edge": occ::Edge,
+        "wire": occ::Wire,
+        "face": occ::Face,
+        "shell": occ::Shell,
+        "solid": occ::Solid,
+        "compound": occ::Compound,
+        "shape": occ::Shape,
     },
 });
-
-pub struct MyWireBuilder {
-    builder: WireBuilder,
-}
-
-pub struct MyEdge {
-    edge: Edge,
-}
-
-pub struct MyWire {
-    wire: Wire,
-}
-
-pub struct MyFace {
-    face: Face,
-}
-
-pub struct MyShell {
-    shell: Shell,
-}
-
-pub struct MySolid {
-    shell: Solid,
-}
-
-pub struct MyCompound {
-    compound: Compound,
-}
-
-pub struct MyShape {
-    shape: Shape,
-}
 
 impl From<Point3> for DVec3 {
     fn from(p: Point3) -> Self {
@@ -83,131 +51,131 @@ impl ModelHost {
     }
 }
 
-impl HostWasmEdge for ModelHost {
-    fn segment(&mut self, p1: Point3, p2: Point3) -> Result<Resource<MyEdge>, anyhow::Error> {
-        Ok(self.edges.push(MyEdge { edge: Edge::segment(p1.into(), p2.into()) })?)
+impl HostEdge for ModelHost {
+    fn segment(&mut self, p1: Point3, p2: Point3) -> Result<Resource<occ::Edge>, anyhow::Error> {
+        Ok(self.edges.push(occ::Edge::segment(p1.into(), p2.into()))?)
     }
 
-    fn drop(&mut self, resource: Resource<MyEdge>) -> Result<(), anyhow::Error> {
+    fn drop(&mut self, resource: Resource<occ::Edge>) -> Result<(), anyhow::Error> {
         let _ = self.wire_builders.delete(resource);
         Ok(())
     }
 }
 
-impl HostWasmWireBuilder for ModelHost {
-    fn new(&mut self) -> Result<Resource<MyWireBuilder>, anyhow::Error> {
-        Ok(self.wire_builders.push(MyWireBuilder { builder: WireBuilder::new() })?)
+impl HostWireBuilder for ModelHost {
+    fn new(&mut self) -> Result<Resource<occ::WireBuilder>, anyhow::Error> {
+        Ok(self.wire_builders.push(occ::WireBuilder::new())?)
     }
 
     fn add_edge(
         &mut self,
-        builder_resource: Resource<MyWireBuilder>,
-        edge_resource: Resource<MyEdge>,
+        builder_resource: Resource<occ::WireBuilder>,
+        edge_resource: Resource<occ::Edge>,
     ) -> Result<(), anyhow::Error> {
-        let builder = &mut self.wire_builders.get_mut(&builder_resource)?.builder;
+        let builder = &mut self.wire_builders.get_mut(&builder_resource)?;
         let edge = self.edges.get(&edge_resource)?;
-        builder.add_edge(&edge.edge);
+        builder.add_edge(edge);
 
         Ok(())
     }
 
     fn build(
         &mut self,
-        resource: Resource<MyWireBuilder>,
-    ) -> Result<Resource<MyWire>, anyhow::Error> {
-        let wire = self.wire_builders.delete(resource)?.builder.build();
+        resource: Resource<occ::WireBuilder>,
+    ) -> Result<Resource<occ::Wire>, anyhow::Error> {
+        let wire = self.wire_builders.delete(resource)?.build();
 
-        let new_wire = self.wires.push(MyWire { wire })?;
+        let new_wire = self.wires.push(wire)?;
 
         Ok(new_wire)
     }
 
-    fn drop(&mut self, resource: Resource<MyWireBuilder>) -> Result<(), anyhow::Error> {
+    fn drop(&mut self, resource: Resource<occ::WireBuilder>) -> Result<(), anyhow::Error> {
         let _ = self.wire_builders.delete(resource);
         Ok(())
     }
 }
 
-impl HostWasmWire for ModelHost {
-    fn drop(&mut self, resource: Resource<MyWire>) -> Result<(), anyhow::Error> {
+impl HostWire for ModelHost {
+    fn drop(&mut self, resource: Resource<occ::Wire>) -> Result<(), anyhow::Error> {
         let _ = self.wires.delete(resource);
         Ok(())
     }
 }
 
-impl HostWasmFace for ModelHost {
-    fn drop(&mut self, resource: Resource<MyFace>) -> Result<(), anyhow::Error> {
+impl HostFace for ModelHost {
+    fn drop(&mut self, resource: Resource<occ::Face>) -> Result<(), anyhow::Error> {
         let _ = self.faces.delete(resource);
         Ok(())
     }
 
     fn fillet(
         &mut self,
-        face_resource: Resource<MyFace>,
+        face_resource: Resource<occ::Face>,
         radius: f64,
-    ) -> Result<Resource<MyFace>, anyhow::Error> {
+    ) -> Result<Resource<occ::Face>, anyhow::Error> {
         let face = self.faces.get(&face_resource)?;
-        let new_face = face.face.fillet(radius);
-        Ok(self.faces.push(MyFace { face: new_face })?)
+        let new_face = face.fillet(radius);
+        Ok(self.faces.push(new_face)?)
     }
 
     fn from_wire(
         &mut self,
-        wire_resource: Resource<MyWire>,
-    ) -> Result<Resource<MyFace>, anyhow::Error> {
+        wire_resource: Resource<occ::Wire>,
+    ) -> Result<Resource<occ::Face>, anyhow::Error> {
         let wire = self.wires.get(&wire_resource)?;
-        let face = Face::from_wire(&wire.wire);
+        let face = Face::from_wire(wire);
 
-        let new_face = self.faces.push(MyFace { face })?;
+        let new_face = self.faces.push(face)?;
 
         Ok(new_face)
     }
 
     fn outer_wire(
         &mut self,
-        face_resource: Resource<MyFace>,
-    ) -> Result<Resource<MyWire>, anyhow::Error> {
+        face_resource: Resource<occ::Face>,
+    ) -> Result<Resource<occ::Wire>, anyhow::Error> {
         let face = self.faces.get(&face_resource)?;
-        let new_wire = face.face.outer_wire();
-        Ok(self.wires.push(MyWire { wire: new_wire })?)
+        let new_wire = face.outer_wire();
+        Ok(self.wires.push(new_wire)?)
     }
 }
 
-impl HostWasmShell for ModelHost {
-    fn drop(&mut self, resource: Resource<MyShell>) -> Result<(), anyhow::Error> {
+impl HostShell for ModelHost {
+    fn drop(&mut self, resource: Resource<occ::Shell>) -> Result<(), anyhow::Error> {
         let _ = self.shells.delete(resource);
         Ok(())
     }
 }
 
-impl HostWasmSolid for ModelHost {
-    fn drop(&mut self, resource: Resource<MySolid>) -> Result<(), anyhow::Error> {
+impl HostSolid for ModelHost {
+    fn drop(&mut self, resource: Resource<occ::Solid>) -> Result<(), anyhow::Error> {
         let _ = self.solids.delete(resource);
         Ok(())
     }
 }
 
-impl HostWasmCompound for ModelHost {
-    fn drop(&mut self, resource: Resource<MyCompound>) -> Result<(), anyhow::Error> {
+impl HostCompound for ModelHost {
+    fn drop(&mut self, resource: Resource<occ::Compound>) -> Result<(), anyhow::Error> {
         let _ = self.compounds.delete(resource);
         Ok(())
     }
 }
 
-impl HostWasmShape for ModelHost {
-    fn drop(&mut self, resource: Resource<MyShape>) -> Result<(), anyhow::Error> {
+impl HostShape for ModelHost {
+    fn drop(&mut self, resource: Resource<occ::Shape>) -> Result<(), anyhow::Error> {
         let _ = self.wires.delete(resource);
         Ok(())
     }
 
     fn from_wire(
         &mut self,
-        wire_resource: Resource<MyWire>,
-    ) -> Result<Resource<MyShape>, anyhow::Error> {
+        wire_resource: Resource<occ::Wire>,
+    ) -> Result<Resource<occ::Shape>, anyhow::Error> {
         let wire = self.wires.get(&wire_resource)?;
-        let shape = Face::from_wire(&wire.wire).into();
+        let shape = Face::from_wire(wire).into();
 
-        let new_shape = self.shapes.push(MyShape { shape })?;
+        let new_shape = self.shapes.push(shape)?;
 
         Ok(new_shape)
     }
@@ -251,8 +219,6 @@ impl WasmEngine {
         let shape = bindings.call_run(&mut store).unwrap();
 
         let mut data = store.into_data();
-        let shape = data.shapes.delete(shape).expect("Should have at least one shape returned");
-
-        shape.shape
+        data.shapes.delete(shape).expect("Should have at least one shape returned")
     }
 }

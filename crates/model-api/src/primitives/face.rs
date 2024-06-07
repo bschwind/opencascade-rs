@@ -1,7 +1,7 @@
-use crate::{primitives::Wire, wasm, wasm::WasmFace};
+use crate::{primitives::Wire, wasm};
 
 pub struct Face {
-    pub(crate) inner: WasmFace,
+    pub(crate) inner: wasm::Face,
 }
 
 impl AsRef<Face> for Face {
@@ -12,7 +12,7 @@ impl AsRef<Face> for Face {
 
 impl Face {
     pub fn from_wire(wire: &Wire) -> Self {
-        let host_face = wasm::WasmFace::from_wire(&wire.inner);
+        let host_face = wasm::Face::from_wire(&wire.inner);
 
         Self { inner: host_face }
     }
