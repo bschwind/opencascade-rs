@@ -80,7 +80,7 @@ struct ViewerApp {
     rendered_edges: RenderedLine,
     cad_mesh: CadMesh,
     mouse_state: MouseState,
-    wasm_engine: WasmEngine,
+    wasm_engine: Option<WasmEngine>,
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -93,6 +93,9 @@ struct AppArgs {
 
     #[arg(long, value_enum, group = "model")]
     example: Option<examples::Example>,
+
+    #[arg(long, value_enum, group = "model")]
+    wasm_path: Option<PathBuf>,
 }
 
 fn get_shape_mesh(shape: &Shape, graphics_device: &GraphicsDevice) -> CadMesh {
@@ -139,8 +142,7 @@ impl GameApp for ViewerApp {
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
         let args = AppArgs::parse();
 
-        let wasm_engine =
-            WasmEngine::new("target/wasm32-unknown-unknown/release/wasm_example.wasm");
+        let mut wasm_engine = None;
 
         let shape = if let Some(step_file) = args.step_file {
             Shape::read_step(step_file).expect("Failed to read STEP file, {step_file}")
@@ -156,12 +158,15 @@ impl GameApp for ViewerApp {
             // pcb.edge_cuts().to_face().extrude(glam::dvec3(0.0, 0.0, 1.6)).into()
         } else if let Some(example) = args.example {
             example.shape()
+        } else if let Some(wasm_path) = args.wasm_path {
+            let engine = WasmEngine::new(wasm_path);
+            let shape = engine.shape();
+            wasm_engine = Some(engine);
+
+            shape
         } else {
             eprintln!("Warning - no example or STEP file specified, you get a default cube.");
-
-            wasm_engine.shape()
-
-            // Shape::cube_centered(50.0)
+            Shape::cube_centered(50.0)
         };
 
         let cad_mesh = get_shape_mesh(&shape, graphics_device);
@@ -291,9 +296,13 @@ impl GameApp for ViewerApp {
     fn tick(&mut self, _dt: f32) {}
 
     fn render(&mut self, graphics_device: &mut GraphicsDevice, _window: &Window) {
-        if let Some(new_shape) = self.wasm_engine.new_shape_if_wasm_changed() {
-            self.cad_mesh = get_shape_mesh(&new_shape, graphics_device);
-            self.rendered_edges = get_shape_edges(&new_shape, graphics_device);
+        if let Some(wasm_engine) = &mut self.wasm_engine {
+            let start = std::time::Instant::now();
+            if let Some(new_shape) = wasm_engine.new_shape_if_wasm_changed() {
+                self.cad_mesh = get_shape_mesh(&new_shape, graphics_device);
+                self.rendered_edges = get_shape_edges(&new_shape, graphics_device);
+                println!("Created a new shape in {:?}", start.elapsed());
+            }
         }
 
         let mut frame_encoder = graphics_device.begin_frame();
