@@ -13,7 +13,7 @@ cxx = "1"
 [build-dependencies]
 cmake = "0.1"
 cxx-build = "1"
-occt-sys = { version = "0.3", optional = true }
+occt-sys = { path = "../occt-sys", optional = true }
 
 [features]
 builtin = ["occt-sys"]

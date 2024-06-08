@@ -1,0 +1,48 @@
+on:
+  pull_request:
+    paths:
+      - 'crates/occt-sys/**'
+      - 'crates/opencascade-sys/**'
+
+name: Cargo Build OCCT
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Cargo Build OCCT
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+      - run: cargo build -p opencascade-sys --features builtin -vv
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: 4
+  build-wasm:
+    name: Cargo Build OCCT (wasm32)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+      - uses: mymindstorm/setup-emsdk@v13
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-emscripten
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+      - run: cargo build -p opencascade-sys --features builtin --target wasm32-unknown-emscripten -vv
+        env:
+          CMAKE_BUILD_PARALLEL_LEVEL: 4
