@@ -2,13 +2,12 @@ use std::iter::once;
 
 use crate::{
     angle::{Angle, ToAngle},
-    primitives::{
-        make_dir, make_point, make_point2d, make_vec, Edge, Face, JoinType, Shape, Shell,
-    },
+    law_function::LawFunction,
+    primitives::{make_dir, make_point, make_vec, Edge, Face, JoinType, Shape, Shell},
     Error,
 };
 use cxx::UniquePtr;
-use glam::{dvec2, dvec3, DVec3};
+use glam::{dvec3, DVec3};
 use opencascade_sys::ffi;
 
 pub struct Wire {
@@ -209,18 +208,8 @@ impl Wire {
         path: &Wire,
         radius_values: impl IntoIterator<Item = (f64, f64)>,
     ) -> Shell {
-        let radius_values: Vec<_> = radius_values.into_iter().collect();
-        let mut array = ffi::TColgp_Array1OfPnt2d_ctor(1, radius_values.len() as i32);
-
-        for (index, (t, radius)) in radius_values.into_iter().enumerate() {
-            array.pin_mut().SetValue(index as i32 + 1, &make_point2d(dvec2(t, radius)));
-        }
-
-        let mut interpol = ffi::Law_Interpol_ctor();
-        let is_periodic = false;
-        interpol.pin_mut().Set(&array, is_periodic);
-        let law_function = ffi::Law_Interpol_into_Law_Function(interpol);
-        let law_handle = ffi::Law_Function_to_handle(law_function);
+        let law_function = LawFunction::from_function_graph(radius_values);
+        let law_handle = ffi::Law_Function_to_handle(law_function.inner);
 
         let profile_shape = ffi::cast_wire_to_shape(&self.inner);
         let mut make_pipe_shell = ffi::BRepOffsetAPI_MakePipeShell_ctor(&path.inner);
