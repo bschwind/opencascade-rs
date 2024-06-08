@@ -12,6 +12,7 @@ pub mod keycap;
 pub mod offset_2d;
 pub mod rounded_chamfer;
 pub mod swept_face;
+pub mod swept_face_variable;
 pub mod swept_wire;
 pub mod swept_wire_variable;
 pub mod turners_cube;
@@ -30,6 +31,7 @@ pub enum Example {
     Offset2d,
     RoundedChamfer,
     SweptFace,
+    SweptFaceVariable,
     SweptWire,
     SweptWireVariable,
     TurnersCube,
@@ -50,6 +52,7 @@ impl Example {
             Example::Offset2d => offset_2d::shape(),
             Example::RoundedChamfer => rounded_chamfer::shape(),
             Example::SweptFace => swept_face::shape(),
+            Example::SweptFaceVariable => swept_face_variable::shape(),
             Example::SweptWire => swept_wire::shape(),
             Example::SweptWireVariable => swept_wire_variable::shape(),
             Example::TurnersCube => turners_cube::shape(),

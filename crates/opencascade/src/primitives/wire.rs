@@ -202,7 +202,7 @@ impl Wire {
         Shell::from_shell(result_shell)
     }
 
-    /// Sweep the face along a path, modulated by a function, to produce a solid
+    /// Sweep the wire along a path, modulated by a function, to produce a shell
     #[must_use]
     pub fn sweep_along_with_radius_values(
         &self,
