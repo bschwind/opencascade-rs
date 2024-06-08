@@ -44,7 +44,7 @@ fn main() {
 }
 
 fn determine_format(extension: &OsStr) -> Option<Format> {
-    match extension.as_bytes() {
+    match extension.to_ascii_lowercase().as_bytes() {
         b"step" | b"stp" => Some(Format::Step),
         b"stl" => Some(Format::Stl),
         _ => None,
