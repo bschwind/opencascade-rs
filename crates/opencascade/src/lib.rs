@@ -2,10 +2,12 @@ use thiserror::Error;
 
 pub mod angle;
 pub mod kicad;
-pub mod law_function;
 pub mod mesh;
 pub mod primitives;
 pub mod workplane;
+
+mod law_function;
+mod make_pipe_shell;
 
 #[derive(Error, Debug)]
 pub enum Error {

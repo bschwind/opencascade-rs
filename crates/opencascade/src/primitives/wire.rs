@@ -2,7 +2,8 @@ use std::iter::once;
 
 use crate::{
     angle::{Angle, ToAngle},
-    law_function::LawFunction,
+    law_function::law_function_from_graph,
+    make_pipe_shell::make_pipe_shell_with_law_function,
     primitives::{make_dir, make_point, make_vec, Edge, Face, JoinType, Shape, Shell},
     Error,
 };
@@ -208,16 +209,11 @@ impl Wire {
         path: &Wire,
         radius_values: impl IntoIterator<Item = (f64, f64)>,
     ) -> Shell {
-        let law_function = LawFunction::from_function_graph(radius_values);
-        let law_handle = ffi::Law_Function_to_handle(law_function.inner);
+        let law_function = law_function_from_graph(radius_values);
+        let law_handle = ffi::Law_Function_to_handle(law_function);
 
-        let profile_shape = ffi::cast_wire_to_shape(&self.inner);
-        let mut make_pipe_shell = ffi::BRepOffsetAPI_MakePipeShell_ctor(&path.inner);
-        make_pipe_shell.pin_mut().SetMode(false);
-        let with_contact = false;
-        let with_correction = true;
-        make_pipe_shell.pin_mut().SetLaw(profile_shape, &law_handle, with_contact, with_correction);
-
+        let mut make_pipe_shell =
+            make_pipe_shell_with_law_function(&self.inner, &path.inner, &law_handle);
         let pipe_shape = make_pipe_shell.pin_mut().Shape();
         let result_shell = ffi::TopoDS_cast_to_shell(pipe_shape);
 

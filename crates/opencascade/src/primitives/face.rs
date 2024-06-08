@@ -1,6 +1,7 @@
 use crate::{
     angle::Angle,
-    law_function::LawFunction,
+    law_function::law_function_from_graph,
+    make_pipe_shell::make_pipe_shell_with_law_function,
     primitives::{
         make_axis_1, make_point, make_vec, EdgeIterator, JoinType, Shape, Solid, Surface, Wire,
     },
@@ -221,16 +222,12 @@ impl Face {
         path: &Wire,
         radius_values: impl IntoIterator<Item = (f64, f64)>,
     ) -> Solid {
-        let law_function = LawFunction::from_function_graph(radius_values);
-        let law_handle = ffi::Law_Function_to_handle(law_function.inner);
+        let law_function = law_function_from_graph(radius_values);
+        let law_handle = ffi::Law_Function_to_handle(law_function);
 
         let profile_wire = ffi::outer_wire(&self.inner);
-        let profile_shape = ffi::cast_wire_to_shape(&profile_wire);
-        let mut make_pipe_shell = ffi::BRepOffsetAPI_MakePipeShell_ctor(&path.inner);
-        make_pipe_shell.pin_mut().SetMode(false);
-        let with_contact = false;
-        let with_correction = true;
-        make_pipe_shell.pin_mut().SetLaw(profile_shape, &law_handle, with_contact, with_correction);
+        let mut make_pipe_shell =
+            make_pipe_shell_with_law_function(&profile_wire, &path.inner, &law_handle);
 
         make_pipe_shell.pin_mut().Build(&ffi::Message_ProgressRange_ctor());
         make_pipe_shell.pin_mut().MakeSolid();
