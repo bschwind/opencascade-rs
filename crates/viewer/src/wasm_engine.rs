@@ -17,6 +17,7 @@ wasmtime::component::bindgen!({
         "wire-builder": occ::WireBuilder,
         "edge-iterator": occ::EdgeIterator,
         "face-iterator": occ::FaceIterator,
+        "chamfer-maker": occ::ChamferMaker,
         "edge": occ::Edge,
         "wire": occ::Wire,
         "face": occ::Face,
@@ -43,6 +44,7 @@ struct ModelHost {
     wire_builders: ResourceTable,
     edge_iterators: ResourceTable,
     face_iterators: ResourceTable,
+    chamfer_makers: ResourceTable,
     edges: ResourceTable,
     wires: ResourceTable,
     faces: ResourceTable,
@@ -58,6 +60,7 @@ impl ModelHost {
             wire_builders: ResourceTable::new(),
             edge_iterators: ResourceTable::new(),
             face_iterators: ResourceTable::new(),
+            chamfer_makers: ResourceTable::new(),
             edges: ResourceTable::new(),
             wires: ResourceTable::new(),
             faces: ResourceTable::new(),
@@ -116,6 +119,45 @@ impl HostFaceIterator for ModelHost {
     }
 
     fn drop(&mut self, resource: Resource<occ::FaceIterator>) -> Result<(), anyhow::Error> {
+        let _ = self.face_iterators.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostChamferMaker for ModelHost {
+    fn new(
+        &mut self,
+        shape_resource: Resource<occ::Shape>,
+    ) -> Result<Resource<occ::ChamferMaker>, anyhow::Error> {
+        let shape = self.shapes.get(&shape_resource)?;
+
+        Ok(self.chamfer_makers.push(occ::ChamferMaker::new(shape))?)
+    }
+
+    fn add_edge(
+        &mut self,
+        chamfer_maker_resource: Resource<occ::ChamferMaker>,
+        distance: f64,
+        edge_resource: Resource<occ::Edge>,
+    ) -> Result<(), anyhow::Error> {
+        let chamfer_maker = &mut self.chamfer_makers.get_mut(&chamfer_maker_resource)?;
+        let edge = self.edges.get(&edge_resource)?;
+        chamfer_maker.add_edge(distance, edge);
+
+        Ok(())
+    }
+
+    fn build(
+        &mut self,
+        resource: Resource<occ::ChamferMaker>,
+    ) -> Result<Resource<occ::Shape>, anyhow::Error> {
+        let shape = self.chamfer_makers.delete(resource)?.build();
+        let shape_resource = self.shapes.push(shape)?;
+
+        Ok(shape_resource)
+    }
+
+    fn drop(&mut self, resource: Resource<occ::ChamferMaker>) -> Result<(), anyhow::Error> {
         let _ = self.face_iterators.delete(resource);
         Ok(())
     }

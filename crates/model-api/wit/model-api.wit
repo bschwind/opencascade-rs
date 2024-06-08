@@ -19,6 +19,12 @@ world model-world {
     next: func() -> option<face>;
   }
 
+  resource chamfer-maker {
+    constructor(shape: borrow<shape>);
+    add-edge: func(distance: f64, edge: borrow<edge>);
+    build: func() -> shape;
+  }
+
   resource wire-builder {
     constructor();
     add-edge: func(edge: borrow<edge>);

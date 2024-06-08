@@ -698,3 +698,23 @@ pub struct LineFaceHitPoint {
     /// The intersection point
     pub point: DVec3,
 }
+
+pub struct ChamferMaker {
+    inner: UniquePtr<ffi::BRepFilletAPI_MakeChamfer>,
+}
+
+impl ChamferMaker {
+    pub fn new(shape: &Shape) -> Self {
+        let make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&shape.inner);
+
+        Self { inner: make_chamfer }
+    }
+
+    pub fn add_edge(&mut self, distance: f64, edge: &Edge) {
+        self.inner.pin_mut().add_edge(distance, &edge.inner);
+    }
+
+    pub fn build(mut self) -> Shape {
+        Shape::from_shape(self.inner.pin_mut().Shape())
+    }
+}

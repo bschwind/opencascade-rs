@@ -5,9 +5,9 @@ use model_api::{
     Model,
 };
 
-struct CableBracket {}
+struct RoundedChamfer {}
 
-impl Model for CableBracket {
+impl Model for RoundedChamfer {
     fn new() -> Self {
         Self {}
     }
@@ -15,17 +15,15 @@ impl Model for CableBracket {
     fn create_model(&mut self) -> Shape {
         let shape = Workplane::xy()
             .rect(16.0, 10.0)
-            .fillet(2.0)
+            .fillet(1.0)
             .to_face()
-            .extrude(dvec3(0.0, 0.0, 1.0))
+            .extrude(dvec3(0.0, 0.0, 3.0))
             .into_shape();
 
-        let _top_edges = shape.faces().farthest(Direction::PosZ).edges();
+        let top_edges = shape.faces().farthest(Direction::PosZ).edges();
 
-        // shape.chamfer_edges(0.7, top_edges)
-
-        shape
+        shape.chamfer_edges(0.7, top_edges)
     }
 }
 
-model_api::register_model!(CableBracket);
+model_api::register_model!(RoundedChamfer);

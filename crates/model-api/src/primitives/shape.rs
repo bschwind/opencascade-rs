@@ -122,20 +122,20 @@ impl Shape {
         Self { inner: shape }
     }
 
-    // #[must_use]
-    // pub fn chamfer_edges<T: AsRef<Edge>>(
-    //     &self,
-    //     distance: f64,
-    //     edges: impl IntoIterator<Item = T>,
-    // ) -> Self {
-    //     let mut make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
+    #[must_use]
+    pub fn chamfer_edges<T: AsRef<Edge>>(
+        &self,
+        distance: f64,
+        edges: impl IntoIterator<Item = T>,
+    ) -> Self {
+        let make_chamfer = wasm::ChamferMaker::new(&self.inner);
 
-    //     for edge in edges.into_iter() {
-    //         make_chamfer.pin_mut().add_edge(distance, &edge.as_ref().inner);
-    //     }
+        for edge in edges.into_iter() {
+            make_chamfer.add_edge(distance, &edge.as_ref().inner);
+        }
 
-    //     Self::from_shape(make_chamfer.pin_mut().Shape())
-    // }
+        Self { inner: make_chamfer.build() }
+    }
 
     pub fn faces(&self) -> FaceIterator {
         FaceIterator::new(self)

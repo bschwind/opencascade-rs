@@ -1232,3 +1232,4 @@ unsafe impl Send for ffi::TopoDS_Compound {}
 unsafe impl Send for ffi::TopoDS_Shape {}
 
 unsafe impl Send for ffi::TopExp_Explorer {}
+unsafe impl Send for ffi::BRepFilletAPI_MakeChamfer {}
