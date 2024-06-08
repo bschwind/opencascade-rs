@@ -1,7 +1,7 @@
 use crate::wasm;
 
 pub struct Compound {
-    pub(crate) inner: wasm::Compound,
+    pub(crate) _inner: wasm::Compound,
 }
 
 impl AsRef<Compound> for Compound {

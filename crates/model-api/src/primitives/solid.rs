@@ -1,7 +1,7 @@
 use crate::wasm;
 
 pub struct Solid {
-    pub(crate) inner: wasm::Solid,
+    pub(crate) _inner: wasm::Solid,
 }
 
 impl AsRef<Solid> for Solid {
