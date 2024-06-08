@@ -30,7 +30,7 @@ fn main() {
 
     let format = args.format.unwrap_or_else(|| {
         let extension = args.output.extension().unwrap_or_else(|| {
-            panic!("Cannot guess format because the output file name has no extension.")
+            panic!("Cannot guess format because the output file name has no extension. Use the '-f' or '--format' flag to specify a format.")
         });
 
         determine_format(extension)
