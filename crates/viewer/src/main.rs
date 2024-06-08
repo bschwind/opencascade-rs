@@ -80,7 +80,7 @@ struct ViewerApp {
     rendered_edges: RenderedLine,
     cad_mesh: CadMesh,
     mouse_state: MouseState,
-    // wasm_engine: WasmEngine,
+    wasm_engine: WasmEngine,
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -95,6 +95,42 @@ struct AppArgs {
     example: Option<examples::Example>,
 }
 
+fn get_shape_mesh(shape: &Shape, graphics_device: &GraphicsDevice) -> CadMesh {
+    let mesh = shape.mesh().expect("example shape should yield a valid triangulation");
+    CadMesh::from_mesh(&mesh, graphics_device.device())
+}
+
+fn get_shape_edges(shape: &Shape, graphics_device: &GraphicsDevice) -> RenderedLine {
+    // Pre-render the model edges.
+    let line_thickness = 3.0;
+    let mut line_builder = LineBuilder::new();
+
+    for edge in shape.edges() {
+        let mut segments = vec![];
+
+        let mut last_point: Option<DVec3> = None;
+        let mut length_so_far = 0.0;
+
+        for point in edge.approximation_segments() {
+            if let Some(last_point) = last_point {
+                length_so_far += (point - last_point).length();
+            }
+
+            segments.push(LineVertex3::new(
+                vec3(point.x as f32, point.y as f32, point.z as f32),
+                line_thickness,
+                length_so_far as f32,
+            ));
+
+            last_point = Some(point);
+        }
+
+        line_builder.add_round_line_strip(&segments);
+    }
+
+    line_builder.build(graphics_device.device())
+}
+
 impl GameApp for ViewerApp {
     fn window_title() -> &'static str {
         "Viewer"
@@ -102,6 +138,9 @@ impl GameApp for ViewerApp {
 
     fn init(graphics_device: &mut GraphicsDevice) -> Self {
         let args = AppArgs::parse();
+
+        let wasm_engine =
+            WasmEngine::new("target/wasm32-unknown-unknown/release/wasm_example.wasm");
 
         let shape = if let Some(step_file) = args.step_file {
             Shape::read_step(step_file).expect("Failed to read STEP file, {step_file}")
@@ -120,43 +159,13 @@ impl GameApp for ViewerApp {
         } else {
             eprintln!("Warning - no example or STEP file specified, you get a default cube.");
 
-            let wasm_engine = WasmEngine::new();
             wasm_engine.shape()
 
             // Shape::cube_centered(50.0)
         };
 
-        let mesh = shape.mesh().expect("example shape should yield a valid triangulation");
-        let cad_mesh = CadMesh::from_mesh(&mesh, graphics_device.device());
-
-        // Pre-render the model edges.
-        let line_thickness = 3.0;
-        let mut line_builder = LineBuilder::new();
-
-        for edge in shape.edges() {
-            let mut segments = vec![];
-
-            let mut last_point: Option<DVec3> = None;
-            let mut length_so_far = 0.0;
-
-            for point in edge.approximation_segments() {
-                if let Some(last_point) = last_point {
-                    length_so_far += (point - last_point).length();
-                }
-
-                segments.push(LineVertex3::new(
-                    vec3(point.x as f32, point.y as f32, point.z as f32),
-                    line_thickness,
-                    length_so_far as f32,
-                ));
-
-                last_point = Some(point);
-            }
-
-            line_builder.add_round_line_strip(&segments);
-        }
-
-        let rendered_edges = line_builder.build(graphics_device.device());
+        let cad_mesh = get_shape_mesh(&shape, graphics_device);
+        let rendered_edges = get_shape_edges(&shape, graphics_device);
 
         // Create SMAA target
         let (width, height) = graphics_device.surface_dimensions();
@@ -194,7 +203,7 @@ impl GameApp for ViewerApp {
             cad_mesh,
             rendered_edges,
             mouse_state: Default::default(),
-            // wasm_engine,
+            wasm_engine,
         }
     }
 
@@ -282,6 +291,11 @@ impl GameApp for ViewerApp {
     fn tick(&mut self, _dt: f32) {}
 
     fn render(&mut self, graphics_device: &mut GraphicsDevice, _window: &Window) {
+        if let Some(new_shape) = self.wasm_engine.new_shape_if_wasm_changed() {
+            self.cad_mesh = get_shape_mesh(&new_shape, graphics_device);
+            self.rendered_edges = get_shape_edges(&new_shape, graphics_device);
+        }
+
         let mut frame_encoder = graphics_device.begin_frame();
 
         let smaa_render_target = self.smaa_target.start_frame(

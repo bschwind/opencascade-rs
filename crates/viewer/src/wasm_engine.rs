@@ -1,6 +1,11 @@
+use core::sync::atomic::{AtomicBool, Ordering};
 use glam::DVec3;
+use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use opencascade::primitives as occ;
-use std::path::Path;
+use std::{
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 use wasmtime::{
     component::{Component, Linker, Resource, ResourceTable},
     Config, Engine, Store,
@@ -194,6 +199,9 @@ pub struct WasmEngine {
     engine: Engine,
     linker: Linker<ModelHost>,
     component: Component,
+    wasm_path: PathBuf,
+    changed: Arc<AtomicBool>,
+    _watcher: RecommendedWatcher,
 }
 
 fn convert_to_component(path: impl AsRef<Path>) -> Vec<u8> {
@@ -202,19 +210,53 @@ fn convert_to_component(path: impl AsRef<Path>) -> Vec<u8> {
 }
 
 impl WasmEngine {
-    pub fn new() -> Self {
+    pub fn new(wasm_path: impl AsRef<Path>) -> Self {
         let mut config = Config::new();
         config.wasm_component_model(true);
         let engine = Engine::new(&config).unwrap();
 
-        let component_bytes =
-            convert_to_component("target/wasm32-unknown-unknown/release/wasm_example.wasm");
+        let component_bytes = convert_to_component(&wasm_path);
         let component = Component::from_binary(&engine, &component_bytes).unwrap();
 
         let mut linker = Linker::new(&engine);
         ModelWorld::add_to_linker(&mut linker, |state: &mut ModelHost| state).unwrap();
 
-        Self { engine, linker, component }
+        let changed = Arc::new(AtomicBool::new(false));
+        let mut watcher = RecommendedWatcher::new(
+            {
+                let changed = Arc::clone(&changed);
+                move |res| match res {
+                    Ok(_) => changed.store(true, Ordering::SeqCst),
+                    Err(e) => println!("[warn] Watch error: `{e:?}`."),
+                }
+            },
+            Default::default(),
+        )
+        .unwrap();
+
+        watcher.watch(wasm_path.as_ref(), RecursiveMode::NonRecursive).unwrap();
+
+        let wasm_path = wasm_path.as_ref();
+
+        Self {
+            engine,
+            linker,
+            component,
+            wasm_path: wasm_path.to_owned(),
+            changed,
+            _watcher: watcher,
+        }
+    }
+
+    pub fn new_shape_if_wasm_changed(&mut self) -> Option<Shape> {
+        if self.changed.swap(false, Ordering::SeqCst) {
+            let component_bytes = convert_to_component(&self.wasm_path);
+            self.component = Component::from_binary(&self.engine, &component_bytes).unwrap();
+
+            Some(self.shape())
+        } else {
+            None
+        }
     }
 
     pub fn shape(&self) -> Shape {
