@@ -242,6 +242,7 @@ impl Face {
         let with_correction = true;
         make_pipe_shell.pin_mut().SetLaw(profile_shape, &law_handle, with_contact, with_correction);
 
+        make_pipe_shell.pin_mut().Build(&ffi::Message_ProgressRange_ctor());
         make_pipe_shell.pin_mut().MakeSolid();
         let pipe_shape = make_pipe_shell.pin_mut().Shape();
         let result_solid = ffi::TopoDS_cast_to_solid(pipe_shape);
