@@ -7,7 +7,7 @@ use std::{
     sync::Arc,
 };
 use wasmtime::{
-    component::{Component, Linker, Resource, ResourceTable},
+    component::{Component, Linker, Resource, ResourceTable, ResourceTableError},
     Config, Engine, Store,
 };
 
@@ -40,34 +40,61 @@ impl From<DVec3> for Point3 {
     }
 }
 
+struct TypedResourceTable<T> {
+    resource_table: ResourceTable,
+    _marker: std::marker::PhantomData<T>,
+}
+
+impl<T: std::marker::Send + 'static> TypedResourceTable<T> {
+    fn new() -> Self {
+        Self { resource_table: ResourceTable::new(), _marker: std::marker::PhantomData }
+    }
+
+    fn push(&mut self, val: T) -> Result<Resource<T>, ResourceTableError> {
+        self.resource_table.push(val)
+    }
+
+    fn get(&self, key: &Resource<T>) -> Result<&T, ResourceTableError> {
+        self.resource_table.get(key)
+    }
+
+    fn get_mut(&mut self, key: &Resource<T>) -> Result<&mut T, ResourceTableError> {
+        self.resource_table.get_mut(key)
+    }
+
+    fn delete(&mut self, resource: Resource<T>) -> Result<T, ResourceTableError> {
+        self.resource_table.delete(resource)
+    }
+}
+
 struct ModelHost {
-    wire_builders: ResourceTable,
-    edge_iterators: ResourceTable,
-    face_iterators: ResourceTable,
-    chamfer_makers: ResourceTable,
-    edges: ResourceTable,
-    wires: ResourceTable,
-    faces: ResourceTable,
-    shells: ResourceTable,
-    solids: ResourceTable,
-    compounds: ResourceTable,
-    shapes: ResourceTable,
+    wire_builders: TypedResourceTable<occ::WireBuilder>,
+    edge_iterators: TypedResourceTable<occ::EdgeIterator>,
+    face_iterators: TypedResourceTable<occ::FaceIterator>,
+    chamfer_makers: TypedResourceTable<occ::ChamferMaker>,
+    edges: TypedResourceTable<occ::Edge>,
+    wires: TypedResourceTable<occ::Wire>,
+    faces: TypedResourceTable<occ::Face>,
+    shells: TypedResourceTable<occ::Shell>,
+    solids: TypedResourceTable<occ::Solid>,
+    compounds: TypedResourceTable<occ::Compound>,
+    shapes: TypedResourceTable<occ::Shape>,
 }
 
 impl ModelHost {
     fn new() -> Self {
         Self {
-            wire_builders: ResourceTable::new(),
-            edge_iterators: ResourceTable::new(),
-            face_iterators: ResourceTable::new(),
-            chamfer_makers: ResourceTable::new(),
-            edges: ResourceTable::new(),
-            wires: ResourceTable::new(),
-            faces: ResourceTable::new(),
-            shells: ResourceTable::new(),
-            solids: ResourceTable::new(),
-            compounds: ResourceTable::new(),
-            shapes: ResourceTable::new(),
+            wire_builders: TypedResourceTable::new(),
+            edge_iterators: TypedResourceTable::new(),
+            face_iterators: TypedResourceTable::new(),
+            chamfer_makers: TypedResourceTable::new(),
+            edges: TypedResourceTable::new(),
+            wires: TypedResourceTable::new(),
+            faces: TypedResourceTable::new(),
+            shells: TypedResourceTable::new(),
+            solids: TypedResourceTable::new(),
+            compounds: TypedResourceTable::new(),
+            shapes: TypedResourceTable::new(),
         }
     }
 }
