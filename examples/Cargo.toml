@@ -4,9 +4,18 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
+clap = { version = "4", features = ["derive"] }
 opencascade = { version = "0.2", path = "../crates/opencascade", default-features = false }
 glam = { version = "0.24", features = ["bytemuck"] }
 
 [features]
 default = ["builtin"]
 builtin = ["opencascade/builtin"]
+
+[lib]
+name = "examples"
+path = "src/lib.rs"
+
+[[bin]]
+name = "write_model"
+path = "src/write_model.rs"

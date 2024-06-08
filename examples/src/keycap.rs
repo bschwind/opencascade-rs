@@ -155,7 +155,7 @@ pub fn shape() -> Shape {
                 stem_points.extend_from_slice(&[(0.0, -dist), (0.0, dist)]);
             }
 
-            ribh_points = stem_points.clone();
+            ribh_points.clone_from(&stem_points);
             ribv_points.push((0.0, 0.0));
         } else {
             if keycap_unit_size_x > 2.75 {
@@ -167,7 +167,7 @@ pub fn shape() -> Shape {
             }
 
             ribh_points.push((0.0, 0.0));
-            ribv_points = stem_points.clone();
+            ribv_points.clone_from(&stem_points);
         }
     }
 

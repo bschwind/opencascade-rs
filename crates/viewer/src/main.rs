@@ -4,7 +4,7 @@ use crate::{
 };
 use anyhow::Error;
 use camera::OrbitCamera;
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 use glam::{vec2, vec3, DVec3, Mat4, Quat, Vec2, Vec3};
 use kicad_parser::board::BoardLayer;
 use opencascade::{
@@ -89,46 +89,7 @@ struct AppArgs {
     kicad_file: Option<PathBuf>,
 
     #[arg(long, value_enum, group = "model")]
-    example: Option<Example>,
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, ValueEnum)]
-enum Example {
-    Airfoil,
-    CableBracket,
-    BoxShape,
-    Chamfer,
-    Gizmo,
-    HighLevelBottle,
-    KeyboardCase,
-    Keycap,
-    Offset2d,
-    RoundedChamfer,
-    SweptFace,
-    SweptWire,
-    TurnersCube,
-    VariableFillet,
-}
-
-impl Example {
-    pub fn shape(self) -> Shape {
-        match self {
-            Example::Airfoil => examples::airfoil::shape(),
-            Example::CableBracket => examples::cable_bracket::shape(),
-            Example::BoxShape => examples::box_shape::shape(),
-            Example::Chamfer => examples::chamfer::shape(),
-            Example::Gizmo => examples::gizmo::shape(),
-            Example::HighLevelBottle => examples::high_level_bottle::shape(),
-            Example::KeyboardCase => examples::keyboard_case::shape(),
-            Example::Keycap => examples::keycap::shape(),
-            Example::Offset2d => examples::offset_2d::shape(),
-            Example::RoundedChamfer => examples::rounded_chamfer::shape(),
-            Example::SweptFace => examples::swept_face::shape(),
-            Example::SweptWire => examples::swept_wire::shape(),
-            Example::TurnersCube => examples::turners_cube::shape(),
-            Example::VariableFillet => examples::variable_fillet::shape(),
-        }
-    }
+    example: Option<examples::Example>,
 }
 
 impl GameApp for ViewerApp {
