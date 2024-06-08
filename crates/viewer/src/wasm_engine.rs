@@ -158,7 +158,7 @@ impl HostChamferMaker for ModelHost {
     }
 
     fn drop(&mut self, resource: Resource<occ::ChamferMaker>) -> Result<(), anyhow::Error> {
-        let _ = self.face_iterators.delete(resource);
+        let _ = self.chamfer_makers.delete(resource);
         Ok(())
     }
 }
@@ -169,7 +169,7 @@ impl HostEdge for ModelHost {
     }
 
     fn drop(&mut self, resource: Resource<occ::Edge>) -> Result<(), anyhow::Error> {
-        let _ = self.wire_builders.delete(resource);
+        let _ = self.edges.delete(resource);
         Ok(())
     }
 }
@@ -294,7 +294,7 @@ impl HostCompound for ModelHost {
 
 impl HostShape for ModelHost {
     fn drop(&mut self, resource: Resource<occ::Shape>) -> Result<(), anyhow::Error> {
-        let _ = self.wires.delete(resource);
+        let _ = self.shapes.delete(resource);
         Ok(())
     }
 
