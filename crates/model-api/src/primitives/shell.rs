@@ -1,7 +1,7 @@
 use crate::wasm;
 
 pub struct Shell {
-    pub(crate) _inner: wasm::Shell,
+    pub(crate) inner: wasm::Shell,
 }
 
 impl AsRef<Shell> for Shell {

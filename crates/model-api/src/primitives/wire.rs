@@ -28,4 +28,8 @@ impl Wire {
         let face = Face::from_wire(self).fillet(radius);
         face.outer_wire()
     }
+
+    pub fn to_face(&self) -> Face {
+        Face::from_wire(self)
+    }
 }

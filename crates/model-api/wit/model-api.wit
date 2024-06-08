@@ -9,6 +9,16 @@ world model-world {
     z: f64,
   }
 
+  resource edge-iterator {
+    constructor(face: borrow<face>);
+    next: func() -> option<edge>;
+  }
+
+  resource face-iterator {
+    constructor(shape: borrow<shape>);
+    next: func() -> option<face>;
+  }
+
   resource wire-builder {
     constructor();
     add-edge: func(edge: borrow<edge>);
@@ -22,7 +32,9 @@ world model-world {
   resource face {
     from-wire: static func(w: borrow<wire>) -> face;
     fillet: func(radius: f64) -> face;
+    extrude: func(dir: point3) -> solid;
     outer-wire: func() -> wire;
+    center-of-mass: func() -> point3;
   }
 
   resource shell {
@@ -42,7 +54,12 @@ world model-world {
   }
 
   resource shape {
+    from-edge: static func(w: borrow<edge>) -> shape;
     from-wire: static func(w: borrow<wire>) -> shape;
+    from-face: static func(w: borrow<face>) -> shape;
+    from-shell: static func(w: borrow<shell>) -> shape;
+    from-solid: static func(w: borrow<solid>) -> shape;
+    from-compound: static func(w: borrow<compound>) -> shape;
   }
 
   export init-model: func();

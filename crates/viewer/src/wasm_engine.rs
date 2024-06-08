@@ -15,6 +15,8 @@ wasmtime::component::bindgen!({
     path: "../model-api/wit",
     with: {
         "wire-builder": occ::WireBuilder,
+        "edge-iterator": occ::EdgeIterator,
+        "face-iterator": occ::FaceIterator,
         "edge": occ::Edge,
         "wire": occ::Wire,
         "face": occ::Face,
@@ -31,8 +33,16 @@ impl From<Point3> for DVec3 {
     }
 }
 
+impl From<DVec3> for Point3 {
+    fn from(p: DVec3) -> Self {
+        Self { x: p.x, y: p.y, z: p.z }
+    }
+}
+
 struct ModelHost {
     wire_builders: ResourceTable,
+    edge_iterators: ResourceTable,
+    face_iterators: ResourceTable,
     edges: ResourceTable,
     wires: ResourceTable,
     faces: ResourceTable,
@@ -46,6 +56,8 @@ impl ModelHost {
     fn new() -> Self {
         Self {
             wire_builders: ResourceTable::new(),
+            edge_iterators: ResourceTable::new(),
+            face_iterators: ResourceTable::new(),
             edges: ResourceTable::new(),
             wires: ResourceTable::new(),
             faces: ResourceTable::new(),
@@ -54,6 +66,58 @@ impl ModelHost {
             compounds: ResourceTable::new(),
             shapes: ResourceTable::new(),
         }
+    }
+}
+
+impl HostEdgeIterator for ModelHost {
+    fn new(
+        &mut self,
+        face_resource: Resource<occ::Face>,
+    ) -> Result<Resource<occ::EdgeIterator>, anyhow::Error> {
+        let face = self.faces.get(&face_resource)?;
+
+        Ok(self.edge_iterators.push(face.edges())?)
+    }
+
+    fn next(
+        &mut self,
+        resource: Resource<occ::EdgeIterator>,
+    ) -> Result<Option<Resource<occ::Edge>>, anyhow::Error> {
+        let iter = self.edge_iterators.get_mut(&resource)?;
+        let next_item = iter.next().map(|edge| self.edges.push(edge).unwrap());
+
+        Ok(next_item)
+    }
+
+    fn drop(&mut self, resource: Resource<occ::EdgeIterator>) -> Result<(), anyhow::Error> {
+        let _ = self.edge_iterators.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostFaceIterator for ModelHost {
+    fn new(
+        &mut self,
+        shape_resource: Resource<occ::Shape>,
+    ) -> Result<Resource<occ::FaceIterator>, anyhow::Error> {
+        let shape = self.shapes.get(&shape_resource)?;
+
+        Ok(self.face_iterators.push(shape.faces())?)
+    }
+
+    fn next(
+        &mut self,
+        resource: Resource<occ::FaceIterator>,
+    ) -> Result<Option<Resource<occ::Face>>, anyhow::Error> {
+        let iter = self.face_iterators.get_mut(&resource)?;
+        let next_item = iter.next().map(|face| self.faces.push(face).unwrap());
+
+        Ok(next_item)
+    }
+
+    fn drop(&mut self, resource: Resource<occ::FaceIterator>) -> Result<(), anyhow::Error> {
+        let _ = self.face_iterators.delete(resource);
+        Ok(())
     }
 }
 
@@ -125,6 +189,16 @@ impl HostFace for ModelHost {
         Ok(self.faces.push(new_face)?)
     }
 
+    fn extrude(
+        &mut self,
+        face_resource: Resource<occ::Face>,
+        dir: Point3,
+    ) -> Result<Resource<occ::Solid>, anyhow::Error> {
+        let face = self.faces.get(&face_resource)?;
+        let new_solid = face.extrude(dir.into());
+        Ok(self.solids.push(new_solid)?)
+    }
+
     fn from_wire(
         &mut self,
         wire_resource: Resource<occ::Wire>,
@@ -144,6 +218,14 @@ impl HostFace for ModelHost {
         let face = self.faces.get(&face_resource)?;
         let new_wire = face.outer_wire();
         Ok(self.wires.push(new_wire)?)
+    }
+
+    fn center_of_mass(
+        &mut self,
+        face_resource: Resource<occ::Face>,
+    ) -> Result<Point3, anyhow::Error> {
+        let face = self.faces.get(&face_resource)?;
+        Ok(face.center_of_mass().into())
     }
 }
 
@@ -174,12 +256,72 @@ impl HostShape for ModelHost {
         Ok(())
     }
 
+    fn from_edge(
+        &mut self,
+        edge_resource: Resource<occ::Edge>,
+    ) -> Result<Resource<occ::Shape>, anyhow::Error> {
+        let edge = self.edges.get(&edge_resource)?;
+        let shape = edge.into();
+
+        let new_shape = self.shapes.push(shape)?;
+
+        Ok(new_shape)
+    }
+
     fn from_wire(
         &mut self,
         wire_resource: Resource<occ::Wire>,
     ) -> Result<Resource<occ::Shape>, anyhow::Error> {
         let wire = self.wires.get(&wire_resource)?;
-        let shape = Face::from_wire(wire).into();
+        let shape = wire.into();
+
+        let new_shape = self.shapes.push(shape)?;
+
+        Ok(new_shape)
+    }
+
+    fn from_face(
+        &mut self,
+        face_resource: Resource<occ::Face>,
+    ) -> Result<Resource<occ::Shape>, anyhow::Error> {
+        let face = self.faces.get(&face_resource)?;
+        let shape = face.into();
+
+        let new_shape = self.shapes.push(shape)?;
+
+        Ok(new_shape)
+    }
+
+    fn from_shell(
+        &mut self,
+        shell_resource: Resource<occ::Shell>,
+    ) -> Result<Resource<occ::Shape>, anyhow::Error> {
+        let shell = self.shells.get(&shell_resource)?;
+        let shape = shell.into();
+
+        let new_shape = self.shapes.push(shape)?;
+
+        Ok(new_shape)
+    }
+
+    fn from_solid(
+        &mut self,
+        solid_resource: Resource<occ::Solid>,
+    ) -> Result<Resource<occ::Shape>, anyhow::Error> {
+        let solid = self.solids.get(&solid_resource)?;
+        let shape = solid.into();
+
+        let new_shape = self.shapes.push(shape)?;
+
+        Ok(new_shape)
+    }
+
+    fn from_compound(
+        &mut self,
+        compound_resource: Resource<occ::Compound>,
+    ) -> Result<Resource<occ::Shape>, anyhow::Error> {
+        let compound = self.compounds.get(&compound_resource)?;
+        let shape = compound.into();
 
         let new_shape = self.shapes.push(shape)?;
 
