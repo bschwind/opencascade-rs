@@ -34,7 +34,7 @@ fn main() {
         });
 
         determine_format(extension)
-            .unwrap_or_else(|| panic!("Cannot guess format from extension {:?}.", extension))
+            .unwrap_or_else(|| panic!("Cannot guess format from extension {:?}.  Use the '-f' or '--format' flag to specify a format.", extension))
     });
 
     match format {
