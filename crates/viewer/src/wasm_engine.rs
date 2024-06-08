@@ -13,6 +13,9 @@ use wasmtime::{
 
 wasmtime::component::bindgen!({
     path: "../model-api/wit",
+    // This is where we map the types we declared in the WIT file
+    // to their corresponding host type, which will be managed as
+    // a wasmtime "Resource".
     with: {
         "wire-builder": occ::WireBuilder,
         "edge-iterator": occ::EdgeIterator,
