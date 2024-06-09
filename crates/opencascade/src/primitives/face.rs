@@ -1,5 +1,7 @@
 use crate::{
     angle::Angle,
+    law_function::law_function_from_graph,
+    make_pipe_shell::make_pipe_shell_with_law_function,
     primitives::{
         make_axis_1, make_point, make_vec, EdgeIterator, JoinType, Shape, Solid, Surface, Wire,
     },
@@ -208,6 +210,28 @@ impl Face {
         let mut make_pipe = ffi::BRepOffsetAPI_MakePipe_ctor(&path.inner, profile_shape);
 
         let pipe_shape = make_pipe.pin_mut().Shape();
+        let result_solid = ffi::TopoDS_cast_to_solid(pipe_shape);
+
+        Solid::from_solid(result_solid)
+    }
+
+    /// Sweep the face along a path, modulated by a function, to produce a solid
+    #[must_use]
+    pub fn sweep_along_with_radius_values(
+        &self,
+        path: &Wire,
+        radius_values: impl IntoIterator<Item = (f64, f64)>,
+    ) -> Solid {
+        let law_function = law_function_from_graph(radius_values);
+        let law_handle = ffi::Law_Function_to_handle(law_function);
+
+        let profile_wire = ffi::outer_wire(&self.inner);
+        let mut make_pipe_shell =
+            make_pipe_shell_with_law_function(&profile_wire, &path.inner, &law_handle);
+
+        make_pipe_shell.pin_mut().Build(&ffi::Message_ProgressRange_ctor());
+        make_pipe_shell.pin_mut().MakeSolid();
+        let pipe_shape = make_pipe_shell.pin_mut().Shape();
         let result_solid = ffi::TopoDS_cast_to_solid(pipe_shape);
 
         Solid::from_solid(result_solid)

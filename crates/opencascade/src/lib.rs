@@ -6,6 +6,9 @@ pub mod mesh;
 pub mod primitives;
 pub mod workplane;
 
+mod law_function;
+mod make_pipe_shell;
+
 #[derive(Error, Debug)]
 pub enum Error {
     #[error("failed to write STL file")]

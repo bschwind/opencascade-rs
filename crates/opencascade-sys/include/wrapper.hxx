@@ -25,6 +25,7 @@
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepOffsetAPI_MakeOffset.hxx>
 #include <BRepOffsetAPI_MakePipe.hxx>
+#include <BRepOffsetAPI_MakePipeShell.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
@@ -50,6 +51,8 @@
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <Law_Function.hxx>
+#include <Law_Interpol.hxx>
 #include <NCollection_Array1.hxx>
 #include <NCollection_Array2.hxx>
 #include <Poly_Connect.hxx>
@@ -99,6 +102,7 @@ typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
 typedef opencascade::handle<Poly_Triangulation> Handle_Poly_Triangulation;
 typedef opencascade::handle<TopTools_HSequenceOfShape> Handle_TopTools_HSequenceOfShape;
+typedef opencascade::handle<Law_Function> HandleLawFunction;
 
 // Handle stuff
 template <typename T> const T &handle_try_deref(const opencascade::handle<T> &handle) {
@@ -233,6 +237,16 @@ inline std::unique_ptr<gp_Dir2d> gp_Dir2d_ctor(double x, double y) {
 
 inline std::unique_ptr<gp_Ax2d> gp_Ax2d_ctor(const gp_Pnt2d &point, const gp_Dir2d &dir) {
   return std::unique_ptr<gp_Ax2d>(new gp_Ax2d(point, dir));
+}
+
+// Law_Function stuff
+inline std::unique_ptr<HandleLawFunction> Law_Function_to_handle(std::unique_ptr<Law_Function> law_function) {
+  return std::unique_ptr<HandleLawFunction>(new HandleLawFunction(law_function.release()));
+}
+
+// Law_Interpol stuff
+inline std::unique_ptr<Law_Function> Law_Interpol_into_Law_Function(std::unique_ptr<Law_Interpol> law_interpol) {
+  return std::unique_ptr<Law_Function>(law_interpol.release());
 }
 
 // Shape stuff
