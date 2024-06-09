@@ -77,6 +77,7 @@ pub mod ffi {
         // Handles
         type HandleStandardType;
         type HandleGeomCurve;
+        type HandleGeomBSplineCurve;
         type HandleGeomTrimmedCurve;
         type HandleGeomSurface;
         type HandleGeomBezierSurface;
@@ -88,8 +89,18 @@ pub mod ffi {
         type Handle_TopTools_HSequenceOfShape;
         type HandleLawFunction;
 
+        type Handle_TColgpHArray1OfPnt;
+        pub fn new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(
+            array: &TColgp_HArray1OfPnt,
+        ) -> UniquePtr<Handle_TColgpHArray1OfPnt>;
+
         pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
+
+        #[cxx_name = "construct_unique"]
+        pub fn new_HandleGeomCurve_from_HandleGeom_BSplineCurve(
+            bspline_curve_handle: &HandleGeomBSplineCurve,
+        ) -> UniquePtr<HandleGeomCurve>;
 
         #[cxx_name = "construct_unique"]
         pub fn new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
@@ -210,6 +221,19 @@ pub mod ffi {
             column_upper: i32,
         ) -> UniquePtr<TColgp_Array2OfPnt>;
         pub fn SetValue(self: Pin<&mut TColgp_Array2OfPnt>, row: i32, column: i32, item: &gp_Pnt);
+
+        type TColgp_HArray1OfPnt;
+        #[cxx_name = "construct_unique"]
+        pub fn TColgp_HArray1OfPnt_ctor(
+            lower_bound: i32,
+            upper_bound: i32,
+        ) -> UniquePtr<TColgp_HArray1OfPnt>;
+        pub fn Length(self: &TColgp_HArray1OfPnt) -> i32;
+        pub fn TColgp_HArray1OfPnt_Value(
+            array: &TColgp_HArray1OfPnt,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt>;
+        pub fn SetValue(self: Pin<&mut TColgp_HArray1OfPnt>, index: i32, item: &gp_Pnt);
 
         type TopTools_HSequenceOfShape;
 
@@ -934,6 +958,29 @@ pub mod ffi {
 
         #[cxx_name = "construct_unique"]
         pub fn gp_Ax2d_ctor(point: &gp_Pnt2d, dir: &gp_Dir2d) -> UniquePtr<gp_Ax2d>;
+
+        // Geometry Interpolation
+        type GeomAPI_Interpolate;
+
+        #[cxx_name = "construct_unique"]
+        pub fn GeomAPI_Interpolate_ctor(
+            points: &Handle_TColgpHArray1OfPnt,
+            periodic: bool,
+            tolerance: f64,
+        ) -> UniquePtr<GeomAPI_Interpolate>;
+
+        pub fn Load(
+            self: Pin<&mut GeomAPI_Interpolate>,
+            initial_tangent: &gp_Vec,
+            final_tangent: &gp_Vec,
+            scale: bool,
+        );
+
+        pub fn Perform(self: Pin<&mut GeomAPI_Interpolate>);
+
+        pub fn GeomAPI_Interpolate_Curve(
+            interpolate: &GeomAPI_Interpolate,
+        ) -> UniquePtr<HandleGeomBSplineCurve>;
 
         // Geometry Querying
         type GeomAPI_ProjectPointOnSurf;

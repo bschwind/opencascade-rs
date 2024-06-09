@@ -72,7 +72,24 @@ impl Edge {
 
     pub fn ellipse() {}
 
-    pub fn spline() {}
+    pub fn spline_from_points(points: impl Iterator<Item = DVec3>) -> Self {
+        let points: Vec<_> = points.into_iter().collect();
+        let mut array = ffi::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
+        for (index, point) in points.into_iter().enumerate() {
+            array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
+        }
+        let array_handle = ffi::new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(&array);
+
+        let periodic = false;
+        let tolerance = 1.0e-6;
+        let interpolate = ffi::GeomAPI_Interpolate_ctor(&array_handle, periodic, tolerance);
+
+        let bspline_handle = ffi::GeomAPI_Interpolate_Curve(&interpolate);
+        let curve_handle = ffi::new_HandleGeomCurve_from_HandleGeom_BSplineCurve(&bspline_handle);
+
+        let make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
+        Self::from_make_edge(make_edge)
+    }
 
     pub fn arc(p1: DVec3, p2: DVec3, p3: DVec3) -> Self {
         let make_arc = ffi::GC_MakeArcOfCircle_point_point_point(
