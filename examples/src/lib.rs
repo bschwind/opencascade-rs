@@ -6,6 +6,7 @@ pub mod box_shape;
 pub mod cable_bracket;
 pub mod chamfer;
 pub mod gizmo;
+pub mod heater_coil;
 pub mod high_level_bottle;
 pub mod keyboard_case;
 pub mod keycap;
@@ -25,6 +26,7 @@ pub enum Example {
     BoxShape,
     Chamfer,
     Gizmo,
+    HeaterCoil,
     HighLevelBottle,
     KeyboardCase,
     Keycap,
@@ -46,6 +48,7 @@ impl Example {
             Example::BoxShape => box_shape::shape(),
             Example::Chamfer => chamfer::shape(),
             Example::Gizmo => gizmo::shape(),
+            Example::HeaterCoil => heater_coil::shape(),
             Example::HighLevelBottle => high_level_bottle::shape(),
             Example::KeyboardCase => keyboard_case::shape(),
             Example::Keycap => keycap::shape(),

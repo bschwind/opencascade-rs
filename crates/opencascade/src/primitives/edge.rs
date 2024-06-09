@@ -81,14 +81,16 @@ impl Edge {
         let array_handle = ffi::new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(&array);
 
         let periodic = false;
-        let tolerance = 1.0e-6;
-        let interpolate = ffi::GeomAPI_Interpolate_ctor(&array_handle, periodic, tolerance);
+        let tolerance = 1.0e-7;
+        let mut interpolate = ffi::GeomAPI_Interpolate_ctor(&array_handle, periodic, tolerance);
 
+        interpolate.pin_mut().Perform();
         let bspline_handle = ffi::GeomAPI_Interpolate_Curve(&interpolate);
         let curve_handle = ffi::new_HandleGeomCurve_from_HandleGeom_BSplineCurve(&bspline_handle);
 
-        let make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
-        Self::from_make_edge(make_edge)
+        let mut make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
+        let edge = make_edge.pin_mut().Edge();
+        Self::from_edge(edge)
     }
 
     pub fn arc(p1: DVec3, p2: DVec3, p3: DVec3) -> Self {
