@@ -78,7 +78,7 @@ impl Edge {
         for (index, point) in points.into_iter().enumerate() {
             array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
         }
-        let array_handle = ffi::new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(&array);
+        let array_handle = ffi::new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(array);
 
         let periodic = false;
         let tolerance = 1.0e-7;

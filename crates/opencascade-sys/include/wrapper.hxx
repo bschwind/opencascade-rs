@@ -109,8 +109,10 @@ typedef opencascade::handle<Law_Function> HandleLawFunction;
 
 typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
 
-inline std::unique_ptr<Handle_TColgpHArray1OfPnt> new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(const TColgp_HArray1OfPnt &array) {
-    Handle_TColgpHArray1OfPnt handle = &array;
+inline std::unique_ptr<Handle_TColgpHArray1OfPnt> new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(
+    std::unique_ptr<TColgp_HArray1OfPnt> array
+) {
+    Handle_TColgpHArray1OfPnt handle = array.release();
     return std::unique_ptr<Handle_TColgpHArray1OfPnt>(new Handle_TColgpHArray1OfPnt(handle));
 }
 

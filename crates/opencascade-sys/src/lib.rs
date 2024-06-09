@@ -91,7 +91,7 @@ pub mod ffi {
 
         type Handle_TColgpHArray1OfPnt;
         pub fn new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(
-            array: &TColgp_HArray1OfPnt,
+            array: UniquePtr<TColgp_HArray1OfPnt>,
         ) -> UniquePtr<Handle_TColgpHArray1OfPnt>;
 
         pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;

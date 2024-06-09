@@ -25,7 +25,6 @@ pub fn shape() -> Shape {
     });
 
     let coil = Edge::spline_from_points(spiral_points);
-    println!("1 POTATO");
     let path = Wire::from_edges(&[coil]);
 
     let pipe_solid: Solid = face_profile.sweep_along(&path);
