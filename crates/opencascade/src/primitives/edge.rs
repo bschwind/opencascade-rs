@@ -3,6 +3,8 @@ use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys::ffi;
 
+use super::make_vec;
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum EdgeType {
     Line,
@@ -72,7 +74,10 @@ impl Edge {
 
     pub fn ellipse() {}
 
-    pub fn spline_from_points(points: impl Iterator<Item = DVec3>) -> Self {
+    pub fn spline_from_points(
+        points: impl Iterator<Item = DVec3>,
+        tangents: Option<(DVec3, DVec3)>,
+    ) -> Self {
         let points: Vec<_> = points.into_iter().collect();
         let mut array = ffi::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
         for (index, point) in points.into_iter().enumerate() {
@@ -83,6 +88,9 @@ impl Edge {
         let periodic = false;
         let tolerance = 1.0e-7;
         let mut interpolate = ffi::GeomAPI_Interpolate_ctor(&array_handle, periodic, tolerance);
+        if let Some((t_start, t_end)) = tangents {
+            interpolate.pin_mut().Load(&make_vec(t_start), &make_vec(t_end), true);
+        }
 
         interpolate.pin_mut().Perform();
         let bspline_handle = ffi::GeomAPI_Interpolate_Curve(&interpolate);

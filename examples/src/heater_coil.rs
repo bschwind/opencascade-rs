@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use glam::DVec3;
 use opencascade::{
     angle::{RVec, ToAngle},
@@ -20,7 +18,7 @@ pub fn shape() -> Shape {
         .rect(a, a)
         .to_face();
 
-    let sample_count = 80;
+    let sample_count = 20;
     let spiral_points: Vec<DVec3> = (0..sample_count)
         .map(|i| {
             let t = i as f64 / (sample_count - 1) as f64;
@@ -37,7 +35,7 @@ pub fn shape() -> Shape {
     let p0 = spiral_points[0];
     let p1 = spiral_points[sample_count - 1];
 
-    let coil = Edge::spline_from_points(spiral_points.into_iter());
+    let coil = Edge::spline_from_points(spiral_points.into_iter(), None);
     let attach_0 = Edge::segment(p0 - DVec3::new(0.0, attach_len, 0.0), p0);
     let attach_1 = Edge::segment(p1, p1 - DVec3::new(0.0, attach_len, 0.0));
     let path = Wire::from_edges(&[attach_0, coil, attach_1]);
