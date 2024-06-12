@@ -1,3 +1,4 @@
+use anyhow::Result;
 use core::sync::atomic::{AtomicBool, Ordering};
 use glam::DVec3;
 use notify::{RecommendedWatcher, RecursiveMode, Watcher};
@@ -462,7 +463,7 @@ impl WasmEngine {
         }
     }
 
-    pub fn new_shape_if_wasm_changed(&mut self) -> Option<Shape> {
+    pub fn new_shape_if_wasm_changed(&mut self) -> Option<Result<Shape>> {
         if self.changed.swap(false, Ordering::SeqCst) {
             let component_bytes = convert_to_component(&self.wasm_path);
             self.component = Component::from_binary(&self.engine, &component_bytes).unwrap();
@@ -473,16 +474,15 @@ impl WasmEngine {
         }
     }
 
-    pub fn shape(&self) -> Shape {
+    pub fn shape(&self) -> Result<Shape> {
         let mut store = Store::new(&self.engine, ModelHost::new());
 
-        let (bindings, _) =
-            ModelWorld::instantiate(&mut store, &self.component, &self.linker).unwrap();
+        let (bindings, _) = ModelWorld::instantiate(&mut store, &self.component, &self.linker)?;
 
-        bindings.call_init_model(&mut store).unwrap();
-        let shape = bindings.call_run(&mut store).unwrap();
+        bindings.call_init_model(&mut store)?;
+        let shape = bindings.call_run(&mut store)?;
 
         let mut data = store.into_data();
-        data.shapes.delete(shape).expect("Should have at least one shape returned")
+        Ok(data.shapes.delete(shape)?)
     }
 }

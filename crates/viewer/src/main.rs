@@ -163,7 +163,13 @@ impl GameApp for ViewerApp {
             let shape = engine.shape();
             wasm_engine = Some(engine);
 
-            shape
+            match shape {
+                Ok(shape) => shape,
+                Err(err) => {
+                    eprintln!("Error occurred while executing the model code: {err} - starting with a default cube.");
+                    Shape::cube_centered(50.0)
+                },
+            }
         } else {
             eprintln!("Warning - no example or STEP file specified, you get a default cube.");
             Shape::cube_centered(50.0)
@@ -298,10 +304,16 @@ impl GameApp for ViewerApp {
     fn render(&mut self, graphics_device: &mut GraphicsDevice, _window: &Window) {
         if let Some(wasm_engine) = &mut self.wasm_engine {
             let start = std::time::Instant::now();
-            if let Some(new_shape) = wasm_engine.new_shape_if_wasm_changed() {
-                self.cad_mesh = get_shape_mesh(&new_shape, graphics_device);
-                self.rendered_edges = get_shape_edges(&new_shape, graphics_device);
-                println!("Created a new shape in {:?}", start.elapsed());
+            match wasm_engine.new_shape_if_wasm_changed() {
+                Some(Ok(new_shape)) => {
+                    self.cad_mesh = get_shape_mesh(&new_shape, graphics_device);
+                    self.rendered_edges = get_shape_edges(&new_shape, graphics_device);
+                    println!("Created a new shape in {:?}", start.elapsed());
+                },
+                Some(Err(err)) => {
+                    println!("Error occurred while executing the model code: {err}");
+                },
+                _ => {},
             }
         }
 
