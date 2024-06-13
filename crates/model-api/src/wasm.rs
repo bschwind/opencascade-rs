@@ -57,6 +57,30 @@ macro_rules! register_model {
     };
 }
 
+#[macro_export]
+macro_rules! register_model_fn {
+    ($model_function:block) => {
+        struct ModelFunction {}
+
+        impl model_api::Model for ModelFunction {
+            fn new() -> Self {
+                Self {}
+            }
+
+            fn create_model(&mut self) -> model_api::primitives::Shape {
+                $model_function
+            }
+        }
+
+        #[export_name = "init-model"]
+        pub extern "C" fn __init_model() {
+            model_api::wasm::register_model(
+                || Box::new(<ModelFunction as model_api::Model>::new()),
+            );
+        }
+    };
+}
+
 // export! defines that the `CadModelCode` struct defined below is going to define
 // the exports of the `world`, namely the `run` function.
 export!(CadModelCode);
