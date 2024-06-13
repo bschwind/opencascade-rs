@@ -699,6 +699,26 @@ pub struct LineFaceHitPoint {
     pub point: DVec3,
 }
 
+pub struct FilletMaker {
+    inner: UniquePtr<ffi::BRepFilletAPI_MakeFillet>,
+}
+
+impl FilletMaker {
+    pub fn new(shape: &Shape) -> Self {
+        let make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&shape.inner);
+
+        Self { inner: make_fillet }
+    }
+
+    pub fn add_edge(&mut self, distance: f64, edge: &Edge) {
+        self.inner.pin_mut().add_edge(distance, &edge.inner);
+    }
+
+    pub fn build(mut self) -> Shape {
+        Shape::from_shape(self.inner.pin_mut().Shape())
+    }
+}
+
 pub struct ChamferMaker {
     inner: UniquePtr<ffi::BRepFilletAPI_MakeChamfer>,
 }

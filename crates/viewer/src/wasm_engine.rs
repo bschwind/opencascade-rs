@@ -21,6 +21,7 @@ wasmtime::component::bindgen!({
         "wire-builder": occ::WireBuilder,
         "edge-iterator": occ::EdgeIterator,
         "face-iterator": occ::FaceIterator,
+        "fillet-maker": occ::FilletMaker,
         "chamfer-maker": occ::ChamferMaker,
         "edge": occ::Edge,
         "wire": occ::Wire,
@@ -75,6 +76,7 @@ struct ModelHost {
     wire_builders: TypedResourceTable<occ::WireBuilder>,
     edge_iterators: TypedResourceTable<occ::EdgeIterator>,
     face_iterators: TypedResourceTable<occ::FaceIterator>,
+    fillet_makers: TypedResourceTable<occ::FilletMaker>,
     chamfer_makers: TypedResourceTable<occ::ChamferMaker>,
     edges: TypedResourceTable<occ::Edge>,
     wires: TypedResourceTable<occ::Wire>,
@@ -91,6 +93,7 @@ impl ModelHost {
             wire_builders: TypedResourceTable::new(),
             edge_iterators: TypedResourceTable::new(),
             face_iterators: TypedResourceTable::new(),
+            fillet_makers: TypedResourceTable::new(),
             chamfer_makers: TypedResourceTable::new(),
             edges: TypedResourceTable::new(),
             wires: TypedResourceTable::new(),
@@ -111,6 +114,15 @@ impl HostEdgeIterator for ModelHost {
         let face = self.faces.get(&face_resource)?;
 
         Ok(self.edge_iterators.push(face.edges())?)
+    }
+
+    fn new_from_shape(
+        &mut self,
+        shape_resource: Resource<occ::Shape>,
+    ) -> Result<Resource<occ::EdgeIterator>, anyhow::Error> {
+        let shape = self.shapes.get(&shape_resource)?;
+
+        Ok(self.edge_iterators.push(shape.edges())?)
     }
 
     fn next(
@@ -151,6 +163,45 @@ impl HostFaceIterator for ModelHost {
 
     fn drop(&mut self, resource: Resource<occ::FaceIterator>) -> Result<(), anyhow::Error> {
         let _ = self.face_iterators.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostFilletMaker for ModelHost {
+    fn new(
+        &mut self,
+        shape_resource: Resource<occ::Shape>,
+    ) -> Result<Resource<occ::FilletMaker>, anyhow::Error> {
+        let shape = self.shapes.get(&shape_resource)?;
+
+        Ok(self.fillet_makers.push(occ::FilletMaker::new(shape))?)
+    }
+
+    fn add_edge(
+        &mut self,
+        fillet_maker_resource: Resource<occ::FilletMaker>,
+        distance: f64,
+        edge_resource: Resource<occ::Edge>,
+    ) -> Result<(), anyhow::Error> {
+        let fillet_maker = &mut self.fillet_makers.get_mut(&fillet_maker_resource)?;
+        let edge = self.edges.get(&edge_resource)?;
+        fillet_maker.add_edge(distance, edge);
+
+        Ok(())
+    }
+
+    fn build(
+        &mut self,
+        resource: Resource<occ::FilletMaker>,
+    ) -> Result<Resource<occ::Shape>, anyhow::Error> {
+        let shape = self.fillet_makers.delete(resource)?.build();
+        let shape_resource = self.shapes.push(shape)?;
+
+        Ok(shape_resource)
+    }
+
+    fn drop(&mut self, resource: Resource<occ::FilletMaker>) -> Result<(), anyhow::Error> {
+        let _ = self.fillet_makers.delete(resource);
         Ok(())
     }
 }
@@ -399,6 +450,32 @@ impl HostShape for ModelHost {
         let new_shape = self.shapes.push(shape)?;
 
         Ok(new_shape)
+    }
+
+    fn box_from_corners(
+        &mut self,
+        p1: Point3,
+        p2: Point3,
+    ) -> Result<Resource<occ::Shape>, anyhow::Error> {
+        let new_shape = self.shapes.push(Shape::box_from_corners(p1.into(), p2.into()))?;
+
+        Ok(new_shape)
+    }
+
+    fn subtract(
+        &mut self,
+        shape_resource: Resource<occ::Shape>,
+        other_shape_resource: Resource<occ::Shape>,
+    ) -> Result<(Resource<occ::Shape>, Vec<Resource<occ::Edge>>), anyhow::Error> {
+        let shape = self.shapes.get(&shape_resource)?;
+        let other_shape = self.shapes.get(&other_shape_resource)?;
+        let subtraction = shape.subtract(other_shape);
+
+        let shape = self.shapes.push(subtraction.shape)?;
+        let edges =
+            subtraction.new_edges.into_iter().map(|e| self.edges.push(e).unwrap()).collect();
+
+        Ok((shape, edges))
     }
 }
 

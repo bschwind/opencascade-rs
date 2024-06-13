@@ -1,7 +1,11 @@
+// use crate::primitives::BooleanShape;
 use crate::{
-    primitives::{Compound, Edge, Face, FaceIterator, Shell, Solid, Wire},
+    primitives::{
+        BooleanShape, Compound, Edge, EdgeIterator, Face, FaceIterator, Shell, Solid, Wire,
+    },
     wasm,
 };
+use glam::{dvec3, DVec3};
 
 pub struct Shape {
     pub(crate) inner: wasm::Shape,
@@ -122,6 +126,43 @@ impl Shape {
         Self { inner: shape }
     }
 
+    /// Make a box with one corner at corner_1, and the opposite corner
+    /// at corner_2.
+    pub fn box_from_corners(corner_1: DVec3, corner_2: DVec3) -> Self {
+        let shape = wasm::Shape::box_from_corners(corner_1.into(), corner_2.into());
+
+        Self { inner: shape }
+    }
+
+    /// Make a box with `width` (x), `depth` (y), and `height` (z)
+    /// extending into the positive axes
+    pub fn box_with_dimensions(width: f64, depth: f64, height: f64) -> Self {
+        let corner_1 = DVec3::ZERO;
+        let corner_2 = dvec3(width, depth, height);
+        Self::box_from_corners(corner_1, corner_2)
+    }
+
+    #[must_use]
+    pub fn fillet_edges<T: AsRef<Edge>>(
+        &self,
+        radius: f64,
+        edges: impl IntoIterator<Item = T>,
+    ) -> Self {
+        let make_fillet = wasm::FilletMaker::new(&self.inner);
+
+        for edge in edges.into_iter() {
+            make_fillet.add_edge(radius, &edge.as_ref().inner);
+        }
+
+        Self { inner: make_fillet.build() }
+    }
+
+    /// Performs chamfer of `distance` on all edges of the shape
+    #[must_use]
+    pub fn chamfer(&self, distance: f64) -> Self {
+        self.chamfer_edges(distance, self.edges())
+    }
+
     #[must_use]
     pub fn chamfer_edges<T: AsRef<Edge>>(
         &self,
@@ -137,7 +178,22 @@ impl Shape {
         Self { inner: make_chamfer.build() }
     }
 
+    pub fn edges(&self) -> EdgeIterator {
+        EdgeIterator::new_from_shape(self)
+    }
+
     pub fn faces(&self) -> FaceIterator {
         FaceIterator::new(self)
+    }
+
+    #[must_use]
+    pub fn subtract(&self, other: &Shape) -> BooleanShape {
+        let (shape, new_edges) = self.inner.subtract(&other.inner);
+
+        let shape = Shape { inner: shape };
+
+        let new_edges = new_edges.into_iter().map(|e| Edge { inner: e }).collect();
+
+        BooleanShape { shape, new_edges }
     }
 }

@@ -1,6 +1,7 @@
 use crate::wasm;
 use glam::DVec3;
 
+mod boolean_shape;
 mod compound;
 mod edge;
 mod face;
@@ -9,6 +10,7 @@ mod shell;
 mod solid;
 mod wire;
 
+pub use boolean_shape::*;
 pub use compound::*;
 pub use edge::*;
 pub use face::*;
@@ -59,6 +61,10 @@ pub struct EdgeIterator {
 impl EdgeIterator {
     pub fn new(face: &Face) -> Self {
         Self { iterator: wasm::EdgeIterator::new(&face.inner) }
+    }
+
+    pub fn new_from_shape(shape: &Shape) -> Self {
+        Self { iterator: wasm::EdgeIterator::new_from_shape(&shape.inner) }
     }
 }
 

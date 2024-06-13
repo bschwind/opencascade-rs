@@ -11,12 +11,19 @@ world model-world {
 
   resource edge-iterator {
     constructor(face: borrow<face>);
+    new-from-shape: static func(shape: borrow<shape>) -> edge-iterator;
     next: func() -> option<edge>;
   }
 
   resource face-iterator {
     constructor(shape: borrow<shape>);
     next: func() -> option<face>;
+  }
+
+  resource fillet-maker {
+    constructor(shape: borrow<shape>);
+    add-edge: func(radius: f64, edge: borrow<edge>);
+    build: func() -> shape;
   }
 
   resource chamfer-maker {
@@ -66,6 +73,8 @@ world model-world {
     from-shell: static func(w: borrow<shell>) -> shape;
     from-solid: static func(w: borrow<solid>) -> shape;
     from-compound: static func(w: borrow<compound>) -> shape;
+    box-from-corners: static func(p1: point3, p2: point3) -> shape;
+    subtract: func(shape: borrow<shape>) -> (shape: shape, edges: list<edge>);
   }
 
   export init-model: func();
