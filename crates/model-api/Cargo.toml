@@ -1,0 +1,8 @@
+[package]
+name = "model-api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wit-bindgen = "0.26"
+glam = { version = "0.24", features = ["bytemuck"] }

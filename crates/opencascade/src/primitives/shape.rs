@@ -29,8 +29,24 @@ impl From<Vertex> for Shape {
     }
 }
 
+impl From<&Vertex> for Shape {
+    fn from(vertex: &Vertex) -> Self {
+        let shape = ffi::cast_vertex_to_shape(&vertex.inner);
+
+        Self::from_shape(shape)
+    }
+}
+
 impl From<Edge> for Shape {
     fn from(edge: Edge) -> Self {
+        let shape = ffi::cast_edge_to_shape(&edge.inner);
+
+        Self::from_shape(shape)
+    }
+}
+
+impl From<&Edge> for Shape {
+    fn from(edge: &Edge) -> Self {
         let shape = ffi::cast_edge_to_shape(&edge.inner);
 
         Self::from_shape(shape)
@@ -45,8 +61,24 @@ impl From<Wire> for Shape {
     }
 }
 
+impl From<&Wire> for Shape {
+    fn from(wire: &Wire) -> Self {
+        let shape = ffi::cast_wire_to_shape(&wire.inner);
+
+        Self::from_shape(shape)
+    }
+}
+
 impl From<Face> for Shape {
     fn from(face: Face) -> Self {
+        let shape = ffi::cast_face_to_shape(&face.inner);
+
+        Self::from_shape(shape)
+    }
+}
+
+impl From<&Face> for Shape {
+    fn from(face: &Face) -> Self {
         let shape = ffi::cast_face_to_shape(&face.inner);
 
         Self::from_shape(shape)
@@ -61,6 +93,14 @@ impl From<Shell> for Shape {
     }
 }
 
+impl From<&Shell> for Shape {
+    fn from(shell: &Shell) -> Self {
+        let shape = ffi::cast_shell_to_shape(&shell.inner);
+
+        Self::from_shape(shape)
+    }
+}
+
 impl From<Solid> for Shape {
     fn from(solid: Solid) -> Self {
         let shape = ffi::cast_solid_to_shape(&solid.inner);
@@ -69,8 +109,24 @@ impl From<Solid> for Shape {
     }
 }
 
+impl From<&Solid> for Shape {
+    fn from(solid: &Solid) -> Self {
+        let shape = ffi::cast_solid_to_shape(&solid.inner);
+
+        Self::from_shape(shape)
+    }
+}
+
 impl From<Compound> for Shape {
     fn from(compound: Compound) -> Self {
+        let shape = ffi::cast_compound_to_shape(&compound.inner);
+
+        Self::from_shape(shape)
+    }
+}
+
+impl From<&Compound> for Shape {
+    fn from(compound: &Compound) -> Self {
         let shape = ffi::cast_compound_to_shape(&compound.inner);
 
         Self::from_shape(shape)
@@ -641,4 +697,24 @@ pub struct LineFaceHitPoint {
     pub v: f64,
     /// The intersection point
     pub point: DVec3,
+}
+
+pub struct ChamferMaker {
+    inner: UniquePtr<ffi::BRepFilletAPI_MakeChamfer>,
+}
+
+impl ChamferMaker {
+    pub fn new(shape: &Shape) -> Self {
+        let make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&shape.inner);
+
+        Self { inner: make_chamfer }
+    }
+
+    pub fn add_edge(&mut self, distance: f64, edge: &Edge) {
+        self.inner.pin_mut().add_edge(distance, &edge.inner);
+    }
+
+    pub fn build(mut self) -> Shape {
+        Shape::from_shape(self.inner.pin_mut().Shape())
+    }
 }

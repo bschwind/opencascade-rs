@@ -1267,3 +1267,16 @@ pub mod ffi {
         );
     }
 }
+
+// Gross, but is this okay?
+unsafe impl Send for ffi::BRepBuilderAPI_MakeWire {}
+unsafe impl Send for ffi::TopoDS_Edge {}
+unsafe impl Send for ffi::TopoDS_Wire {}
+unsafe impl Send for ffi::TopoDS_Face {}
+unsafe impl Send for ffi::TopoDS_Shell {}
+unsafe impl Send for ffi::TopoDS_Solid {}
+unsafe impl Send for ffi::TopoDS_Compound {}
+unsafe impl Send for ffi::TopoDS_Shape {}
+
+unsafe impl Send for ffi::TopExp_Explorer {}
+unsafe impl Send for ffi::BRepFilletAPI_MakeChamfer {}

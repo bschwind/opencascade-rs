@@ -1,0 +1,73 @@
+package example:host;
+
+world model-world {
+  import print: func(msg: string);
+
+  record point3 {
+    x: f64,
+    y: f64,
+    z: f64,
+  }
+
+  resource edge-iterator {
+    constructor(face: borrow<face>);
+    next: func() -> option<edge>;
+  }
+
+  resource face-iterator {
+    constructor(shape: borrow<shape>);
+    next: func() -> option<face>;
+  }
+
+  resource chamfer-maker {
+    constructor(shape: borrow<shape>);
+    add-edge: func(distance: f64, edge: borrow<edge>);
+    build: func() -> shape;
+  }
+
+  resource wire-builder {
+    constructor();
+    add-edge: func(edge: borrow<edge>);
+    build: func() -> wire;
+  }
+
+  resource wire {
+
+  }
+
+  resource face {
+    from-wire: static func(w: borrow<wire>) -> face;
+    fillet: func(radius: f64) -> face;
+    extrude: func(dir: point3) -> solid;
+    outer-wire: func() -> wire;
+    center-of-mass: func() -> point3;
+  }
+
+  resource shell {
+
+  }
+
+  resource solid {
+
+  }
+
+  resource compound {
+
+  }
+
+  resource edge {
+    segment: static func(p1: point3, p2: point3) -> edge;
+  }
+
+  resource shape {
+    from-edge: static func(w: borrow<edge>) -> shape;
+    from-wire: static func(w: borrow<wire>) -> shape;
+    from-face: static func(w: borrow<face>) -> shape;
+    from-shell: static func(w: borrow<shell>) -> shape;
+    from-solid: static func(w: borrow<solid>) -> shape;
+    from-compound: static func(w: borrow<compound>) -> shape;
+  }
+
+  export init-model: func();
+  export run: func() -> shape;
+}

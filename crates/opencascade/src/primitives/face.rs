@@ -323,6 +323,13 @@ impl Face {
     pub fn orientation(&self) -> FaceOrientation {
         FaceOrientation::from(self.inner.Orientation())
     }
+
+    #[must_use]
+    pub fn outer_wire(&self) -> Wire {
+        let inner = ffi::outer_wire(&self.inner);
+
+        Wire { inner }
+    }
 }
 
 pub struct CompoundFace {
