@@ -21,6 +21,7 @@ wasmtime::component::bindgen!({
         "wire-builder": occ::WireBuilder,
         "edge-iterator": occ::EdgeIterator,
         "face-iterator": occ::FaceIterator,
+        "approximation-segment-iterator": occ::ApproximationSegmentIterator,
         "fillet-maker": occ::FilletMaker,
         "chamfer-maker": occ::ChamferMaker,
         "edge": occ::Edge,
@@ -42,6 +43,22 @@ impl From<Point3> for DVec3 {
 impl From<DVec3> for Point3 {
     fn from(p: DVec3) -> Self {
         Self { x: p.x, y: p.y, z: p.z }
+    }
+}
+
+impl From<occ::EdgeType> for EdgeType {
+    fn from(edge_type: occ::EdgeType) -> Self {
+        match edge_type {
+            occ::EdgeType::Line => EdgeType::Line,
+            occ::EdgeType::Circle => EdgeType::Circle,
+            occ::EdgeType::Ellipse => EdgeType::Ellipse,
+            occ::EdgeType::Hyperbola => EdgeType::Hyperbola,
+            occ::EdgeType::Parabola => EdgeType::Parabola,
+            occ::EdgeType::BezierCurve => EdgeType::BezierCurve,
+            occ::EdgeType::BSplineCurve => EdgeType::BSplineCurve,
+            occ::EdgeType::OffsetCurve => EdgeType::OffsetCurve,
+            occ::EdgeType::OtherCurve => EdgeType::OtherCurve,
+        }
     }
 }
 
@@ -76,6 +93,7 @@ struct ModelHost {
     wire_builders: TypedResourceTable<occ::WireBuilder>,
     edge_iterators: TypedResourceTable<occ::EdgeIterator>,
     face_iterators: TypedResourceTable<occ::FaceIterator>,
+    segment_iterators: TypedResourceTable<occ::ApproximationSegmentIterator>,
     fillet_makers: TypedResourceTable<occ::FilletMaker>,
     chamfer_makers: TypedResourceTable<occ::ChamferMaker>,
     edges: TypedResourceTable<occ::Edge>,
@@ -93,6 +111,7 @@ impl ModelHost {
             wire_builders: TypedResourceTable::new(),
             edge_iterators: TypedResourceTable::new(),
             face_iterators: TypedResourceTable::new(),
+            segment_iterators: TypedResourceTable::new(),
             fillet_makers: TypedResourceTable::new(),
             chamfer_makers: TypedResourceTable::new(),
             edges: TypedResourceTable::new(),
@@ -163,6 +182,35 @@ impl HostFaceIterator for ModelHost {
 
     fn drop(&mut self, resource: Resource<occ::FaceIterator>) -> Result<(), anyhow::Error> {
         let _ = self.face_iterators.delete(resource);
+        Ok(())
+    }
+}
+
+impl HostApproximationSegmentIterator for ModelHost {
+    fn new(
+        &mut self,
+        edge_resource: Resource<occ::Edge>,
+    ) -> Result<Resource<occ::ApproximationSegmentIterator>, anyhow::Error> {
+        let edge = self.edges.get(&edge_resource)?;
+
+        Ok(self.segment_iterators.push(edge.approximation_segments())?)
+    }
+
+    fn next(
+        &mut self,
+        resource: Resource<occ::ApproximationSegmentIterator>,
+    ) -> Result<Option<Point3>, anyhow::Error> {
+        let iter = self.segment_iterators.get_mut(&resource)?;
+        let next_item = iter.next().map(|point| point.into());
+
+        Ok(next_item)
+    }
+
+    fn drop(
+        &mut self,
+        resource: Resource<occ::ApproximationSegmentIterator>,
+    ) -> Result<(), anyhow::Error> {
+        let _ = self.segment_iterators.delete(resource);
         Ok(())
     }
 }
@@ -246,13 +294,49 @@ impl HostChamferMaker for ModelHost {
 }
 
 impl HostEdge for ModelHost {
+    fn edge_type(&mut self, edge_resource: Resource<occ::Edge>) -> Result<EdgeType, anyhow::Error> {
+        let edge = self.edges.get(&edge_resource)?;
+
+        Ok(edge.edge_type().into())
+    }
+
     fn segment(&mut self, p1: Point3, p2: Point3) -> Result<Resource<occ::Edge>, anyhow::Error> {
         Ok(self.edges.push(occ::Edge::segment(p1.into(), p2.into()))?)
+    }
+
+    fn circle(
+        &mut self,
+        center: Point3,
+        normal: Point3,
+        radius: f64,
+    ) -> Result<Resource<occ::Edge>, anyhow::Error> {
+        Ok(self.edges.push(occ::Edge::circle(center.into(), normal.into(), radius))?)
+    }
+
+    fn arc(
+        &mut self,
+        p1: Point3,
+        p2: Point3,
+        p3: Point3,
+    ) -> Result<Resource<occ::Edge>, anyhow::Error> {
+        Ok(self.edges.push(occ::Edge::arc(p1.into(), p2.into(), p3.into()))?)
     }
 
     fn drop(&mut self, resource: Resource<occ::Edge>) -> Result<(), anyhow::Error> {
         let _ = self.edges.delete(resource);
         Ok(())
+    }
+
+    fn start_point(&mut self, edge_resource: Resource<occ::Edge>) -> Result<Point3, anyhow::Error> {
+        let edge = self.edges.get(&edge_resource)?;
+
+        Ok(edge.start_point().into())
+    }
+
+    fn end_point(&mut self, edge_resource: Resource<occ::Edge>) -> Result<Point3, anyhow::Error> {
+        let edge = self.edges.get(&edge_resource)?;
+
+        Ok(edge.end_point().into())
     }
 }
 

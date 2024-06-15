@@ -15,6 +15,11 @@ world model-world {
     next: func() -> option<edge>;
   }
 
+  resource approximation-segment-iterator {
+    constructor(edge: borrow<edge>);
+    next: func() -> option<point3>;
+  }
+
   resource face-iterator {
     constructor(shape: borrow<shape>);
     next: func() -> option<face>;
@@ -62,8 +67,25 @@ world model-world {
 
   }
 
+  enum edge-type {
+      line,
+      circle,
+      ellipse,
+      hyperbola,
+      parabola,
+      bezier-curve,
+      b-spline-curve,
+      offset-curve,
+      other-curve,
+  }
+
   resource edge {
+    edge-type: func() -> edge-type;
     segment: static func(p1: point3, p2: point3) -> edge;
+    circle: static func(center: point3, normal: point3, radius: f64) -> edge;
+    arc: static func(p1: point3, p2: point3, p3: point3) -> edge;
+    start-point: func() -> point3;
+    end-point: func() -> point3;
   }
 
   resource shape {
