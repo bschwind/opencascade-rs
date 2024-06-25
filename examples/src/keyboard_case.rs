@@ -1,5 +1,8 @@
-use glam::{DVec2, DVec3};
-use opencascade::primitives::{IntoShape, Shape, Solid};
+use glam::{dvec3, DVec2, DVec3};
+use opencascade::{
+    primitives::{Direction, IntoShape, Shape, Solid},
+    workplane::Workplane,
+};
 
 // All units are in millimeters.
 // The top/bottom/left/right conventions relate to 2D rectangles in
@@ -10,8 +13,10 @@ const PCB_WIDTH: f64 = 285.75;
 const PCB_HEIGHT: f64 = 114.3;
 const TOP_PLATE_THICKNESS: f64 = 1.6;
 
+const PCB_FILLET_RADIUS: f64 = 2.4;
+
 // "Inflate" the PCB dimensions by this much to create an easier fit.
-const PCB_DIMENSION_TOLERANCE: f64 = 0.2;
+const PCB_DIMENSION_TOLERANCE: f64 = 0.0;
 
 // The origin point for this board is the top left corner
 // of the PCB, on the top surface. The PCB rests on this
@@ -20,7 +25,7 @@ const PCB_DIMENSION_TOLERANCE: f64 = 0.2;
 const ORIGIN: DVec3 = DVec3::new(0.0, 0.0, 0.0);
 
 // Case
-const CASE_WALL_THICKNESS: f64 = 3.0;
+const CASE_WALL_THICKNESS: f64 = 3.5;
 const CASE_LIP_HEIGHT: f64 = 1.0;
 
 const CASE_TOP: f64 = PCB_TOP + CASE_WALL_THICKNESS;
@@ -55,6 +60,7 @@ const SUPPORT_POST_RADIUS: f64 = 2.25;
 const SUPPORT_POST_DRILL_RADIUS: f64 = 0.8;
 const SUPPORT_POST_DIST_FROM_EDGE: f64 = 2.5;
 
+#[allow(unused)]
 enum PostDirection {
     Up,
     Down,
@@ -134,14 +140,6 @@ const SUPPORT_POSTS: &[SupportPost] = &[
         direction: PostDirection::Up,
     },
     SupportPost {
-        pos: DVec2::new(PCB_LEFT + SUPPORT_POST_DIST_FROM_EDGE, -57.15),
-        direction: PostDirection::Left,
-    },
-    SupportPost {
-        pos: DVec2::new(PCB_RIGHT - SUPPORT_POST_DIST_FROM_EDGE, -57.15),
-        direction: PostDirection::Right,
-    },
-    SupportPost {
         pos: DVec2::new(80.95, PCB_BOTTOM + SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Down,
     },
@@ -164,10 +162,11 @@ const FEET_CUTOUTS: &[DVec2] = &[
 ];
 
 // USB C Connector Cutout
-const USB_CUTOUT_PADDING: f64 = PCB_THICKNESS;
+const USB_CUTOUT_PADDING: f64 = 0.1;
 const USB_WIDTH: f64 = 9.0;
 const USB_HEIGHT: f64 = 7.45;
 const USB_DEPTH: f64 = 3.26;
+const USB_RADIUS: f64 = 1.43;
 
 const USB_LEFT: f64 = 21.724;
 const USB_RIGHT: f64 = USB_LEFT + USB_WIDTH;
@@ -188,17 +187,43 @@ const PINHOLE_BUTTON_RADIUS: f64 = 1.1;
 const PINHOLE_LOCATIONS: &[DVec2] = &[DVec2::new(35.85, -53.95), DVec2::new(8.425, -86.075)];
 
 fn case_outer_box() -> Shape {
-    let corner_1 = DVec3::new(CASE_LEFT, CASE_TOP, CASE_BOTTOM_Z);
-    let corner_2 = DVec3::new(CASE_RIGHT, CASE_BOTTOM, CASE_TOP_Z);
+    let mut workplane = Workplane::xy();
+    workplane.set_translation(dvec3(0.0, 0.0, CASE_BOTTOM_Z));
 
-    Shape::box_from_corners(corner_1, corner_2)
+    let shape = workplane
+        .sketch()
+        .move_to(CASE_LEFT, CASE_TOP)
+        .line_to(CASE_RIGHT, CASE_TOP)
+        .line_to(CASE_RIGHT, CASE_BOTTOM)
+        .line_to(CASE_LEFT, CASE_BOTTOM)
+        .close()
+        .fillet(PCB_FILLET_RADIUS + CASE_WALL_THICKNESS)
+        .to_face()
+        .extrude(dvec3(0.0, 0.0, CASE_TOP_Z - CASE_BOTTOM_Z))
+        .into_shape();
+
+    let top_edges = shape.faces().farthest(Direction::PosZ).edges();
+    let bottom_edges = shape.faces().farthest(Direction::NegZ).edges();
+
+    shape.chamfer_edges(1.5, top_edges.chain(bottom_edges))
 }
 
 fn case_inner_box() -> Shape {
-    let corner_1 = DVec3::new(PCB_LEFT, PCB_TOP, CASE_FLOOR_Z);
-    let corner_2 = DVec3::new(PCB_RIGHT, PCB_BOTTOM, CASE_TOP_Z);
+    let mut workplane = Workplane::xy();
+    workplane.set_translation(dvec3(0.0, 0.0, CASE_FLOOR_Z));
 
-    Shape::box_from_corners(corner_1, corner_2)
+    workplane
+        .sketch()
+        .move_to(PCB_LEFT, PCB_TOP)
+        .line_to(PCB_RIGHT, PCB_TOP)
+        .line_to(PCB_RIGHT, PCB_BOTTOM)
+        .line_to(PCB_LEFT, PCB_BOTTOM)
+        .close()
+        .fillet(PCB_FILLET_RADIUS)
+        .to_face()
+        // 0.1 is a fudge factor to retrieve edges from boolean subtraction
+        .extrude(dvec3(0.0, 0.0, CASE_TOP_Z + 0.1 - CASE_FLOOR_Z))
+        .into_shape()
 }
 
 fn pcb_top_shelf() -> Shape {
@@ -230,31 +255,45 @@ fn pcb_bottom_shelf() -> Shape {
 }
 
 fn usb_connector_cutout() -> Shape {
-    let corner_1 = DVec3::new(
-        USB_LEFT - USB_CUTOUT_PADDING,
-        CASE_TOP + USB_CUTOUT_PADDING,
-        PCB_BOTTOM_Z - USB_DEPTH - USB_CUTOUT_PADDING,
-    );
+    let corner_1 = DVec3::new(USB_LEFT - USB_CUTOUT_PADDING, 2.3, PCB_BOTTOM_Z - (USB_DEPTH / 2.0));
     let corner_2 = DVec3::new(
         USB_RIGHT + USB_CUTOUT_PADDING,
         USB_BOTTOM - USB_CUTOUT_PADDING,
         PCB_BOTTOM_Z + USB_CUTOUT_PADDING,
     );
 
-    Shape::box_from_corners(corner_1, corner_2).fillet(2.0)
+    let squared_shape = Shape::box_from_corners(corner_1, corner_2);
+
+    let mut usb_workplane = Workplane::xz();
+    usb_workplane.set_translation(dvec3(
+        USB_LEFT + (USB_WIDTH / 2.0),
+        USB_BOTTOM,
+        PCB_BOTTOM_Z - (USB_DEPTH / 2.0),
+    ));
+    usb_workplane
+        .rect(USB_WIDTH, USB_DEPTH)
+        .fillet(USB_RADIUS)
+        .to_face()
+        .extrude(dvec3(0.0, USB_HEIGHT + CASE_WALL_THICKNESS, 0.0))
+        .into_shape()
+        .union(&squared_shape)
+        .into()
 }
 
 // This is the little trapezoidal PCB shape which helps the USB C connector
 // extend forward into the case.
 fn pcb_usb_overhang() -> Shape {
+    let start = CASE_FLOOR_Z;
     Solid::extrude_polygon(
         [
-            DVec3::new(19.05, 0.0, PCB_BOTTOM_Z),
-            DVec3::new(21.431, 2.381, PCB_BOTTOM_Z),
-            DVec3::new(30.596, 2.381, PCB_BOTTOM_Z),
-            DVec3::new(33.337, 0.0, PCB_BOTTOM_Z),
+            DVec3::new(19.05, 0.0, start),
+            DVec3::new(USB_LEFT - 0.3, 2.381, start),
+            DVec3::new(USB_RIGHT + 0.3, 2.381, start),
+            DVec3::new(33.337, 0.0, start),
+            DVec3::new(33.337, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
+            DVec3::new(19.05, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
         ],
-        PCB_THICKNESS + 0.5,
+        PCB_TOP_Z - start,
     )
     .unwrap()
     .into()
@@ -266,13 +305,21 @@ pub fn shape() -> Shape {
     let bottom_shelf = pcb_bottom_shelf();
     let usb_cutout = usb_connector_cutout();
 
-    let mut shape = case_outer_box()
+    let shape = case_outer_box()
         .subtract(&inner_box)
-        .fillet(1.3)
+        .fillet_new_edges(0.3)
         .union(&top_shelf)
         .union(&bottom_shelf)
-        .subtract(&usb_cutout)
-        .into_shape();
+        .subtract(&usb_cutout);
+
+    let new_edges: Vec<_> = shape
+        .new_edges()
+        .filter(|e| e.start_point().y > 0.0) // Only chamfer edges on the exterior of the case
+        .collect();
+
+    let shape = shape.chamfer_edges(1.0, new_edges);
+
+    let mut shape = shape.into_shape();
 
     for support_post in SUPPORT_POSTS {
         shape = shape.union(&support_post.shape()).into();
@@ -297,15 +344,17 @@ pub fn shape() -> Shape {
     }
 
     // For exporting to smaller 3D printers
-    // let corner_1 = DVec3::new(CASE_LEFT, CASE_BOTTOM, CASE_BOTTOM_Z);
-    // let corner_2 = DVec3::new(CASE_RIGHT / 2.0, CASE_TOP, CASE_TOP_Z);
-    // let left_half = Shape::box_from_corners(corner_1, corner_2);
+    let corner_1 = DVec3::new(CASE_LEFT, CASE_BOTTOM, CASE_BOTTOM_Z);
+    let corner_2 = DVec3::new(CASE_RIGHT / 2.0, CASE_TOP, CASE_TOP_Z);
+    let left_half = Shape::box_from_corners(corner_1, corner_2);
 
     // let corner_1 = DVec3::new(CASE_RIGHT / 2.0, CASE_BOTTOM, CASE_BOTTOM_Z);
     // let corner_2 = DVec3::new(CASE_RIGHT, CASE_TOP, CASE_TOP_Z);
     // let right_half = Shape::box_from_corners(corner_1, corner_2);
 
-    // outer_box.intersect(&right_half);
+    let shape = shape.intersect(&left_half);
 
-    shape
+    shape.write_stl("lol.stl").unwrap();
+
+    shape.into()
 }
