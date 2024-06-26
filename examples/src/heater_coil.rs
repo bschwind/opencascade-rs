@@ -35,7 +35,7 @@ pub fn shape() -> Shape {
     let p0 = spiral_points[0];
     let p1 = spiral_points[sample_count - 1];
 
-    let coil = Edge::spline_from_points(spiral_points.into_iter(), None);
+    let coil = Edge::spline_from_points(spiral_points, None);
     let attach_0 = Edge::segment(p0 - DVec3::new(0.0, attach_len, 0.0), p0);
     let attach_1 = Edge::segment(p1, p1 - DVec3::new(0.0, attach_len, 0.0));
     let path = Wire::from_edges(&[attach_0, coil, attach_1]);
