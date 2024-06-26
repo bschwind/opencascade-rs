@@ -75,7 +75,7 @@ impl Edge {
     pub fn ellipse() {}
 
     pub fn spline_from_points(
-        points: impl Iterator<Item = DVec3>,
+        points: impl IntoIterator<Item = DVec3>,
         tangents: Option<(DVec3, DVec3)>,
     ) -> Self {
         let points: Vec<_> = points.into_iter().collect();
