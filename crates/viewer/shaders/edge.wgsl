@@ -33,6 +33,9 @@ struct VertexOutput {
 
     @location(0)
     dist: f32,
+
+    @location(1)
+    plane_distance: f32,
 };
 
 @vertex
@@ -45,6 +48,8 @@ fn main_vs(input: VertexInput) -> VertexOutput {
     // Transform the segment endpoints to clip space
     let clip0 = globals.proj * globals.transform * vec4<f32>(input.point_a.xyz, 1.0);
     let clip1 = globals.proj * globals.transform * vec4<f32>(input.point_b.xyz, 1.0);
+
+    let interpolated_pos = vec4<f32>(mix(input.point_a.xyz, input.point_b.xyz, vec3<f32>(input.pos.z)), 1.0);
 
     // Transform the segment endpoints to screen space
     let a = globals.resolution.xy * (0.5 * clip0.xy / clip0.w + 0.5);
@@ -63,11 +68,18 @@ fn main_vs(input: VertexInput) -> VertexOutput {
     out.pos = vec4<f32>(clip.w * ((2.0 * final_pos) / globals.resolution.xy - 1.0), clip.z, clip.w);
     out.dist = mix(input.length_so_far_a.x, input.length_so_far_b.x, input.pos.z);
 
+    var plane = vec4<f32>(-1.0, 0.8, 1.2, 40.0);
+    out.plane_distance = dot(plane, interpolated_pos);
+
     return out;
 }
 
 @fragment
 fn main_fs(input: VertexOutput) -> @location(0) vec4<f32> {
+    if input.plane_distance > 0.0 {
+        discard;
+    }
+
     let r = 0.0;
     let g = 0.0;
     let b = 0.0;
