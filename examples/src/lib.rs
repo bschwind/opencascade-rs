@@ -15,6 +15,7 @@ pub mod swept_face;
 pub mod swept_face_variable;
 pub mod swept_wire;
 pub mod swept_wire_variable;
+pub mod thumbtack_mount;
 pub mod turners_cube;
 pub mod variable_fillet;
 
@@ -34,6 +35,7 @@ pub enum Example {
     SweptFaceVariable,
     SweptWire,
     SweptWireVariable,
+    ThumbtackMount,
     TurnersCube,
     VariableFillet,
 }
@@ -55,6 +57,7 @@ impl Example {
             Example::SweptFaceVariable => swept_face_variable::shape(),
             Example::SweptWire => swept_wire::shape(),
             Example::SweptWireVariable => swept_wire_variable::shape(),
+            Example::ThumbtackMount => thumbtack_mount::shape(),
             Example::TurnersCube => turners_cube::shape(),
             Example::VariableFillet => variable_fillet::shape(),
         }
