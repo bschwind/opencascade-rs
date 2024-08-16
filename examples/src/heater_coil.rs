@@ -40,8 +40,6 @@ pub fn shape() -> Shape {
     let attach_1 = Edge::segment(p1, p1 - DVec3::new(0.0, attach_len, 0.0));
     let path = Wire::from_edges(&[attach_0, coil, attach_1]);
 
-    //path.into_shape().union(&face_profile.into_shape()).into_shape()
-
-    let pipe_solid: Solid = face_profile.sweep_along(&path);
+    let pipe_solid = face_profile.sweep_along(&path);
     pipe_solid.into_shape()
 }
