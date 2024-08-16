@@ -1,7 +1,7 @@
 use glam::DVec3;
 use opencascade::{
     angle::{RVec, ToAngle},
-    primitives::{Edge, Face, IntoShape, Shape, Solid, Wire},
+    primitives::{Edge, IntoShape, Shape, Wire},
     workplane::Workplane,
 };
 
@@ -12,7 +12,7 @@ pub fn shape() -> Shape {
     let spiral_half_turn_count = 5;
     let attach_len = 4.0;
 
-    let face_profile: Face = Workplane::xz()
+    let face_profile = Workplane::xz()
         .translated(DVec3::new(spiral_radius, 0.0, attach_len))
         .rotated(RVec::z(45.0.degrees()))
         .rect(a, a)
