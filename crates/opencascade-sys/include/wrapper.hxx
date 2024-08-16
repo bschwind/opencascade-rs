@@ -43,6 +43,7 @@
 #include <GProp_GProps.hxx>
 #include <Geom2d_Ellipse.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
+#include <GeomAPI_Interpolate.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <GeomAbs_CurveType.hxx>
 #include <GeomAbs_JoinType.hxx>
@@ -63,6 +64,7 @@
 #include <Standard_Type.hxx>
 #include <StlAPI_Writer.hxx>
 #include <TColgp_Array1OfDir.hxx>
+#include <TColgp_HArray1OfPnt.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
@@ -92,6 +94,7 @@ template <typename T> std::unique_ptr<std::vector<T>> list_to_vector(const NColl
 // Handles
 typedef opencascade::handle<Standard_Type> HandleStandardType;
 typedef opencascade::handle<Geom_Curve> HandleGeomCurve;
+typedef opencascade::handle<Geom_BSplineCurve> HandleGeomBSplineCurve;
 typedef opencascade::handle<Geom_TrimmedCurve> HandleGeomTrimmedCurve;
 typedef opencascade::handle<Geom_Surface> HandleGeomSurface;
 typedef opencascade::handle<Geom_BezierSurface> HandleGeomBezierSurface;
@@ -103,6 +106,13 @@ typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurfa
 typedef opencascade::handle<Poly_Triangulation> Handle_Poly_Triangulation;
 typedef opencascade::handle<TopTools_HSequenceOfShape> Handle_TopTools_HSequenceOfShape;
 typedef opencascade::handle<Law_Function> HandleLawFunction;
+
+typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
+
+inline std::unique_ptr<Handle_TColgpHArray1OfPnt>
+new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(std::unique_ptr<TColgp_HArray1OfPnt> array) {
+  return std::unique_ptr<Handle_TColgpHArray1OfPnt>(new Handle_TColgpHArray1OfPnt(array.release()));
+}
 
 // Handle stuff
 template <typename T> const T &handle_try_deref(const opencascade::handle<T> &handle) {
@@ -139,6 +149,10 @@ inline const gp_Pnt &handle_geom_plane_location(const HandleGeomPlane &plane) { 
 inline std::unique_ptr<HandleGeom_CylindricalSurface> Geom_CylindricalSurface_ctor(const gp_Ax3 &axis, double radius) {
   return std::unique_ptr<HandleGeom_CylindricalSurface>(
       new opencascade::handle<Geom_CylindricalSurface>(new Geom_CylindricalSurface(axis, radius)));
+}
+
+inline std::unique_ptr<HandleGeomBSplineCurve> GeomAPI_Interpolate_Curve(const GeomAPI_Interpolate &interpolate) {
+  return std::unique_ptr<HandleGeomBSplineCurve>(new opencascade::handle<Geom_BSplineCurve>(interpolate.Curve()));
 }
 
 inline std::unique_ptr<HandleGeomSurface> cylinder_to_surface(const HandleGeom_CylindricalSurface &cylinder_handle) {
@@ -446,6 +460,10 @@ inline std::unique_ptr<gp_Dir> TColgp_Array1OfDir_Value(const TColgp_Array1OfDir
 
 inline std::unique_ptr<gp_Pnt2d> TColgp_Array1OfPnt2d_Value(const TColgp_Array1OfPnt2d &array, Standard_Integer index) {
   return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(array.Value(index)));
+}
+
+inline std::unique_ptr<gp_Pnt> TColgp_HArray1OfPnt_Value(const TColgp_HArray1OfPnt &array, Standard_Integer index) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(array.Value(index)));
 }
 
 inline void connect_edges_to_wires(Handle_TopTools_HSequenceOfShape &edges, const Standard_Real toler,
