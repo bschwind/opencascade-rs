@@ -1,7 +1,7 @@
 /// Minimum compatible version of OpenCASCADE library (major, minor)
 ///
 /// Pre-installed OpenCASCADE library will be checked for compatibility using semver rules.
-const OCCT_VERSION: (u8, u8) = (7, 6);
+const OCCT_VERSION: (u8, u8) = (7, 8);
 
 /// The list of used OpenCASCADE libraries which needs to be linked with.
 const OCCT_LIBS: &[&str] = &[
@@ -15,11 +15,8 @@ const OCCT_LIBS: &[&str] = &[
     "TKGeomAlgo",
     "TKBRep",
     "TKPrim",
-    "TKSTEP",
-    "TKSTEPAttr",
-    "TKSTEPBase",
-    "TKSTEP209",
-    "TKSTL",
+    "TKDESTEP",
+    "TKDESTL",
     "TKMesh",
     "TKShHealing",
     "TKFillet",
