@@ -224,6 +224,7 @@ impl EdgeDrawer {
                         ],
                     },
                 ],
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
             fragment: Some(wgpu::FragmentState {
                 module: &draw_shader,
@@ -236,6 +237,7 @@ impl EdgeDrawer {
                     }),
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             }),
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleList,
@@ -253,6 +255,7 @@ impl EdgeDrawer {
             }),
             multisample: wgpu::MultisampleState::default(),
             multiview: None,
+            cache: None,
         })
     }
 

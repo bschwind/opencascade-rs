@@ -67,6 +67,7 @@ impl SurfaceDrawer {
                 module: &draw_shader,
                 entry_point: "vs_main",
                 buffers: vertex_buffers,
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleList,
@@ -100,8 +101,10 @@ impl SurfaceDrawer {
                     }),
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
             }),
             multiview: None,
+            cache: None,
         });
 
         let uniform_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
