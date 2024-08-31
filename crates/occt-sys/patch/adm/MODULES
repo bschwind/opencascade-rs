@@ -1,4 +1,5 @@
 FoundationClasses TKernel TKMath
 ModelingData TKG2d TKG3d TKGeomBase TKBRep
-ModelingAlgorithms TKGeomAlgo TKTopAlgo TKPrim TKBO TKBool TKFillet TKOffset TKFeat TKMesh TKShHealing TKXCAF TKXmlXCAF TKBinXCAF
-DataExchange TKDE TKXSBase TKDESTEP TKDESTL
+ModelingAlgorithms TKGeomAlgo TKTopAlgo TKPrim TKBO TKBool TKHLR TKFillet TKOffset TKFeat TKMesh TKXMesh TKShHealing
+ApplicationFramework TKCDF TKLCAF TKCAF TKBinL TKXmlL TKBin TKXml TKStdL TKStd TKTObj TKBinTObj TKXmlTObj TKVCAF
+DataExchange TKDE TKXSBase TKDESTEP TKDEIGES TKDESTL TKDEVRML TKDECascade TKDEOBJ TKDEGLTF TKDEPLY TKXCAF TKXmlXCAF TKBinXCAF TKRWMesh
