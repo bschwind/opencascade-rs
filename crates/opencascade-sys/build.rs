@@ -7,6 +7,7 @@ const OCCT_VERSION: (u8, u8) = (7, 8);
 const OCCT_LIBS: &[&str] = &[
     "TKMath",
     "TKernel",
+    "TKDE",
     "TKFeat",
     "TKGeomBase",
     "TKG2d",
@@ -24,6 +25,9 @@ const OCCT_LIBS: &[&str] = &[
     "TKBO",
     "TKOffset",
     "TKXSBase",
+    "TKCAF",
+    "TKLCAF",
+    "TKXCAF",
 ];
 
 fn main() {
