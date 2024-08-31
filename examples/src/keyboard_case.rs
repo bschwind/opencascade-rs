@@ -344,17 +344,17 @@ pub fn shape() -> Shape {
     }
 
     // For exporting to smaller 3D printers
-    let corner_1 = DVec3::new(CASE_LEFT, CASE_BOTTOM, CASE_BOTTOM_Z);
-    let corner_2 = DVec3::new(CASE_RIGHT / 2.0, CASE_TOP, CASE_TOP_Z);
-    let left_half = Shape::box_from_corners(corner_1, corner_2);
+    // let corner_1 = DVec3::new(CASE_LEFT, CASE_BOTTOM, CASE_BOTTOM_Z);
+    // let corner_2 = DVec3::new(CASE_RIGHT / 2.0, CASE_TOP, CASE_TOP_Z);
+    // let left_half = Shape::box_from_corners(corner_1, corner_2);
 
     // let corner_1 = DVec3::new(CASE_RIGHT / 2.0, CASE_BOTTOM, CASE_BOTTOM_Z);
     // let corner_2 = DVec3::new(CASE_RIGHT, CASE_TOP, CASE_TOP_Z);
     // let right_half = Shape::box_from_corners(corner_1, corner_2);
 
-    let shape = shape.intersect(&left_half);
+    // let shape = shape.intersect(&left_half);
 
-    shape.write_stl("lol.stl").unwrap();
+    // shape.write_stl("keyboard_half.stl").unwrap();
 
-    shape.into()
+    shape
 }
