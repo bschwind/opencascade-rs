@@ -1003,9 +1003,16 @@ pub mod ffi {
         pub fn SetRotation(self: Pin<&mut gp_Trsf>, axis: &gp_Ax1, angle: f64);
         pub fn SetScale(self: Pin<&mut gp_Trsf>, point: &gp_Pnt, scale: f64);
         pub fn SetTranslation(self: Pin<&mut gp_Trsf>, point1: &gp_Pnt, point2: &gp_Pnt);
+        pub fn Value(self: &gp_Trsf, the_row: i32, the_col: i32) -> f64;
 
         #[cxx_name = "SetTranslationPart"]
         pub fn set_translation_vec(self: Pin<&mut gp_Trsf>, translation: &gp_Vec);
+
+        type gp_GTrsf;
+        #[cxx_name = "construct_unique"]
+        pub fn new_gp_GTrsf() -> UniquePtr<gp_GTrsf>;
+        pub fn SetValue(self: Pin<&mut gp_GTrsf>, the_row: i32, the_col: i32, the_value: f64);
+        pub fn Value(self: &gp_GTrsf, the_row: i32, the_col: i32) -> f64;
 
         type BRepBuilderAPI_MakeSolid;
 
@@ -1044,6 +1051,20 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_Transform>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepBuilderAPI_Transform>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepBuilderAPI_Transform) -> bool;
+
+
+        type BRepBuilderAPI_GTransform;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepBuilderAPI_GTransform_ctor(
+            shape: &TopoDS_Shape,
+            transform: &gp_GTrsf,
+            copy: bool,
+        ) -> UniquePtr<BRepBuilderAPI_GTransform>;
+
+        pub fn Shape(self: Pin<&mut BRepBuilderAPI_GTransform>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepBuilderAPI_GTransform>, progress: &Message_ProgressRange);
+        pub fn IsDone(self: &BRepBuilderAPI_GTransform) -> bool;
 
         // Topology Explorer
         type TopExp_Explorer;
