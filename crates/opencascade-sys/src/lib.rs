@@ -1052,7 +1052,6 @@ pub mod ffi {
         pub fn Build(self: Pin<&mut BRepBuilderAPI_Transform>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepBuilderAPI_Transform) -> bool;
 
-
         type BRepBuilderAPI_GTransform;
 
         #[cxx_name = "construct_unique"]
