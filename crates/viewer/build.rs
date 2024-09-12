@@ -23,10 +23,9 @@ fn compile_shader<P: AsRef<Path>>(path: P) {
     let shader_source = std::fs::read_to_string(path).expect("Shader source should be available");
 
     let module = naga::front::wgsl::parse_str(&shader_source)
-        .map_err(|e| {
+        .inspect_err(|e| {
             let msg = e.emit_to_string(&shader_source);
             println!("{msg}");
-            e
         })
         .expect("Shader compilation failed");
 
