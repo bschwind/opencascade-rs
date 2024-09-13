@@ -190,7 +190,7 @@ fn case_outer_box() -> Shape {
     let mut workplane = Workplane::xy();
     workplane.set_translation(dvec3(0.0, 0.0, CASE_BOTTOM_Z));
 
-    let shape = workplane
+    let outer_box = workplane
         .sketch()
         .move_to(CASE_LEFT, CASE_TOP)
         .line_to(CASE_RIGHT, CASE_TOP)
@@ -202,10 +202,10 @@ fn case_outer_box() -> Shape {
         .extrude(dvec3(0.0, 0.0, CASE_TOP_Z - CASE_BOTTOM_Z))
         .into_shape();
 
-    let top_edges = shape.faces().farthest(Direction::PosZ).edges();
-    let bottom_edges = shape.faces().farthest(Direction::NegZ).edges();
+    let top_edges = outer_box.faces().farthest(Direction::PosZ).edges();
+    let bottom_edges = outer_box.faces().farthest(Direction::NegZ).edges();
 
-    shape.chamfer_edges(1.5, top_edges.chain(bottom_edges))
+    outer_box.chamfer_edges(1.5, top_edges.chain(bottom_edges))
 }
 
 fn case_inner_box() -> Shape {
@@ -305,42 +305,42 @@ pub fn shape() -> Shape {
     let bottom_shelf = pcb_bottom_shelf();
     let usb_cutout = usb_connector_cutout();
 
-    let shape = case_outer_box()
+    let case = case_outer_box()
         .subtract(&inner_box)
         .fillet_new_edges(0.3)
         .union(&top_shelf)
         .union(&bottom_shelf)
         .subtract(&usb_cutout);
 
-    let new_edges: Vec<_> = shape
+    let new_edges: Vec<_> = case
         .new_edges()
         .filter(|e| e.start_point().y > 0.0) // Only chamfer edges on the exterior of the case
         .collect();
 
-    let shape = shape.chamfer_edges(1.0, new_edges);
+    let case = case.chamfer_edges(1.0, new_edges);
 
-    let mut shape = shape.into_shape();
+    let mut case = case.into_shape();
 
     for support_post in SUPPORT_POSTS {
-        shape = shape.union(&support_post.shape()).into();
+        case = case.union(&support_post.shape()).into();
     }
 
     let usb_overhang = pcb_usb_overhang();
 
-    shape = shape.subtract(&usb_overhang).into();
+    case = case.subtract(&usb_overhang).into();
 
     for feet_cutout in FEET_CUTOUTS {
         let pos = DVec3::from((*feet_cutout, CASE_FLOOR_Z));
         let dir = DVec3::new(0.0, 0.0, -1.0);
 
-        shape = shape.drill_hole(pos, dir, BOTTOM_CUTOUT_RADIUS);
+        case = case.drill_hole(pos, dir, BOTTOM_CUTOUT_RADIUS);
     }
 
     for pinhole_pos in PINHOLE_LOCATIONS {
         let pos = DVec3::from((*pinhole_pos, CASE_FLOOR_Z));
         let dir = DVec3::new(0.0, 0.0, -1.0);
 
-        shape = shape.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
+        case = case.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
     }
 
     // For exporting to smaller 3D printers
@@ -356,5 +356,5 @@ pub fn shape() -> Shape {
 
     // shape.write_stl("keyboard_half.stl").unwrap();
 
-    shape
+    case
 }
