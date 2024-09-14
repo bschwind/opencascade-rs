@@ -251,6 +251,39 @@ impl Sketch {
         self
     }
 
+    pub fn line_dx(mut self, dx: f64) -> Self {
+        let cursor = self.workplane.to_local_pos(self.cursor);
+        let new_point = self.workplane.to_world_pos(dvec3(cursor.x + dx, cursor.y, 0.0));
+        let new_edge = Edge::segment(self.cursor, new_point);
+        self.cursor = new_point;
+
+        self.add_edge(new_edge);
+
+        self
+    }
+
+    pub fn line_dy(mut self, dy: f64) -> Self {
+        let cursor = self.workplane.to_local_pos(self.cursor);
+        let new_point = self.workplane.to_world_pos(dvec3(cursor.x, cursor.y + dy, 0.0));
+        let new_edge = Edge::segment(self.cursor, new_point);
+        self.cursor = new_point;
+
+        self.add_edge(new_edge);
+
+        self
+    }
+
+    pub fn line_dx_dy(mut self, dx: f64, dy: f64) -> Self {
+        let cursor = self.workplane.to_local_pos(self.cursor);
+        let new_point = self.workplane.to_world_pos(dvec3(cursor.x + dx, cursor.y + dy, 0.0));
+        let new_edge = Edge::segment(self.cursor, new_point);
+        self.cursor = new_point;
+
+        self.add_edge(new_edge);
+
+        self
+    }
+
     pub fn arc(mut self, (x1, y1): (f64, f64), (x2, y2): (f64, f64), (x3, y3): (f64, f64)) -> Self {
         let p1 = self.workplane.to_world_pos(dvec3(x1, y1, 0.0));
         let p2 = self.workplane.to_world_pos(dvec3(x2, y2, 0.0));
