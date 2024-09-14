@@ -1,4 +1,4 @@
-use glam::{dvec3, DVec2, DVec3};
+use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade::{
     primitives::{Direction, IntoShape, Shape, Solid},
     workplane::Workplane,
@@ -299,6 +299,28 @@ fn pcb_usb_overhang() -> Shape {
     .into()
 }
 
+fn case_foot(center: DVec2) -> Shape {
+    const FOOT_THICKNESS: f64 = 2.4;
+    const HALF_FOOT_THICKNESS: f64 = FOOT_THICKNESS / 2.0;
+    const FOOT_EXTENT: f64 = 15.0;
+
+    Workplane::xy()
+        .sketch()
+        .move_to(center.x - HALF_FOOT_THICKNESS, center.y - HALF_FOOT_THICKNESS)
+        .line_dx(-FOOT_EXTENT)
+        .line_dy(FOOT_THICKNESS)
+        .line_dx(FOOT_EXTENT * 2.0 + FOOT_THICKNESS)
+        .line_dy(-FOOT_THICKNESS)
+        .line_dx(-FOOT_EXTENT)
+        .line_dy(-FOOT_EXTENT)
+        .line_dx(-FOOT_THICKNESS)
+        .close()
+        .fillet(0.7)
+        .to_face()
+        .extrude(dvec3(0.0, 0.0, 5.0))
+        .into()
+}
+
 pub fn shape() -> Shape {
     let inner_box = case_inner_box();
     let top_shelf = pcb_top_shelf();
@@ -356,5 +378,11 @@ pub fn shape() -> Shape {
 
     // shape.write_stl("keyboard_half.stl").unwrap();
 
-    case
+    // case.write_step("keyboard.step").unwrap();
+
+    // case
+    let foot = case_foot(dvec2(0.0, 0.0));
+    foot.write_step("keyboard_case_foot.step").unwrap();
+
+    foot
 }
