@@ -299,26 +299,38 @@ fn pcb_usb_overhang() -> Shape {
     .into()
 }
 
-fn case_foot(center: DVec2) -> Shape {
-    const FOOT_THICKNESS: f64 = 2.4;
+fn case_foot(center: DVec2, pointing_down: bool) -> Shape {
+    const FOOT_THICKNESS: f64 = 2.3;
     const HALF_FOOT_THICKNESS: f64 = FOOT_THICKNESS / 2.0;
     const FOOT_EXTENT: f64 = 15.0;
 
-    Workplane::xy()
-        .sketch()
-        .move_to(center.x - HALF_FOOT_THICKNESS, center.y - HALF_FOOT_THICKNESS)
-        .line_dx(-FOOT_EXTENT)
-        .line_dy(FOOT_THICKNESS)
-        .line_dx(FOOT_EXTENT * 2.0 + FOOT_THICKNESS)
-        .line_dy(-FOOT_THICKNESS)
-        .line_dx(-FOOT_EXTENT)
-        .line_dy(-FOOT_EXTENT)
-        .line_dx(-FOOT_THICKNESS)
-        .close()
-        .fillet(0.7)
-        .to_face()
-        .extrude(dvec3(0.0, 0.0, 5.0))
-        .into()
+    let sketch = if pointing_down {
+        Workplane::xy()
+            .sketch()
+            .move_to(center.x - HALF_FOOT_THICKNESS, center.y - HALF_FOOT_THICKNESS)
+            .line_dx(-FOOT_EXTENT)
+            .line_dy(FOOT_THICKNESS)
+            .line_dx(FOOT_EXTENT * 2.0 + FOOT_THICKNESS)
+            .line_dy(-FOOT_THICKNESS)
+            .line_dx(-FOOT_EXTENT)
+            .line_dy(-FOOT_EXTENT)
+            .line_dx(-FOOT_THICKNESS)
+            .close()
+    } else {
+        Workplane::xy()
+            .sketch()
+            .move_to(center.x + HALF_FOOT_THICKNESS, center.y + HALF_FOOT_THICKNESS)
+            .line_dx(FOOT_EXTENT)
+            .line_dy(-FOOT_THICKNESS)
+            .line_dx(-(FOOT_EXTENT * 2.0 + FOOT_THICKNESS))
+            .line_dy(FOOT_THICKNESS)
+            .line_dx(FOOT_EXTENT)
+            .line_dy(FOOT_EXTENT)
+            .line_dx(FOOT_THICKNESS)
+            .close()
+    };
+
+    sketch.fillet(0.7).to_face().extrude(dvec3(0.0, 0.0, -5.0)).into()
 }
 
 pub fn shape() -> Shape {
@@ -381,8 +393,31 @@ pub fn shape() -> Shape {
     // case.write_step("keyboard.step").unwrap();
 
     // case
-    let foot = case_foot(dvec2(0.0, 0.0));
-    foot.write_step("keyboard_case_foot.step").unwrap();
+    // let foot = case_foot(dvec2(0.0, 0.0), pointing_down);
 
-    foot
+    let pcb_center = dvec2(PCB_WIDTH / 2.0, PCB_HEIGHT / 2.0);
+
+    let upper_left_foot_pos = pcb_center + dvec2(-90.0, 18.5);
+    let bottom_left_foot_pos = upper_left_foot_pos + dvec2(14.0, -54.7);
+
+    let upper_left_foot = case_foot(upper_left_foot_pos, true);
+    let upper_right_foot = case_foot(upper_left_foot_pos + dvec2(170.46, 0.0), true);
+    let bottom_left_foot = case_foot(bottom_left_foot_pos, false);
+    let bottom_right_foot = case_foot(bottom_left_foot_pos + dvec2(151.52, 0.0), false);
+
+    // Temporary plate to hold the feet
+    let corner_1 = DVec3::new(pcb_center.x - 120.0, pcb_center.y - 35.0 - 10.0, 0.0);
+    let corner_2 = DVec3::new(pcb_center.x + 120.0, pcb_center.y + 35.0 - 10.0, 0.5);
+    let plate = Shape::box_from_corners(corner_1, corner_2);
+
+    let feet = upper_left_foot
+        .union(&upper_right_foot)
+        .union(&bottom_left_foot)
+        .union(&bottom_right_foot)
+        .union(&plate)
+        .into_shape();
+
+    feet.write_step("keyboard_case_feet_plate_test.step").unwrap();
+
+    feet
 }
