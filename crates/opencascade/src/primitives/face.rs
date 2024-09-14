@@ -91,7 +91,7 @@ impl Face {
         let profile_base = &self.inner;
         let sketch_base = ffi::TopoDS_Face_ctor();
         let angle = 0.0;
-        let fuse = 1; // 0 = subtractive, 1 = additive
+        let fuse = 0; // 0 = subtractive, 1 = additive
         let modify = false;
 
         let mut make_prism = ffi::BRepFeat_MakeDPrism_ctor(
@@ -306,6 +306,19 @@ impl Face {
         let fuse_shape = fuse_operation.pin_mut().Shape();
 
         let compound = ffi::TopoDS_cast_to_compound(fuse_shape);
+
+        CompoundFace::from_compound(compound)
+    }
+
+    pub fn subtract(&self, other: &Face) -> CompoundFace {
+        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
+
+        let mut fuse_operation = ffi::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+
+        let cut_shape = fuse_operation.pin_mut().Shape();
+
+        let compound = ffi::TopoDS_cast_to_compound(cut_shape);
 
         CompoundFace::from_compound(compound)
     }
