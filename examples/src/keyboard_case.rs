@@ -354,6 +354,24 @@ fn case_feet() -> Shape {
         .into()
 }
 
+const PUSH_SLOT_LOCATIONS: &[DVec2] = &[
+    DVec2::new(PCB_LEFT + 58.0, PCB_BOTTOM + 8.0),
+    DVec2::new(PCB_RIGHT - 58.0, PCB_BOTTOM + 8.0),
+];
+
+// A slot to help remove the PCB by pushing through the bottom of the case.
+fn push_slot(center: DVec2) -> Shape {
+    let mut cutout_workplane = Workplane::xy();
+    cutout_workplane.set_translation(dvec3(center.x, center.y, CASE_FLOOR_Z));
+
+    cutout_workplane
+        .rect(10.0, 3.0)
+        .fillet(1.0)
+        .to_face()
+        .extrude(dvec3(0.0, 0.0, -CASE_WALL_THICKNESS))
+        .into()
+}
+
 pub fn shape() -> Shape {
     let inner_box = case_inner_box();
     let top_shelf = pcb_top_shelf();
@@ -396,6 +414,11 @@ pub fn shape() -> Shape {
         let dir = DVec3::new(0.0, 0.0, -1.0);
 
         case = case.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
+    }
+
+    for slot_center in PUSH_SLOT_LOCATIONS {
+        let slot = push_slot(*slot_center);
+        case = case.subtract(&slot).into();
     }
 
     // For exporting to smaller 3D printers
