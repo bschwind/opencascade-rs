@@ -398,12 +398,12 @@ pub fn shape() -> Shape {
     let pcb_center = dvec2(PCB_WIDTH / 2.0, PCB_HEIGHT / 2.0);
 
     let upper_left_foot_pos = pcb_center + dvec2(-90.0, 18.5);
-    let bottom_left_foot_pos = upper_left_foot_pos + dvec2(14.0, -54.7);
+    let bottom_left_foot_pos = upper_left_foot_pos + dvec2(14.0, -55.3);
 
     let upper_left_foot = case_foot(upper_left_foot_pos, true);
-    let upper_right_foot = case_foot(upper_left_foot_pos + dvec2(170.46, 0.0), true);
+    let upper_right_foot = case_foot(upper_left_foot_pos + dvec2(171.1, 0.0), true);
     let bottom_left_foot = case_foot(bottom_left_foot_pos, false);
-    let bottom_right_foot = case_foot(bottom_left_foot_pos + dvec2(151.52, 0.0), false);
+    let bottom_right_foot = case_foot(bottom_left_foot_pos + dvec2(152.1, 0.0), false);
 
     // Temporary plate to hold the feet
     let corner_1 = DVec3::new(pcb_center.x - 120.0, pcb_center.y - 35.0 - 10.0, 0.0);
