@@ -333,7 +333,8 @@ fn case_foot(center: DVec2, pointing_down: bool) -> Shape {
             .close()
     };
 
-    sketch.fillet(0.7).to_face().extrude(dvec3(0.0, 0.0, -5.0)).into()
+    // A macbook keycap is about 1mm tall, so give it about 1.5mm of extra clearance.
+    sketch.fillet(0.7).to_face().extrude(dvec3(0.0, 0.0, -2.5)).into()
 }
 
 fn case_feet() -> Shape {
