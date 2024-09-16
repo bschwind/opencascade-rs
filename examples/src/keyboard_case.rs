@@ -36,6 +36,8 @@ const CASE_RIGHT: f64 = PCB_RIGHT + CASE_WALL_THICKNESS;
 const CASE_FLOOR_Z: f64 = PCB_BOTTOM_Z - PCB_SHELF_HEIGHT;
 const CASE_BOTTOM_Z: f64 = CASE_FLOOR_Z - CASE_WALL_THICKNESS;
 
+const CASE_FOOT_THICKNESS: f64 = 2.2;
+
 // PCB
 const PCB_TOP: f64 = ORIGIN.y + PCB_DIMENSION_TOLERANCE;
 const PCB_TOP_Z: f64 = ORIGIN.z;
@@ -299,10 +301,10 @@ fn pcb_usb_overhang() -> Shape {
     .into()
 }
 
-fn case_foot(center: DVec2, pointing_down: bool) -> Shape {
-    const FOOT_THICKNESS: f64 = 2.2;
-    const HALF_FOOT_THICKNESS: f64 = FOOT_THICKNESS / 2.0;
+fn case_foot(center: DVec2, pointing_down: bool, foot_thickness: f64, z_extrude: f64) -> Shape {
     const FOOT_EXTENT: f64 = 15.0;
+
+    let half_foot_thickness = foot_thickness / 2.0;
 
     let mut workplane = Workplane::xy();
     workplane.set_translation(dvec3(0.0, 0.0, CASE_BOTTOM_Z));
@@ -310,42 +312,43 @@ fn case_foot(center: DVec2, pointing_down: bool) -> Shape {
     let sketch = if pointing_down {
         workplane
             .sketch()
-            .move_to(center.x - HALF_FOOT_THICKNESS, center.y - HALF_FOOT_THICKNESS)
+            .move_to(center.x - half_foot_thickness, center.y - half_foot_thickness)
             .line_dx(-FOOT_EXTENT)
-            .line_dy(FOOT_THICKNESS)
-            .line_dx(FOOT_EXTENT * 2.0 + FOOT_THICKNESS)
-            .line_dy(-FOOT_THICKNESS)
+            .line_dy(foot_thickness)
+            .line_dx(FOOT_EXTENT * 2.0 + foot_thickness)
+            .line_dy(-foot_thickness)
             .line_dx(-FOOT_EXTENT)
             .line_dy(-FOOT_EXTENT)
-            .line_dx(-FOOT_THICKNESS)
+            .line_dx(-foot_thickness)
             .close()
     } else {
         workplane
             .sketch()
-            .move_to(center.x + HALF_FOOT_THICKNESS, center.y + HALF_FOOT_THICKNESS)
+            .move_to(center.x + half_foot_thickness, center.y + half_foot_thickness)
             .line_dx(FOOT_EXTENT)
-            .line_dy(-FOOT_THICKNESS)
-            .line_dx(-(FOOT_EXTENT * 2.0 + FOOT_THICKNESS))
-            .line_dy(FOOT_THICKNESS)
+            .line_dy(-foot_thickness)
+            .line_dx(-(FOOT_EXTENT * 2.0 + foot_thickness))
+            .line_dy(foot_thickness)
             .line_dx(FOOT_EXTENT)
             .line_dy(FOOT_EXTENT)
-            .line_dx(FOOT_THICKNESS)
+            .line_dx(foot_thickness)
             .close()
     };
 
-    // A macbook keycap is about 1mm tall, so give it about 1.5mm of extra clearance.
-    sketch.fillet(0.7).to_face().extrude(dvec3(0.0, 0.0, -2.5)).into()
+    sketch.fillet(0.7).to_face().extrude(dvec3(0.0, 0.0, z_extrude)).into()
 }
 
-fn case_feet() -> Shape {
+fn case_feet(foot_thickness: f64, z_extrude: f64) -> Shape {
     let reference_point = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8);
     let upper_left_foot_pos = reference_point + dvec2(-90.0, 18.5);
     let bottom_left_foot_pos = upper_left_foot_pos + dvec2(14.0, -55.3);
 
-    let upper_left_foot = case_foot(upper_left_foot_pos, true);
-    let upper_right_foot = case_foot(upper_left_foot_pos + dvec2(171.1, 0.0), true);
-    let bottom_left_foot = case_foot(bottom_left_foot_pos, false);
-    let bottom_right_foot = case_foot(bottom_left_foot_pos + dvec2(152.1, 0.0), false);
+    let upper_left_foot = case_foot(upper_left_foot_pos, true, foot_thickness, z_extrude);
+    let upper_right_foot =
+        case_foot(upper_left_foot_pos + dvec2(171.1, 0.0), true, foot_thickness, z_extrude);
+    let bottom_left_foot = case_foot(bottom_left_foot_pos, false, foot_thickness, z_extrude);
+    let bottom_right_foot =
+        case_foot(bottom_left_foot_pos + dvec2(152.1, 0.0), false, foot_thickness, z_extrude);
 
     upper_left_foot
         .union(&upper_right_foot)
@@ -434,9 +437,12 @@ pub fn shape() -> Shape {
 
     // shape.write_stl("keyboard_half.stl").unwrap();
 
-    let feet = case_feet();
+    let foot_z_extrude = 2.5;
+    let feet_indentation = case_feet(CASE_FOOT_THICKNESS + 0.15, foot_z_extrude);
+    // let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude);
 
-    let case = case.union(&feet).into_shape();
+    let case = case.subtract(&feet_indentation).into_shape();
+    // let case = case.union(&feet).into_shape();
 
     case.write_step("keyboard.step").unwrap();
 
