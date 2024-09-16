@@ -16,7 +16,7 @@ const TOP_PLATE_THICKNESS: f64 = 1.6;
 const PCB_FILLET_RADIUS: f64 = 2.4;
 
 // "Inflate" the PCB dimensions by this much to create an easier fit.
-const PCB_DIMENSION_TOLERANCE: f64 = 0.5;
+const PCB_DIMENSION_TOLERANCE: f64 = 0.8;
 
 // The origin point for this board is the top left corner
 // of the PCB, on the top surface. The PCB rests on this
@@ -164,14 +164,15 @@ const FEET_CUTOUTS: &[DVec2] = &[
 ];
 
 // USB C Connector Cutout
-const USB_CUTOUT_PADDING: f64 = 0.1;
-const USB_WIDTH: f64 = 9.0;
+const USB_CONNECTOR_PADDING: f64 = 1.0;
+const USB_WIDTH: f64 = 9.0 + USB_CONNECTOR_PADDING;
 const USB_HEIGHT: f64 = 7.45;
-const USB_DEPTH: f64 = 3.26;
+const USB_DEPTH: f64 = 3.26 + USB_CONNECTOR_PADDING;
 const USB_RADIUS: f64 = 1.43;
 
-const USB_LEFT: f64 = 21.724;
-const USB_RIGHT: f64 = USB_LEFT + USB_WIDTH;
+const USB_MIDDLE_X: f64 = 26.194;
+const USB_LEFT: f64 = USB_MIDDLE_X - (USB_WIDTH / 2.0);
+const USB_RIGHT: f64 = USB_MIDDLE_X + (USB_WIDTH / 2.0);
 const USB_TOP: f64 = 3.04;
 const USB_BOTTOM: f64 = USB_TOP - USB_HEIGHT;
 
@@ -257,18 +258,9 @@ fn pcb_bottom_shelf() -> Shape {
 }
 
 fn usb_connector_cutout() -> Shape {
-    let corner_1 = DVec3::new(USB_LEFT - USB_CUTOUT_PADDING, 2.3, PCB_BOTTOM_Z - (USB_DEPTH / 2.0));
-    let corner_2 = DVec3::new(
-        USB_RIGHT + USB_CUTOUT_PADDING,
-        USB_BOTTOM - USB_CUTOUT_PADDING,
-        PCB_BOTTOM_Z + USB_CUTOUT_PADDING,
-    );
-
-    let squared_shape = Shape::box_from_corners(corner_1, corner_2);
-
     let mut usb_workplane = Workplane::xz();
     usb_workplane.set_translation(dvec3(
-        USB_LEFT + (USB_WIDTH / 2.0),
+        USB_MIDDLE_X,
         USB_BOTTOM,
         PCB_BOTTOM_Z - (USB_DEPTH / 2.0),
     ));
@@ -278,13 +270,13 @@ fn usb_connector_cutout() -> Shape {
         .to_face()
         .extrude(dvec3(0.0, USB_HEIGHT + CASE_WALL_THICKNESS, 0.0))
         .into_shape()
-        .union(&squared_shape)
-        .into()
 }
 
 // This is the little trapezoidal PCB shape which helps the USB C connector
 // extend forward into the case.
 fn pcb_usb_overhang() -> Shape {
+    const VERTICAL_PADDING: f64 = 1.0;
+
     let start = CASE_FLOOR_Z;
     Solid::extrude_polygon(
         [
@@ -295,7 +287,7 @@ fn pcb_usb_overhang() -> Shape {
             DVec3::new(33.337, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
             DVec3::new(19.05, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
         ],
-        PCB_TOP_Z - start,
+        PCB_TOP_Z - start + VERTICAL_PADDING,
     )
     .unwrap()
     .into()
