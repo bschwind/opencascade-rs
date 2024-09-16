@@ -16,7 +16,7 @@ const TOP_PLATE_THICKNESS: f64 = 1.6;
 const PCB_FILLET_RADIUS: f64 = 2.4;
 
 // "Inflate" the PCB dimensions by this much to create an easier fit.
-const PCB_DIMENSION_TOLERANCE: f64 = 0.1;
+const PCB_DIMENSION_TOLERANCE: f64 = 0.3;
 
 // The origin point for this board is the top left corner
 // of the PCB, on the top surface. The PCB rests on this
@@ -54,7 +54,7 @@ const PCB_SHELF_THICKNESS_BOTTOM: f64 = 4.0;
 const PCB_SHELF_HEIGHT: f64 = 4.0;
 
 // Top plate support post locations
-const SUPPORT_POST_RADIUS: f64 = 2.25;
+const SUPPORT_POST_RADIUS: f64 = 2.0;
 
 // http://www.metrication.com/engineering/threads.html
 const SUPPORT_POST_DRILL_RADIUS: f64 = 0.8;
@@ -300,7 +300,7 @@ fn pcb_usb_overhang() -> Shape {
 }
 
 fn case_foot(center: DVec2, pointing_down: bool) -> Shape {
-    const FOOT_THICKNESS: f64 = 2.3;
+    const FOOT_THICKNESS: f64 = 2.2;
     const HALF_FOOT_THICKNESS: f64 = FOOT_THICKNESS / 2.0;
     const FOOT_EXTENT: f64 = 15.0;
 
