@@ -1,6 +1,6 @@
 use glam::{dvec2, dvec3, DVec2, DVec3};
 use opencascade::{
-    primitives::{Direction, IntoShape, Shape, Solid},
+    primitives::{Direction, IntoShape, JoinType, Shape, Wire},
     workplane::Workplane,
 };
 
@@ -16,7 +16,7 @@ const TOP_PLATE_THICKNESS: f64 = 1.6;
 const PCB_FILLET_RADIUS: f64 = 2.4;
 
 // "Inflate" the PCB dimensions by this much to create an easier fit.
-const PCB_DIMENSION_TOLERANCE: f64 = 0.8;
+const PCB_DIMENSION_TOLERANCE: f64 = 0.9;
 
 // The origin point for this board is the top left corner
 // of the PCB, on the top surface. The PCB rests on this
@@ -167,6 +167,7 @@ const FEET_CUTOUTS: &[DVec2] = &[
 const USB_CONNECTOR_PADDING: f64 = 1.0;
 const USB_WIDTH: f64 = 9.0 + USB_CONNECTOR_PADDING;
 const USB_HEIGHT: f64 = 7.45;
+const USB_DEPTH_NO_PADDING: f64 = 3.26;
 const USB_DEPTH: f64 = 3.26 + USB_CONNECTOR_PADDING;
 const USB_RADIUS: f64 = 1.43;
 
@@ -262,8 +263,9 @@ fn usb_connector_cutout() -> Shape {
     usb_workplane.set_translation(dvec3(
         USB_MIDDLE_X,
         USB_BOTTOM,
-        PCB_BOTTOM_Z - (USB_DEPTH / 2.0),
+        PCB_BOTTOM_Z - (USB_DEPTH_NO_PADDING / 2.0) - 0.01, // TODO - why does it segfault without this fudge factor?
     ));
+
     usb_workplane
         .rect(USB_WIDTH, USB_DEPTH)
         .fillet(USB_RADIUS)
@@ -276,21 +278,20 @@ fn usb_connector_cutout() -> Shape {
 // extend forward into the case.
 fn pcb_usb_overhang() -> Shape {
     const VERTICAL_PADDING: f64 = 1.0;
+    const TRAPEZOID_PADDING: f64 = 1.0;
 
     let start = CASE_FLOOR_Z;
-    Solid::extrude_polygon(
-        [
-            DVec3::new(19.05, 0.0, start),
-            DVec3::new(USB_LEFT - 0.3, 2.381, start),
-            DVec3::new(USB_RIGHT + 0.3, 2.381, start),
-            DVec3::new(33.337, 0.0, start),
-            DVec3::new(33.337, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
-            DVec3::new(19.05, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
-        ],
-        PCB_TOP_Z - start + VERTICAL_PADDING,
-    )
-    .unwrap()
-    .into()
+    let points = [
+        DVec3::new(19.05, 0.0, start),
+        DVec3::new(USB_LEFT - 0.3, 2.381, start),
+        DVec3::new(USB_RIGHT + 0.3, 2.381, start),
+        DVec3::new(33.337, 0.0, start),
+        DVec3::new(33.337, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
+        DVec3::new(19.05, PCB_TOP - PCB_SHELF_THICKNESS_TOP, start),
+    ];
+
+    let wire = Wire::from_ordered_points(points).unwrap().offset(TRAPEZOID_PADDING, JoinType::Arc);
+    wire.to_face().extrude(dvec3(0.0, 0.0, PCB_TOP_Z - start + VERTICAL_PADDING)).into()
 }
 
 fn case_foot(center: DVec2, pointing_down: bool, foot_thickness: f64, z_extrude: f64) -> Shape {
