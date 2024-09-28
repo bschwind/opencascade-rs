@@ -40,11 +40,14 @@ const CASE_FOOT_THICKNESS: f64 = 2.2;
 
 // PCB
 const PCB_TOP: f64 = ORIGIN.y + PCB_DIMENSION_TOLERANCE;
+const PCB_TOP_NO_TOLERANCE: f64 = ORIGIN.y;
 const PCB_TOP_Z: f64 = ORIGIN.z;
-const PCB_BOTTOM: f64 = PCB_TOP - PCB_HEIGHT - PCB_DIMENSION_TOLERANCE;
+const PCB_BOTTOM: f64 = PCB_TOP_NO_TOLERANCE - PCB_HEIGHT - PCB_DIMENSION_TOLERANCE;
+const PCB_BOTTOM_NO_TOLERANCE: f64 = PCB_TOP_NO_TOLERANCE - PCB_HEIGHT;
 const PCB_BOTTOM_Z: f64 = PCB_TOP_Z - PCB_THICKNESS;
 const PCB_LEFT: f64 = ORIGIN.x - PCB_DIMENSION_TOLERANCE;
-const PCB_RIGHT: f64 = PCB_LEFT + PCB_WIDTH + PCB_DIMENSION_TOLERANCE;
+const PCB_LEFT_NO_TOLERANCE: f64 = ORIGIN.x;
+const PCB_RIGHT: f64 = PCB_LEFT_NO_TOLERANCE + PCB_WIDTH + PCB_DIMENSION_TOLERANCE;
 
 // Top Plate
 const TOP_PLATE_BOTTOM_Z: f64 = 3.4;
@@ -60,7 +63,7 @@ const SUPPORT_POST_RADIUS: f64 = 2.0;
 
 // http://www.metrication.com/engineering/threads.html
 const SUPPORT_POST_DRILL_RADIUS: f64 = 0.8;
-const SUPPORT_POST_DIST_FROM_EDGE: f64 = 2.5;
+const SUPPORT_POST_DIST_FROM_EDGE: f64 = 2.5 + PCB_DIMENSION_TOLERANCE;
 
 #[allow(unused)]
 enum PostDirection {
@@ -85,44 +88,34 @@ impl SupportPost {
         let m2_drill_hole =
             Shape::cylinder(pos, SUPPORT_POST_DRILL_RADIUS, DVec3::Z, top_z - bottom_z);
 
+        let dist_from_edge = SUPPORT_POST_DIST_FROM_EDGE + PCB_DIMENSION_TOLERANCE;
+
         let box_part = match self.direction {
             PostDirection::Up => {
-                let corner_1 = DVec3::new(
-                    pos.x - SUPPORT_POST_RADIUS,
-                    pos.y + SUPPORT_POST_DIST_FROM_EDGE,
-                    bottom_z,
-                );
+                let corner_1 =
+                    DVec3::new(pos.x - SUPPORT_POST_RADIUS, pos.y + dist_from_edge, bottom_z);
                 let corner_2 = DVec3::new(pos.x + SUPPORT_POST_RADIUS, pos.y, top_z);
 
                 Shape::box_from_corners(corner_1, corner_2)
             },
             PostDirection::Down => {
                 let corner_1 = DVec3::new(pos.x - SUPPORT_POST_RADIUS, pos.y, bottom_z);
-                let corner_2 = DVec3::new(
-                    pos.x + SUPPORT_POST_RADIUS,
-                    pos.y - SUPPORT_POST_DIST_FROM_EDGE,
-                    top_z,
-                );
+                let corner_2 =
+                    DVec3::new(pos.x + SUPPORT_POST_RADIUS, pos.y - dist_from_edge, top_z);
 
                 Shape::box_from_corners(corner_1, corner_2)
             },
             PostDirection::Left => {
-                let corner_1 = DVec3::new(
-                    pos.x - SUPPORT_POST_DIST_FROM_EDGE,
-                    pos.y - SUPPORT_POST_RADIUS,
-                    bottom_z,
-                );
+                let corner_1 =
+                    DVec3::new(pos.x - dist_from_edge, pos.y - SUPPORT_POST_RADIUS, bottom_z);
                 let corner_2 = DVec3::new(pos.x, pos.y + SUPPORT_POST_RADIUS, top_z);
 
                 Shape::box_from_corners(corner_1, corner_2)
             },
             PostDirection::Right => {
                 let corner_1 = DVec3::new(pos.x, pos.y - SUPPORT_POST_RADIUS, bottom_z);
-                let corner_2 = DVec3::new(
-                    pos.x + SUPPORT_POST_DIST_FROM_EDGE,
-                    pos.y + SUPPORT_POST_RADIUS,
-                    top_z,
-                );
+                let corner_2 =
+                    DVec3::new(pos.x + dist_from_edge, pos.y + SUPPORT_POST_RADIUS, top_z);
 
                 Shape::box_from_corners(corner_1, corner_2)
             },
@@ -134,19 +127,19 @@ impl SupportPost {
 
 const SUPPORT_POSTS: &[SupportPost] = &[
     SupportPost {
-        pos: DVec2::new(119.075, PCB_TOP - SUPPORT_POST_DIST_FROM_EDGE),
+        pos: DVec2::new(119.075, PCB_TOP_NO_TOLERANCE - SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Up,
     },
     SupportPost {
-        pos: DVec2::new(204.75, PCB_TOP - SUPPORT_POST_DIST_FROM_EDGE),
+        pos: DVec2::new(204.75, PCB_TOP_NO_TOLERANCE - SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Up,
     },
     SupportPost {
-        pos: DVec2::new(80.95, PCB_BOTTOM + SUPPORT_POST_DIST_FROM_EDGE),
+        pos: DVec2::new(80.95, PCB_BOTTOM_NO_TOLERANCE + SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Down,
     },
     SupportPost {
-        pos: DVec2::new(200.05, PCB_BOTTOM + SUPPORT_POST_DIST_FROM_EDGE),
+        pos: DVec2::new(200.05, PCB_BOTTOM_NO_TOLERANCE + SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Down,
     },
 ];
