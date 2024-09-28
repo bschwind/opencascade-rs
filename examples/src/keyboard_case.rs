@@ -48,6 +48,7 @@ const PCB_BOTTOM_Z: f64 = PCB_TOP_Z - PCB_THICKNESS;
 const PCB_LEFT: f64 = ORIGIN.x - PCB_DIMENSION_TOLERANCE;
 const PCB_LEFT_NO_TOLERANCE: f64 = ORIGIN.x;
 const PCB_RIGHT: f64 = PCB_LEFT_NO_TOLERANCE + PCB_WIDTH + PCB_DIMENSION_TOLERANCE;
+const PCB_RIGHT_NO_TOLERANCE: f64 = PCB_LEFT_NO_TOLERANCE + PCB_WIDTH;
 
 // Top Plate
 const TOP_PLATE_BOTTOM_Z: f64 = 3.4;
@@ -133,6 +134,14 @@ const SUPPORT_POSTS: &[SupportPost] = &[
     SupportPost {
         pos: DVec2::new(204.75, PCB_TOP_NO_TOLERANCE - SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Up,
+    },
+    SupportPost {
+        pos: DVec2::new(PCB_LEFT_NO_TOLERANCE + SUPPORT_POST_DIST_FROM_EDGE, -57.15),
+        direction: PostDirection::Left,
+    },
+    SupportPost {
+        pos: DVec2::new(PCB_RIGHT_NO_TOLERANCE - SUPPORT_POST_DIST_FROM_EDGE, -57.15),
+        direction: PostDirection::Right,
     },
     SupportPost {
         pos: DVec2::new(80.95, PCB_BOTTOM_NO_TOLERANCE + SUPPORT_POST_DIST_FROM_EDGE),
