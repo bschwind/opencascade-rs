@@ -464,12 +464,20 @@ pub fn shape() -> Shape {
 
     let foot_z_extrude = 2.5;
     let feet_indentation = case_feet(CASE_FOOT_THICKNESS + 0.15, foot_z_extrude);
-    // let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude);
+    let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude);
 
-    let case = case.subtract(&feet_indentation).into_shape();
-    // let case = case.union(&feet).into_shape();
+    // let case = case.subtract(&feet_indentation).into_shape();
+    let case = case.union(&feet).into_shape();
 
-    case.write_step("keyboard.step").unwrap();
+    let pcb_center = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8);
+    // Temporary plate to hold the feet
+    let corner_1 = DVec3::new(pcb_center.x - 120.0, pcb_center.y - 45.0, CASE_BOTTOM_Z);
+    let corner_2 = DVec3::new(pcb_center.x + 120.0, pcb_center.y + 45.0, CASE_BOTTOM_Z + 0.5);
+    let plate = Shape::box_from_corners(corner_1, corner_2);
 
-    case
+    let test_plate = plate.union(&feet);
+
+    test_plate.write_step("feet_plate.step").unwrap();
+
+    test_plate.into()
 }
