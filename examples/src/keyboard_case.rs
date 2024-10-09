@@ -354,7 +354,7 @@ fn case_feet(foot_thickness: f64, z_extrude: f64) -> Shape {
 
     // A center point "origin" for the feet locations.
     // TODO(bschwind) - Add comments or const values for these magic numbers.
-    let reference_point = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8);
+    let reference_point = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8 + 5.0);
     let upper_left_foot_pos = reference_point + dvec2(-90.0, 18.5 + KEY_ROW_VERTICAL_PITCH + 0.1);
     let bottom_left_foot_pos = upper_left_foot_pos + dvec2(14.0, -(55.3 + KEY_ROW_VERTICAL_PITCH));
 
@@ -466,18 +466,22 @@ pub fn shape() -> Shape {
     let feet_indentation = case_feet(CASE_FOOT_THICKNESS + 0.15, foot_z_extrude);
     let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude);
 
-    // let case = case.subtract(&feet_indentation).into_shape();
-    let case = case.union(&feet).into_shape();
+    let case = case.subtract(&feet_indentation).into_shape();
+    // let case = case.union(&feet).into_shape();
 
-    let pcb_center = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8);
+    // let pcb_center = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8);
     // Temporary plate to hold the feet
-    let corner_1 = DVec3::new(pcb_center.x - 120.0, pcb_center.y - 45.0, CASE_BOTTOM_Z);
-    let corner_2 = DVec3::new(pcb_center.x + 120.0, pcb_center.y + 45.0, CASE_BOTTOM_Z + 0.5);
-    let plate = Shape::box_from_corners(corner_1, corner_2);
+    // let corner_1 = DVec3::new(pcb_center.x - 120.0, pcb_center.y - 45.0, CASE_BOTTOM_Z);
+    // let corner_2 = DVec3::new(pcb_center.x + 120.0, pcb_center.y + 45.0, CASE_BOTTOM_Z + 0.5);
+    // let plate = Shape::box_from_corners(corner_1, corner_2);
 
-    let test_plate = plate.union(&feet);
+    // let test_plate = plate.union(&feet);
 
-    test_plate.write_step("feet_plate.step").unwrap();
+    // test_plate.write_step("feet_plate.step").unwrap();
 
-    test_plate.into()
+    // test_plate.into()
+
+    case.write_step("keyboard.step").unwrap();
+    feet.write_step("case_feet.step").unwrap();
+    case
 }
