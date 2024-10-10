@@ -36,7 +36,7 @@ const CASE_RIGHT: f64 = PCB_RIGHT + CASE_WALL_THICKNESS;
 const CASE_FLOOR_Z: f64 = PCB_BOTTOM_Z - PCB_SHELF_HEIGHT;
 const CASE_BOTTOM_Z: f64 = CASE_FLOOR_Z - CASE_WALL_THICKNESS;
 
-const CASE_FOOT_THICKNESS: f64 = 2.2;
+const CASE_FOOT_THICKNESS: f64 = 2.1;
 
 // PCB
 const PCB_TOP: f64 = ORIGIN.y + PCB_DIMENSION_TOLERANCE;
@@ -296,7 +296,14 @@ fn pcb_usb_overhang() -> Shape {
     wire.to_face().extrude(dvec3(0.0, 0.0, PCB_TOP_Z - start + VERTICAL_PADDING)).into()
 }
 
-fn case_foot(center: DVec2, pointing_down: bool, foot_thickness: f64, z_extrude: f64) -> Shape {
+#[allow(unused)]
+enum FootStyle {
+    PointingUp,
+    PointingDown,
+    Line,
+}
+
+fn case_foot(center: DVec2, foot_style: FootStyle, foot_thickness: f64, z_extrude: f64) -> Shape {
     const FOOT_EXTENT: f64 = 15.0;
 
     let half_foot_thickness = foot_thickness / 2.0;
@@ -304,20 +311,8 @@ fn case_foot(center: DVec2, pointing_down: bool, foot_thickness: f64, z_extrude:
     let mut workplane = Workplane::xy();
     workplane.set_translation(dvec3(0.0, 0.0, CASE_BOTTOM_Z));
 
-    let sketch = if pointing_down {
-        workplane
-            .sketch()
-            .move_to(center.x - half_foot_thickness, center.y - half_foot_thickness)
-            .line_dx(-FOOT_EXTENT)
-            .line_dy(foot_thickness)
-            .line_dx(FOOT_EXTENT * 2.0 + foot_thickness)
-            .line_dy(-foot_thickness)
-            .line_dx(-FOOT_EXTENT)
-            .line_dy(-FOOT_EXTENT)
-            .line_dx(-foot_thickness)
-            .close()
-    } else {
-        workplane
+    let sketch = match foot_style {
+        FootStyle::PointingUp => workplane
             .sketch()
             .move_to(center.x + half_foot_thickness, center.y + half_foot_thickness)
             .line_dx(FOOT_EXTENT)
@@ -327,23 +322,58 @@ fn case_foot(center: DVec2, pointing_down: bool, foot_thickness: f64, z_extrude:
             .line_dx(FOOT_EXTENT)
             .line_dy(FOOT_EXTENT)
             .line_dx(foot_thickness)
-            .close()
+            .close(),
+        FootStyle::PointingDown => workplane
+            .sketch()
+            .move_to(center.x - half_foot_thickness, center.y - half_foot_thickness)
+            .line_dx(-FOOT_EXTENT)
+            .line_dy(foot_thickness)
+            .line_dx(FOOT_EXTENT * 2.0 + foot_thickness)
+            .line_dy(-foot_thickness)
+            .line_dx(-FOOT_EXTENT)
+            .line_dy(-FOOT_EXTENT)
+            .line_dx(-foot_thickness)
+            .close(),
+        FootStyle::Line => workplane
+            .sketch()
+            .move_to(center.x - FOOT_EXTENT, center.y + half_foot_thickness)
+            .line_dx(FOOT_EXTENT * 2.0)
+            .line_dy(-foot_thickness)
+            .line_dx(-FOOT_EXTENT * 2.0)
+            .close(),
     };
 
     sketch.fillet(0.7).to_face().extrude(dvec3(0.0, 0.0, z_extrude)).into()
 }
 
 fn case_feet(foot_thickness: f64, z_extrude: f64) -> Shape {
-    let reference_point = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8);
-    let upper_left_foot_pos = reference_point + dvec2(-90.0, 18.5);
-    let bottom_left_foot_pos = upper_left_foot_pos + dvec2(14.0, -55.3);
+    // The vertical distance between the gaps in between rows of keycaps.
+    // Moving this amount will take you from the center of one gap to the one
+    // above or below it.
+    const KEY_ROW_VERTICAL_PITCH: f64 = 18.4333;
 
-    let upper_left_foot = case_foot(upper_left_foot_pos, true, foot_thickness, z_extrude);
-    let upper_right_foot =
-        case_foot(upper_left_foot_pos + dvec2(171.1, 0.0), true, foot_thickness, z_extrude);
-    let bottom_left_foot = case_foot(bottom_left_foot_pos, false, foot_thickness, z_extrude);
-    let bottom_right_foot =
-        case_foot(bottom_left_foot_pos + dvec2(152.1, 0.0), false, foot_thickness, z_extrude);
+    // A center point "origin" for the feet locations.
+    // TODO(bschwind) - Add comments or const values for these magic numbers.
+    let reference_point = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8 + 5.0);
+    let upper_left_foot_pos = reference_point + dvec2(-90.0, 18.5 + KEY_ROW_VERTICAL_PITCH + 0.1);
+    let bottom_left_foot_pos = upper_left_foot_pos + dvec2(14.0, -(55.3 + KEY_ROW_VERTICAL_PITCH));
+
+    let upper_left_foot =
+        case_foot(upper_left_foot_pos, FootStyle::Line, foot_thickness, z_extrude);
+    let upper_right_foot = case_foot(
+        upper_left_foot_pos + dvec2(171.1, 0.0),
+        FootStyle::Line,
+        foot_thickness,
+        z_extrude,
+    );
+    let bottom_left_foot =
+        case_foot(bottom_left_foot_pos, FootStyle::PointingUp, foot_thickness, z_extrude);
+    let bottom_right_foot = case_foot(
+        bottom_left_foot_pos + dvec2(152.1, 0.0),
+        FootStyle::PointingUp,
+        foot_thickness,
+        z_extrude,
+    );
 
     upper_left_foot
         .union(&upper_right_foot)
@@ -434,12 +464,24 @@ pub fn shape() -> Shape {
 
     let foot_z_extrude = 2.5;
     let feet_indentation = case_feet(CASE_FOOT_THICKNESS + 0.15, foot_z_extrude);
-    // let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude);
+    let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude);
 
     let case = case.subtract(&feet_indentation).into_shape();
     // let case = case.union(&feet).into_shape();
 
-    case.write_step("keyboard.step").unwrap();
+    // let pcb_center = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8);
+    // Temporary plate to hold the feet
+    // let corner_1 = DVec3::new(pcb_center.x - 120.0, pcb_center.y - 45.0, CASE_BOTTOM_Z);
+    // let corner_2 = DVec3::new(pcb_center.x + 120.0, pcb_center.y + 45.0, CASE_BOTTOM_Z + 0.5);
+    // let plate = Shape::box_from_corners(corner_1, corner_2);
 
+    // let test_plate = plate.union(&feet);
+
+    // test_plate.write_step("feet_plate.step").unwrap();
+
+    // test_plate.into()
+
+    case.write_step("keyboard.step").unwrap();
+    feet.write_step("case_feet.step").unwrap();
     case
 }
