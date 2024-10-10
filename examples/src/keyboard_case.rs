@@ -64,7 +64,7 @@ const SUPPORT_POST_RADIUS: f64 = 2.0;
 
 // http://www.metrication.com/engineering/threads.html
 const SUPPORT_POST_DRILL_RADIUS: f64 = 0.8;
-const SUPPORT_POST_DIST_FROM_EDGE: f64 = 2.5 + PCB_DIMENSION_TOLERANCE;
+const SUPPORT_POST_DIST_FROM_EDGE: f64 = 2.5;
 
 #[allow(unused)]
 enum PostDirection {
