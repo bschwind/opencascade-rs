@@ -136,14 +136,6 @@ const SUPPORT_POSTS: &[SupportPost] = &[
         direction: PostDirection::Up,
     },
     SupportPost {
-        pos: DVec2::new(PCB_LEFT_NO_TOLERANCE + SUPPORT_POST_DIST_FROM_EDGE, -57.15),
-        direction: PostDirection::Left,
-    },
-    SupportPost {
-        pos: DVec2::new(PCB_RIGHT_NO_TOLERANCE - SUPPORT_POST_DIST_FROM_EDGE, -57.15),
-        direction: PostDirection::Right,
-    },
-    SupportPost {
         pos: DVec2::new(80.95, PCB_BOTTOM_NO_TOLERANCE + SUPPORT_POST_DIST_FROM_EDGE),
         direction: PostDirection::Down,
     },
