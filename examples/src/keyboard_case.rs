@@ -16,7 +16,7 @@ const TOP_PLATE_THICKNESS: f64 = 1.6;
 const PCB_FILLET_RADIUS: f64 = 2.4;
 
 // "Inflate" the PCB dimensions by this much to create an easier fit.
-const PCB_DIMENSION_TOLERANCE: f64 = 0.9;
+const PCB_DIMENSION_TOLERANCE: f64 = 0.2;
 
 // The origin point for this board is the top left corner
 // of the PCB, on the top surface. The PCB rests on this
@@ -48,7 +48,6 @@ const PCB_BOTTOM_Z: f64 = PCB_TOP_Z - PCB_THICKNESS;
 const PCB_LEFT: f64 = ORIGIN.x - PCB_DIMENSION_TOLERANCE;
 const PCB_LEFT_NO_TOLERANCE: f64 = ORIGIN.x;
 const PCB_RIGHT: f64 = PCB_LEFT_NO_TOLERANCE + PCB_WIDTH + PCB_DIMENSION_TOLERANCE;
-const PCB_RIGHT_NO_TOLERANCE: f64 = PCB_LEFT_NO_TOLERANCE + PCB_WIDTH;
 
 // Top Plate
 const TOP_PLATE_BOTTOM_Z: f64 = 3.4;
