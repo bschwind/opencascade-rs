@@ -36,7 +36,7 @@ const CASE_RIGHT: f64 = PCB_RIGHT + CASE_WALL_THICKNESS;
 const CASE_FLOOR_Z: f64 = PCB_BOTTOM_Z - PCB_SHELF_HEIGHT;
 const CASE_BOTTOM_Z: f64 = CASE_FLOOR_Z - CASE_WALL_THICKNESS;
 
-const CASE_FOOT_THICKNESS: f64 = 2.1;
+const CASE_FOOT_THICKNESS: f64 = 2.0;
 
 // PCB
 const PCB_TOP: f64 = ORIGIN.y + PCB_DIMENSION_TOLERANCE;
@@ -346,7 +346,7 @@ fn case_feet(foot_thickness: f64, z_extrude: f64) -> Shape {
     // A center point "origin" for the feet locations.
     // TODO(bschwind) - Add comments or const values for these magic numbers.
     let reference_point = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8 + 5.0);
-    let upper_left_foot_pos = reference_point + dvec2(-90.0, 18.5 + KEY_ROW_VERTICAL_PITCH + 0.1);
+    let upper_left_foot_pos = reference_point + dvec2(-90.0, 18.5 + KEY_ROW_VERTICAL_PITCH + 0.2);
     let bottom_left_foot_pos = upper_left_foot_pos + dvec2(14.0, -(55.3 + KEY_ROW_VERTICAL_PITCH));
 
     let upper_left_foot =
@@ -455,7 +455,7 @@ pub fn shape() -> Shape {
 
     let foot_z_extrude = 2.5;
     let feet_indentation = case_feet(CASE_FOOT_THICKNESS + 0.15, foot_z_extrude);
-    let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude);
+    let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude * 2.0);
 
     let case = case.subtract(&feet_indentation).into_shape();
     // let case = case.union(&feet).into_shape();
