@@ -346,8 +346,9 @@ fn case_feet(foot_thickness: f64, z_extrude: f64) -> Shape {
     // A center point "origin" for the feet locations.
     // TODO(bschwind) - Add comments or const values for these magic numbers.
     let reference_point = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8 + 5.0);
-    let upper_left_foot_pos = reference_point + dvec2(-90.0, 18.5 + KEY_ROW_VERTICAL_PITCH + 0.2);
-    let bottom_left_foot_pos = upper_left_foot_pos + dvec2(14.0, -(55.3 + KEY_ROW_VERTICAL_PITCH));
+    let upper_left_foot_pos = reference_point + dvec2(-90.0, 18.5 + KEY_ROW_VERTICAL_PITCH);
+    let bottom_left_foot_pos =
+        upper_left_foot_pos + dvec2(14.0, -(55.3 + KEY_ROW_VERTICAL_PITCH + 0.1));
 
     let upper_left_foot =
         case_foot(upper_left_foot_pos, FootStyle::Line, foot_thickness, z_extrude);
