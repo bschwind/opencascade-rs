@@ -455,7 +455,7 @@ pub fn shape() -> Shape {
     // shape.write_stl("keyboard_half.stl").unwrap();
 
     let foot_z_extrude = 2.5;
-    let feet_indentation = case_feet(CASE_FOOT_THICKNESS + 0.15, foot_z_extrude);
+    let feet_indentation = case_feet(CASE_FOOT_THICKNESS + 0.1, foot_z_extrude);
     let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude * 2.0);
 
     let case = case.subtract(&feet_indentation).into_shape();
