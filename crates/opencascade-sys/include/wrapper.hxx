@@ -100,12 +100,12 @@ typedef opencascade::handle<Geom_TrimmedCurve> HandleGeomTrimmedCurve;
 typedef opencascade::handle<Geom_Surface> HandleGeomSurface;
 typedef opencascade::handle<Geom_BezierSurface> HandleGeomBezierSurface;
 typedef opencascade::handle<Geom_Plane> HandleGeomPlane;
-typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
-typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
-typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
-typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
+typedef opencascade::handle<Geom2d_Curve> HandleGeom2dCurve;
+typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2dEllipse;
+typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2dTrimmedCurve;
+typedef opencascade::handle<Geom_CylindricalSurface> HandleGeomCylindricalSurface;
 typedef opencascade::handle<Poly_Triangulation> Handle_Poly_Triangulation;
-typedef opencascade::handle<TopTools_HSequenceOfShape> Handle_TopTools_HSequenceOfShape;
+typedef opencascade::handle<TopTools_HSequenceOfShape> Handle_TopToolsHSequenceOfShape;
 typedef opencascade::handle<Law_Function> HandleLawFunction;
 
 typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
@@ -125,7 +125,7 @@ template <typename T> const T &handle_try_deref(const opencascade::handle<T> &ha
 
 inline const HandleStandardType &DynamicType(const HandleGeomSurface &surface) { return surface->DynamicType(); }
 
-inline rust::String type_name(const HandleStandardType &handle) { return std::string(handle->Name()); }
+inline rust::String TypeName(const HandleStandardType &handle) { return std::string(handle->Name()); }
 
 inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve &curve, const Standard_Real U) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
@@ -147,8 +147,8 @@ inline void shape_list_append_face(TopTools_ListOfShape &list, const TopoDS_Face
 // Geometry
 inline const gp_Pnt &handle_geom_plane_location(const HandleGeomPlane &plane) { return plane->Location(); }
 
-inline std::unique_ptr<HandleGeom_CylindricalSurface> Geom_CylindricalSurface_ctor(const gp_Ax3 &axis, double radius) {
-  return std::unique_ptr<HandleGeom_CylindricalSurface>(
+inline std::unique_ptr<HandleGeomCylindricalSurface> GeomCylindricalSurface_ctor(const gp_Ax3 &axis, double radius) {
+  return std::unique_ptr<HandleGeomCylindricalSurface>(
       new opencascade::handle<Geom_CylindricalSurface>(new Geom_CylindricalSurface(axis, radius)));
 }
 
@@ -156,11 +156,11 @@ inline std::unique_ptr<HandleGeomBSplineCurve> GeomAPI_Interpolate_Curve(const G
   return std::unique_ptr<HandleGeomBSplineCurve>(new opencascade::handle<Geom_BSplineCurve>(interpolate.Curve()));
 }
 
-inline std::unique_ptr<HandleGeomSurface> cylinder_to_surface(const HandleGeom_CylindricalSurface &cylinder_handle) {
+inline std::unique_ptr<HandleGeomSurface> cylinder_to_surface(const HandleGeomCylindricalSurface &cylinder_handle) {
   return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(cylinder_handle));
 }
 
-inline std::unique_ptr<HandleGeomBezierSurface> Geom_BezierSurface_ctor(const TColgp_Array2OfPnt &poles) {
+inline std::unique_ptr<HandleGeomBezierSurface> GeomBezierSurface_ctor(const TColgp_Array2OfPnt &poles) {
   return std::unique_ptr<HandleGeomBezierSurface>(
       new opencascade::handle<Geom_BezierSurface>(new Geom_BezierSurface(poles)));
 }
@@ -169,28 +169,28 @@ inline std::unique_ptr<HandleGeomSurface> bezier_to_surface(const HandleGeomBezi
   return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(bezier_handle));
 }
 
-inline std::unique_ptr<HandleGeom2d_Ellipse> Geom2d_Ellipse_ctor(const gp_Ax2d &axis, double major_radius,
+inline std::unique_ptr<HandleGeom2dEllipse> Geom2dEllipse_ctor(const gp_Ax2d &axis, double major_radius,
                                                                  double minor_radius) {
-  return std::unique_ptr<HandleGeom2d_Ellipse>(
+  return std::unique_ptr<HandleGeom2dEllipse>(
       new opencascade::handle<Geom2d_Ellipse>(new Geom2d_Ellipse(axis, major_radius, minor_radius)));
 }
 
-inline std::unique_ptr<HandleGeom2d_Curve> ellipse_to_HandleGeom2d_Curve(const HandleGeom2d_Ellipse &ellipse_handle) {
-  return std::unique_ptr<HandleGeom2d_Curve>(new opencascade::handle<Geom2d_Curve>(ellipse_handle));
+inline std::unique_ptr<HandleGeom2dCurve> ellipse_to_HandleGeom2dCurve(const HandleGeom2dEllipse &ellipse_handle) {
+  return std::unique_ptr<HandleGeom2dCurve>(new opencascade::handle<Geom2d_Curve>(ellipse_handle));
 }
 
-inline std::unique_ptr<HandleGeom2d_TrimmedCurve> Geom2d_TrimmedCurve_ctor(const HandleGeom2d_Curve &curve, double u1,
+inline std::unique_ptr<HandleGeom2dTrimmedCurve> Geom2dTrimmedCurve_ctor(const HandleGeom2dCurve &curve, double u1,
                                                                            double u2) {
-  return std::unique_ptr<HandleGeom2d_TrimmedCurve>(
+  return std::unique_ptr<HandleGeom2dTrimmedCurve>(
       new opencascade::handle<Geom2d_TrimmedCurve>(new Geom2d_TrimmedCurve(curve, u1, u2)));
 }
 
-inline std::unique_ptr<HandleGeom2d_Curve>
-HandleGeom2d_TrimmedCurve_to_curve(const HandleGeom2d_TrimmedCurve &trimmed_curve) {
-  return std::unique_ptr<HandleGeom2d_Curve>(new opencascade::handle<Geom2d_Curve>(trimmed_curve));
+inline std::unique_ptr<HandleGeom2dCurve>
+HandleGeom2dTrimmedCurve_to_curve(const HandleGeom2dTrimmedCurve &trimmed_curve) {
+  return std::unique_ptr<HandleGeom2dCurve>(new opencascade::handle<Geom2d_Curve>(trimmed_curve));
 }
 
-inline std::unique_ptr<gp_Pnt2d> ellipse_value(const HandleGeom2d_Ellipse &ellipse, double u) {
+inline std::unique_ptr<gp_Pnt2d> ellipse_value(const HandleGeom2dEllipse &ellipse, double u) {
   return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(ellipse->Value(u)));
 }
 
@@ -199,9 +199,9 @@ inline std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeSegment_Value(const GC_Mak
   return std::unique_ptr<HandleGeomTrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(segment.Value()));
 }
 
-inline std::unique_ptr<HandleGeom2d_TrimmedCurve> GCE2d_MakeSegment_point_point(const gp_Pnt2d &p1,
+inline std::unique_ptr<HandleGeom2dTrimmedCurve> GCE2d_MakeSegment_point_point(const gp_Pnt2d &p1,
                                                                                 const gp_Pnt2d &p2) {
-  return std::unique_ptr<HandleGeom2d_TrimmedCurve>(
+  return std::unique_ptr<HandleGeom2dTrimmedCurve>(
       new opencascade::handle<Geom2d_TrimmedCurve>(GCE2d_MakeSegment(p1, p2)));
 }
 
@@ -255,12 +255,12 @@ inline std::unique_ptr<gp_Ax2d> gp_Ax2d_ctor(const gp_Pnt2d &point, const gp_Dir
 }
 
 // Law_Function stuff
-inline std::unique_ptr<HandleLawFunction> Law_Function_to_handle(std::unique_ptr<Law_Function> law_function) {
+inline std::unique_ptr<HandleLawFunction> LawFunction_to_handle(std::unique_ptr<Law_Function> law_function) {
   return std::unique_ptr<HandleLawFunction>(new HandleLawFunction(law_function.release()));
 }
 
 // Law_Interpol stuff
-inline std::unique_ptr<Law_Function> Law_Interpol_into_Law_Function(std::unique_ptr<Law_Interpol> law_interpol) {
+inline std::unique_ptr<Law_Function> LawInterpol_into_LawFunction(std::unique_ptr<Law_Interpol> law_interpol) {
   return std::unique_ptr<Law_Function>(law_interpol.release());
 }
 
@@ -374,7 +374,7 @@ inline IFSelect_ReturnStatus write_step(STEPControl_Writer &writer, rust::String
   return writer.Write(theFileName.c_str());
 }
 
-inline bool write_stl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::String theFileName) {
+inline bool WriteStl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::String theFileName) {
   return writer.Write(theShape, theFileName.c_str());
 }
 
@@ -455,15 +455,15 @@ inline void map_shapes_and_unique_ancestors(const TopoDS_Shape &S, const TopAbs_
   TopExp::MapShapesAndUniqueAncestors(S, TS, TA, M);
 }
 
-inline std::unique_ptr<gp_Dir> TColgp_Array1OfDir_Value(const TColgp_Array1OfDir &array, Standard_Integer index) {
+inline std::unique_ptr<gp_Dir> TColgpArray1OfDir_Value(const TColgp_Array1OfDir &array, Standard_Integer index) {
   return std::unique_ptr<gp_Dir>(new gp_Dir(array.Value(index)));
 }
 
-inline std::unique_ptr<gp_Pnt2d> TColgp_Array1OfPnt2d_Value(const TColgp_Array1OfPnt2d &array, Standard_Integer index) {
+inline std::unique_ptr<gp_Pnt2d> TColgpArray1OfPnt2d_Value(const TColgp_Array1OfPnt2d &array, Standard_Integer index) {
   return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(array.Value(index)));
 }
 
-inline std::unique_ptr<gp_Pnt> TColgp_HArray1OfPnt_Value(const TColgp_HArray1OfPnt &array, Standard_Integer index) {
+inline std::unique_ptr<gp_Pnt> TColgpHArray1OfPnt_Value(const TColgp_HArray1OfPnt &array, Standard_Integer index) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(array.Value(index)));
 }
 
@@ -472,22 +472,22 @@ inline void connect_edges_to_wires(Handle_TopTools_HSequenceOfShape &edges, cons
   ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, toler, shared, wires);
 }
 
-inline std::unique_ptr<Handle_TopTools_HSequenceOfShape> new_Handle_TopTools_HSequenceOfShape() {
+inline std::unique_ptr<Handle_TopTools_HSequenceOfShape> new_Handle_TopToolsHSequenceOfShape() {
   auto sequence = new TopTools_HSequenceOfShape();
   auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);
 
   return std::unique_ptr<Handle_TopTools_HSequenceOfShape>(handle);
 }
 
-inline void TopTools_HSequenceOfShape_append(Handle_TopTools_HSequenceOfShape &handle, const TopoDS_Shape &shape) {
+inline void TopToolsHSequenceOfShape_append(Handle_TopTools_HSequenceOfShape &handle, const TopoDS_Shape &shape) {
   handle->Append(shape);
 }
 
-inline Standard_Integer TopTools_HSequenceOfShape_length(const Handle_TopTools_HSequenceOfShape &handle) {
+inline Standard_Integer TopToolsHSequenceOfShape_length(const Handle_TopTools_HSequenceOfShape &handle) {
   return handle->Length();
 }
 
-inline const TopoDS_Shape &TopTools_HSequenceOfShape_value(const Handle_TopTools_HSequenceOfShape &handle,
+inline const TopoDS_Shape &TopToolsHSequenceOfShape_value(const Handle_TopTools_HSequenceOfShape &handle,
                                                            Standard_Integer index) {
   return handle->Value(index);
 }

@@ -2,7 +2,8 @@
 pub mod ffi {
     #[repr(u32)]
     #[derive(Debug)]
-    pub enum TopAbs_ShapeEnum {
+    #[cxx_name = "TopAbs_ShapeEnum"]
+    pub enum TopAbsShapeEnum {
         TopAbs_COMPOUND,
         TopAbs_COMPSOLID,
         TopAbs_SOLID,
@@ -15,7 +16,8 @@ pub mod ffi {
     }
 
     #[repr(u32)]
-    pub enum TopAbs_Orientation {
+    #[cxx_name = "TopAbs_Orientation"]
+    pub enum TopAbsOrientation {
         TopAbs_FORWARD,
         TopAbs_REVERSED,
         TopAbs_INTERNAL,
@@ -24,7 +26,8 @@ pub mod ffi {
 
     #[derive(Debug)]
     #[repr(u32)]
-    pub enum IFSelect_ReturnStatus {
+    #[cxx_name = "IFSelect_ReturnStatus"]
+    pub enum IFSelectReturnStatus {
         IFSelect_RetVoid,
         IFSelect_RetDone,
         IFSelect_RetError,
@@ -34,7 +37,8 @@ pub mod ffi {
 
     #[derive(Debug)]
     #[repr(u32)]
-    pub enum BOPAlgo_GlueEnum {
+    #[cxx_name = "BOPAlgo_GlueEnum"]
+    pub enum BOPAlgoGlueEnum {
         BOPAlgo_GlueOff,
         BOPAlgo_GlueShift,
         BOPAlgo_GlueFull,
@@ -42,7 +46,8 @@ pub mod ffi {
 
     #[derive(Debug)]
     #[repr(u32)]
-    pub enum GeomAbs_CurveType {
+    #[cxx_name = "GeomAbs_CurveType"]
+    pub enum GeomAbsCurveType {
         GeomAbs_Line,
         GeomAbs_Circle,
         GeomAbs_Ellipse,
@@ -56,7 +61,8 @@ pub mod ffi {
 
     #[repr(u32)]
     #[derive(Debug)]
-    pub enum GeomAbs_JoinType {
+    #[cxx_name = "GeomAbs_JoinType"]
+    pub enum GeomAbsJoinType {
         GeomAbs_Arc,
         GeomAbs_Tangent,
         GeomAbs_Intersection,
@@ -69,10 +75,11 @@ pub mod ffi {
         include!("opencascade-sys/include/wrapper.hxx");
 
         // Runtime
-        type Message_ProgressRange;
+        #[cxx_name = "Message_ProgressRange"]
+        type MessageProgressRange;
 
         #[cxx_name = "construct_unique"]
-        pub fn Message_ProgressRange_ctor() -> UniquePtr<Message_ProgressRange>;
+        pub fn MessageProgressRange_ctor() -> UniquePtr<MessageProgressRange>;
 
         // Handles
         type HandleStandardType;
@@ -82,19 +89,21 @@ pub mod ffi {
         type HandleGeomSurface;
         type HandleGeomBezierSurface;
         type HandleGeomPlane;
-        type HandleGeom2d_Curve;
-        type HandleGeom2d_Ellipse;
-        type HandleGeom2d_TrimmedCurve;
-        type HandleGeom_CylindricalSurface;
-        type Handle_TopTools_HSequenceOfShape;
+        type HandleGeom2dCurve;
+        type HandleGeom2dEllipse;
+        type HandleGeom2dTrimmedCurve;
+        type HandleGeomCylindricalSurface;
+        type Handle_TopToolsHSequenceOfShape;
         type HandleLawFunction;
 
         type Handle_TColgpHArray1OfPnt;
         pub fn new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(
-            array: UniquePtr<TColgp_HArray1OfPnt>,
+            array: UniquePtr<TColgpHArray1OfPnt>,
         ) -> UniquePtr<Handle_TColgpHArray1OfPnt>;
 
-        pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
+        #[cxx_name = "DynamicType"]
+        pub fn dynamic_type(surface: &HandleGeomSurface) -> &HandleStandardType;
+        #[cxx_name = "TypeName"]
         pub fn type_name(handle: &HandleStandardType) -> String;
 
         #[cxx_name = "construct_unique"]
@@ -103,7 +112,7 @@ pub mod ffi {
         ) -> UniquePtr<HandleGeomCurve>;
 
         #[cxx_name = "construct_unique"]
-        pub fn new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
+        pub fn new_HandleGeomCurve_from_HandleGeomTrimmedCurve(
             trimmed_curve_handle: &HandleGeomTrimmedCurve,
         ) -> UniquePtr<HandleGeomCurve>;
 
@@ -111,211 +120,250 @@ pub mod ffi {
             geom_surface_handle: &HandleGeomSurface,
         ) -> UniquePtr<HandleGeomPlane>;
 
-        pub fn IsNull(self: &HandleStandardType) -> bool;
-        pub fn IsNull(self: &HandleGeomCurve) -> bool;
-        pub fn IsNull(self: &HandleGeomTrimmedCurve) -> bool;
-        pub fn IsNull(self: &HandleGeomSurface) -> bool;
-        pub fn IsNull(self: &HandleGeomBezierSurface) -> bool;
-        pub fn IsNull(self: &HandleGeomPlane) -> bool;
-        pub fn IsNull(self: &HandleGeom2d_Curve) -> bool;
-        pub fn IsNull(self: &HandleGeom2d_Ellipse) -> bool;
-        pub fn IsNull(self: &HandleGeom2d_TrimmedCurve) -> bool;
-        pub fn IsNull(self: &HandleGeom_CylindricalSurface) -> bool;
-        pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleStandardType) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleGeomCurve) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleGeomTrimmedCurve) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleGeomSurface) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleGeomBezierSurface) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleGeomPlane) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleGeom2dCurve) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleGeom2dEllipse) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleGeom2dTrimmedCurve) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &HandleGeomCylindricalSurface) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &Handle_TopToolsHSequenceOfShape) -> bool;
 
         pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
 
         // Collections
-        type TopTools_ListOfShape;
+        #[cxx_name = "TopTools_ListOfShape"]
+        type TopToolsListOfShape;
 
         #[cxx_name = "construct_unique"]
-        pub fn new_list_of_shape() -> UniquePtr<TopTools_ListOfShape>;
-        pub fn shape_list_append_face(list: Pin<&mut TopTools_ListOfShape>, face: &TopoDS_Face);
-        pub fn Size(self: &TopTools_ListOfShape) -> i32;
+        pub fn new_list_of_shape() -> UniquePtr<TopToolsListOfShape>;
+        pub fn shape_list_append_face(list: Pin<&mut TopToolsListOfShape>, face: &TopoDS_Face);
+        #[cxx_name = "Size"]
+        pub fn size(self: &TopToolsListOfShape) -> i32;
 
         #[cxx_name = "list_to_vector"]
         pub fn shape_list_to_vector(
-            list: &TopTools_ListOfShape,
+            list: &TopToolsListOfShape,
         ) -> UniquePtr<CxxVector<TopoDS_Shape>>;
 
-        type TopTools_IndexedMapOfShape;
+        #[cxx_name = "TopTools_IndexedMapOfShape"]
+        type TopToolsIndexedMapOfShape;
 
         #[cxx_name = "construct_unique"]
-        pub fn new_indexed_map_of_shape() -> UniquePtr<TopTools_IndexedMapOfShape>;
-        pub fn Extent(self: &TopTools_IndexedMapOfShape) -> i32;
-        pub fn FindKey(self: &TopTools_IndexedMapOfShape, index: i32) -> &TopoDS_Shape;
+        pub fn new_indexed_map_of_shape() -> UniquePtr<TopToolsIndexedMapOfShape>;
+        #[cxx_name = "Extent"]
+        pub fn extent(self: &TopToolsIndexedMapOfShape) -> i32;
+        #[cxx_name = "FindKey"]
+        pub fn find_key(self: &TopToolsIndexedMapOfShape, index: i32) -> &TopoDS_Shape;
 
         pub fn map_shapes(
             shape: &TopoDS_Shape,
-            shape_type: TopAbs_ShapeEnum,
-            shape_map: Pin<&mut TopTools_IndexedMapOfShape>,
+            shape_type: TopAbsShapeEnum,
+            shape_map: Pin<&mut TopToolsIndexedMapOfShape>,
         );
 
-        type TopTools_IndexedDataMapOfShapeListOfShape;
+        #[cxx_name = "TopTools_IndexedDataMapOfShapeListOfShape"]
+        type TopToolsIndexedDataMapOfShapeListOfShape;
 
         #[cxx_name = "construct_unique"]
         pub fn new_indexed_data_map_of_shape_list_of_shape(
-        ) -> UniquePtr<TopTools_IndexedDataMapOfShapeListOfShape>;
-        pub fn Extent(self: &TopTools_IndexedDataMapOfShapeListOfShape) -> i32;
-        pub fn FindKey(
-            self: &TopTools_IndexedDataMapOfShapeListOfShape,
+        ) -> UniquePtr<TopToolsIndexedDataMapOfShapeListOfShape>;
+        #[cxx_name = "Extent"]
+        pub fn extent(self: &TopToolsIndexedDataMapOfShapeListOfShape) -> i32;
+        #[cxx_name = "FindKey"]
+        pub fn find_key(
+            self: &TopToolsIndexedDataMapOfShapeListOfShape,
             index: i32,
         ) -> &TopoDS_Shape;
-        pub fn FindFromIndex(
-            self: &TopTools_IndexedDataMapOfShapeListOfShape,
+        #[cxx_name = "FindFromIndex"]
+        pub fn find_from_index(
+            self: &TopToolsIndexedDataMapOfShapeListOfShape,
             index: i32,
-        ) -> &TopTools_ListOfShape;
-        pub fn FindIndex(
-            self: &TopTools_IndexedDataMapOfShapeListOfShape,
+        ) -> &TopToolsListOfShape;
+        #[cxx_name = "FindIndex"]
+        pub fn find_index(
+            self: &TopToolsIndexedDataMapOfShapeListOfShape,
             shape: &TopoDS_Shape,
         ) -> i32;
-        pub fn FindFromKey<'a>(
-            self: &'a TopTools_IndexedDataMapOfShapeListOfShape,
+        #[cxx_name = "FindFromKey"]
+        pub fn find_from_key<'a>(
+            self: &'a TopToolsIndexedDataMapOfShapeListOfShape,
             shape: &'a TopoDS_Shape,
-        ) -> &'a TopTools_ListOfShape;
+        ) -> &'a TopToolsListOfShape;
 
         pub fn map_shapes_and_ancestors(
             shape: &TopoDS_Shape,
-            parent_type: TopAbs_ShapeEnum,
-            child_type: TopAbs_ShapeEnum,
-            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
+            parent_type: TopAbsShapeEnum,
+            child_type: TopAbsShapeEnum,
+            shape_data_map: Pin<&mut TopToolsIndexedDataMapOfShapeListOfShape>,
         );
         pub fn map_shapes_and_unique_ancestors(
             shape: &TopoDS_Shape,
-            parent_type: TopAbs_ShapeEnum,
-            child_type: TopAbs_ShapeEnum,
-            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
+            parent_type: TopAbsShapeEnum,
+            child_type: TopAbsShapeEnum,
+            shape_data_map: Pin<&mut TopToolsIndexedDataMapOfShapeListOfShape>,
         );
 
-        type TColgp_Array1OfDir;
-        #[cxx_name = "construct_unique"]
-        pub fn TColgp_Array1OfDir_ctor(
-            lower_bound: i32,
-            upper_bound: i32,
-        ) -> UniquePtr<TColgp_Array1OfDir>;
-        pub fn Length(self: &TColgp_Array1OfDir) -> i32;
-        pub fn TColgp_Array1OfDir_Value(
-            array: &TColgp_Array1OfDir,
-            index: i32,
-        ) -> UniquePtr<gp_Dir>;
+        #[cxx_name = "TColgp_Array1OfDir"]
+        type TColgpArray1OfDir;
 
-        type TColgp_Array1OfPnt2d;
         #[cxx_name = "construct_unique"]
-        pub fn TColgp_Array1OfPnt2d_ctor(
+        pub fn TColgpArray1OfDir_ctor(
             lower_bound: i32,
             upper_bound: i32,
-        ) -> UniquePtr<TColgp_Array1OfPnt2d>;
-        pub fn Length(self: &TColgp_Array1OfPnt2d) -> i32;
-        pub fn TColgp_Array1OfPnt2d_Value(
-            array: &TColgp_Array1OfPnt2d,
+        ) -> UniquePtr<TColgpArray1OfDir>;
+        #[cxx_name = "Length"]
+        pub fn length(self: &TColgpArray1OfDir) -> i32;
+        pub fn TColgpArray1OfDir_Value(array: &TColgpArray1OfDir, index: i32) -> UniquePtr<gp_Dir>;
+
+        #[cxx_name = "TColgp_Array1OfPnt2d"]
+        type TColgpArray1OfPnt2d;
+        #[cxx_name = "construct_unique"]
+        pub fn TColgpArray1OfPnt2d_ctor(
+            lower_bound: i32,
+            upper_bound: i32,
+        ) -> UniquePtr<TColgpArray1OfPnt2d>;
+        #[cxx_name = "Length"]
+        pub fn length(self: &TColgpArray1OfPnt2d) -> i32;
+        pub fn TColgpArray1OfPnt2d_Value(
+            array: &TColgpArray1OfPnt2d,
             index: i32,
         ) -> UniquePtr<gp_Pnt2d>;
-        pub fn SetValue(self: Pin<&mut TColgp_Array1OfPnt2d>, index: i32, item: &gp_Pnt2d);
+        #[cxx_name = "SetValue"]
+        pub fn set_value(self: Pin<&mut TColgpArray1OfPnt2d>, index: i32, item: &gp_Pnt2d);
 
-        type TColgp_Array2OfPnt;
+        #[cxx_name = "TColgp_Array2OfPnt"]
+        type TColgpArray2OfPnt;
         #[cxx_name = "construct_unique"]
-        pub fn TColgp_Array2OfPnt_ctor(
+        pub fn TColgpArray2OfPnt_ctor(
             row_lower: i32,
             row_upper: i32,
             column_lower: i32,
             column_upper: i32,
-        ) -> UniquePtr<TColgp_Array2OfPnt>;
-        pub fn SetValue(self: Pin<&mut TColgp_Array2OfPnt>, row: i32, column: i32, item: &gp_Pnt);
+        ) -> UniquePtr<TColgpArray2OfPnt>;
+        #[cxx_name = "SetValue"]
+        pub fn set_value(self: Pin<&mut TColgpArray2OfPnt>, row: i32, column: i32, item: &gp_Pnt);
 
-        type TColgp_HArray1OfPnt;
+        #[cxx_name = "TColgp_HArray1OfPnt"]
+        type TColgpHArray1OfPnt;
         #[cxx_name = "construct_unique"]
-        pub fn TColgp_HArray1OfPnt_ctor(
+        pub fn TColgpHArray1OfPnt_ctor(
             lower_bound: i32,
             upper_bound: i32,
-        ) -> UniquePtr<TColgp_HArray1OfPnt>;
-        pub fn Length(self: &TColgp_HArray1OfPnt) -> i32;
-        pub fn TColgp_HArray1OfPnt_Value(
-            array: &TColgp_HArray1OfPnt,
+        ) -> UniquePtr<TColgpHArray1OfPnt>;
+        #[cxx_name = "Length"]
+        pub fn length(self: &TColgpHArray1OfPnt) -> i32;
+        pub fn TColgpHArray1OfPnt_Value(
+            array: &TColgpHArray1OfPnt,
             index: i32,
         ) -> UniquePtr<gp_Pnt>;
-        pub fn SetValue(self: Pin<&mut TColgp_HArray1OfPnt>, index: i32, item: &gp_Pnt);
+        #[cxx_name = "SetValue"]
+        pub fn set_value(self: Pin<&mut TColgpHArray1OfPnt>, index: i32, item: &gp_Pnt);
 
-        type TopTools_HSequenceOfShape;
+        #[cxx_name = "TopTools_HSequenceOfShape"]
+        type TopToolsHSequenceOfShape;
 
-        pub fn Length(self: &TopTools_HSequenceOfShape) -> i32;
+        #[cxx_name = "Length"]
+        pub fn length(self: &TopToolsHSequenceOfShape) -> i32;
 
-        pub fn new_Handle_TopTools_HSequenceOfShape() -> UniquePtr<Handle_TopTools_HSequenceOfShape>;
-        pub fn TopTools_HSequenceOfShape_append(
-            handle: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+        pub fn new_Handle_TopToolsHSequenceOfShape() -> UniquePtr<Handle_TopToolsHSequenceOfShape>;
+        pub fn TopToolsHSequenceOfShape_append(
+            handle: Pin<&mut Handle_TopToolsHSequenceOfShape>,
             shape: &TopoDS_Shape,
         );
 
-        pub fn TopTools_HSequenceOfShape_length(handle: &Handle_TopTools_HSequenceOfShape) -> i32;
-        pub fn TopTools_HSequenceOfShape_value(
-            handle: &Handle_TopTools_HSequenceOfShape,
+        pub fn TopToolsHSequenceOfShape_length(handle: &Handle_TopToolsHSequenceOfShape) -> i32;
+        pub fn TopToolsHSequenceOfShape_value(
+            handle: &Handle_TopToolsHSequenceOfShape,
             index: i32,
         ) -> &TopoDS_Shape;
 
         #[cxx_name = "handle_try_deref"]
-        pub fn Handle_TopTools_HSequenceOfShape_Get(
-            handle: &Handle_TopTools_HSequenceOfShape,
-        ) -> Result<&TopTools_HSequenceOfShape>;
+        pub fn Handle_TopToolsHSequenceOfShape_Get(
+            handle: &Handle_TopToolsHSequenceOfShape,
+        ) -> Result<&TopToolsHSequenceOfShape>;
 
         // Law Function
-        type Law_Function;
+        #[cxx_name = "Law_Function"]
+        type LawFunction;
 
-        pub fn Law_Function_to_handle(law: UniquePtr<Law_Function>)
-            -> UniquePtr<HandleLawFunction>;
+        pub fn LawFunction_to_handle(law: UniquePtr<LawFunction>) -> UniquePtr<HandleLawFunction>;
 
         // Law Interpol
-
-        type Law_Interpol;
+        #[cxx_name = "Law_Interpol"]
+        type LawInterpol;
 
         #[cxx_name = "construct_unique"]
-        pub fn Law_Interpol_ctor() -> UniquePtr<Law_Interpol>;
-        pub fn Law_Interpol_into_Law_Function(
-            interpol: UniquePtr<Law_Interpol>,
-        ) -> UniquePtr<Law_Function>;
-        pub fn Set(self: Pin<&mut Law_Interpol>, array: &TColgp_Array1OfPnt2d, periodic: bool);
+        pub fn LawInterpol_ctor() -> UniquePtr<LawInterpol>;
+        pub fn LawInterpol_into_LawFunction(
+            interpol: UniquePtr<LawInterpol>,
+        ) -> UniquePtr<LawFunction>;
+        #[cxx_name = "Set"]
+        pub fn set(self: Pin<&mut LawInterpol>, array: &TColgpArray1OfPnt2d, periodic: bool);
 
         // Geometry
-        type Geom_TrimmedCurve;
-        type Geom_CylindricalSurface;
-        type Geom_BezierSurface;
-        type Geom2d_Ellipse;
-        type Geom2d_Curve;
-        type Geom2d_TrimmedCurve;
+        #[cxx_name = "Geom_TrimmedCurve"]
+        type GeomTrimmedCurve;
+        #[cxx_name = "Geom_CylindricalSurface"]
+        type GeomCylindricalSurface;
+        #[cxx_name = "Geom_BezierSurface"]
+        type GeomBezierSurface;
+        #[cxx_name = "Geom2d_Ellipse"]
+        type Geom2dEllipse;
+        #[cxx_name = "Geom2d_Curve"]
+        type Geom2dCurve;
+        #[cxx_name = "Geom2d_TrimmedCurve"]
+        type Geom2dTrimmedCurve;
 
         pub fn handle_geom_plane_location(plane: &HandleGeomPlane) -> &gp_Pnt;
 
-        pub fn Geom_CylindricalSurface_ctor(
+        pub fn GeomCylindricalSurface_ctor(
             axis: &gp_Ax3,
             radius: f64,
-        ) -> UniquePtr<HandleGeom_CylindricalSurface>;
+        ) -> UniquePtr<HandleGeomCylindricalSurface>;
         pub fn cylinder_to_surface(
-            cylinder_handle: &HandleGeom_CylindricalSurface,
+            cylinder_handle: &HandleGeomCylindricalSurface,
         ) -> UniquePtr<HandleGeomSurface>;
 
-        pub fn Geom_BezierSurface_ctor(
-            poles: &TColgp_Array2OfPnt,
+        pub fn GeomBezierSurface_ctor(
+            poles: &TColgpArray2OfPnt,
         ) -> UniquePtr<HandleGeomBezierSurface>;
         pub fn bezier_to_surface(
             bezier_handle: &HandleGeomBezierSurface,
         ) -> UniquePtr<HandleGeomSurface>;
 
-        pub fn Geom2d_Ellipse_ctor(
+        pub fn Geom2dEllipse_ctor(
             axis: &gp_Ax2d,
             major_radius: f64,
             minor_radius: f64,
-        ) -> UniquePtr<HandleGeom2d_Ellipse>;
-        pub fn ellipse_to_HandleGeom2d_Curve(
-            ellipse: &HandleGeom2d_Ellipse,
-        ) -> UniquePtr<HandleGeom2d_Curve>;
-        pub fn Geom2d_TrimmedCurve_ctor(
-            curve_handle: &HandleGeom2d_Curve,
+        ) -> UniquePtr<HandleGeom2dEllipse>;
+        pub fn ellipse_to_HandleGeom2dCurve(
+            ellipse: &HandleGeom2dEllipse,
+        ) -> UniquePtr<HandleGeom2dCurve>;
+        pub fn Geom2dTrimmedCurve_ctor(
+            curve_handle: &HandleGeom2dCurve,
             u1: f64,
             u2: f64,
-        ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
-        pub fn HandleGeom2d_TrimmedCurve_to_curve(
-            trimmed_curve: &HandleGeom2d_TrimmedCurve,
-        ) -> UniquePtr<HandleGeom2d_Curve>;
+        ) -> UniquePtr<HandleGeom2dTrimmedCurve>;
+        pub fn HandleGeom2dTrimmedCurve_to_curve(
+            trimmed_curve: &HandleGeom2dTrimmedCurve,
+        ) -> UniquePtr<HandleGeom2dCurve>;
 
-        pub fn ellipse_value(ellipse: &HandleGeom2d_Ellipse, u: f64) -> UniquePtr<gp_Pnt2d>;
+        pub fn ellipse_value(ellipse: &HandleGeom2dEllipse, u: f64) -> UniquePtr<gp_Pnt2d>;
 
         // Points
         type gp_Pnt;
@@ -324,30 +372,42 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn new_point(x: f64, y: f64, z: f64) -> UniquePtr<gp_Pnt>;
 
-        pub fn X(self: &gp_Pnt) -> f64;
-        pub fn Y(self: &gp_Pnt) -> f64;
-        pub fn Z(self: &gp_Pnt) -> f64;
-        pub fn Distance(self: &gp_Pnt, other: &gp_Pnt) -> f64;
-        pub fn Transform(self: Pin<&mut gp_Pnt>, transform: &gp_Trsf);
+        #[cxx_name = "X"]
+        pub fn x(self: &gp_Pnt) -> f64;
+        #[cxx_name = "Y"]
+        pub fn y(self: &gp_Pnt) -> f64;
+        #[cxx_name = "Z"]
+        pub fn z(self: &gp_Pnt) -> f64;
+        #[cxx_name = "Distance"]
+        pub fn distance(self: &gp_Pnt, other: &gp_Pnt) -> f64;
+        #[cxx_name = "Transform"]
+        pub fn transform(self: Pin<&mut gp_Pnt>, transform: &gp_Trsf);
 
         #[cxx_name = "construct_unique"]
         pub fn new_point_2d(x: f64, y: f64) -> UniquePtr<gp_Pnt2d>;
 
-        pub fn X(self: &gp_Pnt2d) -> f64;
-        pub fn Y(self: &gp_Pnt2d) -> f64;
-        pub fn Distance(self: &gp_Pnt2d, other: &gp_Pnt2d) -> f64;
+        #[cxx_name = "X"]
+        pub fn x(self: &gp_Pnt2d) -> f64;
+        #[cxx_name = "Y"]
+        pub fn y(self: &gp_Pnt2d) -> f64;
+        #[cxx_name = "Distance"]
+        pub fn distance(self: &gp_Pnt2d, other: &gp_Pnt2d) -> f64;
 
         type gp_Vec;
 
         #[cxx_name = "construct_unique"]
         pub fn new_vec(x: f64, y: f64, z: f64) -> UniquePtr<gp_Vec>;
 
-        pub fn X(self: &gp_Vec) -> f64;
-        pub fn Y(self: &gp_Vec) -> f64;
-        pub fn Z(self: &gp_Vec) -> f64;
+        #[cxx_name = "X"]
+        pub fn x(self: &gp_Vec) -> f64;
+        #[cxx_name = "Y"]
+        pub fn y(self: &gp_Vec) -> f64;
+        #[cxx_name = "Z"]
+        pub fn z(self: &gp_Vec) -> f64;
 
         // Edge types
-        type GeomAbs_CurveType;
+        #[cxx_name = "GeomAbs_CurveType"]
+        type GeomAbsCurveType;
 
         // Segments
         type GC_MakeSegment;
@@ -360,7 +420,7 @@ pub mod ffi {
         pub fn GCE2d_MakeSegment_point_point(
             p1: &gp_Pnt2d,
             p2: &gp_Pnt2d,
-        ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
+        ) -> UniquePtr<HandleGeom2dTrimmedCurve>;
 
         // Lines
         type gp_Lin;
@@ -454,13 +514,19 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Shape_to_owned(shape: &TopoDS_Shape) -> UniquePtr<TopoDS_Shape>;
 
-        pub fn IsNull(self: &TopoDS_Shape) -> bool;
-        pub fn IsEqual(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
-        pub fn ShapeType(self: &TopoDS_Shape) -> TopAbs_ShapeEnum;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &TopoDS_Shape) -> bool;
+        #[cxx_name = "IsEqual"]
+        pub fn is_equal(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
+        #[cxx_name = "ShapeType"]
+        pub fn shape_type(self: &TopoDS_Shape) -> TopAbsShapeEnum;
 
-        type TopAbs_Orientation;
-        pub fn Orientation(self: &TopoDS_Shape) -> TopAbs_Orientation;
-        pub fn Orientation(self: &TopoDS_Face) -> TopAbs_Orientation;
+        #[cxx_name = "TopAbs_Orientation"]
+        type TopAbsOrientation;
+        #[cxx_name = "Orientation"]
+        pub fn orientation(self: &TopoDS_Shape) -> TopAbsOrientation;
+        #[cxx_name = "Orientation"]
+        pub fn orientation(self: &TopoDS_Face) -> TopAbsOrientation;
 
         // Compound Shapes
         type TopoDS_Compound;
@@ -483,9 +549,12 @@ pub mod ffi {
         pub fn BRep_Builder_ctor() -> UniquePtr<BRep_Builder>;
 
         pub fn BRep_Builder_upcast_to_topods_builder(builder: &BRep_Builder) -> &TopoDS_Builder;
-        pub fn MakeCompound(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Compound>);
-        pub fn MakeShell(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Shell>);
-        pub fn Add(self: &TopoDS_Builder, shape: Pin<&mut TopoDS_Shape>, compound: &TopoDS_Shape);
+        #[cxx_name = "MakeCompound"]
+        pub fn make_compound(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Compound>);
+        #[cxx_name = "MakeShell"]
+        pub fn make_shell(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Shell>);
+        #[cxx_name = "Add"]
+        pub fn add(self: &TopoDS_Builder, shape: Pin<&mut TopoDS_Shape>, compound: &TopoDS_Shape);
 
         // BRepBuilder
         type BRepBuilderAPI_MakeVertex;
@@ -494,7 +563,8 @@ pub mod ffi {
             point: &gp_Pnt,
         ) -> UniquePtr<BRepBuilderAPI_MakeVertex>;
 
-        pub fn Vertex(self: Pin<&mut BRepBuilderAPI_MakeVertex>) -> &TopoDS_Vertex;
+        #[cxx_name = "Vertex"]
+        pub fn vertex(self: Pin<&mut BRepBuilderAPI_MakeVertex>) -> &TopoDS_Vertex;
 
         type BRepBuilderAPI_MakeEdge;
 
@@ -516,14 +586,18 @@ pub mod ffi {
 
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeEdge_CurveSurface2d(
-            curve_handle: &HandleGeom2d_Curve,
+            curve_handle: &HandleGeom2dCurve,
             surface_handle: &HandleGeomSurface,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
 
-        pub fn Vertex1(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Vertex;
-        pub fn Edge(self: Pin<&mut BRepBuilderAPI_MakeEdge>) -> &TopoDS_Edge;
-        pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeEdge>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepBuilderAPI_MakeEdge) -> bool;
+        #[cxx_name = "Vertex1"]
+        pub fn vertex1(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Vertex;
+        #[cxx_name = "Edge"]
+        pub fn edge(self: Pin<&mut BRepBuilderAPI_MakeEdge>) -> &TopoDS_Edge;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepBuilderAPI_MakeEdge>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepBuilderAPI_MakeEdge) -> bool;
 
         type BRepBuilderAPI_MakeWire;
 
@@ -543,10 +617,14 @@ pub mod ffi {
             edge_3: &TopoDS_Edge,
         ) -> UniquePtr<BRepBuilderAPI_MakeWire>;
 
-        pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Shape;
-        pub fn Wire(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Wire;
-        pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeWire>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepBuilderAPI_MakeWire) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Shape;
+        #[cxx_name = "Wire"]
+        pub fn wire(self: Pin<&mut BRepBuilderAPI_MakeWire>) -> &TopoDS_Wire;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepBuilderAPI_MakeWire>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepBuilderAPI_MakeWire) -> bool;
 
         type BRepBuilderAPI_MakeFace;
 
@@ -561,20 +639,27 @@ pub mod ffi {
             edge_tolerance: f64,
         ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
 
-        pub fn Face(self: &BRepBuilderAPI_MakeFace) -> &TopoDS_Face;
-        pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeFace>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeFace>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepBuilderAPI_MakeFace) -> bool;
+        #[cxx_name = "Face"]
+        pub fn face(self: &BRepBuilderAPI_MakeFace) -> &TopoDS_Face;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepBuilderAPI_MakeFace>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepBuilderAPI_MakeFace>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepBuilderAPI_MakeFace) -> bool;
 
         // BRepAdaptor
         type BRepAdaptor_Curve;
 
         #[cxx_name = "construct_unique"]
         pub fn BRepAdaptor_Curve_ctor(edge: &TopoDS_Edge) -> UniquePtr<BRepAdaptor_Curve>;
-        pub fn FirstParameter(self: &BRepAdaptor_Curve) -> f64;
-        pub fn LastParameter(self: &BRepAdaptor_Curve) -> f64;
+        #[cxx_name = "FirstParameter"]
+        pub fn first_parameter(self: &BRepAdaptor_Curve) -> f64;
+        #[cxx_name = "LastParameter"]
+        pub fn last_parameter(self: &BRepAdaptor_Curve) -> f64;
         pub fn BRepAdaptor_Curve_value(curve: &BRepAdaptor_Curve, u: f64) -> UniquePtr<gp_Pnt>;
-        pub fn GetType(self: &BRepAdaptor_Curve) -> GeomAbs_CurveType;
+        #[cxx_name = "GetType"]
+        pub fn get_type(self: &BRepAdaptor_Curve) -> GeomAbsCurveType;
 
         // Primitives
         type BRepPrimAPI_MakePrism;
@@ -587,9 +672,12 @@ pub mod ffi {
             canonize: bool,
         ) -> UniquePtr<BRepPrimAPI_MakePrism>;
 
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakePrism>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakePrism) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepPrimAPI_MakePrism>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepPrimAPI_MakePrism) -> bool;
 
         type BRepFeat_MakeDPrism;
 
@@ -608,7 +696,8 @@ pub mod ffi {
 
         #[cxx_name = "Perform"]
         pub fn perform_with_height(self: Pin<&mut BRepFeat_MakeDPrism>, height: f64);
-        pub fn Shape(self: Pin<&mut BRepFeat_MakeDPrism>) -> &TopoDS_Shape;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepFeat_MakeDPrism>) -> &TopoDS_Shape;
 
         type BRepPrimAPI_MakeRevol;
 
@@ -620,15 +709,20 @@ pub mod ffi {
             copy: bool,
         ) -> UniquePtr<BRepPrimAPI_MakeRevol>;
 
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeRevol>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeRevol>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeRevol) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepPrimAPI_MakeRevol>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepPrimAPI_MakeRevol>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepPrimAPI_MakeRevol) -> bool;
 
         #[rust_name = "add_edge"]
-        pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, edge: &TopoDS_Edge);
+        #[cxx_name = "Add"]
+        pub fn add(self: Pin<&mut BRepBuilderAPI_MakeWire>, edge: &TopoDS_Edge);
 
         #[rust_name = "add_wire"]
-        pub fn Add(self: Pin<&mut BRepBuilderAPI_MakeWire>, wire: &TopoDS_Wire);
+        #[cxx_name = "Add"]
+        pub fn add(self: Pin<&mut BRepBuilderAPI_MakeWire>, wire: &TopoDS_Wire);
 
         type BRepPrimAPI_MakeCylinder;
 
@@ -639,9 +733,12 @@ pub mod ffi {
             height: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeCylinder>;
 
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCylinder>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeCylinder>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeCylinder) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepPrimAPI_MakeCylinder>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepPrimAPI_MakeCylinder>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepPrimAPI_MakeCylinder) -> bool;
 
         type BRepPrimAPI_MakeBox;
 
@@ -653,9 +750,12 @@ pub mod ffi {
             dz: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeBox>;
 
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeBox>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeBox>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeBox) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepPrimAPI_MakeBox>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepPrimAPI_MakeBox>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepPrimAPI_MakeBox) -> bool;
 
         type BRepPrimAPI_MakeSphere;
 
@@ -666,9 +766,12 @@ pub mod ffi {
             angle_1: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeSphere>;
 
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeSphere>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeSphere>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeSphere) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepPrimAPI_MakeSphere>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepPrimAPI_MakeSphere>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepPrimAPI_MakeSphere) -> bool;
 
         type BRepPrimAPI_MakeCone;
 
@@ -681,9 +784,12 @@ pub mod ffi {
             angle: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeCone>;
 
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCone>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeCone>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeCone) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepPrimAPI_MakeCone>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepPrimAPI_MakeCone>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepPrimAPI_MakeCone) -> bool;
 
         type BRepPrimAPI_MakeTorus;
 
@@ -697,9 +803,12 @@ pub mod ffi {
             angle_3: f64,
         ) -> UniquePtr<BRepPrimAPI_MakeTorus>;
 
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeTorus>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeTorus>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeTorus) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepPrimAPI_MakeTorus>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepPrimAPI_MakeTorus>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepPrimAPI_MakeTorus) -> bool;
 
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
@@ -713,18 +822,22 @@ pub mod ffi {
         ) -> UniquePtr<BRepFilletAPI_MakeFillet>;
 
         #[rust_name = "add_edge"]
-        pub fn Add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
+        #[cxx_name = "Add"]
+        pub fn add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
 
         #[rust_name = "variable_add_edge"]
         pub fn Add(
             self: Pin<&mut BRepFilletAPI_MakeFillet>,
-            radius_values: &TColgp_Array1OfPnt2d,
+            radius_values: &TColgpArray1OfPnt2d,
             edge: &TopoDS_Edge,
         );
 
-        pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepFilletAPI_MakeFillet) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepFilletAPI_MakeFillet>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepFilletAPI_MakeFillet) -> bool;
 
         type BRepFilletAPI_MakeFillet2d;
 
@@ -752,9 +865,12 @@ pub mod ffi {
             distance: f64,
             angle: f64,
         ) -> UniquePtr<TopoDS_Edge>;
-        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet2d>, progress: &Message_ProgressRange);
-        pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet2d>) -> &TopoDS_Shape;
-        pub fn IsDone(self: &BRepFilletAPI_MakeFillet2d) -> bool;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepFilletAPI_MakeFillet2d>, progress: &MessageProgressRange);
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepFilletAPI_MakeFillet2d>) -> &TopoDS_Shape;
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepFilletAPI_MakeFillet2d) -> bool;
 
         // Chamfers
         type BRepFilletAPI_MakeChamfer;
@@ -765,10 +881,14 @@ pub mod ffi {
         ) -> UniquePtr<BRepFilletAPI_MakeChamfer>;
 
         #[rust_name = "add_edge"]
-        pub fn Add(self: Pin<&mut BRepFilletAPI_MakeChamfer>, distance: f64, edge: &TopoDS_Edge);
-        pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeChamfer>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeChamfer>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepFilletAPI_MakeChamfer) -> bool;
+        #[cxx_name = "Add"]
+        pub fn add(self: Pin<&mut BRepFilletAPI_MakeChamfer>, distance: f64, edge: &TopoDS_Edge);
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepFilletAPI_MakeChamfer>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepFilletAPI_MakeChamfer>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepFilletAPI_MakeChamfer) -> bool;
 
         // Offset
         type BRepOffsetAPI_MakeOffset;
@@ -776,22 +896,27 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn BRepOffsetAPI_MakeOffset_face_ctor(
             face: &TopoDS_Face,
-            join: GeomAbs_JoinType,
+            join: GeomAbsJoinType,
         ) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
 
         #[cxx_name = "construct_unique"]
         pub fn BRepOffsetAPI_MakeOffset_wire_ctor(
             wire: &TopoDS_Wire,
-            join: GeomAbs_JoinType,
+            join: GeomAbsJoinType,
         ) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
 
-        pub fn Perform(self: Pin<&mut BRepOffsetAPI_MakeOffset>, offset: f64, alt: f64);
+        #[cxx_name = "Perform"]
+        pub fn perform(self: Pin<&mut BRepOffsetAPI_MakeOffset>, offset: f64, alt: f64);
 
-        pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeOffset>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepOffsetAPI_MakeOffset>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepOffsetAPI_MakeOffset) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepOffsetAPI_MakeOffset>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepOffsetAPI_MakeOffset>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepOffsetAPI_MakeOffset) -> bool;
 
-        type GeomAbs_JoinType;
+        #[cxx_name = "GeomAbs_JoinType"]
+        type GeomAbsJoinType;
 
         // Solids
         type BRepOffsetAPI_MakeThickSolid;
@@ -802,16 +927,15 @@ pub mod ffi {
         pub fn MakeThickSolidByJoin(
             make_thick_solid: Pin<&mut BRepOffsetAPI_MakeThickSolid>,
             shape: &TopoDS_Shape,
-            closing_faces: &TopTools_ListOfShape,
+            closing_faces: &TopToolsListOfShape,
             offset: f64,
             tolerance: f64,
         );
-        pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeThickSolid>) -> &TopoDS_Shape;
-        pub fn Build(
-            self: Pin<&mut BRepOffsetAPI_MakeThickSolid>,
-            progress: &Message_ProgressRange,
-        );
-        pub fn IsDone(self: &BRepOffsetAPI_MakeThickSolid) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepOffsetAPI_MakeThickSolid>) -> &TopoDS_Shape;
+        pub fn Build(self: Pin<&mut BRepOffsetAPI_MakeThickSolid>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepOffsetAPI_MakeThickSolid) -> bool;
 
         // Sweeps
         type BRepOffsetAPI_MakePipe;
@@ -822,7 +946,8 @@ pub mod ffi {
             profile: &TopoDS_Shape,
         ) -> UniquePtr<BRepOffsetAPI_MakePipe>;
 
-        pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakePipe>) -> &TopoDS_Shape;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepOffsetAPI_MakePipe>) -> &TopoDS_Shape;
 
         // Sweeps with a law function
         type BRepOffsetAPI_MakePipeShell;
@@ -832,7 +957,8 @@ pub mod ffi {
             spine: &TopoDS_Wire,
         ) -> UniquePtr<BRepOffsetAPI_MakePipeShell>;
 
-        pub fn SetMode(self: Pin<&mut BRepOffsetAPI_MakePipeShell>, is_frenet: bool);
+        #[cxx_name = "SetMode"]
+        pub fn set_mode(self: Pin<&mut BRepOffsetAPI_MakePipeShell>, is_frenet: bool);
 
         pub fn Add(
             self: Pin<&mut BRepOffsetAPI_MakePipeShell>,
@@ -849,9 +975,12 @@ pub mod ffi {
             with_correction: bool,
         );
 
-        pub fn Build(self: Pin<&mut BRepOffsetAPI_MakePipeShell>, progress: &Message_ProgressRange);
-        pub fn MakeSolid(self: Pin<&mut BRepOffsetAPI_MakePipeShell>) -> bool;
-        pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakePipeShell>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepOffsetAPI_MakePipeShell>, progress: &MessageProgressRange);
+        #[cxx_name = "MakeSolid"]
+        pub fn make_solid(self: Pin<&mut BRepOffsetAPI_MakePipeShell>) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepOffsetAPI_MakePipeShell>) -> &TopoDS_Shape;
 
         // Lofting
         type BRepOffsetAPI_ThruSections;
@@ -861,15 +990,21 @@ pub mod ffi {
             is_solid: bool,
         ) -> UniquePtr<BRepOffsetAPI_ThruSections>;
 
-        pub fn AddWire(self: Pin<&mut BRepOffsetAPI_ThruSections>, wire: &TopoDS_Wire);
-        pub fn CheckCompatibility(self: Pin<&mut BRepOffsetAPI_ThruSections>, check: bool);
-        pub fn Shape(self: Pin<&mut BRepOffsetAPI_ThruSections>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepOffsetAPI_ThruSections>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepOffsetAPI_ThruSections) -> bool;
+        #[cxx_name = "AddWire"]
+        pub fn add_wire(self: Pin<&mut BRepOffsetAPI_ThruSections>, wire: &TopoDS_Wire);
+        #[cxx_name = "CheckCompatibility"]
+        pub fn check_compatibility(self: Pin<&mut BRepOffsetAPI_ThruSections>, check: bool);
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepOffsetAPI_ThruSections>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepOffsetAPI_ThruSections>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepOffsetAPI_ThruSections) -> bool;
 
         // Boolean Operations
         type BRepAlgoAPI_Fuse;
-        type BOPAlgo_GlueEnum;
+        #[cxx_name = "BOPAlgo_GlueEnum"]
+        type BOPAlgoGlueEnum;
 
         #[cxx_name = "construct_unique"]
         pub fn BRepAlgoAPI_Fuse_ctor(
@@ -877,11 +1012,16 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Fuse>;
 
-        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepAlgoAPI_Fuse>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepAlgoAPI_Fuse) -> bool;
-        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopTools_ListOfShape;
-        pub fn SetGlue(self: Pin<&mut BRepAlgoAPI_Fuse>, glue: BOPAlgo_GlueEnum);
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepAlgoAPI_Fuse>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepAlgoAPI_Fuse) -> bool;
+        #[cxx_name = "SectionEdges"]
+        pub fn section_edges(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopToolsListOfShape;
+        #[cxx_name = "SetGlue"]
+        pub fn set_glue(self: Pin<&mut BRepAlgoAPI_Fuse>, glue: BOPAlgoGlueEnum);
 
         type BRepAlgoAPI_Cut;
 
@@ -891,14 +1031,18 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Cut>;
 
-        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepAlgoAPI_Cut>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepAlgoAPI_Cut) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepAlgoAPI_Cut>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepAlgoAPI_Cut) -> bool;
         pub fn Generated<'a>(
             self: Pin<&'a mut BRepAlgoAPI_Cut>,
             shape: &'a TopoDS_Shape,
-        ) -> &'a TopTools_ListOfShape;
-        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopTools_ListOfShape;
+        ) -> &'a TopToolsListOfShape;
+        #[cxx_name = "SectionEdges"]
+        pub fn section_edges(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopToolsListOfShape;
 
         type BRepAlgoAPI_Common;
 
@@ -908,10 +1052,14 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Common>;
 
-        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepAlgoAPI_Common>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepAlgoAPI_Common) -> bool;
-        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopTools_ListOfShape;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepAlgoAPI_Common>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepAlgoAPI_Common) -> bool;
+        #[cxx_name = "SectionEdges"]
+        pub fn section_edges(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopToolsListOfShape;
 
         type BRepAlgoAPI_Section;
 
@@ -921,9 +1069,12 @@ pub mod ffi {
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Section>;
 
-        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepAlgoAPI_Section>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepAlgoAPI_Section) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepAlgoAPI_Section>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepAlgoAPI_Section) -> bool;
 
         // Geometric processor
         type gp_Ax1;
@@ -937,9 +1088,12 @@ pub mod ffi {
         pub fn gp_OZ() -> &'static gp_Ax1;
         pub fn gp_DZ() -> &'static gp_Dir;
 
-        pub fn X(self: &gp_Dir) -> f64;
-        pub fn Y(self: &gp_Dir) -> f64;
-        pub fn Z(self: &gp_Dir) -> f64;
+        #[cxx_name = "X"]
+        pub fn x(self: &gp_Dir) -> f64;
+        #[cxx_name = "Y"]
+        pub fn y(self: &gp_Dir) -> f64;
+        #[cxx_name = "Z"]
+        pub fn z(self: &gp_Dir) -> f64;
 
         #[cxx_name = "construct_unique"]
         pub fn gp_Ax1_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax1>;
@@ -976,7 +1130,8 @@ pub mod ffi {
             scale: bool,
         );
 
-        pub fn Perform(self: Pin<&mut GeomAPI_Interpolate>);
+        #[cxx_name = "Perform"]
+        pub fn perform(self: Pin<&mut GeomAPI_Interpolate>);
 
         pub fn GeomAPI_Interpolate_Curve(
             interpolate: &GeomAPI_Interpolate,
@@ -990,7 +1145,12 @@ pub mod ffi {
             origin: &gp_Pnt,
             surface: &HandleGeomSurface,
         ) -> UniquePtr<GeomAPI_ProjectPointOnSurf>;
-        pub fn LowerDistanceParameters(self: &GeomAPI_ProjectPointOnSurf, u: &mut f64, v: &mut f64);
+        #[cxx_name = "LowerDistanceParameters"]
+        pub fn lower_distance_parameters(
+            self: &GeomAPI_ProjectPointOnSurf,
+            u: &mut f64,
+            v: &mut f64,
+        );
 
         // Transforms
         type gp_Trsf;
@@ -999,11 +1159,16 @@ pub mod ffi {
         pub fn new_transform() -> UniquePtr<gp_Trsf>;
 
         #[rust_name = "set_mirror_axis"]
-        pub fn SetMirror(self: Pin<&mut gp_Trsf>, axis: &gp_Ax1);
-        pub fn SetRotation(self: Pin<&mut gp_Trsf>, axis: &gp_Ax1, angle: f64);
-        pub fn SetScale(self: Pin<&mut gp_Trsf>, point: &gp_Pnt, scale: f64);
-        pub fn SetTranslation(self: Pin<&mut gp_Trsf>, point1: &gp_Pnt, point2: &gp_Pnt);
-        pub fn Value(self: &gp_Trsf, the_row: i32, the_col: i32) -> f64;
+        #[cxx_name = "SetMirror"]
+        pub fn set_mirror(self: Pin<&mut gp_Trsf>, axis: &gp_Ax1);
+        #[cxx_name = "SetRotation"]
+        pub fn set_rotation(self: Pin<&mut gp_Trsf>, axis: &gp_Ax1, angle: f64);
+        #[cxx_name = "SetScale"]
+        pub fn set_scale(self: Pin<&mut gp_Trsf>, point: &gp_Pnt, scale: f64);
+        #[cxx_name = "SetTranslation"]
+        pub fn set_translation(self: Pin<&mut gp_Trsf>, point1: &gp_Pnt, point2: &gp_Pnt);
+        #[cxx_name = "Value"]
+        pub fn value(self: &gp_Trsf, the_row: i32, the_col: i32) -> f64;
 
         #[cxx_name = "SetTranslationPart"]
         pub fn set_translation_vec(self: Pin<&mut gp_Trsf>, translation: &gp_Vec);
@@ -1011,8 +1176,10 @@ pub mod ffi {
         type gp_GTrsf;
         #[cxx_name = "construct_unique"]
         pub fn new_gp_GTrsf() -> UniquePtr<gp_GTrsf>;
-        pub fn SetValue(self: Pin<&mut gp_GTrsf>, the_row: i32, the_col: i32, the_value: f64);
-        pub fn Value(self: &gp_GTrsf, the_row: i32, the_col: i32) -> f64;
+        #[cxx_name = "SetValue"]
+        pub fn set_value(self: Pin<&mut gp_GTrsf>, the_row: i32, the_col: i32, the_value: f64);
+        #[cxx_name = "Value"]
+        pub fn value(self: &gp_GTrsf, the_row: i32, the_col: i32) -> f64;
 
         type BRepBuilderAPI_MakeSolid;
 
@@ -1021,9 +1188,12 @@ pub mod ffi {
             shell: &TopoDS_Shell,
         ) -> UniquePtr<BRepBuilderAPI_MakeSolid>;
 
-        pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeSolid>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepBuilderAPI_MakeSolid>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepBuilderAPI_MakeSolid) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepBuilderAPI_MakeSolid>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepBuilderAPI_MakeSolid>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepBuilderAPI_MakeSolid) -> bool;
 
         type BRepBuilderAPI_MakeShapeOnMesh;
 
@@ -1032,12 +1202,14 @@ pub mod ffi {
             mesh: &Handle_Poly_Triangulation,
         ) -> UniquePtr<BRepBuilderAPI_MakeShapeOnMesh>;
 
-        pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeShapeOnMesh>) -> &TopoDS_Shape;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepBuilderAPI_MakeShapeOnMesh>) -> &TopoDS_Shape;
         pub fn Build(
             self: Pin<&mut BRepBuilderAPI_MakeShapeOnMesh>,
-            progress: &Message_ProgressRange,
+            progress: &MessageProgressRange,
         );
-        pub fn IsDone(self: &BRepBuilderAPI_MakeShapeOnMesh) -> bool;
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepBuilderAPI_MakeShapeOnMesh) -> bool;
 
         type BRepBuilderAPI_Transform;
 
@@ -1048,9 +1220,12 @@ pub mod ffi {
             copy: bool,
         ) -> UniquePtr<BRepBuilderAPI_Transform>;
 
-        pub fn Shape(self: Pin<&mut BRepBuilderAPI_Transform>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepBuilderAPI_Transform>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepBuilderAPI_Transform) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepBuilderAPI_Transform>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepBuilderAPI_Transform>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepBuilderAPI_Transform) -> bool;
 
         type BRepBuilderAPI_GTransform;
 
@@ -1061,24 +1236,32 @@ pub mod ffi {
             copy: bool,
         ) -> UniquePtr<BRepBuilderAPI_GTransform>;
 
-        pub fn Shape(self: Pin<&mut BRepBuilderAPI_GTransform>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepBuilderAPI_GTransform>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepBuilderAPI_GTransform) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: Pin<&mut BRepBuilderAPI_GTransform>) -> &TopoDS_Shape;
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepBuilderAPI_GTransform>, progress: &MessageProgressRange);
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepBuilderAPI_GTransform) -> bool;
 
         // Topology Explorer
         type TopExp_Explorer;
-        type TopAbs_ShapeEnum;
+
+        #[cxx_name = "TopAbs_ShapeEnum"]
+        type TopAbsShapeEnum;
 
         #[cxx_name = "construct_unique"]
         pub fn TopExp_Explorer_ctor(
             shape: &TopoDS_Shape,
-            to_find: TopAbs_ShapeEnum,
+            to_find: TopAbsShapeEnum,
         ) -> UniquePtr<TopExp_Explorer>;
 
-        pub fn More(self: &TopExp_Explorer) -> bool;
-        pub fn Next(self: Pin<&mut TopExp_Explorer>);
+        #[cxx_name = "More"]
+        pub fn more(self: &TopExp_Explorer) -> bool;
+        #[cxx_name = "Next"]
+        pub fn next(self: Pin<&mut TopExp_Explorer>);
         pub fn ExplorerCurrentShape(explorer: &TopExp_Explorer) -> UniquePtr<TopoDS_Shape>;
-        pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
+        #[cxx_name = "Current"]
+        pub fn current(self: &TopExp_Explorer) -> &TopoDS_Shape;
 
         pub fn TopExp_FirstVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
         pub fn TopExp_LastVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
@@ -1120,17 +1303,22 @@ pub mod ffi {
             line: &gp_Lin,
             tolerance: f64,
         );
-        pub fn More(self: &BRepIntCurveSurface_Inter) -> bool;
-        pub fn Next(self: Pin<&mut BRepIntCurveSurface_Inter>);
+        #[cxx_name = "More"]
+        pub fn more(self: &BRepIntCurveSurface_Inter) -> bool;
+        #[cxx_name = "Next"]
+        pub fn next(self: Pin<&mut BRepIntCurveSurface_Inter>);
         pub fn BRepIntCurveSurface_Inter_face(
             intersector: &BRepIntCurveSurface_Inter,
         ) -> UniquePtr<TopoDS_Face>;
         pub fn BRepIntCurveSurface_Inter_point(
             intersector: &BRepIntCurveSurface_Inter,
         ) -> UniquePtr<gp_Pnt>;
-        pub fn U(self: &BRepIntCurveSurface_Inter) -> f64;
-        pub fn V(self: &BRepIntCurveSurface_Inter) -> f64;
-        pub fn W(self: &BRepIntCurveSurface_Inter) -> f64;
+        #[cxx_name = "U"]
+        pub fn u(self: &BRepIntCurveSurface_Inter) -> f64;
+        #[cxx_name = "V"]
+        pub fn v(self: &BRepIntCurveSurface_Inter) -> f64;
+        #[cxx_name = "W"]
+        pub fn w(self: &BRepIntCurveSurface_Inter) -> f64;
 
         // BRepFeat
         type BRepFeat_MakeCylindricalHole;
@@ -1140,13 +1328,18 @@ pub mod ffi {
             shape: &TopoDS_Shape,
             axis: &gp_Ax1,
         );
-        pub fn Perform(self: Pin<&mut BRepFeat_MakeCylindricalHole>, radius: f64);
-        pub fn Build(self: Pin<&mut BRepFeat_MakeCylindricalHole>);
-        pub fn Shape(self: &BRepFeat_MakeCylindricalHole) -> &TopoDS_Shape;
+        #[cxx_name = "Perform"]
+        pub fn perform(self: Pin<&mut BRepFeat_MakeCylindricalHole>, radius: f64);
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut BRepFeat_MakeCylindricalHole>);
+        #[cxx_name = "Shape"]
+        pub fn shape(self: &BRepFeat_MakeCylindricalHole) -> &TopoDS_Shape;
 
         // Data Import
         type STEPControl_Reader;
-        type IFSelect_ReturnStatus;
+
+        #[cxx_name = "IFSelect_ReturnStatus"]
+        type IFSelectReturnStatus;
 
         #[cxx_name = "construct_unique"]
         pub fn STEPControl_Reader_ctor() -> UniquePtr<STEPControl_Reader>;
@@ -1154,10 +1347,10 @@ pub mod ffi {
         pub fn read_step(
             reader: Pin<&mut STEPControl_Reader>,
             filename: String,
-        ) -> IFSelect_ReturnStatus;
+        ) -> IFSelectReturnStatus;
         pub fn TransferRoots(
             self: Pin<&mut STEPControl_Reader>,
-            progress: &Message_ProgressRange,
+            progress: &MessageProgressRange,
         ) -> i32;
         pub fn one_shape(reader: &STEPControl_Reader) -> UniquePtr<TopoDS_Shape>;
 
@@ -1170,18 +1363,18 @@ pub mod ffi {
         pub fn transfer_shape(
             writer: Pin<&mut STEPControl_Writer>,
             shape: &TopoDS_Shape,
-        ) -> IFSelect_ReturnStatus;
+        ) -> IFSelectReturnStatus;
         pub fn write_step(
             writer: Pin<&mut STEPControl_Writer>,
             filename: String,
-        ) -> IFSelect_ReturnStatus;
+        ) -> IFSelectReturnStatus;
 
         type StlAPI_Writer;
 
         #[cxx_name = "construct_unique"]
         pub fn StlAPI_Writer_ctor() -> UniquePtr<StlAPI_Writer>;
 
-        // pub fn Write(self: Pin<&mut StlAPI_Writer>, shape: &TopoDS_Shape, filename: &c_char) -> bool;
+        #[cxx_name = "WriteStl"]
         pub fn write_stl(
             writer: Pin<&mut StlAPI_Writer>,
             shape: &TopoDS_Shape,
@@ -1197,8 +1390,10 @@ pub mod ffi {
             deflection: f64,
         ) -> UniquePtr<BRepMesh_IncrementalMesh>;
 
-        pub fn Shape(self: &BRepMesh_IncrementalMesh) -> &TopoDS_Shape;
-        pub fn IsDone(self: &BRepMesh_IncrementalMesh) -> bool;
+        #[cxx_name = "Shape"]
+        pub fn shape(self: &BRepMesh_IncrementalMesh) -> &TopoDS_Shape;
+        #[cxx_name = "IsDone"]
+        pub fn is_done(self: &BRepMesh_IncrementalMesh) -> bool;
 
         type TopLoc_Location;
         #[cxx_name = "construct_unique"]
@@ -1215,7 +1410,8 @@ pub mod ffi {
             triangulation: UniquePtr<Poly_Triangulation>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
 
-        pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
+        #[cxx_name = "IsNull"]
+        pub fn is_null(self: &Handle_Poly_Triangulation) -> bool;
         #[cxx_name = "handle_try_deref"]
         pub fn Handle_Poly_Triangulation_Get(
             handle: &Handle_Poly_Triangulation,
@@ -1229,19 +1425,27 @@ pub mod ffi {
             has_uv: bool,
             has_normals: bool,
         ) -> UniquePtr<Poly_Triangulation>;
-        pub fn NbNodes(self: &Poly_Triangulation) -> i32;
-        pub fn NbTriangles(self: &Poly_Triangulation) -> i32;
-        pub fn HasNormals(self: &Poly_Triangulation) -> bool;
-        pub fn HasUVNodes(self: &Poly_Triangulation) -> bool;
-        pub fn Triangle(self: &Poly_Triangulation, index: i32) -> &Poly_Triangle;
+        #[cxx_name = "NbNodes"]
+        pub fn nb_nodes(self: &Poly_Triangulation) -> i32;
+        #[cxx_name = "NbTriangles"]
+        pub fn nb_triangles(self: &Poly_Triangulation) -> i32;
+        #[cxx_name = "HasNormals"]
+        pub fn has_normals(self: &Poly_Triangulation) -> bool;
+        #[cxx_name = "HasUVNodes"]
+        pub fn has_uv_nodes(self: &Poly_Triangulation) -> bool;
+        #[cxx_name = "Triangle"]
+        pub fn triangle(self: &Poly_Triangulation, index: i32) -> &Poly_Triangle;
         pub fn SetTriangle(
             self: Pin<&mut Poly_Triangulation>,
             index: i32,
             triangle: &Poly_Triangle,
         );
-        pub fn SetNode(self: Pin<&mut Poly_Triangulation>, index: i32, node: &gp_Pnt);
-        pub fn SetNormal(self: Pin<&mut Poly_Triangulation>, index: i32, dir: &gp_Dir);
-        pub fn SetUVNode(self: Pin<&mut Poly_Triangulation>, index: i32, uv: &gp_Pnt2d);
+        #[cxx_name = "SetNode"]
+        pub fn set_node(self: Pin<&mut Poly_Triangulation>, index: i32, node: &gp_Pnt);
+        #[cxx_name = "SetNormal"]
+        pub fn set_normal(self: Pin<&mut Poly_Triangulation>, index: i32, dir: &gp_Dir);
+        #[cxx_name = "SetUVNode"]
+        pub fn set_uv_node(self: Pin<&mut Poly_Triangulation>, index: i32, uv: &gp_Pnt2d);
         pub fn Poly_Triangulation_Normal(
             triangulation: &Poly_Triangulation,
             index: i32,
@@ -1258,7 +1462,8 @@ pub mod ffi {
         type Poly_Triangle;
         #[cxx_name = "construct_unique"]
         pub fn Poly_Triangle_ctor(node1: i32, node2: i32, node3: i32) -> UniquePtr<Poly_Triangle>;
-        pub fn Value(self: &Poly_Triangle, index: i32) -> i32;
+        #[cxx_name = "Value"]
+        pub fn value(self: &Poly_Triangle, index: i32) -> i32;
 
         type Poly_Connect;
         #[cxx_name = "construct_unique"]
@@ -1277,7 +1482,8 @@ pub mod ffi {
             angular_deflection: f64,
             curvature_deflection: f64,
         ) -> UniquePtr<GCPnts_TangentialDeflection>;
-        pub fn NbPoints(self: &GCPnts_TangentialDeflection) -> i32;
+        #[cxx_name = "NbPoints"]
+        pub fn nb_points(self: &GCPnts_TangentialDeflection) -> i32;
         pub fn GCPnts_TangentialDeflection_Value(
             approximator: &GCPnts_TangentialDeflection,
             index: i32,
@@ -1287,10 +1493,14 @@ pub mod ffi {
         type GProp_GProps;
         #[cxx_name = "construct_unique"]
         pub fn GProp_GProps_ctor() -> UniquePtr<GProp_GProps>;
-        pub fn Mass(self: &GProp_GProps) -> f64;
-        pub fn StaticMoments(self: &GProp_GProps, lx: &mut f64, ly: &mut f64, lz: &mut f64);
-        pub fn MomentOfInertia(self: &GProp_GProps, axis: &gp_Ax1) -> f64;
-        pub fn RadiusOfGyration(self: &GProp_GProps, axis: &gp_Ax1) -> f64;
+        #[cxx_name = "Mass"]
+        pub fn mass(self: &GProp_GProps) -> f64;
+        #[cxx_name = "StaticMoments"]
+        pub fn static_moments(self: &GProp_GProps, lx: &mut f64, ly: &mut f64, lz: &mut f64);
+        #[cxx_name = "MomentOfInertia"]
+        pub fn moment_of_inertia(self: &GProp_GProps, axis: &gp_Ax1) -> f64;
+        #[cxx_name = "RadiusOfGyration"]
+        pub fn radius_of_gyration(self: &GProp_GProps, axis: &gp_Ax1) -> f64;
         pub fn GProp_GProps_CentreOfMass(props: &GProp_GProps) -> UniquePtr<gp_Pnt>;
 
         pub fn BRepGProp_LinearProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
@@ -1322,15 +1532,18 @@ pub mod ffi {
             unify_faces: bool,
             concat_b_splines: bool,
         ) -> UniquePtr<ShapeUpgrade_UnifySameDomain>;
-        pub fn AllowInternalEdges(self: Pin<&mut ShapeUpgrade_UnifySameDomain>, allow: bool);
-        pub fn Build(self: Pin<&mut ShapeUpgrade_UnifySameDomain>);
-        pub fn Shape(self: &ShapeUpgrade_UnifySameDomain) -> &TopoDS_Shape;
+        #[cxx_name = "AllowInternalEdges"]
+        pub fn allow_internal_edges(self: Pin<&mut ShapeUpgrade_UnifySameDomain>, allow: bool);
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut ShapeUpgrade_UnifySameDomain>);
+        #[cxx_name = "Shape"]
+        pub fn shape(self: &ShapeUpgrade_UnifySameDomain) -> &TopoDS_Shape;
 
         pub fn connect_edges_to_wires(
-            edges: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+            edges: Pin<&mut Handle_TopToolsHSequenceOfShape>,
             tolerance: f64,
             shared: bool,
-            wires: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+            wires: Pin<&mut Handle_TopToolsHSequenceOfShape>,
         );
     }
 }

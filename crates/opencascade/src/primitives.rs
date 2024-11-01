@@ -60,19 +60,19 @@ pub enum ShapeType {
     Compound,
 }
 
-impl From<ffi::TopAbs_ShapeEnum> for ShapeType {
-    fn from(shape_enum: ffi::TopAbs_ShapeEnum) -> Self {
+impl From<ffi::TopAbsShapeEnum> for ShapeType {
+    fn from(shape_enum: ffi::TopAbsShapeEnum) -> Self {
         match shape_enum {
-            ffi::TopAbs_ShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
-            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
-            ffi::TopAbs_ShapeEnum::TopAbs_EDGE => ShapeType::Edge,
-            ffi::TopAbs_ShapeEnum::TopAbs_WIRE => ShapeType::Wire,
-            ffi::TopAbs_ShapeEnum::TopAbs_FACE => ShapeType::Face,
-            ffi::TopAbs_ShapeEnum::TopAbs_SHELL => ShapeType::Shell,
-            ffi::TopAbs_ShapeEnum::TopAbs_SOLID => ShapeType::Solid,
-            ffi::TopAbs_ShapeEnum::TopAbs_COMPSOLID => ShapeType::CompoundSolid,
-            ffi::TopAbs_ShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
-            ffi::TopAbs_ShapeEnum { repr } => panic!("Unexpected shape type: {repr}"),
+            ffi::TopAbsShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
+            ffi::TopAbsShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
+            ffi::TopAbsShapeEnum::TopAbs_EDGE => ShapeType::Edge,
+            ffi::TopAbsShapeEnum::TopAbs_WIRE => ShapeType::Wire,
+            ffi::TopAbsShapeEnum::TopAbs_FACE => ShapeType::Face,
+            ffi::TopAbsShapeEnum::TopAbs_SHELL => ShapeType::Shell,
+            ffi::TopAbsShapeEnum::TopAbs_SOLID => ShapeType::Solid,
+            ffi::TopAbsShapeEnum::TopAbs_COMPSOLID => ShapeType::CompoundSolid,
+            ffi::TopAbsShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
+            ffi::TopAbsShapeEnum { repr } => panic!("Unexpected shape type: {repr}"),
         }
     }
 }
@@ -243,23 +243,23 @@ pub enum JoinType {
     Intersection,
 }
 
-impl From<ffi::GeomAbs_JoinType> for JoinType {
-    fn from(value: ffi::GeomAbs_JoinType) -> Self {
+impl From<ffi::GeomAbsJoinType> for JoinType {
+    fn from(value: ffi::GeomAbsJoinType) -> Self {
         match value {
-            ffi::GeomAbs_JoinType::GeomAbs_Arc => Self::Arc,
-            //ffi::GeomAbs_JoinType::GeomAbs_Tangent => Self::Tangent,
-            ffi::GeomAbs_JoinType::GeomAbs_Intersection => Self::Intersection,
-            ffi::GeomAbs_JoinType { repr } => panic!("Unexpected join type: {repr}"),
+            ffi::GeomAbsJoinType::GeomAbs_Arc => Self::Arc,
+            //ffi::GeomAbsJoinType::GeomAbs_Tangent => Self::Tangent,
+            ffi::GeomAbsJoinType::GeomAbs_Intersection => Self::Intersection,
+            ffi::GeomAbsJoinType { repr } => panic!("Unexpected join type: {repr}"),
         }
     }
 }
 
-impl From<JoinType> for ffi::GeomAbs_JoinType {
+impl From<JoinType> for ffi::GeomAbsJoinType {
     fn from(value: JoinType) -> Self {
         match value {
-            JoinType::Arc => ffi::GeomAbs_JoinType::GeomAbs_Arc,
-            //JoinType::Tangent => ffi::GeomAbs_JoinType::GeomAbs_Tangent,
-            JoinType::Intersection => ffi::GeomAbs_JoinType::GeomAbs_Intersection,
+            JoinType::Arc => ffi::GeomAbsJoinType::GeomAbs_Arc,
+            //JoinType::Tangent => ffi::GeomAbsJoinType::GeomAbs_Tangent,
+            JoinType::Intersection => ffi::GeomAbsJoinType::GeomAbs_Intersection,
         }
     }
 }

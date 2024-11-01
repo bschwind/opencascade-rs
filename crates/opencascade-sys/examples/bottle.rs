@@ -1,7 +1,7 @@
 use cxx::UniquePtr;
 use opencascade_sys::ffi::{
-    cylinder_to_surface, ellipse_to_HandleGeom2d_Curve, ellipse_value, gp_Ax2_ctor, gp_Ax2d_ctor,
-    gp_Ax3_from_gp_Ax2, gp_DZ, gp_Dir2d_ctor, gp_OX, handle_geom_plane_location,
+    cylinder_to_surface, dynamic_type, ellipse_to_HandleGeom2d_Curve, ellipse_value, gp_Ax2_ctor,
+    gp_Ax2d_ctor, gp_Ax3_from_gp_Ax2, gp_DZ, gp_Dir2d_ctor, gp_OX, handle_geom_plane_location,
     new_HandleGeomCurve_from_HandleGeom_TrimmedCurve, new_HandleGeomPlane_from_HandleGeomSurface,
     new_list_of_shape, new_point, new_point_2d, new_transform, new_vec, shape_list_append_face,
     type_name, write_stl, BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_CurveSurface2d,
@@ -11,11 +11,11 @@ use opencascade_sys::ffi::{
     BRepFilletAPI_MakeFillet_ctor, BRepLibBuildCurves3d, BRepMesh_IncrementalMesh_ctor,
     BRepOffsetAPI_MakeThickSolid_ctor, BRepOffsetAPI_ThruSections_ctor,
     BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Builder_ctor,
-    BRep_Builder_upcast_to_topods_builder, BRep_Tool_Surface, DynamicType, ExplorerCurrentShape,
+    BRep_Builder_upcast_to_topods_builder, BRep_Tool_Surface, ExplorerCurrentShape,
     GCE2d_MakeSegment_point_point, GC_MakeArcOfCircle_Value, GC_MakeArcOfCircle_point_point_point,
     GC_MakeSegment_Value, GC_MakeSegment_point_point, Geom2d_Ellipse_ctor,
     Geom2d_TrimmedCurve_ctor, Geom_CylindricalSurface_ctor, HandleGeom2d_TrimmedCurve_to_curve,
-    MakeThickSolidByJoin, StlAPI_Writer_ctor, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
+    MakeThickSolidByJoin, StlAPI_Writer_ctor, TopAbsShapeEnum, TopExp_Explorer_ctor,
     TopoDS_Compound_as_shape, TopoDS_Compound_ctor, TopoDS_Face, TopoDS_Face_to_owned,
     TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
 };
@@ -81,7 +81,7 @@ pub fn main() {
 
     let mut make_fillet = BRepFilletAPI_MakeFillet_ctor(body.pin_mut().Shape());
     let mut edge_explorer =
-        TopExp_Explorer_ctor(body.pin_mut().Shape(), TopAbs_ShapeEnum::TopAbs_EDGE);
+        TopExp_Explorer_ctor(body.pin_mut().Shape(), TopAbsShapeEnum::TopAbs_EDGE);
 
     while edge_explorer.More() {
         let edge = TopoDS_cast_to_edge(edge_explorer.Current());
@@ -106,7 +106,7 @@ pub fn main() {
     let body_shape = fuse_neck.pin_mut().Shape();
 
     // Make the bottle hollow
-    let mut face_explorer = TopExp_Explorer_ctor(body_shape, TopAbs_ShapeEnum::TopAbs_FACE);
+    let mut face_explorer = TopExp_Explorer_ctor(body_shape, TopAbsShapeEnum::TopAbs_FACE);
     let mut z_max = -1.0;
     let mut top_face: Option<UniquePtr<TopoDS_Face>> = None;
 
@@ -115,7 +115,7 @@ pub fn main() {
         let face = TopoDS_cast_to_face(&shape);
 
         let surface = BRep_Tool_Surface(face);
-        let dynamic_type = DynamicType(&surface);
+        let dynamic_type = dynamic_type(&surface);
         let name = type_name(dynamic_type);
 
         if name == "Geom_Plane" {

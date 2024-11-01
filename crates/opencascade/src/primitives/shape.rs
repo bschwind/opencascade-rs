@@ -605,12 +605,12 @@ impl Shape {
     }
 
     pub fn edges(&self) -> EdgeIterator {
-        let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbs_ShapeEnum::TopAbs_EDGE);
+        let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbsShapeEnum::TopAbs_EDGE);
         EdgeIterator { explorer }
     }
 
     pub fn faces(&self) -> FaceIterator {
-        let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbs_ShapeEnum::TopAbs_FACE);
+        let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbsShapeEnum::TopAbs_FACE);
         FaceIterator { explorer }
     }
 

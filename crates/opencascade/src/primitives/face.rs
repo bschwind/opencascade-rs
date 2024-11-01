@@ -132,7 +132,7 @@ impl Face {
 
         // We use a shape map here to avoid duplicates.
         let mut shape_map = ffi::new_indexed_map_of_shape();
-        ffi::map_shapes(face_shape, ffi::TopAbs_ShapeEnum::TopAbs_VERTEX, shape_map.pin_mut());
+        ffi::map_shapes(face_shape, ffi::TopAbsShapeEnum::TopAbs_VERTEX, shape_map.pin_mut());
 
         for i in 1..=shape_map.Extent() {
             let vertex = ffi::TopoDS_cast_to_vertex(shape_map.FindKey(i));
@@ -158,14 +158,14 @@ impl Face {
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
 
         let mut vertex_map = ffi::new_indexed_map_of_shape();
-        ffi::map_shapes(face_shape, ffi::TopAbs_ShapeEnum::TopAbs_VERTEX, vertex_map.pin_mut());
+        ffi::map_shapes(face_shape, ffi::TopAbsShapeEnum::TopAbs_VERTEX, vertex_map.pin_mut());
 
         // Get map of vertices to edges so we can find the edges connected to each vertex.
         let mut data_map = ffi::new_indexed_data_map_of_shape_list_of_shape();
         ffi::map_shapes_and_ancestors(
             face_shape,
-            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX,
-            ffi::TopAbs_ShapeEnum::TopAbs_EDGE,
+            ffi::TopAbsShapeEnum::TopAbs_VERTEX,
+            ffi::TopAbsShapeEnum::TopAbs_EDGE,
             data_map.pin_mut(),
         );
 
@@ -240,7 +240,7 @@ impl Face {
     pub fn edges(&self) -> EdgeIterator {
         let explorer = ffi::TopExp_Explorer_ctor(
             ffi::cast_face_to_shape(&self.inner),
-            ffi::TopAbs_ShapeEnum::TopAbs_EDGE,
+            ffi::TopAbsShapeEnum::TopAbs_EDGE,
         );
 
         EdgeIterator { explorer }
@@ -422,15 +422,15 @@ pub enum FaceOrientation {
     External,
 }
 
-impl From<ffi::TopAbs_Orientation> for FaceOrientation {
-    fn from(orientation: ffi::TopAbs_Orientation) -> Self {
+impl From<ffi::TopAbsOrientation> for FaceOrientation {
+    fn from(orientation: ffi::TopAbsOrientation) -> Self {
         match orientation {
-            ffi::TopAbs_Orientation::TopAbs_FORWARD => Self::Forward,
-            ffi::TopAbs_Orientation::TopAbs_REVERSED => Self::Reversed,
-            ffi::TopAbs_Orientation::TopAbs_INTERNAL => Self::Internal,
-            ffi::TopAbs_Orientation::TopAbs_EXTERNAL => Self::External,
-            ffi::TopAbs_Orientation { repr } => {
-                panic!("TopAbs_Orientation had an unrepresentable value: {repr}")
+            ffi::TopAbsOrientation::TopAbs_FORWARD => Self::Forward,
+            ffi::TopAbsOrientation::TopAbs_REVERSED => Self::Reversed,
+            ffi::TopAbsOrientation::TopAbs_INTERNAL => Self::Internal,
+            ffi::TopAbsOrientation::TopAbs_EXTERNAL => Self::External,
+            ffi::TopAbsOrientation { repr } => {
+                panic!("TopAbsOrientation had an unrepresentable value: {repr}")
             },
         }
     }
