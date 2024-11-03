@@ -105,14 +105,14 @@ typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2dEllipse;
 typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2dTrimmedCurve;
 typedef opencascade::handle<Geom_CylindricalSurface> HandleGeomCylindricalSurface;
 typedef opencascade::handle<Poly_Triangulation> Handle_Poly_Triangulation;
-typedef opencascade::handle<TopTools_HSequenceOfShape> Handle_TopToolsHSequenceOfShape;
+typedef opencascade::handle<TopTools_HSequenceOfShape> HandleTopToolsHSequenceOfShape;
 typedef opencascade::handle<Law_Function> HandleLawFunction;
 
-typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
+typedef opencascade::handle<TColgp_HArray1OfPnt> HandleTColgpHArray1OfPnt;
 
-inline std::unique_ptr<Handle_TColgpHArray1OfPnt>
+inline std::unique_ptr<HandleTColgpHArray1OfPnt>
 new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(std::unique_ptr<TColgp_HArray1OfPnt> array) {
-  return std::unique_ptr<Handle_TColgpHArray1OfPnt>(new Handle_TColgpHArray1OfPnt(array.release()));
+  return std::unique_ptr<HandleTColgpHArray1OfPnt>(new HandleTColgpHArray1OfPnt(array.release()));
 }
 
 // Handle stuff
@@ -131,7 +131,7 @@ inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve &curv
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
 }
 
-inline std::unique_ptr<gp_Pnt> GCPnts_TangentialDeflection_Value(const GCPnts_TangentialDeflection &approximator,
+inline std::unique_ptr<gp_Pnt> GCPntsTangentialDeflection_Value(const GCPnts_TangentialDeflection &approximator,
                                                                  Standard_Integer i) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(approximator.Value(i)));
 }
@@ -152,7 +152,7 @@ inline std::unique_ptr<HandleGeomCylindricalSurface> GeomCylindricalSurface_ctor
       new opencascade::handle<Geom_CylindricalSurface>(new Geom_CylindricalSurface(axis, radius)));
 }
 
-inline std::unique_ptr<HandleGeomBSplineCurve> GeomAPI_Interpolate_Curve(const GeomAPI_Interpolate &interpolate) {
+inline std::unique_ptr<HandleGeomBSplineCurve> GeomAPIInterpolate_Curve(const GeomAPI_Interpolate &interpolate) {
   return std::unique_ptr<HandleGeomBSplineCurve>(new opencascade::handle<Geom_BSplineCurve>(interpolate.Curve()));
 }
 
@@ -195,22 +195,22 @@ inline std::unique_ptr<gp_Pnt2d> ellipse_value(const HandleGeom2dEllipse &ellips
 }
 
 // Segment Stuff
-inline std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeSegment_Value(const GC_MakeSegment &segment) {
+inline std::unique_ptr<HandleGeomTrimmedCurve> GCMakeSegment_Value(const GC_MakeSegment &segment) {
   return std::unique_ptr<HandleGeomTrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(segment.Value()));
 }
 
-inline std::unique_ptr<HandleGeom2dTrimmedCurve> GCE2d_MakeSegment_point_point(const gp_Pnt2d &p1,
+inline std::unique_ptr<HandleGeom2dTrimmedCurve> GCE2dMakeSegment_point_point(const gp_Pnt2d &p1,
                                                                                 const gp_Pnt2d &p2) {
   return std::unique_ptr<HandleGeom2dTrimmedCurve>(
       new opencascade::handle<Geom2d_TrimmedCurve>(GCE2d_MakeSegment(p1, p2)));
 }
 
 // Arc stuff
-inline std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeArcOfCircle_Value(const GC_MakeArcOfCircle &arc) {
+inline std::unique_ptr<HandleGeomTrimmedCurve> GCMakeArcOfCircle_Value(const GC_MakeArcOfCircle &arc) {
   return std::unique_ptr<HandleGeomTrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(arc.Value()));
 }
 
-inline std::unique_ptr<gp_Pnt> BRepAdaptor_Curve_value(const BRepAdaptor_Curve &curve, const Standard_Real U) {
+inline std::unique_ptr<gp_Pnt> BRepAdaptorCurve_value(const BRepAdaptor_Curve &curve, const Standard_Real U) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve.Value(U)));
 }
 
@@ -282,13 +282,13 @@ inline const TopoDS_Shape &cast_solid_to_shape(const TopoDS_Solid &solid) { retu
 inline const TopoDS_Shape &cast_compound_to_shape(const TopoDS_Compound &compound) { return compound; }
 
 // Compound shapes
-inline std::unique_ptr<TopoDS_Shape> TopoDS_Compound_as_shape(std::unique_ptr<TopoDS_Compound> compound) {
+inline std::unique_ptr<TopoDS_Shape> TopoDSCompound_as_shape(std::unique_ptr<TopoDS_Compound> compound) {
   return compound;
 }
 
-inline std::unique_ptr<TopoDS_Shape> TopoDS_Shell_as_shape(std::unique_ptr<TopoDS_Shell> shell) { return shell; }
+inline std::unique_ptr<TopoDS_Shape> TopoDSShell_as_shape(std::unique_ptr<TopoDS_Shell> shell) { return shell; }
 
-inline const TopoDS_Builder &BRep_Builder_upcast_to_topods_builder(const BRep_Builder &builder) { return builder; }
+inline const TopoDS_Builder &BRepBuilder_upcast_to_topodsbuilder(const BRep_Builder &builder) { return builder; }
 
 // Transforms
 inline std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face &face) {
@@ -304,12 +304,12 @@ inline std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex &vertex) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(BRep_Tool::Pnt(vertex)));
 }
 
-inline std::unique_ptr<gp_Trsf> TopLoc_Location_Transformation(const TopLoc_Location &location) {
+inline std::unique_ptr<gp_Trsf> TopLocLocation_Transformation(const TopLoc_Location &location) {
   return std::unique_ptr<gp_Trsf>(new gp_Trsf(location.Transformation()));
 }
 
 inline std::unique_ptr<Handle_Poly_Triangulation>
-Handle_Poly_Triangulation_ctor(std::unique_ptr<Poly_Triangulation> triangulation) {
+HandlePolyTriangulation_ctor(std::unique_ptr<Poly_Triangulation> triangulation) {
   return std::unique_ptr<Handle_Poly_Triangulation>(new Handle_Poly_Triangulation(triangulation.release()));
 }
 
@@ -343,17 +343,12 @@ inline bool TopExp_CommonVertex(const TopoDS_Edge &edge1, const TopoDS_Edge &edg
   return TopExp::CommonVertex(edge1, edge2, vertex);
 }
 
-inline std::unique_ptr<TopoDS_Face> BRepIntCurveSurface_Inter_face(const BRepIntCurveSurface_Inter &intersector) {
+inline std::unique_ptr<TopoDS_Face> BRepIntCurveSurfaceInter_face(const BRepIntCurveSurface_Inter &intersector) {
   return std::unique_ptr<TopoDS_Face>(new TopoDS_Face(intersector.Face()));
 }
 
-inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurveSurface_Inter &intersector) {
+inline std::unique_ptr<gp_Pnt> BRepIntCurveSurfaceInter_point(const BRepIntCurveSurface_Inter &intersector) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(intersector.Pnt()));
-}
-
-// BRepFeat
-inline std::unique_ptr<BRepFeat_MakeCylindricalHole> BRepFeat_MakeCylindricalHole_ctor() {
-  return std::unique_ptr<BRepFeat_MakeCylindricalHole>(new BRepFeat_MakeCylindricalHole());
 }
 
 // Data Import
@@ -378,17 +373,17 @@ inline bool WriteStl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::
   return writer.Write(theShape, theFileName.c_str());
 }
 
-inline std::unique_ptr<gp_Dir> Poly_Triangulation_Normal(const Poly_Triangulation &triangulation,
+inline std::unique_ptr<gp_Dir> PolyTriangulation_Normal(const Poly_Triangulation &triangulation,
                                                          const Standard_Integer index) {
   return std::unique_ptr<gp_Dir>(new gp_Dir(triangulation.Normal(index)));
 }
 
-inline std::unique_ptr<gp_Pnt> Poly_Triangulation_Node(const Poly_Triangulation &triangulation,
+inline std::unique_ptr<gp_Pnt> PolyTriangulation_Node(const Poly_Triangulation &triangulation,
                                                        const Standard_Integer index) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(triangulation.Node(index)));
 }
 
-inline std::unique_ptr<gp_Pnt2d> Poly_Triangulation_UV(const Poly_Triangulation &triangulation,
+inline std::unique_ptr<gp_Pnt2d> PolyTriangulation_UV(const Poly_Triangulation &triangulation,
                                                        const Standard_Integer index) {
   return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(triangulation.UVNode(index)));
 }
@@ -398,7 +393,7 @@ inline void compute_normals(const TopoDS_Face &face, const Handle(Poly_Triangula
 }
 
 // Shape Properties
-inline std::unique_ptr<gp_Pnt> GProp_GProps_CentreOfMass(const GProp_GProps &props) {
+inline std::unique_ptr<gp_Pnt> GPropGProps_CentreOfMass(const GProp_GProps &props) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(props.CentreOfMass()));
 }
 
@@ -415,7 +410,7 @@ inline void BRepGProp_VolumeProperties(const TopoDS_Shape &shape, GProp_GProps &
 }
 
 // Fillets
-inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFilletAPI_MakeFillet2d &make_fillet,
+inline std::unique_ptr<TopoDS_Edge> BRepFilletAPIMakeFillet2d_add_fillet(BRepFilletAPI_MakeFillet2d &make_fillet,
                                                                           const TopoDS_Vertex &vertex,
                                                                           Standard_Real radius) {
   return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddFillet(vertex, radius)));
@@ -423,13 +418,13 @@ inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFi
 
 // Chamfers
 inline std::unique_ptr<TopoDS_Edge>
-BRepFilletAPI_MakeFillet2d_add_chamfer(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Edge &edge1,
+BRepFilletAPIMakeFillet2d_add_chamfer(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Edge &edge1,
                                        const TopoDS_Edge &edge2, const Standard_Real dist1, const Standard_Real dist2) {
   return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddChamfer(edge1, edge2, dist1, dist2)));
 }
 
 inline std::unique_ptr<TopoDS_Edge>
-BRepFilletAPI_MakeFillet2d_add_chamfer_angle(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Edge &edge,
+BRepFilletAPIMakeFillet2d_add_chamfer_angle(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Edge &edge,
                                              const TopoDS_Vertex &vertex, const Standard_Real dist,
                                              const Standard_Real angle) {
   return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddChamfer(edge, vertex, dist, angle)));
@@ -467,27 +462,27 @@ inline std::unique_ptr<gp_Pnt> TColgpHArray1OfPnt_Value(const TColgp_HArray1OfPn
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(array.Value(index)));
 }
 
-inline void connect_edges_to_wires(Handle_TopTools_HSequenceOfShape &edges, const Standard_Real toler,
-                                   const Standard_Boolean shared, Handle_TopTools_HSequenceOfShape &wires) {
+inline void connect_edges_to_wires(HandleTopToolsHSequenceOfShape &edges, const Standard_Real toler,
+                                   const Standard_Boolean shared, HandleTopToolsHSequenceOfShape &wires) {
   ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, toler, shared, wires);
 }
 
-inline std::unique_ptr<Handle_TopTools_HSequenceOfShape> new_Handle_TopToolsHSequenceOfShape() {
+inline std::unique_ptr<HandleTopToolsHSequenceOfShape> new_HandleTopToolsHSequenceOfShape() {
   auto sequence = new TopTools_HSequenceOfShape();
   auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);
 
-  return std::unique_ptr<Handle_TopTools_HSequenceOfShape>(handle);
+  return std::unique_ptr<HandleTopToolsHSequenceOfShape>(handle);
 }
 
-inline void TopToolsHSequenceOfShape_append(Handle_TopTools_HSequenceOfShape &handle, const TopoDS_Shape &shape) {
+inline void TopToolsHSequenceOfShape_append(HandleTopToolsHSequenceOfShape &handle, const TopoDS_Shape &shape) {
   handle->Append(shape);
 }
 
-inline Standard_Integer TopToolsHSequenceOfShape_length(const Handle_TopTools_HSequenceOfShape &handle) {
+inline Standard_Integer TopToolsHSequenceOfShape_length(const HandleTopToolsHSequenceOfShape &handle) {
   return handle->Length();
 }
 
-inline const TopoDS_Shape &TopToolsHSequenceOfShape_value(const Handle_TopTools_HSequenceOfShape &handle,
+inline const TopoDS_Shape &TopToolsHSequenceOfShape_value(const HandleTopToolsHSequenceOfShape &handle,
                                                            Standard_Integer index) {
   return handle->Value(index);
 }
