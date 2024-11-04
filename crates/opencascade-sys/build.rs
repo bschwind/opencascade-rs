@@ -48,7 +48,8 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=user32");
     }
 
-    let mut build = cxx_build::bridge("src/lib.rs");
+    let source_files = vec!["src/lib.rs", "src/export.rs"];
+    let mut build = cxx_build::bridges(source_files);
 
     if is_windows_gnu {
         build.define("OCC_CONVERT_SIGNALS", "TRUE");
