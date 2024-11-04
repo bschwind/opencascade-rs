@@ -4,7 +4,7 @@ use opencascade_sys::ffi;
 use crate::primitives::Wire;
 
 pub struct Shell {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Shell>,
+    pub(crate) inner: UniquePtr<ffi::TopoDSShell>,
 }
 
 impl AsRef<Shell> for Shell {
@@ -14,24 +14,24 @@ impl AsRef<Shell> for Shell {
 }
 
 impl Shell {
-    pub(crate) fn from_shell(shell: &ffi::TopoDS_Shell) -> Self {
-        let inner = ffi::TopoDS_Shell_to_owned(shell);
+    pub(crate) fn from_shell(shell: &ffi::TopoDSShell) -> Self {
+        let inner = ffi::TopoDSShell_to_owned(shell);
 
         Self { inner }
     }
 
     pub fn loft<T: AsRef<Wire>>(wires: impl IntoIterator<Item = T>) -> Self {
         let is_solid = false;
-        let mut make_loft = ffi::BRepOffsetAPI_ThruSections_ctor(is_solid);
+        let mut make_loft = ffi::BRepOffsetAPIThruSections_ctor(is_solid);
 
         for wire in wires.into_iter() {
-            make_loft.pin_mut().AddWire(&wire.as_ref().inner);
+            make_loft.pin_mut().add_wire(&wire.as_ref().inner);
         }
 
         // Set CheckCompatibility to `true` to avoid twisted results.
-        make_loft.pin_mut().CheckCompatibility(true);
+        make_loft.pin_mut().check_compatibility(true);
 
-        let shape = make_loft.pin_mut().Shape();
+        let shape = make_loft.pin_mut().shape();
         let shell = ffi::TopoDS_cast_to_shell(shape);
 
         Self::from_shell(shell)

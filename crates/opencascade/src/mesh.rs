@@ -15,14 +15,14 @@ pub struct Mesh {
 }
 
 pub struct Mesher {
-    pub(crate) inner: UniquePtr<ffi::BRepMesh_IncrementalMesh>,
+    pub(crate) inner: UniquePtr<ffi::BRepMeshIncrementalMesh>,
 }
 
 impl Mesher {
     pub fn try_new(shape: &Shape, triangulation_tolerance: f64) -> Result<Self, Error> {
-        let inner = ffi::BRepMesh_IncrementalMesh_ctor(&shape.inner, triangulation_tolerance);
+        let inner = ffi::BRepMeshIncrementalMesh_ctor(&shape.inner, triangulation_tolerance);
 
-        if inner.IsDone() {
+        if inner.is_done() {
             Ok(Self { inner })
         } else {
             Err(Error::TriangulationFailed)
@@ -35,24 +35,24 @@ impl Mesher {
         let mut normals = vec![];
         let mut indices = vec![];
 
-        let triangulated_shape = Shape::from_shape(self.inner.pin_mut().Shape());
+        let triangulated_shape = Shape::from_shape(self.inner.pin_mut().shape());
 
         for face in triangulated_shape.faces() {
-            let mut location = ffi::TopLoc_Location_ctor();
+            let mut location = ffi::TopLocLocation_ctor();
 
             let triangulation_handle =
                 ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
 
-            let triangulation = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle)
+            let triangulation = ffi::HandlePolyTriangulation_Get(&triangulation_handle)
                 .map_err(|_| Error::UntriangulatedFace)?;
 
             let index_offset = vertices.len();
-            let face_point_count = triangulation.NbNodes();
+            let face_point_count = triangulation.nb_nodes();
 
             for i in 1..=face_point_count {
-                let mut point = ffi::Poly_Triangulation_Node(triangulation, i);
-                point.pin_mut().Transform(&ffi::TopLoc_Location_Transformation(&location));
-                vertices.push(dvec3(point.X(), point.Y(), point.Z()));
+                let mut point = ffi::PolyTriangulation_Node(triangulation, i);
+                point.pin_mut().transform(&ffi::TopLocLocation_Transformation(&location));
+                vertices.push(dvec3(point.x(), point.y(), point.z()));
             }
 
             let mut u_min = f64::INFINITY;
@@ -62,8 +62,8 @@ impl Mesher {
             let mut v_max = f64::NEG_INFINITY;
 
             for i in 1..=(face_point_count) {
-                let uv = ffi::Poly_Triangulation_UV(triangulation, i);
-                let (u, v) = (uv.X(), uv.Y());
+                let uv = ffi::PolyTriangulation_UV(triangulation, i);
+                let (u, v) = (uv.x(), uv.y());
 
                 u_min = u_min.min(u);
                 v_min = v_min.min(v);
@@ -86,27 +86,27 @@ impl Mesher {
 
             // Add in the normals.
             // TODO(bschwind) - Use `location` to transform the normals.
-            let normal_array = ffi::TColgp_Array1OfDir_ctor(0, face_point_count);
+            let normal_array = ffi::TColgpArray1OfDir_ctor(0, face_point_count);
 
             ffi::compute_normals(&face.inner, &triangulation_handle);
 
             // TODO(bschwind) - Why do we start at 1 here?
-            for i in 1..(normal_array.Length() as usize) {
-                let normal = ffi::Poly_Triangulation_Normal(triangulation, i as i32);
-                normals.push(dvec3(normal.X(), normal.Y(), normal.Z()));
+            for i in 1..(normal_array.length() as usize) {
+                let normal = ffi::PolyTriangulation_Normal(triangulation, i as i32);
+                normals.push(dvec3(normal.x(), normal.y(), normal.z()));
             }
 
-            for i in 1..=triangulation.NbTriangles() {
-                let triangle = triangulation.Triangle(i);
+            for i in 1..=triangulation.nb_triangles() {
+                let triangle = triangulation.triangle(i);
 
                 if face.orientation() == FaceOrientation::Forward {
-                    indices.push(index_offset + triangle.Value(1) as usize - 1);
-                    indices.push(index_offset + triangle.Value(2) as usize - 1);
-                    indices.push(index_offset + triangle.Value(3) as usize - 1);
+                    indices.push(index_offset + triangle.value(1) as usize - 1);
+                    indices.push(index_offset + triangle.value(2) as usize - 1);
+                    indices.push(index_offset + triangle.value(3) as usize - 1);
                 } else {
-                    indices.push(index_offset + triangle.Value(3) as usize - 1);
-                    indices.push(index_offset + triangle.Value(2) as usize - 1);
-                    indices.push(index_offset + triangle.Value(1) as usize - 1);
+                    indices.push(index_offset + triangle.value(3) as usize - 1);
+                    indices.push(index_offset + triangle.value(2) as usize - 1);
+                    indices.push(index_offset + triangle.value(1) as usize - 1);
                 }
             }
         }

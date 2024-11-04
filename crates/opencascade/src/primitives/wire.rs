@@ -12,7 +12,7 @@ use glam::{dvec3, DVec3};
 use opencascade_sys::ffi;
 
 pub struct Wire {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Wire>,
+    pub(crate) inner: UniquePtr<ffi::TopoDSWire>,
 }
 
 impl AsRef<Wire> for Wire {
@@ -38,14 +38,14 @@ impl Default for EdgeConnection {
 }
 
 impl Wire {
-    pub(crate) fn from_wire(wire: &ffi::TopoDS_Wire) -> Self {
-        let inner = ffi::TopoDS_Wire_to_owned(wire);
+    pub(crate) fn from_wire(wire: &ffi::TopoDSWire) -> Self {
+        let inner = ffi::TopoDSWire_to_owned(wire);
 
         Self { inner }
     }
 
     fn from_make_wire(mut make_wire: UniquePtr<ffi::BRepBuilderAPI_MakeWire>) -> Self {
-        Self::from_wire(make_wire.pin_mut().Wire())
+        Self::from_wire(make_wire.pin_mut().wire())
     }
 
     pub fn from_ordered_points(points: impl IntoIterator<Item = DVec3>) -> Result<Self, Error> {
@@ -83,14 +83,14 @@ impl Wire {
         unordered_edges: impl IntoIterator<Item = T>,
         edge_connection: EdgeConnection,
     ) -> Self {
-        let mut edges = ffi::new_Handle_TopTools_HSequenceOfShape();
+        let mut edges = ffi::new_HandleTopToolsHSequenceOfShape();
 
         for edge in unordered_edges {
             let edge_shape = ffi::cast_edge_to_shape(&edge.as_ref().inner);
-            ffi::TopTools_HSequenceOfShape_append(edges.pin_mut(), edge_shape);
+            ffi::TopToolsHSequenceOfShape_append(edges.pin_mut(), edge_shape);
         }
 
-        let mut wires = ffi::new_Handle_TopTools_HSequenceOfShape();
+        let mut wires = ffi::new_HandleTopToolsHSequenceOfShape();
 
         let (tolerance, shared) = match edge_connection {
             EdgeConnection::Exact => (0.0, true),
@@ -101,10 +101,10 @@ impl Wire {
 
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 
-        let wire_len = ffi::TopTools_HSequenceOfShape_length(&wires);
+        let wire_len = ffi::TopToolsHSequenceOfShape_length(&wires);
 
         for index in 1..=wire_len {
-            let wire_shape = ffi::TopTools_HSequenceOfShape_value(&wires, index);
+            let wire_shape = ffi::TopToolsHSequenceOfShape_value(&wires, index);
             let wire = ffi::TopoDS_cast_to_wire(wire_shape);
 
             make_wire.pin_mut().add_wire(wire);
@@ -126,7 +126,7 @@ impl Wire {
     #[must_use]
     pub fn mirror_along_axis(&self, axis_origin: DVec3, axis_dir: DVec3) -> Self {
         let axis_dir = make_dir(axis_dir);
-        let axis = ffi::gp_Ax1_ctor(&make_point(axis_origin), &axis_dir);
+        let axis = ffi::GpAx1_ctor(&make_point(axis_origin), &axis_dir);
 
         let mut transform = ffi::new_transform();
 
@@ -134,9 +134,9 @@ impl Wire {
 
         let wire_shape = ffi::cast_wire_to_shape(&self.inner);
 
-        let mut brep_transform = ffi::BRepBuilderAPI_Transform_ctor(wire_shape, &transform, false);
+        let mut brep_transform = ffi::BRepBuilderAPITransform_ctor(wire_shape, &transform, false);
 
-        let mirrored_shape = brep_transform.pin_mut().Shape();
+        let mirrored_shape = brep_transform.pin_mut().shape();
         let mirrored_wire = ffi::TopoDS_cast_to_wire(mirrored_shape);
 
         Self::from_wire(mirrored_wire)
@@ -180,11 +180,10 @@ impl Wire {
     /// Offset the wire by a given distance and join settings
     #[must_use]
     pub fn offset(&self, distance: f64, join_type: JoinType) -> Self {
-        let mut make_offset =
-            ffi::BRepOffsetAPI_MakeOffset_wire_ctor(&self.inner, join_type.into());
-        make_offset.pin_mut().Perform(distance, 0.0);
+        let mut make_offset = ffi::BRepOffsetAPIMakeOffset_wire_ctor(&self.inner, join_type.into());
+        make_offset.pin_mut().perform(distance, 0.0);
 
-        let offset_shape = make_offset.pin_mut().Shape();
+        let offset_shape = make_offset.pin_mut().shape();
         let result_wire = ffi::TopoDS_cast_to_wire(offset_shape);
 
         Self::from_wire(result_wire)
@@ -194,9 +193,9 @@ impl Wire {
     #[must_use]
     pub fn sweep_along(&self, path: &Wire) -> Shell {
         let profile_shape = ffi::cast_wire_to_shape(&self.inner);
-        let mut make_pipe = ffi::BRepOffsetAPI_MakePipe_ctor(&path.inner, profile_shape);
+        let mut make_pipe = ffi::BRepOffsetAPIMakePipe_ctor(&path.inner, profile_shape);
 
-        let pipe_shape = make_pipe.pin_mut().Shape();
+        let pipe_shape = make_pipe.pin_mut().shape();
         let result_shell = ffi::TopoDS_cast_to_shell(pipe_shape);
 
         Shell::from_shell(result_shell)
@@ -210,11 +209,11 @@ impl Wire {
         radius_values: impl IntoIterator<Item = (f64, f64)>,
     ) -> Shell {
         let law_function = law_function_from_graph(radius_values);
-        let law_handle = ffi::Law_Function_to_handle(law_function);
+        let law_handle = ffi::LawFunction_to_handle(law_function);
 
         let mut make_pipe_shell =
             make_pipe_shell_with_law_function(&self.inner, &path.inner, &law_handle);
-        let pipe_shape = make_pipe_shell.pin_mut().Shape();
+        let pipe_shape = make_pipe_shell.pin_mut().shape();
         let result_shell = ffi::TopoDS_cast_to_shell(pipe_shape);
 
         Shell::from_shell(result_shell)
@@ -228,13 +227,12 @@ impl Wire {
     #[must_use]
     pub fn transform(&self, translation: DVec3, rotation_axis: DVec3, angle: Angle) -> Self {
         let mut transform = ffi::new_transform();
-        let rotation_axis_vec =
-            ffi::gp_Ax1_ctor(&make_point(DVec3::ZERO), &make_dir(rotation_axis));
+        let rotation_axis_vec = ffi::GpAx1_ctor(&make_point(DVec3::ZERO), &make_dir(rotation_axis));
         let translation_vec = make_vec(translation);
 
-        transform.pin_mut().SetRotation(&rotation_axis_vec, angle.radians());
+        transform.pin_mut().set_rotation(&rotation_axis_vec, angle.radians());
         transform.pin_mut().set_translation_vec(&translation_vec);
-        let location = ffi::TopLoc_Location_from_transform(&transform);
+        let location = ffi::TopLocLocation_from_transform(&transform);
 
         let wire_shape = ffi::cast_wire_to_shape(&self.inner);
         let mut wire_shape = Shape::from_shape(wire_shape).inner;
@@ -249,9 +247,9 @@ impl Wire {
 
     pub fn to_face(self) -> Face {
         let only_plane = false;
-        let make_face = ffi::BRepBuilderAPI_MakeFace_wire(&self.inner, only_plane);
+        let make_face = ffi::BRepBuilderAPIMakeFace_wire(&self.inner, only_plane);
 
-        Face::from_face(make_face.Face())
+        Face::from_face(make_face.face())
     }
 
     // Create a closure-based API

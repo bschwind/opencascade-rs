@@ -87,43 +87,43 @@ impl<T: Into<Shape>> IntoShape for T {
     }
 }
 
-pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
+pub fn make_point(p: DVec3) -> UniquePtr<ffi::GpPoint> {
     ffi::new_point(p.x, p.y, p.z)
 }
 
-pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::gp_Pnt2d> {
+pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::GpPoint2d> {
     ffi::new_point_2d(p.x, p.y)
 }
 
-fn make_dir(p: DVec3) -> UniquePtr<ffi::gp_Dir> {
-    ffi::gp_Dir_ctor(p.x, p.y, p.z)
+fn make_dir(p: DVec3) -> UniquePtr<ffi::GpDir> {
+    ffi::GpDir_ctor(p.x, p.y, p.z)
 }
 
-fn make_vec(vec: DVec3) -> UniquePtr<ffi::gp_Vec> {
+fn make_vec(vec: DVec3) -> UniquePtr<ffi::GpVec> {
     ffi::new_vec(vec.x, vec.y, vec.z)
 }
 
-fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax1> {
-    ffi::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
+fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::GpAx1> {
+    ffi::GpAx1_ctor(&make_point(origin), &make_dir(dir))
 }
 
-pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
-    ffi::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
+pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::GpAx2> {
+    ffi::GpAx2_ctor(&make_point(origin), &make_dir(dir))
 }
 
 pub struct EdgeIterator {
-    explorer: UniquePtr<ffi::TopExp_Explorer>,
+    explorer: UniquePtr<ffi::TopExpExplorer>,
 }
 
 impl Iterator for EdgeIterator {
     type Item = Edge;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.explorer.More() {
-            let edge = ffi::TopoDS_cast_to_edge(self.explorer.Current());
+        if self.explorer.more() {
+            let edge = ffi::TopoDS_cast_to_edge(self.explorer.current());
             let edge = Edge::from_edge(edge);
 
-            self.explorer.pin_mut().Next();
+            self.explorer.pin_mut().next();
 
             Some(edge)
         } else {
@@ -149,7 +149,7 @@ impl EdgeIterator {
 }
 
 pub struct FaceIterator {
-    explorer: UniquePtr<ffi::TopExp_Explorer>,
+    explorer: UniquePtr<ffi::TopExpExplorer>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -199,11 +199,11 @@ impl Iterator for FaceIterator {
     type Item = Face;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.explorer.More() {
-            let face = ffi::TopoDS_cast_to_face(self.explorer.Current());
+        if self.explorer.more() {
+            let face = ffi::TopoDS_cast_to_face(self.explorer.current());
             let face = Face::from_face(face);
 
-            self.explorer.pin_mut().Next();
+            self.explorer.pin_mut().next();
 
             Some(face)
         } else {

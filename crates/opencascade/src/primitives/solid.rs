@@ -7,7 +7,7 @@ use glam::{dvec3, DVec3};
 use opencascade_sys::ffi;
 
 pub struct Solid {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Solid>,
+    pub(crate) inner: UniquePtr<ffi::TopoDSSolid>,
 }
 
 impl AsRef<Solid> for Solid {
@@ -17,8 +17,8 @@ impl AsRef<Solid> for Solid {
 }
 
 impl Solid {
-    pub(crate) fn from_solid(solid: &ffi::TopoDS_Solid) -> Self {
-        let inner = ffi::TopoDS_Solid_to_owned(solid);
+    pub(crate) fn from_solid(solid: &ffi::TopoDSSolid) -> Self {
+        let inner = ffi::TopoDSSolid_to_owned(solid);
 
         Self { inner }
     }
@@ -31,10 +31,10 @@ impl Solid {
     pub fn fillet_edge(&self, radius: f64, edge: &Edge) -> Compound {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
 
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(inner_shape);
+        let mut make_fillet = ffi::BRepFilletAPIMakeFillet_ctor(inner_shape);
         make_fillet.pin_mut().add_edge(radius, &edge.inner);
 
-        let filleted_shape = make_fillet.pin_mut().Shape();
+        let filleted_shape = make_fillet.pin_mut().shape();
 
         let compound = ffi::TopoDS_cast_to_compound(filleted_shape);
 
@@ -43,16 +43,16 @@ impl Solid {
 
     pub fn loft<T: AsRef<Wire>>(wires: impl IntoIterator<Item = T>) -> Self {
         let is_solid = true;
-        let mut make_loft = ffi::BRepOffsetAPI_ThruSections_ctor(is_solid);
+        let mut make_loft = ffi::BRepOffsetAPIThruSections_ctor(is_solid);
 
         for wire in wires.into_iter() {
-            make_loft.pin_mut().AddWire(&wire.as_ref().inner);
+            make_loft.pin_mut().add_wire(&wire.as_ref().inner);
         }
 
         // Set to CheckCompatibility to `true` to avoid twisted results.
-        make_loft.pin_mut().CheckCompatibility(true);
+        make_loft.pin_mut().check_compatibility(true);
 
-        let shape = make_loft.pin_mut().Shape();
+        let shape = make_loft.pin_mut().shape();
         let solid = ffi::TopoDS_cast_to_solid(shape);
 
         Self::from_solid(solid)
@@ -63,9 +63,9 @@ impl Solid {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
-        let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+        let mut cut_operation = ffi::BRepAlgoAPICut_ctor(inner_shape, other_inner_shape);
 
-        let edge_list = cut_operation.pin_mut().SectionEdges();
+        let edge_list = cut_operation.pin_mut().section_edges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
@@ -74,7 +74,7 @@ impl Solid {
             new_edges.push(Edge::from_edge(edge));
         }
 
-        let shape = Shape::from_shape(cut_operation.pin_mut().Shape());
+        let shape = Shape::from_shape(cut_operation.pin_mut().shape());
 
         BooleanShape { shape, new_edges }
     }
@@ -84,8 +84,8 @@ impl Solid {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
-        let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
-        let edge_list = fuse_operation.pin_mut().SectionEdges();
+        let mut fuse_operation = ffi::BRepAlgoAPIFuse_ctor(inner_shape, other_inner_shape);
+        let edge_list = fuse_operation.pin_mut().section_edges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
@@ -94,7 +94,7 @@ impl Solid {
             new_edges.push(Edge::from_edge(edge));
         }
 
-        let shape = Shape::from_shape(fuse_operation.pin_mut().Shape());
+        let shape = Shape::from_shape(fuse_operation.pin_mut().shape());
 
         BooleanShape { shape, new_edges }
     }
@@ -104,8 +104,8 @@ impl Solid {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
-        let mut fuse_operation = ffi::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
-        let edge_list = fuse_operation.pin_mut().SectionEdges();
+        let mut fuse_operation = ffi::BRepAlgoAPICommon_ctor(inner_shape, other_inner_shape);
+        let edge_list = fuse_operation.pin_mut().section_edges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
@@ -114,7 +114,7 @@ impl Solid {
             new_edges.push(Edge::from_edge(edge));
         }
 
-        let shape = Shape::from_shape(fuse_operation.pin_mut().Shape());
+        let shape = Shape::from_shape(fuse_operation.pin_mut().shape());
 
         BooleanShape { shape, new_edges }
     }

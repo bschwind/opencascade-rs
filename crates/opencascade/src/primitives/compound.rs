@@ -3,7 +3,7 @@ use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
 pub struct Compound {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Compound>,
+    pub(crate) inner: UniquePtr<ffi::TopoDSCompound>,
 }
 
 impl AsRef<Compound> for Compound {
@@ -13,8 +13,8 @@ impl AsRef<Compound> for Compound {
 }
 
 impl Compound {
-    pub(crate) fn from_compound(compound: &ffi::TopoDS_Compound) -> Self {
-        let inner = ffi::TopoDS_Compound_to_owned(compound);
+    pub(crate) fn from_compound(compound: &ffi::TopoDSCompound) -> Self {
+        let inner = ffi::TopoDSCompound_to_owned(compound);
 
         Self { inner }
     }
@@ -27,14 +27,14 @@ impl Compound {
     }
 
     pub fn from_shapes<T: AsRef<Shape>>(shapes: impl IntoIterator<Item = T>) -> Self {
-        let mut compound = ffi::TopoDS_Compound_ctor();
-        let builder = ffi::BRep_Builder_ctor();
-        let builder = ffi::BRep_Builder_upcast_to_topods_builder(&builder);
-        builder.MakeCompound(compound.pin_mut());
-        let mut compound_shape = ffi::TopoDS_Compound_as_shape(compound);
+        let mut compound = ffi::TopoDSCompound_ctor();
+        let builder = ffi::BRepBuilder_ctor();
+        let builder = ffi::BRepBuilder_upcast_to_topodsbuilder(&builder);
+        builder.make_compound(compound.pin_mut());
+        let mut compound_shape = ffi::TopoDSCompound_as_shape(compound);
 
         for shape in shapes.into_iter() {
-            builder.Add(compound_shape.pin_mut(), &shape.as_ref().inner);
+            builder.add(compound_shape.pin_mut(), &shape.as_ref().inner);
         }
 
         let compound = ffi::TopoDS_cast_to_compound(&compound_shape);

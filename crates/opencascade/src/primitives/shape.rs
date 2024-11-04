@@ -12,7 +12,7 @@ use opencascade_sys::ffi;
 use std::path::Path;
 
 pub struct Shape {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Shape>,
+    pub(crate) inner: UniquePtr<ffi::TopoDSShape>,
 }
 
 impl AsRef<Shape> for Shape {
@@ -150,7 +150,7 @@ impl SphereBuilder {
         let axis = make_axis_2(self.center, DVec3::Z);
         let mut make_shere = ffi::BRepPrimAPI_MakeSphere_ctor(&axis, self.radius, self.z_angle);
 
-        Shape::from_shape(make_shere.pin_mut().Shape())
+        Shape::from_shape(make_shere.pin_mut().shape())
     }
 
     pub fn at(mut self, center: DVec3) -> Self {
@@ -175,7 +175,7 @@ pub struct ConeBuilder {
 impl ConeBuilder {
     pub fn build(self) -> Shape {
         let axis = make_axis_2(self.pos, DVec3::Z);
-        let mut make_cone = ffi::BRepPrimAPI_MakeCone_ctor(
+        let mut make_cone = ffi::BRepPrimAPIMakeCone_ctor(
             &axis,
             self.bottom_radius,
             self.top_radius,
@@ -183,7 +183,7 @@ impl ConeBuilder {
             self.z_angle,
         );
 
-        Shape::from_shape(make_cone.pin_mut().Shape())
+        Shape::from_shape(make_cone.pin_mut().shape())
     }
 
     pub fn at(mut self, pos: DVec3) -> Self {
@@ -225,7 +225,7 @@ pub struct TorusBuilder {
 impl TorusBuilder {
     pub fn build(self) -> Shape {
         let axis = make_axis_2(self.pos, self.z_axis);
-        let mut make_torus = ffi::BRepPrimAPI_MakeTorus_ctor(
+        let mut make_torus = ffi::BRepPrimAPIMakeTorus_ctor(
             &axis,
             self.radius_1,
             self.radius_2,
@@ -234,7 +234,7 @@ impl TorusBuilder {
             self.z_angle,
         );
 
-        Shape::from_shape(make_torus.pin_mut().Shape())
+        Shape::from_shape(make_torus.pin_mut().shape())
     }
 
     pub fn at(mut self, pos: DVec3) -> Self {
@@ -274,8 +274,8 @@ impl TorusBuilder {
 }
 
 impl Shape {
-    pub(crate) fn from_shape(shape: &ffi::TopoDS_Shape) -> Self {
-        let inner = ffi::TopoDS_Shape_to_owned(shape);
+    pub(crate) fn from_shape(shape: &ffi::TopoDSShape) -> Self {
+        let inner = ffi::TopoDSShape_to_owned(shape);
 
         Self { inner }
     }
@@ -288,9 +288,9 @@ impl Shape {
 
         let point = ffi::new_point(min_corner.x, min_corner.y, min_corner.z);
         let diff = max_corner - min_corner;
-        let mut my_box = ffi::BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
+        let mut my_box = ffi::BRepPrimAPIMakeBox_ctor(&point, diff.x, diff.y, diff.z);
 
-        Self::from_shape(my_box.pin_mut().Shape())
+        Self::from_shape(my_box.pin_mut().shape())
     }
 
     /// Make a box with `width` (x), `depth` (y), and `height` (z)
@@ -328,9 +328,9 @@ impl Shape {
     /// Extends from `p` along axis `dir`.
     pub fn cylinder(p: DVec3, r: f64, dir: DVec3, h: f64) -> Self {
         let cylinder_coord_system = make_axis_2(p, dir);
-        let mut cylinder = ffi::BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
+        let mut cylinder = ffi::BRepPrimAPIMakeCylinder_ctor(&cylinder_coord_system, r, h);
 
-        Self::from_shape(cylinder.pin_mut().Shape())
+        Self::from_shape(cylinder.pin_mut().shape())
     }
 
     /// Make a "default" cylinder with radius `r` and height `h`.
@@ -380,7 +380,7 @@ impl Shape {
     }
 
     pub fn shape_type(&self) -> ShapeType {
-        self.inner.ShapeType().into()
+        self.inner.shape_type().into()
     }
 
     #[must_use]
@@ -408,13 +408,13 @@ impl Shape {
         radius: f64,
         edges: impl IntoIterator<Item = T>,
     ) -> Self {
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
+        let mut make_fillet = ffi::BRepFilletAPIMakeFillet_ctor(&self.inner);
 
         for edge in edges.into_iter() {
             make_fillet.pin_mut().add_edge(radius, &edge.as_ref().inner);
         }
 
-        Self::from_shape(make_fillet.pin_mut().Shape())
+        Self::from_shape(make_fillet.pin_mut().shape())
     }
 
     #[must_use]
@@ -424,19 +424,19 @@ impl Shape {
         edges: impl IntoIterator<Item = T>,
     ) -> Self {
         let radius_values: Vec<_> = radius_values.into_iter().collect();
-        let mut array = ffi::TColgp_Array1OfPnt2d_ctor(1, radius_values.len() as i32);
+        let mut array = ffi::TColgpArray1OfPnt2d_ctor(1, radius_values.len() as i32);
 
         for (index, (t, radius)) in radius_values.into_iter().enumerate() {
-            array.pin_mut().SetValue(index as i32 + 1, &make_point2d(dvec2(t, radius)));
+            array.pin_mut().set_value(index as i32 + 1, &make_point2d(dvec2(t, radius)));
         }
 
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
+        let mut make_fillet = ffi::BRepFilletAPIMakeFillet_ctor(&self.inner);
 
         for edge in edges.into_iter() {
             make_fillet.pin_mut().variable_add_edge(&array, &edge.as_ref().inner);
         }
 
-        Self::from_shape(make_fillet.pin_mut().Shape())
+        Self::from_shape(make_fillet.pin_mut().shape())
     }
 
     #[must_use]
@@ -451,7 +451,7 @@ impl Shape {
             make_chamfer.pin_mut().add_edge(distance, &edge.as_ref().inner);
         }
 
-        Self::from_shape(make_chamfer.pin_mut().Shape())
+        Self::from_shape(make_chamfer.pin_mut().shape())
     }
 
     /// Performs fillet of `radius` on all edges of the shape
@@ -468,9 +468,9 @@ impl Shape {
 
     #[must_use]
     pub fn subtract(&self, other: &Shape) -> BooleanShape {
-        let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
+        let mut cut_operation = ffi::BRepAlgoAPICut_ctor(&self.inner, &other.inner);
 
-        let edge_list = cut_operation.pin_mut().SectionEdges();
+        let edge_list = cut_operation.pin_mut().section_edges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
@@ -479,21 +479,21 @@ impl Shape {
             new_edges.push(Edge::from_edge(edge));
         }
 
-        let shape = Self::from_shape(cut_operation.pin_mut().Shape());
+        let shape = Self::from_shape(cut_operation.pin_mut().shape());
 
         BooleanShape { shape, new_edges }
     }
 
     pub fn read_step(path: impl AsRef<Path>) -> Result<Self, Error> {
-        let mut reader = ffi::STEPControl_Reader_ctor();
+        let mut reader = ffi::STEPControlReader_ctor();
 
         let status = ffi::read_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
 
-        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != ffi::IFSelectReturnStatus::IFSelect_RetDone {
             return Err(Error::StepReadFailed);
         }
 
-        reader.pin_mut().TransferRoots(&ffi::Message_ProgressRange_ctor());
+        reader.pin_mut().TransferRoots(&ffi::MessageProgressRange_ctor());
 
         let inner = ffi::one_shape(&reader);
 
@@ -501,17 +501,17 @@ impl Shape {
     }
 
     pub fn write_step(&self, path: impl AsRef<Path>) -> Result<(), Error> {
-        let mut writer = ffi::STEPControl_Writer_ctor();
+        let mut writer = ffi::STEPControlWriter_ctor();
 
         let status = ffi::transfer_shape(writer.pin_mut(), &self.inner);
 
-        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != ffi::IFSelectReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);
         }
 
         let status = ffi::write_step(writer.pin_mut(), path.as_ref().to_string_lossy().to_string());
 
-        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != ffi::IFSelectReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);
         }
 
@@ -520,8 +520,8 @@ impl Shape {
 
     #[must_use]
     pub fn union(&self, other: &Shape) -> BooleanShape {
-        let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
-        let edge_list = fuse_operation.pin_mut().SectionEdges();
+        let mut fuse_operation = ffi::BRepAlgoAPIFuse_ctor(&self.inner, &other.inner);
+        let edge_list = fuse_operation.pin_mut().section_edges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
@@ -530,15 +530,15 @@ impl Shape {
             new_edges.push(Edge::from_edge(edge));
         }
 
-        let shape = Self::from_shape(fuse_operation.pin_mut().Shape());
+        let shape = Self::from_shape(fuse_operation.pin_mut().shape());
 
         BooleanShape { shape, new_edges }
     }
 
     #[must_use]
     pub fn intersect(&self, other: &Shape) -> BooleanShape {
-        let mut fuse_operation = ffi::BRepAlgoAPI_Common_ctor(&self.inner, &other.inner);
-        let edge_list = fuse_operation.pin_mut().SectionEdges();
+        let mut fuse_operation = ffi::BRepAlgoAPICommon_ctor(&self.inner, &other.inner);
+        let edge_list = fuse_operation.pin_mut().section_edges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
@@ -547,7 +547,7 @@ impl Shape {
             new_edges.push(Edge::from_edge(edge));
         }
 
-        let shape = Self::from_shape(fuse_operation.pin_mut().Shape());
+        let shape = Self::from_shape(fuse_operation.pin_mut().shape());
 
         BooleanShape { shape, new_edges }
     }
@@ -561,11 +561,11 @@ impl Shape {
         path: P,
         triangulation_tolerance: f64,
     ) -> Result<(), Error> {
-        let mut stl_writer = ffi::StlAPI_Writer_ctor();
+        let mut stl_writer = ffi::StlAPIWriter_ctor();
         let mesher = Mesher::try_new(self, triangulation_tolerance)?;
         let success = ffi::write_stl(
             stl_writer.pin_mut(),
-            mesher.inner.Shape(),
+            mesher.inner.shape(),
             path.as_ref().to_string_lossy().to_string(),
         );
 
@@ -578,11 +578,11 @@ impl Shape {
 
     #[must_use]
     pub fn clean(&self) -> Self {
-        let mut upgrader = ffi::ShapeUpgrade_UnifySameDomain_ctor(&self.inner, true, true, true);
-        upgrader.pin_mut().AllowInternalEdges(false);
-        upgrader.pin_mut().Build();
+        let mut upgrader = ffi::ShapeUpgradeUnifySameDomain_ctor(&self.inner, true, true, true);
+        upgrader.pin_mut().allow_internal_edges(false);
+        upgrader.pin_mut().build();
 
-        Self::from_shape(upgrader.Shape())
+        Self::from_shape(upgrader.shape())
     }
 
     pub fn set_global_translation(&mut self, translation: DVec3) {
@@ -590,7 +590,7 @@ impl Shape {
         let translation_vec = make_vec(translation);
         transform.pin_mut().set_translation_vec(&translation_vec);
 
-        let location = ffi::TopLoc_Location_from_transform(&transform);
+        let location = ffi::TopLocLocation_from_transform(&transform);
 
         self.inner.pin_mut().set_global_translation(&location, false);
     }
@@ -605,41 +605,41 @@ impl Shape {
     }
 
     pub fn edges(&self) -> EdgeIterator {
-        let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbsShapeEnum::TopAbs_EDGE);
+        let explorer = ffi::TopExpExplorer_ctor(&self.inner, ffi::TopAbsShapeEnum::TopAbs_EDGE);
         EdgeIterator { explorer }
     }
 
     pub fn faces(&self) -> FaceIterator {
-        let explorer = ffi::TopExp_Explorer_ctor(&self.inner, ffi::TopAbsShapeEnum::TopAbs_FACE);
+        let explorer = ffi::TopExpExplorer_ctor(&self.inner, ffi::TopAbsShapeEnum::TopAbs_FACE);
         FaceIterator { explorer }
     }
 
     // TODO(bschwind) - Convert the return type to an iterator.
     pub fn faces_along_line(&self, line_origin: DVec3, line_dir: DVec3) -> Vec<LineFaceHitPoint> {
-        let mut intersector = ffi::BRepIntCurveSurface_Inter_ctor();
+        let mut intersector = ffi::BRepIntCurveSurfaceInter_ctor();
         let tolerance = 0.0001;
         intersector.pin_mut().Init(
             &self.inner,
-            &ffi::gp_Lin_ctor(&make_point(line_origin), &make_dir(line_dir)),
+            &ffi::GpLine_ctor(&make_point(line_origin), &make_dir(line_dir)),
             tolerance,
         );
 
         let mut results = vec![];
 
-        while intersector.More() {
-            let face = ffi::BRepIntCurveSurface_Inter_face(&intersector);
+        while intersector.more() {
+            let face = ffi::BRepIntCurveSurfaceInter_face(&intersector);
             let face = Face::from_face(&face);
-            let point = ffi::BRepIntCurveSurface_Inter_point(&intersector);
+            let point = ffi::BRepIntCurveSurfaceInter_point(&intersector);
 
             results.push(LineFaceHitPoint {
                 face,
-                t: intersector.W(),
-                u: intersector.U(),
-                v: intersector.V(),
-                point: dvec3(point.X(), point.Y(), point.Z()),
+                t: intersector.w(),
+                u: intersector.u(),
+                v: intersector.v(),
+                point: dvec3(point.x(), point.y(), point.z()),
             });
 
-            intersector.pin_mut().Next();
+            intersector.pin_mut().next();
         }
 
         results
@@ -657,10 +657,10 @@ impl Shape {
             ffi::shape_list_append_face(faces_list.pin_mut(), &face.as_ref().inner);
         }
 
-        let mut solid_maker = ffi::BRepOffsetAPI_MakeThickSolid_ctor();
+        let mut solid_maker = ffi::BRepOffsetAPIMakeThickSolid_ctor();
         ffi::MakeThickSolidByJoin(solid_maker.pin_mut(), &self.inner, &faces_list, offset, 0.001);
 
-        Self::from_shape(solid_maker.pin_mut().Shape())
+        Self::from_shape(solid_maker.pin_mut().shape())
     }
 
     #[must_use]
@@ -675,13 +675,13 @@ impl Shape {
     pub fn drill_hole(&self, p: DVec3, dir: DVec3, radius: f64) -> Self {
         let hole_axis = make_axis_1(p, dir);
 
-        let mut make_hole = ffi::BRepFeat_MakeCylindricalHole_ctor();
+        let mut make_hole = ffi::BRepFeatMakeCylindricalHole_ctor();
         make_hole.pin_mut().Init(&self.inner, &hole_axis);
 
-        make_hole.pin_mut().Perform(radius);
-        make_hole.pin_mut().Build();
+        make_hole.pin_mut().perform(radius);
+        make_hole.pin_mut().build();
 
-        Self::from_shape(make_hole.pin_mut().Shape())
+        Self::from_shape(make_hole.pin_mut().shape())
     }
 }
 
@@ -700,7 +700,7 @@ pub struct LineFaceHitPoint {
 }
 
 pub struct ChamferMaker {
-    inner: UniquePtr<ffi::BRepFilletAPI_MakeChamfer>,
+    inner: UniquePtr<ffi::BRepFilletAPIMakeChamfer>,
 }
 
 impl ChamferMaker {
@@ -715,6 +715,6 @@ impl ChamferMaker {
     }
 
     pub fn build(mut self) -> Shape {
-        Shape::from_shape(self.inner.pin_mut().Shape())
+        Shape::from_shape(self.inner.pin_mut().shape())
     }
 }
