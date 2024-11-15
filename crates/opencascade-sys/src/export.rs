@@ -1,7 +1,7 @@
-pub use ffi::*;
+pub use inner::*;
 
 #[cxx::bridge]
-mod ffi {
+mod inner {
 
     unsafe extern "C++" {
         #[cxx_name = "IFSelect_ReturnStatus"]

@@ -501,15 +501,16 @@ impl Shape {
     }
 
     pub fn write_step(&self, path: impl AsRef<Path>) -> Result<(), Error> {
-        let mut writer = ffi::STEPControlWriter_ctor();
+        let mut writer = ffi::export::STEPControlWriter_ctor();
 
-        let status = ffi::transfer_shape(writer.pin_mut(), &self.inner);
+        let status = ffi::export::transfer_shape(writer.pin_mut(), &self.inner);
 
         if status != ffi::IFSelectReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);
         }
 
-        let status = ffi::write_step(writer.pin_mut(), path.as_ref().to_string_lossy().to_string());
+        let status =
+            ffi::export::write_step(writer.pin_mut(), path.as_ref().to_string_lossy().to_string());
 
         if status != ffi::IFSelectReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);
@@ -561,9 +562,9 @@ impl Shape {
         path: P,
         triangulation_tolerance: f64,
     ) -> Result<(), Error> {
-        let mut stl_writer = ffi::StlAPIWriter_ctor();
+        let mut stl_writer = ffi::export::StlAPIWriter_ctor();
         let mesher = Mesher::try_new(self, triangulation_tolerance)?;
-        let success = ffi::write_stl(
+        let success = ffi::export::write_stl(
             stl_writer.pin_mut(),
             mesher.inner.shape(),
             path.as_ref().to_string_lossy().to_string(),

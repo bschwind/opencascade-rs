@@ -1,7 +1,11 @@
+pub mod ffi {
+    pub use super::{export, inner::*};
+}
+
 pub mod export;
 
 #[cxx::bridge]
-pub mod ffi {
+pub mod inner {
     #[repr(u32)]
     #[derive(Debug)]
     #[cxx_name = "TopAbs_ShapeEnum"]
@@ -1411,35 +1415,6 @@ pub mod ffi {
             progress: &MessageProgressRange,
         ) -> i32;
         pub fn one_shape(reader: &STEPControlReader) -> UniquePtr<TopoDSShape>;
-
-        // Data Export
-        #[cxx_name = "STEPControl_Writer"]
-        type STEPControlWriter;
-
-        #[cxx_name = "construct_unique"]
-        pub fn STEPControlWriter_ctor() -> UniquePtr<STEPControlWriter>;
-
-        pub fn transfer_shape(
-            writer: Pin<&mut STEPControlWriter>,
-            shape: &TopoDSShape,
-        ) -> IFSelectReturnStatus;
-        pub fn write_step(
-            writer: Pin<&mut STEPControlWriter>,
-            filename: String,
-        ) -> IFSelectReturnStatus;
-
-        #[cxx_name = "StlAPI_Writer"]
-        type StlAPIWriter;
-
-        #[cxx_name = "construct_unique"]
-        pub fn StlAPIWriter_ctor() -> UniquePtr<StlAPIWriter>;
-
-        #[cxx_name = "WriteStl"]
-        pub fn write_stl(
-            writer: Pin<&mut StlAPIWriter>,
-            shape: &TopoDSShape,
-            filename: String,
-        ) -> bool;
 
         // Triangulation
         #[cxx_name = "BRepMesh_IncrementalMesh"]
