@@ -22,6 +22,7 @@ struct Args {
 enum Format {
     Step,
     Stl,
+    Iges,
 }
 
 fn main() {
@@ -38,6 +39,7 @@ fn main() {
     });
 
     match format {
+        Format::Iges => model.write_iges(args.output).unwrap(),
         Format::Step => model.write_step(args.output).unwrap(),
         Format::Stl => model.write_stl(args.output).unwrap(),
     }
@@ -47,6 +49,7 @@ fn determine_format(extension: &OsStr) -> Option<Format> {
     match extension.to_ascii_lowercase().as_bytes() {
         b"step" | b"stp" => Some(Format::Step),
         b"stl" => Some(Format::Stl),
+        b"iges" | b"igs" => Some(Format::Iges),
         _ => None,
     }
 }
