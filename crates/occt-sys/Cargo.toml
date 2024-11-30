@@ -3,7 +3,7 @@ name = "occt-sys"
 description = "Static build of the C++ OpenCascade CAD Kernel for use as a Rust dependency"
 authors = ["Brian Schwind <brianmschwind@gmail.com>", "Matěj Laitl <matej@laitl.cz>"]
 license = "LGPL-2.1"
-version = "0.5.1"
+version = "0.6.0"
 edition = "2021"
 repository = "https://github.com/bschwind/opencascade-rs"
 
