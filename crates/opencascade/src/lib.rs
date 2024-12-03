@@ -15,10 +15,14 @@ pub enum Error {
     StlWriteFailed,
     #[error("failed to read STEP file")]
     StepReadFailed,
+    #[error("failed to read IGES file")]
+    IgesReadFailed,
     #[error("failed to read KiCAD PCB file: {0}")]
     KicadReadFailed(#[from] kicad_parser::Error),
     #[error("failed to write STEP file")]
     StepWriteFailed,
+    #[error("failed to write IGES file")]
+    IgesWriteFailed,
     #[error("failed to triangulate Shape")]
     TriangulationFailed,
     #[error("encountered a face with no triangulation")]

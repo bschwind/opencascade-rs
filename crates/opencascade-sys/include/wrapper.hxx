@@ -53,6 +53,8 @@
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <IGESControl_Reader.hxx>
+#include <IGESControl_Writer.hxx>
 #include <Law_Function.hxx>
 #include <Law_Interpol.hxx>
 #include <NCollection_Array1.hxx>
@@ -361,7 +363,15 @@ inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String 
   return reader.ReadFile(theFileName.c_str());
 }
 
-inline std::unique_ptr<TopoDS_Shape> one_shape(const STEPControl_Reader &reader) {
+inline IFSelect_ReturnStatus read_iges(IGESControl_Reader &reader, rust::String theFileName) {
+  return reader.ReadFile(theFileName.c_str());
+}
+
+inline std::unique_ptr<TopoDS_Shape> one_shape_step(const STEPControl_Reader &reader) {
+  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
+}
+
+inline std::unique_ptr<TopoDS_Shape> one_shape_iges(const IGESControl_Reader &reader) {
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
 }
 
@@ -370,7 +380,15 @@ inline IFSelect_ReturnStatus transfer_shape(STEPControl_Writer &writer, const To
   return writer.Transfer(theShape, STEPControl_AsIs);
 }
 
+inline void compute_model(IGESControl_Writer &writer) { writer.ComputeModel(); }
+
+inline bool add_shape(IGESControl_Writer &writer, const TopoDS_Shape &theShape) { return writer.AddShape(theShape); }
+
 inline IFSelect_ReturnStatus write_step(STEPControl_Writer &writer, rust::String theFileName) {
+  return writer.Write(theFileName.c_str());
+}
+
+inline bool write_iges(IGESControl_Writer &writer, rust::String theFileName) {
   return writer.Write(theFileName.c_str());
 }
 

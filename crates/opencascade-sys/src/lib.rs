@@ -1146,35 +1146,55 @@ pub mod ffi {
 
         // Data Import
         type STEPControl_Reader;
+        type IGESControl_Reader;
         type IFSelect_ReturnStatus;
 
         #[cxx_name = "construct_unique"]
         pub fn STEPControl_Reader_ctor() -> UniquePtr<STEPControl_Reader>;
 
+        #[cxx_name = "construct_unique"]
+        pub fn IGESControl_Reader_ctor() -> UniquePtr<IGESControl_Reader>;
+
         pub fn read_step(
             reader: Pin<&mut STEPControl_Reader>,
+            filename: String,
+        ) -> IFSelect_ReturnStatus;
+        pub fn read_iges(
+            reader: Pin<&mut IGESControl_Reader>,
             filename: String,
         ) -> IFSelect_ReturnStatus;
         pub fn TransferRoots(
             self: Pin<&mut STEPControl_Reader>,
             progress: &Message_ProgressRange,
         ) -> i32;
-        pub fn one_shape(reader: &STEPControl_Reader) -> UniquePtr<TopoDS_Shape>;
+        pub fn TransferRoots(
+            self: Pin<&mut IGESControl_Reader>,
+            progress: &Message_ProgressRange,
+        ) -> i32;
+        pub fn one_shape_step(reader: &STEPControl_Reader) -> UniquePtr<TopoDS_Shape>;
+        pub fn one_shape_iges(reader: &IGESControl_Reader) -> UniquePtr<TopoDS_Shape>;
 
         // Data Export
         type STEPControl_Writer;
+        type IGESControl_Writer;
 
         #[cxx_name = "construct_unique"]
         pub fn STEPControl_Writer_ctor() -> UniquePtr<STEPControl_Writer>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn IGESControl_Writer_ctor() -> UniquePtr<IGESControl_Writer>;
 
         pub fn transfer_shape(
             writer: Pin<&mut STEPControl_Writer>,
             shape: &TopoDS_Shape,
         ) -> IFSelect_ReturnStatus;
+        pub fn add_shape(writer: Pin<&mut IGESControl_Writer>, shape: &TopoDS_Shape) -> bool;
+        pub fn compute_model(writer: Pin<&mut IGESControl_Writer>);
         pub fn write_step(
             writer: Pin<&mut STEPControl_Writer>,
             filename: String,
         ) -> IFSelect_ReturnStatus;
+        pub fn write_iges(writer: Pin<&mut IGESControl_Writer>, filename: String) -> bool;
 
         type StlAPI_Writer;
 
