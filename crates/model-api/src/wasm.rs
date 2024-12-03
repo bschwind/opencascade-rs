@@ -44,7 +44,11 @@ pub fn register_model(build_model: fn() -> Box<dyn Model>) {
 }
 
 fn model() -> &'static mut dyn Model {
-    unsafe { MODEL.as_deref_mut().unwrap() }
+    // TODO(bschwind) - Use something with interior mutability if possible.
+    #[allow(static_mut_refs)]
+    unsafe {
+        MODEL.as_deref_mut().unwrap()
+    }
 }
 
 #[macro_export]

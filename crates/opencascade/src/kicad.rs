@@ -66,7 +66,7 @@ impl KicadPcb {
         )
     }
 
-    pub fn layer_edges<'a>(&'a self, layer: &'a BoardLayer) -> impl Iterator<Item = Edge> + '_ {
+    pub fn layer_edges<'a>(&'a self, layer: &'a BoardLayer) -> impl Iterator<Item = Edge> + 'a {
         let footprint_edges = self.board.footprints().flat_map(|footprint| {
             let angle = footprint.rotation_degrees.degrees();
             // TODO(bschwind) - Document why a negative angle is needed here.
