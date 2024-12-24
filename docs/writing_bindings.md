@@ -191,13 +191,13 @@ Standard_EXPORT TopoDS_Shape OneShape() const;
 Unfortunately, this returns a bare `TopoDS_Shape` so we can't directly bind to it, we'll have to create a wrapper C++ function.
 
 ```rust
-pub fn one_shape(reader: &STEPControl_Reader) -> UniquePtr<TopoDS_Shape>;
+pub fn one_shape_step(reader: &STEPControl_Reader) -> UniquePtr<TopoDS_Shape>;
 ```
 
 and
 
 ```c++
-inline std::unique_ptr<TopoDS_Shape> one_shape(const STEPControl_Reader &reader) {
+inline std::unique_ptr<TopoDS_Shape> one_shape_step(const STEPControl_Reader &reader) {
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
 }
 ```
@@ -233,7 +233,7 @@ pub fn from_step_file<P: AsRef<Path>>(path: P) -> Shape {
         read_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
     reader.pin_mut().TransferRoots(&Message_ProgressRange_ctor());
 
-    let inner = one_shape(&reader);
+    let inner = one_shape_step(&reader);
 
     // Assuming a Shape struct has a UniquePtr<TopoDS_Shape> field called `inner`
     Shape { inner }
