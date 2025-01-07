@@ -37,6 +37,8 @@
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakeTorus.hxx>
 #include <BRepTools.hxx>
+#include <Font_BRepFont.hxx>
+#include <Font_FontAspect.hxx>
 #include <GCE2d_MakeSegment.hxx>
 #include <GCPnts_TangentialDeflection.hxx>
 #include <GC_MakeArcOfCircle.hxx>
@@ -59,6 +61,7 @@
 #include <Law_Interpol.hxx>
 #include <NCollection_Array1.hxx>
 #include <NCollection_Array2.hxx>
+#include <NCollection_UtfString.hxx>
 #include <Poly_Connect.hxx>
 #include <STEPControl_Reader.hxx>
 #include <STEPControl_Writer.hxx>
@@ -351,6 +354,14 @@ inline std::unique_ptr<TopoDS_Face> BRepIntCurveSurface_Inter_face(const BRepInt
 
 inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurveSurface_Inter &intersector) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(intersector.Pnt()));
+}
+
+// Font to BRep
+inline std::unique_ptr<Font_BRepFont> Font_BRepFont_ctor_from_name(const rust::String &theFontName,
+                                                                   const Font_FontAspect theFontAspect,
+                                                                   const Standard_Real theSize) {
+  NCollection_String name(theFontName.data(), theFontName.size());
+  return std::unique_ptr<Font_BRepFont>(new Font_BRepFont(name, theFontAspect, theSize));
 }
 
 // BRepFeat

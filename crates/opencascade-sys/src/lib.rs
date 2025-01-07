@@ -41,6 +41,16 @@ pub mod ffi {
     }
 
     #[derive(Debug)]
+    #[repr(i32)]
+    pub enum FontAspect {
+        Font_FontAspect_UNDEFINED = -1,
+        Font_FontAspect_Regular = 0,
+        Font_FontAspect_Bold,
+        Font_FontAspect_Italic,
+        Font_FontAspect_BoldItalic,
+    }
+
+    #[derive(Debug)]
     #[repr(u32)]
     pub enum GeomAbs_CurveType {
         GeomAbs_Line,
@@ -272,6 +282,15 @@ pub mod ffi {
             interpol: UniquePtr<Law_Interpol>,
         ) -> UniquePtr<Law_Function>;
         pub fn Set(self: Pin<&mut Law_Interpol>, array: &TColgp_Array1OfPnt2d, periodic: bool);
+
+        // Font
+        type Font_BRepFont;
+
+        pub fn Font_BRepFont_ctor_from_name(
+            name: &String,
+            aspect: FontAspect,
+            size: f64,
+        ) -> UniquePtr<Font_BRepFont>;
 
         // Geometry
         type Geom_TrimmedCurve;
