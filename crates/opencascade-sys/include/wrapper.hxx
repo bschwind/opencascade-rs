@@ -37,7 +37,6 @@
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakeTorus.hxx>
 #include <BRepTools.hxx>
-#include <Font_BRepFont.hxx>
 #include <Font_FontAspect.hxx>
 #include <GCE2d_MakeSegment.hxx>
 #include <GCPnts_TangentialDeflection.hxx>
@@ -68,6 +67,7 @@
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
+#include <StdPrs_BRepFont.hxx>
 #include <StlAPI_Writer.hxx>
 #include <TColgp_Array1OfDir.hxx>
 #include <TColgp_HArray1OfPnt.hxx>
@@ -357,15 +357,15 @@ inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurv
 }
 
 // Font to BRep
-inline std::unique_ptr<Font_BRepFont> Font_BRepFont_ctor_from_name(const rust::String &theFontName,
-                                                                   const int32_t theFontAspect,
-                                                                   const Standard_Real theSize) {
+inline std::unique_ptr<StdPrs_BRepFont> StdPrs_BRepFont_ctor_from_name(const rust::String &theFontName,
+                                                                       const int32_t theFontAspect,
+                                                                       const Standard_Real theSize) {
   NCollection_String name(theFontName.data(), theFontName.size());
   Font_FontAspect aspect = static_cast<Font_FontAspect>(theFontAspect);
-  return std::unique_ptr<Font_BRepFont>(new Font_BRepFont(name, aspect, theSize));
+  return std::unique_ptr<StdPrs_BRepFont>(new StdPrs_BRepFont(name, aspect, theSize));
 }
 
-inline std::unique_ptr<TopoDS_Shape> Font_BRepFont_RenderGlyph(Font_BRepFont &theFont, const uint32_t theChar) {
+inline std::unique_ptr<TopoDS_Shape> StdPrs_BRepFont_RenderGlyph(StdPrs_BRepFont &theFont, const uint32_t theChar) {
   std::unique_ptr<TopoDS_Shape> theShape = std::unique_ptr<TopoDS_Shape>();
   *theShape = theFont.RenderGlyph(theChar);
   return theShape;

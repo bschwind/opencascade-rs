@@ -28,7 +28,7 @@ pub fn build_occt() {
         .define("USE_EIGEN", "FALSE")
         .define("USE_FFMPEG", "FALSE")
         .define("USE_FREEIMAGE", "FALSE")
-        .define("USE_FREETYPE", "FALSE")
+        .define("USE_FREETYPE", "TRUE")
         .define("USE_GLES2", "FALSE")
         .define("USE_OPENGL", "FALSE")
         .define("USE_OPENVR", "FALSE")

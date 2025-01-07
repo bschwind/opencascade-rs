@@ -284,16 +284,16 @@ pub mod ffi {
         pub fn Set(self: Pin<&mut Law_Interpol>, array: &TColgp_Array1OfPnt2d, periodic: bool);
 
         // Font
-        type Font_BRepFont;
+        type StdPrs_BRepFont;
 
-        pub fn Font_BRepFont_ctor_from_name(
+        pub fn StdPrs_BRepFont_ctor_from_name(
             name: &String,
             aspect: i32,
             size: f64,
-        ) -> UniquePtr<Font_BRepFont>;
+        ) -> UniquePtr<StdPrs_BRepFont>;
 
-        pub fn Font_BRepFont_RenderGlyph(
-            font: Pin<&mut Font_BRepFont>,
+        pub fn StdPrs_BRepFont_RenderGlyph(
+            font: Pin<&mut StdPrs_BRepFont>,
             theChar: u32,
         ) -> UniquePtr<TopoDS_Shape>;
 
