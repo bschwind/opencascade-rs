@@ -43,11 +43,11 @@ pub mod ffi {
     #[derive(Debug)]
     #[repr(i32)]
     pub enum FontAspect {
-        Font_FontAspect_UNDEFINED = -1,
-        Font_FontAspect_Regular = 0,
-        Font_FontAspect_Bold,
-        Font_FontAspect_Italic,
-        Font_FontAspect_BoldItalic,
+        UNDEFINED = -1,
+        Regular = 0,
+        Bold,
+        Italic,
+        BoldItalic,
     }
 
     #[derive(Debug)]
@@ -288,9 +288,14 @@ pub mod ffi {
 
         pub fn Font_BRepFont_ctor_from_name(
             name: &String,
-            aspect: FontAspect,
+            aspect: i32,
             size: f64,
         ) -> UniquePtr<Font_BRepFont>;
+
+        pub fn Font_BRepFont_RenderGlyph(
+            font: Pin<&mut Font_BRepFont>,
+            theChar: u32,
+        ) -> UniquePtr<TopoDS_Shape>;
 
         // Geometry
         type Geom_TrimmedCurve;

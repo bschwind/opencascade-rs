@@ -358,10 +358,17 @@ inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurv
 
 // Font to BRep
 inline std::unique_ptr<Font_BRepFont> Font_BRepFont_ctor_from_name(const rust::String &theFontName,
-                                                                   const Font_FontAspect theFontAspect,
+                                                                   const int32_t theFontAspect,
                                                                    const Standard_Real theSize) {
   NCollection_String name(theFontName.data(), theFontName.size());
-  return std::unique_ptr<Font_BRepFont>(new Font_BRepFont(name, theFontAspect, theSize));
+  Font_FontAspect aspect = static_cast<Font_FontAspect>(theFontAspect);
+  return std::unique_ptr<Font_BRepFont>(new Font_BRepFont(name, aspect, theSize));
+}
+
+inline std::unique_ptr<TopoDS_Shape> Font_BRepFont_RenderGlyph(Font_BRepFont &theFont, const uint32_t theChar) {
+  std::unique_ptr<TopoDS_Shape> theShape = std::unique_ptr<TopoDS_Shape>();
+  *theShape = theFont.RenderGlyph(theChar);
+  return theShape;
 }
 
 // BRepFeat
