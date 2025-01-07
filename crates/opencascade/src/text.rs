@@ -1,7 +1,7 @@
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
-use crate::primitives::Wire;
+use crate::primitives::CompoundFace;
 
 pub type FontAspect = ffi::FontAspect;
 
@@ -15,9 +15,9 @@ impl Font {
         Self { inner }
     }
 
-    pub fn render_glyph(&mut self, c: char) -> Wire {
+    pub fn render_glyph(&mut self, c: char) -> CompoundFace {
         let shape = ffi::StdPrs_BRepFont_RenderGlyph(self.inner.pin_mut(), c as u32);
-        let wire = ffi::TopoDS_Wire_to_owned(ffi::TopoDS_cast_to_wire(&shape));
-        Wire { inner: wire }
+        let face = ffi::TopoDS_Compound_to_owned(ffi::TopoDS_cast_to_compound(&shape));
+        CompoundFace { inner: face }
     }
 }
