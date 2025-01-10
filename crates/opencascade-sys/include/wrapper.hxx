@@ -365,6 +365,12 @@ inline std::unique_ptr<StdPrs_BRepFont> StdPrs_BRepFont_ctor_from_name(const rus
   return std::unique_ptr<StdPrs_BRepFont>(new StdPrs_BRepFont(name, aspect, theSize));
 }
 
+inline std::unique_ptr<StdPrs_BRepFont> StdPrs_BRepFont_ctor_from_path(const rust::String &theFontPath,
+                                                                       const Standard_Real theSize) {
+  NCollection_String path(theFontPath.data(), theFontPath.size());
+  return std::unique_ptr<StdPrs_BRepFont>(new StdPrs_BRepFont(path, theSize));
+}
+
 inline std::unique_ptr<TopoDS_Shape> StdPrs_BRepFont_RenderGlyph(StdPrs_BRepFont &theFont, const uint32_t theChar) {
   std::unique_ptr<TopoDS_Shape> theShape = std::unique_ptr<TopoDS_Shape>();
   *theShape = theFont.RenderGlyph(theChar);

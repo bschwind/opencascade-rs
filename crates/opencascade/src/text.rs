@@ -15,6 +15,11 @@ impl Font {
         Self { inner }
     }
 
+    pub fn from_path(path: &str, size: f64) -> Self {
+        let inner = ffi::StdPrs_BRepFont_ctor_from_path(&path.to_owned(), size);
+        Self { inner }
+    }
+
     pub fn render_glyph(&mut self, c: char) -> CompoundFace {
         let shape = ffi::StdPrs_BRepFont_RenderGlyph(self.inner.pin_mut(), c as u32);
         let face = ffi::TopoDS_Compound_to_owned(ffi::TopoDS_cast_to_compound(&shape));

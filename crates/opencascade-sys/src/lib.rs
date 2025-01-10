@@ -292,6 +292,11 @@ pub mod ffi {
             size: f64,
         ) -> UniquePtr<StdPrs_BRepFont>;
 
+        pub fn StdPrs_BRepFont_ctor_from_path(
+            path: &String,
+            size: f64,
+        ) -> UniquePtr<StdPrs_BRepFont>;
+
         pub fn StdPrs_BRepFont_RenderGlyph(
             font: Pin<&mut StdPrs_BRepFont>,
             theChar: u32,
