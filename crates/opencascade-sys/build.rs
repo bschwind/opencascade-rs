@@ -29,6 +29,8 @@ const OCCT_LIBS: &[&str] = &[
     "TKCAF",
     "TKLCAF",
     "TKXCAF",
+    "TKService",
+    "TKHLR",
     "TKV3d",
 ];
 
