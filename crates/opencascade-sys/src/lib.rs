@@ -283,7 +283,8 @@ pub mod ffi {
         ) -> UniquePtr<Law_Function>;
         pub fn Set(self: Pin<&mut Law_Interpol>, array: &TColgp_Array1OfPnt2d, periodic: bool);
 
-        // Font
+        // Font & Text Rendering
+
         type StdPrs_BRepFont;
 
         pub fn StdPrs_BRepFont_ctor_from_name(

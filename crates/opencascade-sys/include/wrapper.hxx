@@ -356,7 +356,8 @@ inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurv
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(intersector.Pnt()));
 }
 
-// Font to BRep
+// Font & Text Rendering
+
 inline std::unique_ptr<StdPrs_BRepFont> StdPrs_BRepFont_ctor_from_name(const rust::String &theFontName,
                                                                        const int32_t theFontAspect,
                                                                        const Standard_Real theSize) {
@@ -372,8 +373,9 @@ inline std::unique_ptr<StdPrs_BRepFont> StdPrs_BRepFont_ctor_from_path(const rus
 }
 
 inline std::unique_ptr<TopoDS_Shape> StdPrs_BRepFont_RenderGlyph(StdPrs_BRepFont &theFont, const uint32_t theChar) {
-  std::unique_ptr<TopoDS_Shape> theShape = std::unique_ptr<TopoDS_Shape>();
+  std::unique_ptr<TopoDS_Shape> theShape = std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape());
   *theShape = theFont.RenderGlyph(theChar);
+  assert(!theShape->IsNull());
   return theShape;
 }
 
