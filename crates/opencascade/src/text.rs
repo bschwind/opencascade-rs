@@ -11,12 +11,19 @@ pub struct Font {
 
 impl Font {
     pub fn from_name(name: &str, aspect: FontAspect, size: f64) -> Self {
-        let inner = ffi::StdPrs_BRepFont_ctor_from_name(&name.to_owned(), aspect.repr, size);
+        let name: String = name.to_owned();
+        let mut inner = ffi::StdPrs_BRepFont_ctor();
+        let is_success =
+            ffi::StdPrs_BRepFont_Init_with_name(inner.pin_mut(), &name, aspect.repr, size);
+        assert!(is_success);
         Self { inner }
     }
 
     pub fn from_path(path: &str, size: f64) -> Self {
-        let inner = ffi::StdPrs_BRepFont_ctor_from_path(&path.to_owned(), size);
+        let path: String = path.to_owned();
+        let mut inner = ffi::StdPrs_BRepFont_ctor();
+        let is_success = ffi::StdPrs_BRepFont_Init_with_path(inner.pin_mut(), &path, size);
+        assert!(is_success);
         Self { inner }
     }
 

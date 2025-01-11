@@ -358,18 +358,17 @@ inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurv
 
 // Font & Text Rendering
 
-inline std::unique_ptr<StdPrs_BRepFont> StdPrs_BRepFont_ctor_from_name(const rust::String &theFontName,
-                                                                       const int32_t theFontAspect,
-                                                                       const Standard_Real theSize) {
+inline bool StdPrs_BRepFont_Init_with_name(StdPrs_BRepFont &self, const rust::String &theFontName,
+                                           const int32_t theFontAspect, const Standard_Real theSize) {
   NCollection_String name(theFontName.data(), theFontName.size());
   Font_FontAspect aspect = static_cast<Font_FontAspect>(theFontAspect);
-  return std::unique_ptr<StdPrs_BRepFont>(new StdPrs_BRepFont(name, aspect, theSize));
+  return self.Init(name, aspect, theSize);
 }
 
-inline std::unique_ptr<StdPrs_BRepFont> StdPrs_BRepFont_ctor_from_path(const rust::String &theFontPath,
-                                                                       const Standard_Real theSize) {
+inline bool StdPrs_BRepFont_Init_with_path(StdPrs_BRepFont &self, const rust::String &theFontPath,
+                                           const Standard_Real theSize) {
   NCollection_String path(theFontPath.data(), theFontPath.size());
-  return std::unique_ptr<StdPrs_BRepFont>(new StdPrs_BRepFont(path, theSize));
+  return self.Init(path, theSize, 0);
 }
 
 inline std::unique_ptr<TopoDS_Shape> StdPrs_BRepFont_RenderGlyph(StdPrs_BRepFont &theFont, const uint32_t theChar) {

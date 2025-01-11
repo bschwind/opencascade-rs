@@ -287,16 +287,21 @@ pub mod ffi {
 
         type StdPrs_BRepFont;
 
-        pub fn StdPrs_BRepFont_ctor_from_name(
+        #[cxx_name = "construct_unique"]
+        pub fn StdPrs_BRepFont_ctor() -> UniquePtr<StdPrs_BRepFont>;
+
+        pub fn StdPrs_BRepFont_Init_with_name(
+            brep_font: Pin<&mut StdPrs_BRepFont>,
             name: &String,
             aspect: i32,
             size: f64,
-        ) -> UniquePtr<StdPrs_BRepFont>;
+        ) -> bool;
 
-        pub fn StdPrs_BRepFont_ctor_from_path(
+        pub fn StdPrs_BRepFont_Init_with_path(
+            brep_font: Pin<&mut StdPrs_BRepFont>,
             path: &String,
             size: f64,
-        ) -> UniquePtr<StdPrs_BRepFont>;
+        ) -> bool;
 
         pub fn StdPrs_BRepFont_RenderGlyph(
             font: Pin<&mut StdPrs_BRepFont>,
