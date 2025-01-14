@@ -78,6 +78,7 @@ pub mod ffi {
         type HandleStandardType;
         type HandleGeomCurve;
         type HandleGeomBSplineCurve;
+        type HandleGeomBezierCurve;
         type HandleGeomTrimmedCurve;
         type HandleGeomSurface;
         type HandleGeomBezierSurface;
@@ -100,6 +101,11 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn new_HandleGeomCurve_from_HandleGeom_BSplineCurve(
             bspline_curve_handle: &HandleGeomBSplineCurve,
+        ) -> UniquePtr<HandleGeomCurve>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn new_HandleGeomCurve_from_HandleGeom_BezierCurve(
+            bezier_curve_handle: &HandleGeomBezierCurve,
         ) -> UniquePtr<HandleGeomCurve>;
 
         #[cxx_name = "construct_unique"]
@@ -991,6 +997,18 @@ pub mod ffi {
             surface: &HandleGeomSurface,
         ) -> UniquePtr<GeomAPI_ProjectPointOnSurf>;
         pub fn LowerDistanceParameters(self: &GeomAPI_ProjectPointOnSurf, u: &mut f64, v: &mut f64);
+
+        // Bezier Curve
+        type Geom_BezierCurve;
+
+        #[cxx_name = "construct_unique"]
+        pub fn Geom_BezierCurve_ctor_points(
+            poles: &TColgp_HArray1OfPnt,
+        ) -> UniquePtr<Geom_BezierCurve>;
+
+        pub fn Geom_BezierCurve_to_handle(
+            law: UniquePtr<Geom_BezierCurve>,
+        ) -> UniquePtr<HandleGeomBezierCurve>;
 
         // Transforms
         type gp_Trsf;
