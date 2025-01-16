@@ -1,6 +1,6 @@
 # opencascade-rs
 
-Rust bindings to OpenCascade. The code is currently a major work in progress.
+Rust bindings to [OpenCascade](https://dev.opencascade.org). The code is currently a major work in progress.
 
 I currently work a full-time job and work on this in my spare time, so please adjust timing expectations accordingly :)
 
