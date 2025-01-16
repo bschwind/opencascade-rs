@@ -310,6 +310,20 @@ impl Face {
         CompoundFace::from_compound(compound)
     }
 
+    #[must_use]
+    pub fn intersect(&self, other: &Face) -> CompoundFace {
+        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
+
+        let mut common_operation = ffi::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+
+        let common_shape = common_operation.pin_mut().Shape();
+
+        let compound = ffi::TopoDS_cast_to_compound(common_shape);
+
+        CompoundFace::from_compound(compound)
+    }
+
     pub fn subtract(&self, other: &Face) -> CompoundFace {
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
