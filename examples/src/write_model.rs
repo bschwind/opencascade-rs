@@ -1,4 +1,4 @@
-use std::{ffi::OsStr, os::unix::ffi::OsStrExt, path::PathBuf};
+use std::{ffi::OsStr, path::PathBuf};
 
 use clap::{Parser, ValueEnum};
 use examples::Example;
@@ -46,7 +46,7 @@ fn main() {
 }
 
 fn determine_format(extension: &OsStr) -> Option<Format> {
-    match extension.to_ascii_lowercase().as_bytes() {
+    match extension.to_string_lossy().as_bytes() {
         b"step" | b"stp" => Some(Format::Step),
         b"stl" => Some(Format::Stl),
         b"iges" | b"igs" => Some(Format::Iges),
