@@ -43,7 +43,7 @@ impl Mesher {
             let triangulation_handle =
                 ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
 
-            let triangulation = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle)
+            let triangulation = ffi::HandlePoly_Triangulation_Get(&triangulation_handle)
                 .map_err(|_| Error::UntriangulatedFace)?;
 
             let index_offset = vertices.len();

@@ -83,14 +83,14 @@ impl Wire {
         unordered_edges: impl IntoIterator<Item = T>,
         edge_connection: EdgeConnection,
     ) -> Self {
-        let mut edges = ffi::new_Handle_TopTools_HSequenceOfShape();
+        let mut edges = ffi::new_HandleTopTools_HSequenceOfShape();
 
         for edge in unordered_edges {
             let edge_shape = ffi::cast_edge_to_shape(&edge.as_ref().inner);
             ffi::TopTools_HSequenceOfShape_append(edges.pin_mut(), edge_shape);
         }
 
-        let mut wires = ffi::new_Handle_TopTools_HSequenceOfShape();
+        let mut wires = ffi::new_HandleTopTools_HSequenceOfShape();
 
         let (tolerance, shared) = match edge_connection {
             EdgeConnection::Exact => (0.0, true),
