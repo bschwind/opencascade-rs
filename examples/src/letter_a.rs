@@ -9,13 +9,19 @@ pub fn shape() -> Shape {
     outer.subtract(&inner).into_shape()
 }
 
+const SCALE_FACTOR: f64 = 1.0 / 16.0;
+const CENTER_X: i32 = 256;
+const CENTER_Y: i32 = 256;
+
 fn contour_to_face(contour: Contour) -> Face {
     let edges: Vec<Edge> = contour
         .into_iter()
         .map(|segment_points| {
-            let points = segment_points
-                .into_iter()
-                .map(|(x, y)| DVec3::new(x as f64 / 16.0 - 16.0, y as f64 / 16.0 - 16.0, 0.0));
+            let points = segment_points.into_iter().map(|(x, y)| {
+                let x = (x - CENTER_X) as f64 * SCALE_FACTOR;
+                let y = (y - CENTER_Y) as f64 * SCALE_FACTOR;
+                DVec3::new(x, y, 0.0)
+            });
             Edge::bezier(points)
         })
         .collect();
