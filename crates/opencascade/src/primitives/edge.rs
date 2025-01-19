@@ -63,6 +63,22 @@ impl Edge {
         Self::from_make_edge(make_edge)
     }
 
+    pub fn bezier(points: impl IntoIterator<Item = DVec3>) -> Self {
+        let points: Vec<_> = points.into_iter().collect();
+        let mut array = ffi::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
+        for (index, point) in points.into_iter().enumerate() {
+            array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
+        }
+
+        let bezier = ffi::Geom_BezierCurve_ctor_points(&array);
+        let bezier_handle = ffi::Geom_BezierCurve_to_handle(bezier);
+        let curve_handle = ffi::new_HandleGeomCurve_from_HandleGeom_BezierCurve(&bezier_handle);
+
+        let mut make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
+        let edge = make_edge.pin_mut().Edge();
+        Self::from_edge(edge)
+    }
+
     pub fn circle(center: DVec3, normal: DVec3, radius: f64) -> Self {
         let axis = make_axis_2(center, normal);
 

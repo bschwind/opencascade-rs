@@ -11,6 +11,7 @@ pub mod heater_coil;
 pub mod high_level_bottle;
 pub mod keyboard_case;
 pub mod keycap;
+pub mod letter_a;
 pub mod offset_2d;
 pub mod rounded_chamfer;
 pub mod swept_face;
@@ -33,6 +34,7 @@ pub enum Example {
     HighLevelBottle,
     KeyboardCase,
     Keycap,
+    LetterA,
     Offset2d,
     RoundedChamfer,
     SweptFace,
@@ -57,6 +59,7 @@ impl Example {
             Example::HighLevelBottle => high_level_bottle::shape(),
             Example::KeyboardCase => keyboard_case::shape(),
             Example::Keycap => keycap::shape(),
+            Example::LetterA => letter_a::shape(),
             Example::Offset2d => offset_2d::shape(),
             Example::RoundedChamfer => rounded_chamfer::shape(),
             Example::SweptFace => swept_face::shape(),
