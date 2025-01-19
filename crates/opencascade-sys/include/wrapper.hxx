@@ -108,8 +108,8 @@ typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
 typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
 typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
-typedef opencascade::handle<Poly_Triangulation> Handle_Poly_Triangulation;
-typedef opencascade::handle<TopTools_HSequenceOfShape> Handle_TopTools_HSequenceOfShape;
+typedef opencascade::handle<Poly_Triangulation> HandlePoly_Triangulation;
+typedef opencascade::handle<TopTools_HSequenceOfShape> HandleTopTools_HSequenceOfShape;
 typedef opencascade::handle<Law_Function> HandleLawFunction;
 
 typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
@@ -317,14 +317,14 @@ inline std::unique_ptr<gp_Trsf> TopLoc_Location_Transformation(const TopLoc_Loca
   return std::unique_ptr<gp_Trsf>(new gp_Trsf(location.Transformation()));
 }
 
-inline std::unique_ptr<Handle_Poly_Triangulation>
-Handle_Poly_Triangulation_ctor(std::unique_ptr<Poly_Triangulation> triangulation) {
-  return std::unique_ptr<Handle_Poly_Triangulation>(new Handle_Poly_Triangulation(triangulation.release()));
+inline std::unique_ptr<HandlePoly_Triangulation>
+HandlePoly_Triangulation_ctor(std::unique_ptr<Poly_Triangulation> triangulation) {
+  return std::unique_ptr<HandlePoly_Triangulation>(new HandlePoly_Triangulation(triangulation.release()));
 }
 
-inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
-                                                                          TopLoc_Location &location) {
-  return std::unique_ptr<Handle_Poly_Triangulation>(
+inline std::unique_ptr<HandlePoly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
+                                                                         TopLoc_Location &location) {
+  return std::unique_ptr<HandlePoly_Triangulation>(
       new opencascade::handle<Poly_Triangulation>(BRep_Tool::Triangulation(face, location)));
 }
 
@@ -492,27 +492,27 @@ inline std::unique_ptr<gp_Pnt> TColgp_HArray1OfPnt_Value(const TColgp_HArray1OfP
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(array.Value(index)));
 }
 
-inline void connect_edges_to_wires(Handle_TopTools_HSequenceOfShape &edges, const Standard_Real toler,
-                                   const Standard_Boolean shared, Handle_TopTools_HSequenceOfShape &wires) {
+inline void connect_edges_to_wires(HandleTopTools_HSequenceOfShape &edges, const Standard_Real toler,
+                                   const Standard_Boolean shared, HandleTopTools_HSequenceOfShape &wires) {
   ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, toler, shared, wires);
 }
 
-inline std::unique_ptr<Handle_TopTools_HSequenceOfShape> new_Handle_TopTools_HSequenceOfShape() {
+inline std::unique_ptr<HandleTopTools_HSequenceOfShape> new_HandleTopTools_HSequenceOfShape() {
   auto sequence = new TopTools_HSequenceOfShape();
   auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);
 
-  return std::unique_ptr<Handle_TopTools_HSequenceOfShape>(handle);
+  return std::unique_ptr<HandleTopTools_HSequenceOfShape>(handle);
 }
 
-inline void TopTools_HSequenceOfShape_append(Handle_TopTools_HSequenceOfShape &handle, const TopoDS_Shape &shape) {
+inline void TopTools_HSequenceOfShape_append(HandleTopTools_HSequenceOfShape &handle, const TopoDS_Shape &shape) {
   handle->Append(shape);
 }
 
-inline Standard_Integer TopTools_HSequenceOfShape_length(const Handle_TopTools_HSequenceOfShape &handle) {
+inline Standard_Integer TopTools_HSequenceOfShape_length(const HandleTopTools_HSequenceOfShape &handle) {
   return handle->Length();
 }
 
-inline const TopoDS_Shape &TopTools_HSequenceOfShape_value(const Handle_TopTools_HSequenceOfShape &handle,
+inline const TopoDS_Shape &TopTools_HSequenceOfShape_value(const HandleTopTools_HSequenceOfShape &handle,
                                                            Standard_Integer index) {
   return handle->Value(index);
 }
