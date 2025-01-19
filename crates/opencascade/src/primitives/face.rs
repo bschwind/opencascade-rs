@@ -310,6 +310,20 @@ impl Face {
         CompoundFace::from_compound(compound)
     }
 
+    #[must_use]
+    pub fn intersect(&self, other: &Face) -> CompoundFace {
+        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
+
+        let mut common_operation = ffi::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+
+        let common_shape = common_operation.pin_mut().Shape();
+
+        let compound = ffi::TopoDS_cast_to_compound(common_shape);
+
+        CompoundFace::from_compound(compound)
+    }
+
     pub fn subtract(&self, other: &Face) -> CompoundFace {
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
@@ -401,6 +415,48 @@ impl CompoundFace {
         let revolved_shape = make_solid.pin_mut().Shape();
 
         Shape::from_shape(revolved_shape)
+    }
+
+    #[must_use]
+    pub fn union(&self, other: &CompoundFace) -> CompoundFace {
+        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
+        let other_inner_shape = ffi::cast_compound_to_shape(&other.inner);
+
+        let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
+
+        let fuse_shape = fuse_operation.pin_mut().Shape();
+
+        let compound = ffi::TopoDS_cast_to_compound(fuse_shape);
+
+        CompoundFace::from_compound(compound)
+    }
+
+    #[must_use]
+    pub fn intersect(&self, other: &CompoundFace) -> CompoundFace {
+        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
+        let other_inner_shape = ffi::cast_compound_to_shape(&other.inner);
+
+        let mut common_operation = ffi::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+
+        let common_shape = common_operation.pin_mut().Shape();
+
+        let compound = ffi::TopoDS_cast_to_compound(common_shape);
+
+        CompoundFace::from_compound(compound)
+    }
+
+    #[must_use]
+    pub fn subtract(&self, other: &CompoundFace) -> CompoundFace {
+        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
+        let other_inner_shape = ffi::cast_compound_to_shape(&other.inner);
+
+        let mut fuse_operation = ffi::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+
+        let cut_shape = fuse_operation.pin_mut().Shape();
+
+        let compound = ffi::TopoDS_cast_to_compound(cut_shape);
+
+        CompoundFace::from_compound(compound)
     }
 
     pub fn set_global_translation(&mut self, translation: DVec3) {
