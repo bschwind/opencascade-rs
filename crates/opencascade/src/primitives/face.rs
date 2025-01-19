@@ -369,6 +369,14 @@ impl AsRef<CompoundFace> for CompoundFace {
     }
 }
 
+impl From<&Face> for CompoundFace {
+    fn from(face: &Face) -> Self {
+        let face = ffi::cast_face_to_shape(&face.inner);
+        let compound = ffi::TopoDS_cast_to_compound(&face);
+        Self::from_compound(compound)
+    }
+}
+
 impl CompoundFace {
     pub(crate) fn from_compound(compound: &ffi::TopoDS_Compound) -> Self {
         let inner = ffi::TopoDS_Compound_to_owned(compound);
