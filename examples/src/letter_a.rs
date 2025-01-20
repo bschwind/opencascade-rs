@@ -4,9 +4,9 @@ use opencascade::primitives::{Edge, Face, IntoShape, Shape, Wire};
 type Contour = Vec<Vec<(i32, i32)>>;
 
 pub fn shape() -> Shape {
-    let outer = contour_to_face(outer_contour()).extrude(DVec3::new(0.0, 0.0, 10.0));
-    let inner = contour_to_face(inner_contour()).extrude(DVec3::new(0.0, 0.0, 10.0));
-    outer.subtract(&inner).into_shape()
+    let outer = contour_to_face(outer_contour());
+    let inner = contour_to_face(inner_contour());
+    outer.subtract(&inner).extrude(DVec3::new(0.0, 0.0, 10.0)).into_shape()
 }
 
 const SCALE_FACTOR: f64 = 1.0 / 16.0;
