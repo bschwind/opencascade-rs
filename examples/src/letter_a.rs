@@ -1,12 +1,12 @@
 use glam::DVec3;
-use opencascade::primitives::{Edge, Face, IntoShape, Shape, Wire};
+use opencascade::primitives::{Edge, Face, Shape, Wire};
 
 type Contour = Vec<Vec<(i32, i32)>>;
 
 pub fn shape() -> Shape {
     let outer = contour_to_face(outer_contour());
     let inner = contour_to_face(inner_contour());
-    outer.subtract(&inner).extrude(DVec3::new(0.0, 0.0, 10.0)).into_shape()
+    outer.subtract(&inner).extrude(DVec3::new(0.0, 0.0, 10.0))
 }
 
 const SCALE_FACTOR: f64 = 1.0 / 16.0;
