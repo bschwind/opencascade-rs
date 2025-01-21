@@ -369,6 +369,19 @@ impl AsRef<CompoundFace> for CompoundFace {
     }
 }
 
+impl From<Face> for CompoundFace {
+    fn from(face: Face) -> Self {
+        let face = ffi::cast_face_to_shape(&face.inner);
+        let mut compound = ffi::TopoDS_Compound_ctor();
+        let brep_builder = ffi::BRep_Builder_ctor();
+        let topo_builder = ffi::BRep_Builder_upcast_to_topods_builder(&brep_builder);
+        topo_builder.MakeCompound(compound.pin_mut());
+        let mut compound_shape = ffi::TopoDS_Compound_as_shape(compound);
+        topo_builder.Add(compound_shape.pin_mut(), face);
+        Self::from_compound(ffi::TopoDS_cast_to_compound(&compound_shape))
+    }
+}
+
 impl CompoundFace {
     pub(crate) fn from_compound(compound: &ffi::TopoDS_Compound) -> Self {
         let inner = ffi::TopoDS_Compound_to_owned(compound);
