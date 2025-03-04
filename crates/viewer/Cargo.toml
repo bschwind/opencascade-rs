@@ -12,7 +12,7 @@ glam = { version = "0.24", features = ["bytemuck"] }
 kicad-parser = { path = "../kicad-parser" }
 notify = "6"
 opencascade = { version = "0.2", path = "../opencascade", default-features = false }
-simple-game = { git = "https://github.com/bschwind/simple-game.git", branch = "wgpu-update" }
+simple-game = { git = "https://github.com/bschwind/simple-game.git", rev = "14851f657e523ba31f1a677a3e5ae2291e1f2b21" }
 smaa = "0.16"
 wasmtime = "20"
 wgpu = "24"
