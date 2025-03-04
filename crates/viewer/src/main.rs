@@ -25,7 +25,7 @@ use std::path::PathBuf;
 use winit::{
     dpi::PhysicalPosition,
     event::{ElementState, KeyEvent, MouseButton, MouseScrollDelta::PixelDelta, WindowEvent},
-    event_loop::EventLoopWindowTarget,
+    event_loop::ActiveEventLoop,
     keyboard::{KeyCode, PhysicalKey},
     window::Window,
 };
@@ -227,15 +227,11 @@ impl GameApp for ViewerApp {
         self.smaa_target.resize(graphics_device.device(), width, height);
     }
 
-    fn handle_window_event(
-        &mut self,
-        event: &WindowEvent,
-        window_target: &EventLoopWindowTarget<()>,
-    ) {
+    fn handle_window_event(&mut self, event: &WindowEvent, window_target: &ActiveEventLoop) {
         let screen_diagonal = self.client_rect.length();
 
         match event {
-            WindowEvent::TouchpadRotate { delta, .. } => {
+            WindowEvent::RotationGesture { delta, .. } => {
                 let axis = Vec3::new(0.0, 0.0, 1.0);
                 let rotator = Quat::from_axis_angle(axis, TOUCHPAD_ROTATE_MULTIPLIER * delta);
                 self.camera.rotate(rotator);
@@ -276,7 +272,7 @@ impl GameApp for ViewerApp {
 
                 self.camera.pan(TOUCHPAD_PAN_MULTIPLIER * camera_space_delta);
             },
-            WindowEvent::TouchpadMagnify { delta, .. } => {
+            WindowEvent::PinchGesture { delta, .. } => {
                 let zoom_delta = *delta as f32 * TOUCHPAD_ZOOM_MULTIPLIER;
                 self.camera.zoom(-zoom_delta);
             },

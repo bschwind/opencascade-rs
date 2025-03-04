@@ -131,8 +131,15 @@ impl EdgeDrawer {
                 timestamp_writes: None,
             });
 
+            let instance_buffer_size = rendered_line.vertex_buf.size();
+            let one_instance_size = std::mem::size_of::<LineVertex3>() as u64;
+
             render_pass.set_vertex_buffer(0, self.buffers.round_strip_geometry.slice(..));
-            render_pass.set_vertex_buffer(1, rendered_line.vertex_buf.slice(..));
+            render_pass.set_vertex_buffer(
+                1,
+                rendered_line.vertex_buf.slice(..(instance_buffer_size - one_instance_size)),
+            );
+            render_pass.set_vertex_buffer(2, rendered_line.vertex_buf.slice(one_instance_size..));
 
             // Render dashed line strips
             if self.draw_back_edges {
@@ -203,7 +210,7 @@ impl EdgeDrawer {
             layout: Some(&render_pipeline_layout),
             vertex: wgpu::VertexState {
                 module: &draw_shader,
-                entry_point: "main_vs",
+                entry_point: Some("main_vs"),
                 buffers: &[
                     wgpu::VertexBufferLayout {
                         array_stride: std::mem::size_of::<RoundLineStripVertex>() as u64,
@@ -213,12 +220,17 @@ impl EdgeDrawer {
                         ],
                     },
                     wgpu::VertexBufferLayout {
-                        // The stride is one LineVertex3 here intentionally.
                         array_stride: std::mem::size_of::<LineVertex3>() as u64,
                         step_mode: wgpu::VertexStepMode::Instance,
                         attributes: &wgpu::vertex_attr_array![
                             1 => Float32x4, // Point A
                             2 => Float32x4, // Length so far
+                        ],
+                    },
+                    wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::<LineVertex3>() as u64,
+                        step_mode: wgpu::VertexStepMode::Instance,
+                        attributes: &wgpu::vertex_attr_array![
                             3 => Float32x4, // Point B
                             4 => Float32x4, // Length so far
                         ],
@@ -228,7 +240,7 @@ impl EdgeDrawer {
             },
             fragment: Some(wgpu::FragmentState {
                 module: &draw_shader,
-                entry_point: "main_fs",
+                entry_point: Some("main_fs"),
                 targets: &[Some(wgpu::ColorTargetState {
                     format: target_format,
                     blend: Some(wgpu::BlendState {
