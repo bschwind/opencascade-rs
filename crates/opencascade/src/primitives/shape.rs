@@ -8,7 +8,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec3};
-use opencascade_sys::ffi;
+use opencascade_sys::{ffi, shape_upgrade::UnifySameDomain};
 use std::path::Path;
 
 pub struct Shape {
@@ -614,7 +614,7 @@ impl Shape {
 
     #[must_use]
     pub fn clean(&self) -> Self {
-        let mut upgrader = ffi::ShapeUpgrade_UnifySameDomain_ctor(&self.inner, true, true, true);
+        let mut upgrader = UnifySameDomain::new(&self.inner, true, true, true);
         upgrader.pin_mut().AllowInternalEdges(false);
         upgrader.pin_mut().Build();
 

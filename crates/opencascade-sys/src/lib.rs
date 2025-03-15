@@ -1,5 +1,6 @@
 pub mod b_rep_g_prop;
 pub mod g_prop;
+pub mod shape_upgrade;
 
 #[cxx::bridge]
 pub mod ffi {
@@ -1326,20 +1327,6 @@ pub mod ffi {
 
         // BRepTools
         pub fn outer_wire(face: &TopoDS_Face) -> UniquePtr<TopoDS_Wire>;
-
-        // Cleaning
-        type ShapeUpgrade_UnifySameDomain;
-
-        #[cxx_name = "construct_unique"]
-        pub fn ShapeUpgrade_UnifySameDomain_ctor(
-            shape: &TopoDS_Shape,
-            unify_edges: bool,
-            unify_faces: bool,
-            concat_b_splines: bool,
-        ) -> UniquePtr<ShapeUpgrade_UnifySameDomain>;
-        pub fn AllowInternalEdges(self: Pin<&mut ShapeUpgrade_UnifySameDomain>, allow: bool);
-        pub fn Build(self: Pin<&mut ShapeUpgrade_UnifySameDomain>);
-        pub fn Shape(self: &ShapeUpgrade_UnifySameDomain) -> &TopoDS_Shape;
 
         pub fn connect_edges_to_wires(
             edges: Pin<&mut HandleTopTools_HSequenceOfShape>,
