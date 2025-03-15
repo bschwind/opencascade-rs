@@ -49,7 +49,9 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=user32");
     }
 
-    let mut build = cxx_build::bridge("src/lib.rs");
+    let rust_bridges = ["src/lib.rs", "src/b_rep_g_prop.rs", "src/g_prop.rs"];
+
+    let mut build = cxx_build::bridges(rust_bridges);
 
     if is_windows_gnu {
         build.define("OCC_CONVERT_SIGNALS", "TRUE");
@@ -70,7 +72,10 @@ fn main() {
 
     println!("cargo:rustc-link-lib=static=wrapper");
 
-    println!("cargo:rerun-if-changed=src/lib.rs");
+    for bridge in rust_bridges {
+        println!("cargo:rerun-if-changed={bridge}");
+    }
+
     println!("cargo:rerun-if-changed=include/wrapper.hxx");
 }
 

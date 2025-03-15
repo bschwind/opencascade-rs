@@ -1,3 +1,6 @@
+pub mod b_rep_g_prop;
+pub mod g_prop;
+
 #[cxx::bridge]
 pub mod ffi {
     #[repr(u32)]
@@ -1320,32 +1323,6 @@ pub mod ffi {
             approximator: &GCPnts_TangentialDeflection,
             index: i32,
         ) -> UniquePtr<gp_Pnt>;
-
-        // Shape Properties
-        type GProp_GProps;
-        #[cxx_name = "construct_unique"]
-        pub fn GProp_GProps_ctor() -> UniquePtr<GProp_GProps>;
-        pub fn Mass(self: &GProp_GProps) -> f64;
-        pub fn StaticMoments(self: &GProp_GProps, lx: &mut f64, ly: &mut f64, lz: &mut f64);
-        pub fn MomentOfInertia(self: &GProp_GProps, axis: &gp_Ax1) -> f64;
-        pub fn RadiusOfGyration(self: &GProp_GProps, axis: &gp_Ax1) -> f64;
-        pub fn GProp_GProps_CentreOfMass(props: &GProp_GProps) -> UniquePtr<gp_Pnt>;
-
-        pub fn BRepGProp_LinearProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
-        pub fn BRepGProp_SurfaceProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
-        pub fn BRepGProp_VolumeProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
-
-        type BRepGProp_Face;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepGProp_Face_ctor(face: &TopoDS_Face) -> UniquePtr<BRepGProp_Face>;
-        pub fn Normal(
-            self: &BRepGProp_Face,
-            u: f64,
-            v: f64,
-            point: Pin<&mut gp_Pnt>,
-            normal: Pin<&mut gp_Vec>,
-        );
 
         // BRepTools
         pub fn outer_wire(face: &TopoDS_Face) -> UniquePtr<TopoDS_Wire>;
