@@ -1,7 +1,7 @@
 use crate::primitives::{make_axis_2, make_point};
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::ffi;
+use opencascade_sys::{ffi, gc_pnts::TangentialDeflection};
 
 use super::make_vec;
 
@@ -151,7 +151,7 @@ impl Edge {
 
     pub fn approximation_segments(&self) -> ApproximationSegmentIterator {
         let adaptor_curve = ffi::BRepAdaptor_Curve_ctor(&self.inner);
-        let approximator = ffi::GCPnts_TangentialDeflection_ctor(&adaptor_curve, 0.1, 0.1);
+        let approximator = TangentialDeflection::new(&adaptor_curve, 0.1, 0.1);
 
         ApproximationSegmentIterator { count: 1, approximator }
     }
@@ -167,16 +167,15 @@ impl Edge {
 
 pub struct ApproximationSegmentIterator {
     count: usize,
-    approximator: UniquePtr<ffi::GCPnts_TangentialDeflection>,
+    approximator: UniquePtr<TangentialDeflection>,
 }
 
 impl Iterator for ApproximationSegmentIterator {
     type Item = DVec3;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.count <= self.approximator.NbPoints() as usize {
-            let point =
-                ffi::GCPnts_TangentialDeflection_Value(&self.approximator, self.count as i32);
+        if self.count <= self.approximator.num_points() as usize {
+            let point = self.approximator.value(self.count as i32);
 
             self.count += 1;
             Some(dvec3(point.X(), point.Y(), point.Z()))

@@ -53,6 +53,7 @@ fn main() {
         "src/b_rep_g_prop.rs",
         "src/b_rep_tools.rs",
         "src/g_prop.rs",
+        "src/gc_pnts.rs",
         "src/lib.rs",
         "src/shape_analysis.rs",
         "src/shape_upgrade.rs",

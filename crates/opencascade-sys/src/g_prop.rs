@@ -24,7 +24,7 @@ mod inner {
 }
 
 impl GProps {
-    pub fn new() -> cxx::UniquePtr<GProps> {
+    pub fn new() -> cxx::UniquePtr<Self> {
         GProps_new()
     }
 
