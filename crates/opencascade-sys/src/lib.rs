@@ -1,4 +1,5 @@
 pub mod b_rep_g_prop;
+pub mod b_rep_tools;
 pub mod g_prop;
 pub mod shape_analysis;
 pub mod shape_upgrade;
@@ -1325,9 +1326,6 @@ pub mod ffi {
             approximator: &GCPnts_TangentialDeflection,
             index: i32,
         ) -> UniquePtr<gp_Pnt>;
-
-        // BRepTools
-        pub fn outer_wire(face: &TopoDS_Face) -> UniquePtr<TopoDS_Wire>;
     }
 }
 

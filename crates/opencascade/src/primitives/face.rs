@@ -11,7 +11,7 @@ use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys::{
     b_rep_g_prop::{self, BRepGProp, BRepGProp_SurfaceProperties},
-    ffi,
+    b_rep_tools, ffi,
     g_prop::GProps,
 };
 
@@ -229,7 +229,7 @@ impl Face {
         let law_function = law_function_from_graph(radius_values);
         let law_handle = ffi::Law_Function_to_handle(law_function);
 
-        let profile_wire = ffi::outer_wire(&self.inner);
+        let profile_wire = b_rep_tools::outer_wire(&self.inner);
         let mut make_pipe_shell =
             make_pipe_shell_with_law_function(&profile_wire, &path.inner, &law_handle);
 
@@ -357,7 +357,7 @@ impl Face {
 
     #[must_use]
     pub fn outer_wire(&self) -> Wire {
-        let inner = ffi::outer_wire(&self.inner);
+        let inner = b_rep_tools::outer_wire(&self.inner);
 
         Wire { inner }
     }
