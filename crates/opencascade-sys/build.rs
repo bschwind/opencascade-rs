@@ -49,8 +49,13 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=user32");
     }
 
-    let rust_bridges =
-        ["src/lib.rs", "src/b_rep_g_prop.rs", "src/g_prop.rs", "src/shape_upgrade.rs"];
+    let rust_bridges = [
+        "src/b_rep_g_prop.rs",
+        "src/g_prop.rs",
+        "src/lib.rs",
+        "src/shape_analysis.rs",
+        "src/shape_upgrade.rs",
+    ];
 
     let mut build = cxx_build::bridges(rust_bridges);
 

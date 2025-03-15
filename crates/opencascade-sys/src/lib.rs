@@ -1,5 +1,6 @@
 pub mod b_rep_g_prop;
 pub mod g_prop;
+pub mod shape_analysis;
 pub mod shape_upgrade;
 
 #[cxx::bridge]
@@ -1375,7 +1376,6 @@ pub mod ffi {
         type BRepBndLib;
 
         pub fn BRepBndLib_Add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool);
-
     }
 }
 
