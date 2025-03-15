@@ -1,6 +1,7 @@
 pub mod b_rep_g_prop;
 pub mod b_rep_tools;
 pub mod g_prop;
+pub mod gc_pnts;
 pub mod shape_analysis;
 pub mod shape_upgrade;
 
@@ -1311,21 +1312,6 @@ pub mod ffi {
         ) -> UniquePtr<Poly_Connect>;
 
         pub fn compute_normals(face: &TopoDS_Face, triangulation: &HandlePoly_Triangulation);
-
-        // Edge approximation
-        type GCPnts_TangentialDeflection;
-
-        #[cxx_name = "construct_unique"]
-        pub fn GCPnts_TangentialDeflection_ctor(
-            curve: &BRepAdaptor_Curve,
-            angular_deflection: f64,
-            curvature_deflection: f64,
-        ) -> UniquePtr<GCPnts_TangentialDeflection>;
-        pub fn NbPoints(self: &GCPnts_TangentialDeflection) -> i32;
-        pub fn GCPnts_TangentialDeflection_Value(
-            approximator: &GCPnts_TangentialDeflection,
-            index: i32,
-        ) -> UniquePtr<gp_Pnt>;
     }
 }
 
