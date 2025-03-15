@@ -14,7 +14,7 @@ mod inner {
         type GProps;
 
         #[cxx_name = "construct_unique"]
-        fn GProp_GProps_new() -> UniquePtr<GProps>;
+        fn GProps_new() -> UniquePtr<GProps>;
         fn Mass(self: &GProps) -> f64;
         fn StaticMoments(self: &GProps, lx: &mut f64, ly: &mut f64, lz: &mut f64);
         fn MomentOfInertia(self: &GProps, axis: &gp_Ax1) -> f64;
@@ -25,7 +25,7 @@ mod inner {
 
 impl GProps {
     pub fn new() -> cxx::UniquePtr<GProps> {
-        GProp_GProps_new()
+        GProps_new()
     }
 
     pub fn mass(&self) -> f64 {
