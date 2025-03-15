@@ -1,5 +1,6 @@
 pub mod b_rep_g_prop;
 pub mod g_prop;
+pub mod shape_analysis;
 pub mod shape_upgrade;
 
 #[cxx::bridge]
@@ -1327,13 +1328,6 @@ pub mod ffi {
 
         // BRepTools
         pub fn outer_wire(face: &TopoDS_Face) -> UniquePtr<TopoDS_Wire>;
-
-        pub fn connect_edges_to_wires(
-            edges: Pin<&mut HandleTopTools_HSequenceOfShape>,
-            tolerance: f64,
-            shared: bool,
-            wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
-        );
     }
 }
 

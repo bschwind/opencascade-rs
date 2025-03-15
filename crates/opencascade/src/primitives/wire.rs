@@ -1,3 +1,4 @@
+use opencascade_sys::shape_analysis::connect_edges_to_wires;
 use std::iter::once;
 
 use crate::{
@@ -97,7 +98,7 @@ impl Wire {
             EdgeConnection::Fuzzy { tolerance } => (tolerance, false),
         };
 
-        ffi::connect_edges_to_wires(edges.pin_mut(), tolerance, shared, wires.pin_mut());
+        connect_edges_to_wires(edges.pin_mut(), tolerance, shared, wires.pin_mut());
 
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 
