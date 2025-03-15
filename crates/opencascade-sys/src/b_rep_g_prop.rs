@@ -1,5 +1,6 @@
-pub use inner::*;
 use std::pin::Pin;
+
+pub use inner::*;
 
 #[cxx::bridge]
 mod inner {
