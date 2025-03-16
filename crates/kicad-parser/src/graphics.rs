@@ -3,16 +3,18 @@ use sexp::{Atom, Sexp};
 
 use crate::board::BoardLayer;
 
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GraphicLine {
-    start: (f64, f64),
-    end: (f64, f64),
-    layer: String,
+    pub start: (f64, f64),
+    pub end: (f64, f64),
+    pub layer: BoardLayer,
 }
 
 impl GraphicLine {
     pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
-        let mut line = Self::default();
+        let mut start: Option<(f64, f64)> = None;
+        let mut end: Option<(f64, f64)> = None;
+        let mut layer: Option<BoardLayer> = None;
 
         for field in list {
             let Sexp::List(list) = field else {
@@ -28,48 +30,44 @@ impl GraphicLine {
             match head.as_str() {
                 "start" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    line.start = coords;
+                    start = Some(coords);
                 },
                 "end" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    line.end = coords;
+                    end = Some(coords);
                 },
                 "layer" => {
-                    if let Sexp::Atom(Atom::S(layer)) = &rest[0] {
-                        line.layer = layer.to_string();
+                    if let Sexp::Atom(Atom::S(layer_str)) = &rest[0] {
+                        let layer_valid = layer_str.as_str().into();
+                        layer = Some(layer_valid);
                     }
                 },
                 _ => {},
             }
         }
 
-        Ok(line)
-    }
-
-    pub fn start_point(&self) -> (f64, f64) {
-        self.start
-    }
-
-    pub fn end_point(&self) -> (f64, f64) {
-        self.end
-    }
-
-    pub fn layer(&self) -> BoardLayer {
-        BoardLayer::from(self.layer.as_str())
+        if let (Some(start), Some(end), Some(layer)) = (start, end, layer) {
+            Ok(Self { start, end, layer })
+        } else {
+            Err(Error::IncompleteGraphicLine(list.to_vec()))
+        }
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GraphicArc {
-    start: (f64, f64),
-    mid: (f64, f64),
-    end: (f64, f64),
-    layer: String,
+    pub start: (f64, f64),
+    pub mid: (f64, f64),
+    pub end: (f64, f64),
+    pub layer: BoardLayer,
 }
 
 impl GraphicArc {
     pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
-        let mut line = Self::default();
+        let mut start: Option<(f64, f64)> = None;
+        let mut mid: Option<(f64, f64)> = None;
+        let mut end: Option<(f64, f64)> = None;
+        let mut layer: Option<BoardLayer> = None;
 
         for field in list {
             let Sexp::List(list) = field else {
@@ -85,55 +83,45 @@ impl GraphicArc {
             match head.as_str() {
                 "start" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    line.start = coords;
+                    start = Some(coords);
                 },
                 "mid" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    line.mid = coords;
+                    mid = Some(coords);
                 },
                 "end" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    line.end = coords;
+                    end = Some(coords);
                 },
                 "layer" => {
-                    if let Sexp::Atom(Atom::S(layer)) = &rest[0] {
-                        line.layer = layer.to_string();
+                    if let Sexp::Atom(Atom::S(layer_str)) = &rest[0] {
+                        layer = Some(layer_str.as_str().into());
                     }
                 },
                 _ => {},
             }
         }
 
-        Ok(line)
-    }
-
-    pub fn start_point(&self) -> (f64, f64) {
-        self.start
-    }
-
-    pub fn mid_point(&self) -> (f64, f64) {
-        self.mid
-    }
-
-    pub fn end_point(&self) -> (f64, f64) {
-        self.end
-    }
-
-    pub fn layer(&self) -> BoardLayer {
-        BoardLayer::from(self.layer.as_str())
+        if let (Some(start), Some(mid), Some(end), Some(layer)) = (start, mid, end, layer) {
+            Ok(Self { start, mid, end, layer })
+        } else {
+            Err(Error::IncompleteGraphicArc(list.to_vec()))
+        }
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GraphicCircle {
-    center: (f64, f64),
-    end: (f64, f64),
-    layer: String,
+    pub center: (f64, f64),
+    pub end: (f64, f64),
+    pub layer: BoardLayer,
 }
 
 impl GraphicCircle {
     pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
-        let mut line = Self::default();
+        let mut center: Option<(f64, f64)> = None;
+        let mut end: Option<(f64, f64)> = None;
+        let mut layer: Option<BoardLayer> = None;
 
         for field in list {
             let Sexp::List(list) = field else {
@@ -149,47 +137,41 @@ impl GraphicCircle {
             match head.as_str() {
                 "center" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    line.center = coords;
+                    center = Some(coords);
                 },
                 "end" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    line.end = coords;
+                    end = Some(coords);
                 },
                 "layer" => {
-                    if let Sexp::Atom(Atom::S(layer)) = &rest[0] {
-                        line.layer = layer.to_string();
+                    if let Sexp::Atom(Atom::S(layer_str)) = &rest[0] {
+                        layer = Some(layer_str.as_str().into());
                     }
                 },
                 _ => {},
             }
         }
 
-        Ok(line)
-    }
-
-    pub fn center_point(&self) -> (f64, f64) {
-        self.center
-    }
-
-    pub fn end_point(&self) -> (f64, f64) {
-        self.end
-    }
-
-    pub fn layer(&self) -> BoardLayer {
-        BoardLayer::from(self.layer.as_str())
+        if let (Some(center), Some(end), Some(layer)) = (center, end, layer) {
+            Ok(Self { center, end, layer })
+        } else {
+            Err(Error::IncompleteGraphicCircle(list.to_vec()))
+        }
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct GraphicRect {
-    start: (f64, f64),
-    end: (f64, f64),
-    layer: String,
+    pub start: (f64, f64),
+    pub end: (f64, f64),
+    pub layer: BoardLayer,
 }
 
 impl GraphicRect {
     pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
-        let mut line = Self::default();
+        let mut start: Option<(f64, f64)> = None;
+        let mut end: Option<(f64, f64)> = None;
+        let mut layer: Option<BoardLayer> = None;
 
         for field in list {
             let Sexp::List(list) = field else {
@@ -205,33 +187,25 @@ impl GraphicRect {
             match head.as_str() {
                 "start" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    line.start = coords;
+                    start = Some(coords);
                 },
                 "end" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    line.end = coords;
+                    end = Some(coords);
                 },
                 "layer" => {
-                    if let Sexp::Atom(Atom::S(layer)) = &rest[0] {
-                        line.layer = layer.to_string();
+                    if let Sexp::Atom(Atom::S(layer_str)) = &rest[0] {
+                        layer = Some(layer_str.as_str().into());
                     }
                 },
                 _ => {},
             }
         }
 
-        Ok(line)
-    }
-
-    pub fn start_point(&self) -> (f64, f64) {
-        self.start
-    }
-
-    pub fn end_point(&self) -> (f64, f64) {
-        self.end
-    }
-
-    pub fn layer(&self) -> BoardLayer {
-        BoardLayer::from(self.layer.as_str())
+        if let (Some(start), Some(end), Some(layer)) = (start, end, layer) {
+            Ok(Self { start, end, layer })
+        } else {
+            Err(Error::IncompleteGraphicRect(list.to_vec()))
+        }
     }
 }

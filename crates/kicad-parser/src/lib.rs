@@ -18,6 +18,14 @@ pub enum Error {
     NotKicadPcbFile,
     #[error("Tried to extract a number which is not a float or an int")]
     NumberShouldBeFloatOrInt,
+    #[error("Incomplete GraphicLine: {0:?}")]
+    IncompleteGraphicLine(Vec<Sexp>),
+    #[error("Incomplete GraphicArc: {0:?}")]
+    IncompleteGraphicArc(Vec<Sexp>),
+    #[error("Incomplete GraphicCircle: {0:?}")]
+    IncompleteGraphicCircle(Vec<Sexp>),
+    #[error("Incomplete GraphicRect: {0:?}")]
+    IncompleteGraphicRect(Vec<Sexp>),
 }
 
 fn extract_number(num: &Sexp) -> Result<f64, Error> {
