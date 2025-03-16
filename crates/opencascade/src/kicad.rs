@@ -13,25 +13,25 @@ use std::path::Path;
 
 impl From<&GraphicLine> for Edge {
     fn from(line: &GraphicLine) -> Edge {
-        let start = DVec2::from(line.start_point());
-        let end = DVec2::from(line.end_point());
+        let start = DVec2::from(line.start_point);
+        let end = DVec2::from(line.end_point);
         Edge::segment(start.extend(0.0), end.extend(0.0))
     }
 }
 
 impl From<&GraphicArc> for Edge {
     fn from(arc: &GraphicArc) -> Edge {
-        let start = DVec2::from(arc.start_point());
-        let mid = DVec2::from(arc.mid_point());
-        let end = DVec2::from(arc.end_point());
+        let start = DVec2::from(arc.start_point);
+        let mid = DVec2::from(arc.mid_point);
+        let end = DVec2::from(arc.end_point);
         Edge::arc(start.extend(0.0), mid.extend(0.0), end.extend(0.0))
     }
 }
 
 impl From<&GraphicCircle> for Face {
     fn from(circle: &GraphicCircle) -> Face {
-        let center = DVec2::from(circle.center_point());
-        let end = DVec2::from(circle.end_point());
+        let center = DVec2::from(circle.center_point);
+        let end = DVec2::from(circle.end_point);
 
         let delta = (center - end).abs();
 
@@ -42,8 +42,8 @@ impl From<&GraphicCircle> for Face {
 
 impl From<&GraphicRect> for Face {
     fn from(rect: &GraphicRect) -> Face {
-        let start = DVec2::from(rect.start_point());
-        let end = DVec2::from(rect.end_point());
+        let start = DVec2::from(rect.start_point);
+        let end = DVec2::from(rect.end_point);
 
         let dimensions = (end - start).abs();
         Workplane::xy().translated(start.extend(0.0)).rect(dimensions.x, dimensions.y).to_face()
@@ -75,10 +75,10 @@ impl KicadPcb {
 
             footprint
                 .lines()
-                .filter(|line| line.layer() == *layer)
+                .filter(|line| line.layer == *layer)
                 .map(move |line| {
-                    let start = line.start_point();
-                    let end = line.end_point();
+                    let start = line.start_point;
+                    let end = line.end_point;
                     let start = DVec2::from(start);
                     let end = DVec2::from(end);
 
@@ -87,10 +87,10 @@ impl KicadPcb {
 
                     Edge::segment(start.extend(0.0), end.extend(0.0))
                 })
-                .chain(footprint.arcs().filter(|arc| arc.layer() == *layer).map(move |arc| {
-                    let start = arc.start_point();
-                    let mid = arc.mid_point();
-                    let end = arc.end_point();
+                .chain(footprint.arcs().filter(|arc| arc.layer == *layer).map(move |arc| {
+                    let start = arc.start_point;
+                    let mid = arc.mid_point;
+                    let end = arc.end_point;
                     let start = DVec2::from(start);
                     let mid = DVec2::from(mid);
                     let end = DVec2::from(end);
@@ -105,9 +105,9 @@ impl KicadPcb {
 
         self.board
             .lines()
-            .filter(|line| line.layer() == *layer)
+            .filter(|line| line.layer == *layer)
             .map(Edge::from)
-            .chain(self.board.arcs().filter(|arc| arc.layer() == *layer).map(Edge::from))
+            .chain(self.board.arcs().filter(|arc| arc.layer == *layer).map(Edge::from))
             .chain(footprint_edges)
     }
 }
