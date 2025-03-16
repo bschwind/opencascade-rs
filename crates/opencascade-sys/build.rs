@@ -55,6 +55,7 @@ fn main() {
         "src/g_prop.rs",
         "src/gc_pnts.rs",
         "src/lib.rs",
+        "src/poly.rs",
         "src/shape_analysis.rs",
         "src/shape_upgrade.rs",
     ];

@@ -2,6 +2,7 @@ pub mod b_rep_g_prop;
 pub mod b_rep_tools;
 pub mod g_prop;
 pub mod gc_pnts;
+pub mod poly;
 pub mod shape_analysis;
 pub mod shape_upgrade;
 
@@ -1254,6 +1255,8 @@ pub mod ffi {
 
         pub fn TopLoc_Location_Transformation(location: &TopLoc_Location) -> UniquePtr<gp_Trsf>;
 
+        #[cxx_name = "Poly_Triangulation"]
+        type Poly_Triangulation = crate::poly::Triangulation;
         type HandlePoly_Triangulation;
 
         pub fn HandlePoly_Triangulation_ctor(
@@ -1265,51 +1268,6 @@ pub mod ffi {
         pub fn HandlePoly_Triangulation_Get(
             handle: &HandlePoly_Triangulation,
         ) -> Result<&Poly_Triangulation>;
-
-        type Poly_Triangulation;
-        #[cxx_name = "construct_unique"]
-        pub fn Poly_Triangulation_ctor(
-            nb_nodes: i32,
-            nb_triangles: i32,
-            has_uv: bool,
-            has_normals: bool,
-        ) -> UniquePtr<Poly_Triangulation>;
-        pub fn NbNodes(self: &Poly_Triangulation) -> i32;
-        pub fn NbTriangles(self: &Poly_Triangulation) -> i32;
-        pub fn HasNormals(self: &Poly_Triangulation) -> bool;
-        pub fn HasUVNodes(self: &Poly_Triangulation) -> bool;
-        pub fn Triangle(self: &Poly_Triangulation, index: i32) -> &Poly_Triangle;
-        pub fn SetTriangle(
-            self: Pin<&mut Poly_Triangulation>,
-            index: i32,
-            triangle: &Poly_Triangle,
-        );
-        pub fn SetNode(self: Pin<&mut Poly_Triangulation>, index: i32, node: &gp_Pnt);
-        pub fn SetNormal(self: Pin<&mut Poly_Triangulation>, index: i32, dir: &gp_Dir);
-        pub fn SetUVNode(self: Pin<&mut Poly_Triangulation>, index: i32, uv: &gp_Pnt2d);
-        pub fn Poly_Triangulation_Normal(
-            triangulation: &Poly_Triangulation,
-            index: i32,
-        ) -> UniquePtr<gp_Dir>;
-        pub fn Poly_Triangulation_Node(
-            triangulation: &Poly_Triangulation,
-            index: i32,
-        ) -> UniquePtr<gp_Pnt>;
-        pub fn Poly_Triangulation_UV(
-            triangulation: &Poly_Triangulation,
-            index: i32,
-        ) -> UniquePtr<gp_Pnt2d>;
-
-        type Poly_Triangle;
-        #[cxx_name = "construct_unique"]
-        pub fn Poly_Triangle_ctor(node1: i32, node2: i32, node3: i32) -> UniquePtr<Poly_Triangle>;
-        pub fn Value(self: &Poly_Triangle, index: i32) -> i32;
-
-        type Poly_Connect;
-        #[cxx_name = "construct_unique"]
-        pub fn Poly_Connect_ctor(
-            triangulation: &HandlePoly_Triangulation,
-        ) -> UniquePtr<Poly_Connect>;
 
         pub fn compute_normals(face: &TopoDS_Face, triangulation: &HandlePoly_Triangulation);
     }
