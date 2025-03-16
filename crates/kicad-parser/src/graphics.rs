@@ -5,15 +5,15 @@ use crate::board::BoardLayer;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GraphicLine {
-    pub start: (f64, f64),
-    pub end: (f64, f64),
+    pub start_point: (f64, f64),
+    pub end_point: (f64, f64),
     pub layer: BoardLayer,
 }
 
 impl GraphicLine {
     pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
-        let mut start: Option<(f64, f64)> = None;
-        let mut end: Option<(f64, f64)> = None;
+        let mut start_point: Option<(f64, f64)> = None;
+        let mut end_point: Option<(f64, f64)> = None;
         let mut layer: Option<BoardLayer> = None;
 
         for field in list {
@@ -30,11 +30,11 @@ impl GraphicLine {
             match head.as_str() {
                 "start" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    start = Some(coords);
+                    start_point = Some(coords);
                 },
                 "end" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    end = Some(coords);
+                    end_point = Some(coords);
                 },
                 "layer" => {
                     if let Sexp::Atom(Atom::S(layer_str)) = &rest[0] {
@@ -46,8 +46,8 @@ impl GraphicLine {
             }
         }
 
-        if let (Some(start), Some(end), Some(layer)) = (start, end, layer) {
-            Ok(Self { start, end, layer })
+        if let (Some(start_point), Some(end_point), Some(layer)) = (start_point, end_point, layer) {
+            Ok(Self { start_point, end_point, layer })
         } else {
             Err(Error::IncompleteGraphicLine(list.to_vec()))
         }
@@ -56,17 +56,17 @@ impl GraphicLine {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GraphicArc {
-    pub start: (f64, f64),
-    pub mid: (f64, f64),
-    pub end: (f64, f64),
+    pub start_point: (f64, f64),
+    pub mid_point: (f64, f64),
+    pub end_point: (f64, f64),
     pub layer: BoardLayer,
 }
 
 impl GraphicArc {
     pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
-        let mut start: Option<(f64, f64)> = None;
-        let mut mid: Option<(f64, f64)> = None;
-        let mut end: Option<(f64, f64)> = None;
+        let mut start_point: Option<(f64, f64)> = None;
+        let mut mid_point: Option<(f64, f64)> = None;
+        let mut end_point: Option<(f64, f64)> = None;
         let mut layer: Option<BoardLayer> = None;
 
         for field in list {
@@ -83,15 +83,15 @@ impl GraphicArc {
             match head.as_str() {
                 "start" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    start = Some(coords);
+                    start_point = Some(coords);
                 },
                 "mid" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    mid = Some(coords);
+                    mid_point = Some(coords);
                 },
                 "end" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    end = Some(coords);
+                    end_point = Some(coords);
                 },
                 "layer" => {
                     if let Sexp::Atom(Atom::S(layer_str)) = &rest[0] {
@@ -102,8 +102,8 @@ impl GraphicArc {
             }
         }
 
-        if let (Some(start), Some(mid), Some(end), Some(layer)) = (start, mid, end, layer) {
-            Ok(Self { start, mid, end, layer })
+        if let (Some(start_point), Some(mid_point), Some(end_point), Some(layer)) = (start_point, mid_point, end_point, layer) {
+            Ok(Self { start_point, mid_point, end_point, layer })
         } else {
             Err(Error::IncompleteGraphicArc(list.to_vec()))
         }
@@ -112,15 +112,15 @@ impl GraphicArc {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GraphicCircle {
-    pub center: (f64, f64),
-    pub end: (f64, f64),
+    pub center_point: (f64, f64),
+    pub end_point: (f64, f64),
     pub layer: BoardLayer,
 }
 
 impl GraphicCircle {
     pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
-        let mut center: Option<(f64, f64)> = None;
-        let mut end: Option<(f64, f64)> = None;
+        let mut center_point: Option<(f64, f64)> = None;
+        let mut end_point: Option<(f64, f64)> = None;
         let mut layer: Option<BoardLayer> = None;
 
         for field in list {
@@ -137,11 +137,11 @@ impl GraphicCircle {
             match head.as_str() {
                 "center" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    center = Some(coords);
+                    center_point = Some(coords);
                 },
                 "end" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    end = Some(coords);
+                    end_point = Some(coords);
                 },
                 "layer" => {
                     if let Sexp::Atom(Atom::S(layer_str)) = &rest[0] {
@@ -152,8 +152,8 @@ impl GraphicCircle {
             }
         }
 
-        if let (Some(center), Some(end), Some(layer)) = (center, end, layer) {
-            Ok(Self { center, end, layer })
+        if let (Some(center_point), Some(end_point), Some(layer)) = (center_point, end_point, layer) {
+            Ok(Self { center_point, end_point, layer })
         } else {
             Err(Error::IncompleteGraphicCircle(list.to_vec()))
         }
@@ -162,15 +162,15 @@ impl GraphicCircle {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct GraphicRect {
-    pub start: (f64, f64),
-    pub end: (f64, f64),
+    pub start_point: (f64, f64),
+    pub end_point: (f64, f64),
     pub layer: BoardLayer,
 }
 
 impl GraphicRect {
     pub fn from_list(list: &[Sexp]) -> Result<Self, Error> {
-        let mut start: Option<(f64, f64)> = None;
-        let mut end: Option<(f64, f64)> = None;
+        let mut start_point: Option<(f64, f64)> = None;
+        let mut end_point: Option<(f64, f64)> = None;
         let mut layer: Option<BoardLayer> = None;
 
         for field in list {
@@ -187,11 +187,11 @@ impl GraphicRect {
             match head.as_str() {
                 "start" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    start = Some(coords);
+                    start_point = Some(coords);
                 },
                 "end" => {
                     let coords = extract_coords(&rest[0], &rest[1])?;
-                    end = Some(coords);
+                    end_point = Some(coords);
                 },
                 "layer" => {
                     if let Sexp::Atom(Atom::S(layer_str)) = &rest[0] {
@@ -202,8 +202,8 @@ impl GraphicRect {
             }
         }
 
-        if let (Some(start), Some(end), Some(layer)) = (start, end, layer) {
-            Ok(Self { start, end, layer })
+        if let (Some(start_point), Some(end_point), Some(layer)) = (start_point, end_point, layer) {
+            Ok(Self { start_point, end_point, layer })
         } else {
             Err(Error::IncompleteGraphicRect(list.to_vec()))
         }
