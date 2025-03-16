@@ -345,7 +345,7 @@ impl Face {
         let mut props = GProps::new();
 
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
-        BRepGProp::linear_properties(inner_shape, props.pin_mut());
+        BRepGProp::surface_properties(inner_shape, props.pin_mut());
 
         // Returns surface area, obviously.
         props.Mass()
