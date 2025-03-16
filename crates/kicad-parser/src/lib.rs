@@ -3,6 +3,7 @@ use thiserror::Error;
 
 pub mod board;
 pub mod graphics;
+pub mod writer;
 
 #[derive(Error, Debug)]
 pub enum Error {
