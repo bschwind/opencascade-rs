@@ -158,6 +158,12 @@ impl SurfaceDrawer {
 
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
+
+        // TODO(bschwind) - This is to fix this issue with wgpu:
+        //                  https://github.com/gfx-rs/wgpu/issues/6779
+        if cad_mesh.vertex_buf.size() == 0 || cad_mesh.index_buf.size() == 0 {
+            return;
+        }
         render_pass.set_index_buffer(cad_mesh.index_buf.slice(..), wgpu::IndexFormat::Uint32);
         render_pass.set_vertex_buffer(0, cad_mesh.vertex_buf.slice(..));
         render_pass.draw_indexed(0..(cad_mesh.num_indices as u32), 0, 0..1);
