@@ -102,7 +102,9 @@ impl GraphicArc {
             }
         }
 
-        if let (Some(start_point), Some(mid_point), Some(end_point), Some(layer)) = (start_point, mid_point, end_point, layer) {
+        if let (Some(start_point), Some(mid_point), Some(end_point), Some(layer)) =
+            (start_point, mid_point, end_point, layer)
+        {
             Ok(Self { start_point, mid_point, end_point, layer })
         } else {
             Err(Error::IncompleteGraphicArc(list.to_vec()))
@@ -152,7 +154,8 @@ impl GraphicCircle {
             }
         }
 
-        if let (Some(center_point), Some(end_point), Some(layer)) = (center_point, end_point, layer) {
+        if let (Some(center_point), Some(end_point), Some(layer)) = (center_point, end_point, layer)
+        {
             Ok(Self { center_point, end_point, layer })
         } else {
             Err(Error::IncompleteGraphicCircle(list.to_vec()))
