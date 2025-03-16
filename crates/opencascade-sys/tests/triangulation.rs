@@ -1,7 +1,7 @@
 use opencascade_sys::ffi::{
     new_point, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor, BRep_Tool_Triangulation,
-    HandlePoly_Triangulation_Get, Poly_Triangulation_Node, TopAbs_ShapeEnum, TopExp_Explorer_ctor,
-    TopLoc_Location_ctor, TopoDS_cast_to_face,
+    HandlePoly_Triangulation_Get, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopLoc_Location_ctor,
+    TopoDS_cast_to_face,
 };
 
 #[test]
@@ -25,8 +25,7 @@ fn it_can_access_mesh_triangulation() {
                 let triangle = triangulation.Triangle(index + 1);
 
                 for corner_index in 1..=3 {
-                    let _point =
-                        Poly_Triangulation_Node(triangulation, triangle.Value(corner_index));
+                    let _point = triangulation.node(triangle.Value(corner_index));
                     triangle_corners += 1;
                 }
             }
