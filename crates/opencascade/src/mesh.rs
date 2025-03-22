@@ -4,7 +4,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
-use opencascade_sys::{ffi, top_loc::Location};
+use opencascade_sys::{b_rep_mesh::IncrementalMesh, ffi, top_loc::Location};
 
 #[derive(Debug)]
 pub struct Mesh {
@@ -15,12 +15,12 @@ pub struct Mesh {
 }
 
 pub struct Mesher {
-    pub(crate) inner: UniquePtr<ffi::BRepMesh_IncrementalMesh>,
+    pub(crate) inner: UniquePtr<IncrementalMesh>,
 }
 
 impl Mesher {
     pub fn try_new(shape: &Shape, triangulation_tolerance: f64) -> Result<Self, Error> {
-        let inner = ffi::BRepMesh_IncrementalMesh_ctor(&shape.inner, triangulation_tolerance);
+        let inner = IncrementalMesh::new(&shape.inner, triangulation_tolerance);
 
         if inner.IsDone() {
             Ok(Self { inner })
