@@ -1,8 +1,8 @@
 use opencascade_sys::{
+    b_rep_mesh::IncrementalMesh,
     ffi::{
-        new_point, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor,
-        BRep_Tool_Triangulation, HandlePoly_Triangulation_Get, TopAbs_ShapeEnum,
-        TopExp_Explorer_ctor, TopoDS_cast_to_face,
+        new_point, BRepPrimAPI_MakeBox_ctor, BRep_Tool_Triangulation, HandlePoly_Triangulation_Get,
+        TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_cast_to_face,
     },
     top_loc::Location,
 };
@@ -12,7 +12,7 @@ fn it_can_access_mesh_triangulation() {
     let origin = new_point(0., 0., 0.);
     let mut cube = BRepPrimAPI_MakeBox_ctor(&origin, 10., 10., 10.);
 
-    let mut mesh = BRepMesh_IncrementalMesh_ctor(cube.pin_mut().Shape(), 0.01);
+    let mut mesh = IncrementalMesh::new(cube.pin_mut().Shape(), 0.01);
 
     let mut triangle_corners = 0;
 
