@@ -51,6 +51,7 @@ fn main() {
 
     let rust_bridges = [
         "src/b_rep_g_prop.rs",
+        "src/b_rep_mesh.rs",
         "src/b_rep_tools.rs",
         "src/g_prop.rs",
         "src/gc_pnts.rs",
@@ -58,6 +59,7 @@ fn main() {
         "src/poly.rs",
         "src/shape_analysis.rs",
         "src/shape_upgrade.rs",
+        "src/top_loc.rs",
     ];
 
     let mut build = cxx_build::bridges(rust_bridges);
