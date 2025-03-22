@@ -11,7 +11,7 @@ mod inner {
         #[cxx_name = "TopLoc_Location"]
         type Location;
         #[cxx_name = "construct_unique"]
-        pub fn Location_new() -> UniquePtr<Location>;
+        fn Location_new() -> UniquePtr<Location>;
 
         #[cxx_name = "construct_unique"]
         fn Location_from_transform(transform: &gp_Trsf) -> UniquePtr<Location>;

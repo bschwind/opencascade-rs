@@ -1,4 +1,5 @@
 pub mod b_rep_g_prop;
+pub mod b_rep_mesh;
 pub mod b_rep_tools;
 pub mod g_prop;
 pub mod gc_pnts;
@@ -1230,18 +1231,6 @@ pub mod ffi {
             shape: &TopoDS_Shape,
             filename: String,
         ) -> bool;
-
-        // Triangulation
-        type BRepMesh_IncrementalMesh;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepMesh_IncrementalMesh_ctor(
-            shape: &TopoDS_Shape,
-            deflection: f64,
-        ) -> UniquePtr<BRepMesh_IncrementalMesh>;
-
-        pub fn Shape(self: &BRepMesh_IncrementalMesh) -> &TopoDS_Shape;
-        pub fn IsDone(self: &BRepMesh_IncrementalMesh) -> bool;
 
         #[cxx_name = "TopLoc_Location"]
         type Location = crate::top_loc::Location;
