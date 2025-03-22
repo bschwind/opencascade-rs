@@ -1,7 +1,10 @@
-use opencascade_sys::ffi::{
-    new_point, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor, BRep_Tool_Triangulation,
-    HandlePoly_Triangulation_Get, TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopLoc_Location_ctor,
-    TopoDS_cast_to_face,
+use opencascade_sys::{
+    ffi::{
+        new_point, BRepMesh_IncrementalMesh_ctor, BRepPrimAPI_MakeBox_ctor,
+        BRep_Tool_Triangulation, HandlePoly_Triangulation_Get, TopAbs_ShapeEnum,
+        TopExp_Explorer_ctor, TopoDS_cast_to_face,
+    },
+    top_loc::Location,
 };
 
 #[test]
@@ -17,7 +20,7 @@ fn it_can_access_mesh_triangulation() {
         TopExp_Explorer_ctor(mesh.pin_mut().Shape(), TopAbs_ShapeEnum::TopAbs_FACE);
     while edge_explorer.More() {
         let face = TopoDS_cast_to_face(edge_explorer.Current());
-        let mut location = TopLoc_Location_ctor();
+        let mut location = Location::new();
 
         let triangulation_handle = BRep_Tool_Triangulation(face, location.pin_mut());
         if let Ok(triangulation) = HandlePoly_Triangulation_Get(&triangulation_handle) {

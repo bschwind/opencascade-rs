@@ -1,4 +1,4 @@
-use opencascade_sys::{b_rep_tools, shape_analysis::connect_edges_to_wires};
+use opencascade_sys::{b_rep_tools, shape_analysis::connect_edges_to_wires, top_loc::Location};
 use std::iter::once;
 
 use crate::{
@@ -235,7 +235,7 @@ impl Wire {
 
         transform.pin_mut().SetRotation(&rotation_axis_vec, angle.radians());
         transform.pin_mut().set_translation_vec(&translation_vec);
-        let location = ffi::TopLoc_Location_from_transform(&transform);
+        let location = Location::from_transform(&transform);
 
         let wire_shape = ffi::cast_wire_to_shape(&self.inner);
         let mut wire_shape = Shape::from_shape(wire_shape).inner;
