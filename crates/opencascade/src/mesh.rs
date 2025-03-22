@@ -4,7 +4,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
-use opencascade_sys::ffi;
+use opencascade_sys::{ffi, top_loc::Location};
 
 #[derive(Debug)]
 pub struct Mesh {
@@ -38,7 +38,7 @@ impl Mesher {
         let triangulated_shape = Shape::from_shape(self.inner.pin_mut().Shape());
 
         for face in triangulated_shape.faces() {
-            let mut location = ffi::TopLoc_Location_ctor();
+            let mut location = Location::new();
 
             let triangulation_handle =
                 ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
@@ -51,7 +51,7 @@ impl Mesher {
 
             for i in 1..=face_point_count {
                 let mut point = triangulation.node(i);
-                point.pin_mut().Transform(&ffi::TopLoc_Location_Transformation(&location));
+                point.pin_mut().Transform(&location.transform());
                 vertices.push(dvec3(point.X(), point.Y(), point.Z()));
             }
 

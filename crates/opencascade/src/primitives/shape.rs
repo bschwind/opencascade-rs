@@ -8,7 +8,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec3};
-use opencascade_sys::{ffi, shape_upgrade::UnifySameDomain};
+use opencascade_sys::{ffi, shape_upgrade::UnifySameDomain, top_loc::Location};
 use std::path::Path;
 
 pub struct Shape {
@@ -626,7 +626,7 @@ impl Shape {
         let translation_vec = make_vec(translation);
         transform.pin_mut().set_translation_vec(&translation_vec);
 
-        let location = ffi::TopLoc_Location_from_transform(&transform);
+        let location = Location::from_transform(&transform);
 
         self.inner.pin_mut().set_global_translation(&location, false);
     }
