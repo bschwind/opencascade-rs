@@ -6,22 +6,22 @@ use opencascade_sys::{
         gp_Ax2d_ctor, gp_Ax3_from_gp_Ax2, gp_DZ, gp_Dir2d_ctor, gp_OX, handle_geom_plane_location,
         new_HandleGeomCurve_from_HandleGeom_TrimmedCurve,
         new_HandleGeomPlane_from_HandleGeomSurface, new_list_of_shape, new_point, new_point_2d,
-        new_transform, new_vec, shape_list_append_face, type_name, write_stl,
-        BRepAlgoAPI_Fuse_ctor, BRepBuilderAPI_MakeEdge_CurveSurface2d,
-        BRepBuilderAPI_MakeEdge_HandleGeomCurve, BRepBuilderAPI_MakeFace_wire,
-        BRepBuilderAPI_MakeWire_ctor, BRepBuilderAPI_MakeWire_edge_edge,
-        BRepBuilderAPI_MakeWire_edge_edge_edge, BRepBuilderAPI_Transform_ctor,
-        BRepFilletAPI_MakeFillet_ctor, BRepLibBuildCurves3d, BRepOffsetAPI_MakeThickSolid_ctor,
-        BRepOffsetAPI_ThruSections_ctor, BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor,
-        BRep_Builder_ctor, BRep_Builder_upcast_to_topods_builder, BRep_Tool_Surface, DynamicType,
+        new_transform, new_vec, shape_list_append_face, type_name, BRepAlgoAPI_Fuse_ctor,
+        BRepBuilderAPI_MakeEdge_CurveSurface2d, BRepBuilderAPI_MakeEdge_HandleGeomCurve,
+        BRepBuilderAPI_MakeFace_wire, BRepBuilderAPI_MakeWire_ctor,
+        BRepBuilderAPI_MakeWire_edge_edge, BRepBuilderAPI_MakeWire_edge_edge_edge,
+        BRepBuilderAPI_Transform_ctor, BRepFilletAPI_MakeFillet_ctor, BRepLibBuildCurves3d,
+        BRepOffsetAPI_MakeThickSolid_ctor, BRepOffsetAPI_ThruSections_ctor,
+        BRepPrimAPI_MakeCylinder_ctor, BRepPrimAPI_MakePrism_ctor, BRep_Builder_ctor,
+        BRep_Builder_upcast_to_topods_builder, BRep_Tool_Surface, DynamicType,
         ExplorerCurrentShape, GCE2d_MakeSegment_point_point, GC_MakeArcOfCircle_Value,
         GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value, GC_MakeSegment_point_point,
         Geom2d_Ellipse_ctor, Geom2d_TrimmedCurve_ctor, Geom_CylindricalSurface_ctor,
-        HandleGeom2d_TrimmedCurve_to_curve, MakeThickSolidByJoin, StlAPI_Writer_ctor,
-        TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_Compound_as_shape, TopoDS_Compound_ctor,
-        TopoDS_Face, TopoDS_Face_to_owned, TopoDS_cast_to_edge, TopoDS_cast_to_face,
-        TopoDS_cast_to_wire,
+        HandleGeom2d_TrimmedCurve_to_curve, MakeThickSolidByJoin, TopAbs_ShapeEnum,
+        TopExp_Explorer_ctor, TopoDS_Compound_as_shape, TopoDS_Compound_ctor, TopoDS_Face,
+        TopoDS_Face_to_owned, TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
     },
+    stl_api,
 };
 
 // All dimensions are in millimeters.
@@ -221,9 +221,9 @@ pub fn main() {
     let final_shape = compound_shape;
 
     // Export to an STL file
-    let mut stl_writer = StlAPI_Writer_ctor();
+    let mut stl_writer = stl_api::Writer::new();
     let triangulation = IncrementalMesh::new(&final_shape, 0.01);
-    let success = write_stl(stl_writer.pin_mut(), triangulation.Shape(), "bottle.stl".to_owned());
+    let success = stl_writer.pin_mut().write_stl(triangulation.Shape(), "bottle.stl".to_owned());
 
     println!("Done! Success = {success}");
 }

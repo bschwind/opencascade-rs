@@ -59,6 +59,7 @@ fn main() {
         "src/poly.rs",
         "src/shape_analysis.rs",
         "src/shape_upgrade.rs",
+        "src/stl_api.rs",
         "src/top_loc.rs",
     ];
 

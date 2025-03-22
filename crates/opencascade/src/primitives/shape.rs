@@ -8,7 +8,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec3};
-use opencascade_sys::{ffi, shape_upgrade::UnifySameDomain, top_loc::Location};
+use opencascade_sys::{ffi, shape_upgrade::UnifySameDomain, stl_api, top_loc::Location};
 use std::path::Path;
 
 pub struct Shape {
@@ -597,13 +597,11 @@ impl Shape {
         path: P,
         triangulation_tolerance: f64,
     ) -> Result<(), Error> {
-        let mut stl_writer = ffi::StlAPI_Writer_ctor();
+        let mut stl_writer = stl_api::Writer::new();
         let mesher = Mesher::try_new(self, triangulation_tolerance)?;
-        let success = ffi::write_stl(
-            stl_writer.pin_mut(),
-            mesher.inner.Shape(),
-            path.as_ref().to_string_lossy().to_string(),
-        );
+        let success = stl_writer
+            .pin_mut()
+            .write_stl(mesher.inner.Shape(), path.as_ref().to_string_lossy().to_string());
 
         if success {
             Ok(())

@@ -6,6 +6,7 @@ pub mod gc_pnts;
 pub mod poly;
 pub mod shape_analysis;
 pub mod shape_upgrade;
+pub mod stl_api;
 pub mod top_loc;
 
 #[cxx::bridge]
@@ -1219,18 +1220,6 @@ pub mod ffi {
             filename: String,
         ) -> IFSelect_ReturnStatus;
         pub fn write_iges(writer: Pin<&mut IGESControl_Writer>, filename: String) -> bool;
-
-        type StlAPI_Writer;
-
-        #[cxx_name = "construct_unique"]
-        pub fn StlAPI_Writer_ctor() -> UniquePtr<StlAPI_Writer>;
-
-        // pub fn Write(self: Pin<&mut StlAPI_Writer>, shape: &TopoDS_Shape, filename: &c_char) -> bool;
-        pub fn write_stl(
-            writer: Pin<&mut StlAPI_Writer>,
-            shape: &TopoDS_Shape,
-            filename: String,
-        ) -> bool;
 
         #[cxx_name = "TopLoc_Location"]
         type Location = crate::top_loc::Location;
