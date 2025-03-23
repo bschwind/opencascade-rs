@@ -1,0 +1,8 @@
+[package]
+name = "binding-generator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tree-sitter = "0.25.3"
+tree-sitter-cpp = "0.23.4"
