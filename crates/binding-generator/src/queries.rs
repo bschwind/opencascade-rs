@@ -13,9 +13,7 @@ pub fn class() -> String {
     "
     (
         class_specifier
-        (field_declaration_list
-            (access_specifier) @access (#eq? @access \"public\")
-        )
+        (field_declaration_list)
     ) @class
     "
     .to_string()
@@ -29,7 +27,6 @@ pub fn functions() -> String {
     "
     (
         (field_declaration_list
-            (access_specifier) @access
             (field_declaration
                 (storage_class_specifier)? @storage
                 (type_identifier) @return_type

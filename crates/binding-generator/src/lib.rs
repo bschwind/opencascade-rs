@@ -57,20 +57,18 @@ impl OcctPackage {
             );
 
             // Classes to bind to
-            let classes_query = Query::new(&language.into(), &queries::class()).unwrap();
-            let mut cursor = QueryCursor::new();
+            for_each_match(
+                &queries::class(),
+                tree.root_node(),
+                header_contents.as_bytes(),
+                |_q, query_match| {
+                    let class_node = query_match.captures[0].node;
 
-            let mut matches =
-                cursor.matches(&classes_query, tree.root_node(), header_contents.as_bytes());
-
-            while let Some(class) = matches.next() {
-                dbg!(&class.captures);
-                let class_node = class.captures[0].node;
-
-                let new_class =
-                    OcctClass::new(&header_contents, class_node, header_contents.as_bytes());
-                classes.push(new_class);
-            }
+                    let new_class =
+                        OcctClass::new(&header_contents, class_node, header_contents.as_bytes());
+                    classes.push(new_class);
+                },
+            );
         }
 
         dbg!(&forward_declare_classes);
@@ -90,39 +88,39 @@ pub struct OcctClass {
 impl OcctClass {
     pub fn new(_src: &str, class_node: Node, header_contents: &[u8]) -> Self {
         // Build up regions of public and private access in the header file.
+        let mut access_regions = vec![];
         for_each_match(
             &queries::access_specifier(),
             class_node,
             header_contents,
             |_query, query_match| {
-                dbg!(query_match);
+                let access_node = query_match.captures[0].node;
+                let access_text = query_match.captures[0].node.utf8_text(header_contents).unwrap();
+                let is_public = access_text == "public";
+                access_regions.push((is_public, access_node.start_position().row));
             },
         );
 
+        access_regions.sort_by_key(|a| a.1);
+
         // Only extract public functions
         for_each_match(&queries::functions(), class_node, header_contents, |query, query_match| {
-            let index = query.capture_index_for_name("access").unwrap();
-            let access_text = query_match
-                .captures
-                .iter()
-                .find(|c| c.index == index)
-                .unwrap()
-                .node
-                .utf8_text(header_contents)
-                .unwrap();
-            let is_public = access_text == "public";
+            let index = query.capture_index_for_name("method").unwrap();
+            let func_node = query_match.captures.iter().find(|c| c.index == index).unwrap().node;
 
-            if is_public {
-                let index = query.capture_index_for_name("method").unwrap();
-                let _func_text = query_match
-                    .captures
-                    .iter()
-                    .find(|c| c.index == index)
-                    .unwrap()
-                    .node
-                    .utf8_text(header_contents)
-                    .unwrap();
-            }
+            // Find the closest access specifier that was declared before us,
+            // defaulting to private if none exist.
+            let is_public = access_regions
+                .iter()
+                .rev()
+                .find(|region| func_node.start_position().row >= region.1)
+                .map(|r| r.0)
+                .unwrap_or(false);
+
+            let func_text = func_node.utf8_text(header_contents).unwrap();
+
+            dbg!(is_public);
+            dbg!(func_text);
         });
 
         Self {
@@ -151,7 +149,6 @@ fn for_each_match(
     let mut matches = cursor.matches(&query, node, src_contents);
 
     while let Some(query_match) = matches.next() {
-        // dbg!(query_match÷);
         func(&query, query_match);
     }
 }
