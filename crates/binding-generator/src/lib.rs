@@ -3,7 +3,7 @@ use std::{
     fs::{read_dir, read_to_string},
     path::Path,
 };
-use tree_sitter::{Node, Query, QueryCursor, StreamingIterator};
+use tree_sitter::{Node, Query, QueryCursor, QueryMatch, StreamingIterator};
 
 mod queries;
 
@@ -45,17 +45,16 @@ impl OcctPackage {
             let tree = parser.parse(&header_contents, None).unwrap();
 
             // Forward declare classes
-            let forward_classes =
-                Query::new(&language.into(), &queries::forward_declared_classes()).unwrap();
-            let mut cursor = QueryCursor::new();
-
-            let mut matches =
-                cursor.matches(&forward_classes, tree.root_node(), header_contents.as_bytes());
-            while let Some(class) = matches.next() {
-                let class_name =
-                    class.captures[0].node.utf8_text(header_contents.as_bytes()).unwrap();
-                forward_declare_classes.insert(class_name.to_string());
-            }
+            for_each_match(
+                &queries::forward_declared_classes(),
+                tree.root_node(),
+                header_contents.as_bytes(),
+                |_q, query_match| {
+                    let class_name =
+                        query_match.captures[0].node.utf8_text(header_contents.as_bytes()).unwrap();
+                    forward_declare_classes.insert(class_name.to_string());
+                },
+            );
 
             // Classes to bind to
             let classes_query = Query::new(&language.into(), &queries::class()).unwrap();
@@ -65,13 +64,11 @@ impl OcctPackage {
                 cursor.matches(&classes_query, tree.root_node(), header_contents.as_bytes());
 
             while let Some(class) = matches.next() {
+                dbg!(&class.captures);
                 let class_node = class.captures[0].node;
-                let class_text =
-                    class.captures[0].node.utf8_text(header_contents.as_bytes()).unwrap();
-                println!("{}", class_text);
-                // dbg!(class_node.to_sexp());
 
-                let new_class = OcctClass::new(&header_contents, class_node);
+                let new_class =
+                    OcctClass::new(&header_contents, class_node, header_contents.as_bytes());
                 classes.push(new_class);
             }
         }
@@ -91,7 +88,43 @@ pub struct OcctClass {
 }
 
 impl OcctClass {
-    pub fn new(_src: &str, _class_node: Node) -> Self {
+    pub fn new(_src: &str, class_node: Node, header_contents: &[u8]) -> Self {
+        // Build up regions of public and private access in the header file.
+        for_each_match(
+            &queries::access_specifier(),
+            class_node,
+            header_contents,
+            |_query, query_match| {
+                dbg!(query_match);
+            },
+        );
+
+        // Only extract public functions
+        for_each_match(&queries::functions(), class_node, header_contents, |query, query_match| {
+            let index = query.capture_index_for_name("access").unwrap();
+            let access_text = query_match
+                .captures
+                .iter()
+                .find(|c| c.index == index)
+                .unwrap()
+                .node
+                .utf8_text(header_contents)
+                .unwrap();
+            let is_public = access_text == "public";
+
+            if is_public {
+                let index = query.capture_index_for_name("method").unwrap();
+                let _func_text = query_match
+                    .captures
+                    .iter()
+                    .find(|c| c.index == index)
+                    .unwrap()
+                    .node
+                    .utf8_text(header_contents)
+                    .unwrap();
+            }
+        });
+
         Self {
             name: "lol".to_string(),
             constructors: vec![],
@@ -104,4 +137,21 @@ impl OcctClass {
 #[derive(Debug)]
 pub struct OcctEnum {
     name: String,
+}
+
+fn for_each_match(
+    query_str: &str,
+    node: Node,
+    src_contents: &[u8],
+    mut func: impl FnMut(&Query, &QueryMatch),
+) {
+    let query = Query::new(&tree_sitter_cpp::LANGUAGE.into(), query_str).unwrap();
+    let mut cursor = QueryCursor::new();
+
+    let mut matches = cursor.matches(&query, node, src_contents);
+
+    while let Some(query_match) = matches.next() {
+        // dbg!(query_match÷);
+        func(&query, query_match);
+    }
 }
