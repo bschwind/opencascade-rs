@@ -29,8 +29,10 @@ pub fn functions() -> String {
         (field_declaration_list
             (field_declaration
                 (storage_class_specifier)? @storage
-                (type_identifier) @return_type
-                (function_declarator) @func
+                [(type_identifier) (primitive_type)] @return_type
+                (function_declarator
+                    declarator: (field_identifier) @func_name
+                ) @func
             ) @method
         ) @fields
     )

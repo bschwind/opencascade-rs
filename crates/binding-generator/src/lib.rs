@@ -81,7 +81,7 @@ impl OcctPackage {
 pub struct OcctClass {
     name: String,
     constructors: Vec<()>,
-    methods: Vec<()>,
+    methods: Vec<Function>,
     static_methods: Vec<()>,
 }
 
@@ -108,6 +108,8 @@ impl OcctClass {
             let index = query.capture_index_for_name("method").unwrap();
             let func_node = query_match.captures.iter().find(|c| c.index == index).unwrap().node;
 
+            let result = QueryResult { query, query_match, src_contents: header_contents };
+
             // Find the closest access specifier that was declared before us,
             // defaulting to private if none exist.
             let is_public = access_regions
@@ -117,10 +119,17 @@ impl OcctClass {
                 .map(|r| r.0)
                 .unwrap_or(false);
 
-            let func_text = func_node.utf8_text(header_contents).unwrap();
+            if is_public {
+                let func_name = result.capture_text("func_name");
+                let storage_class = result.capture_text_opt("storage");
+                let func_text = result.capture_text("method");
+                let return_type = result.capture_text("return_type");
 
-            dbg!(is_public);
-            dbg!(func_text);
+                dbg!(storage_class);
+                dbg!(func_name);
+                dbg!(return_type);
+                dbg!(func_text);
+            }
         });
 
         Self {
@@ -151,4 +160,42 @@ fn for_each_match(
     while let Some(query_match) = matches.next() {
         func(&query, query_match);
     }
+}
+
+struct QueryResult<'a> {
+    query: &'a Query,
+    query_match: &'a QueryMatch<'a, 'a>,
+    src_contents: &'a [u8],
+}
+
+impl<'a> QueryResult<'a> {
+    fn capture_text(&self, name: &str) -> &'a str {
+        let index = self.query.capture_index_for_name(name).unwrap();
+        self.query_match
+            .captures
+            .iter()
+            .find(|c| c.index == index)
+            .unwrap()
+            .node
+            .utf8_text(self.src_contents)
+            .unwrap()
+    }
+
+    fn capture_text_opt(&self, name: &str) -> Option<&'a str> {
+        let index = self.query.capture_index_for_name(name).unwrap();
+        self.query_match
+            .captures
+            .iter()
+            .find(|c| c.index == index)
+            .and_then(|c| c.node.utf8_text(self.src_contents).ok())
+    }
+}
+
+#[derive(Debug)]
+pub struct Function {
+    name: String,
+    return_type: Option<String>,
+    args: Vec<String>,
+    is_static: bool,
+    is_virtual: bool,
 }
