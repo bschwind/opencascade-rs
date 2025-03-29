@@ -103,6 +103,8 @@ impl OcctClass {
 
         access_regions.sort_by_key(|a| a.1);
 
+        let mut functions = vec![];
+
         // Only extract public functions
         for_each_match(&queries::functions(), class_node, header_contents, |query, query_match| {
             let index = query.capture_index_for_name("method").unwrap();
@@ -129,6 +131,18 @@ impl OcctClass {
                 dbg!(func_name);
                 dbg!(return_type);
                 dbg!(func_text);
+
+                functions.push(Function {
+                    name: func_name.to_string(),
+                    return_type: if return_type == "void" {
+                        None
+                    } else {
+                        Some(return_type.to_string())
+                    },
+                    args: vec![],
+                    function_type: FunctionType::Constructor,
+                    is_virtual: false,
+                });
             }
         });
 
@@ -192,10 +206,17 @@ impl<'a> QueryResult<'a> {
 }
 
 #[derive(Debug)]
+pub enum FunctionType {
+    Constructor,
+    Static,
+    Method,
+}
+
+#[derive(Debug)]
 pub struct Function {
     name: String,
     return_type: Option<String>,
     args: Vec<String>,
-    is_static: bool,
+    function_type: FunctionType,
     is_virtual: bool,
 }
