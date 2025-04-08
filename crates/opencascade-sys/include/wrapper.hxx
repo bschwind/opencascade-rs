@@ -85,6 +85,18 @@
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
 
+// OCAF stuff
+#include <TDF_Data.hxx>
+#include <TDF_Label.hxx>
+#include <TDF_LabelMap.hxx>
+#include <TDF_ChildIterator.hxx>
+#include <TDF_MapIteratorOfLabelMap.hxx>
+#include <TNaming_NamedShape.hxx>
+#include <TNaming_Selector.hxx>
+#include <TNaming_Tool.hxx>
+#include <TNaming_Builder.hxx>
+#include <TNaming.hxx>
+
 // Generic template constructor
 template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
   return std::unique_ptr<T>(new T(args...));
@@ -117,6 +129,41 @@ typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
 inline std::unique_ptr<Handle_TColgpHArray1OfPnt>
 new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(std::unique_ptr<TColgp_HArray1OfPnt> array) {
   return std::unique_ptr<Handle_TColgpHArray1OfPnt>(new Handle_TColgpHArray1OfPnt(array.release()));
+}
+
+typedef opencascade::handle<TDF_Data> Handle_TDF_Data;
+
+inline std::unique_ptr<Handle_TDF_Data>
+new_Handle_TDF_Data() {
+  return std::unique_ptr<Handle_TDF_Data>(new Handle_TDF_Data(new TDF_Data()));
+}
+
+inline std::unique_ptr<TDF_Label>
+Handle_TDF_Data_Root(const Handle_TDF_Data &h) {
+  return std::unique_ptr<TDF_Label>(new TDF_Label(h->Root()));
+}
+
+inline std::unique_ptr<TDF_Label>
+TDF_Label_FindChild(const TDF_Label &h, const Standard_Integer tag, const Standard_Boolean create) {
+  return std::unique_ptr<TDF_Label>(new TDF_Label(h.FindChild(tag, create)));
+}
+
+inline std::unique_ptr<TopoDS_Shape> 
+TDF_Label_GetShape(const TDF_Label &lab) {
+    Handle(TNaming_NamedShape) ResultNS;
+    lab.FindAttribute(TNaming_NamedShape::GetID(), ResultNS);
+    const TopoDS_Shape& s = ResultNS->Get();
+    return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(s));
+}
+
+inline void 
+TDF_Label_Dump(const TDF_Label& lab) {
+    lab.Dump(std::cout);
+}
+
+inline void
+TDF_Label_Displace(const TDF_Label &lab, const TopLoc_Location& loc) {
+    TNaming::Displace(lab, loc, Standard_True);//with oldshapes
 }
 
 // Handle stuff

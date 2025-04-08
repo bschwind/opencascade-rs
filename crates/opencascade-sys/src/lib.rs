@@ -1370,6 +1370,28 @@ pub mod ffi {
             shared: bool,
             wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
         );
+
+        type Handle_TDF_Data;
+        type TDF_Label;
+        type TNaming_Builder;
+
+        pub fn new_Handle_TDF_Data() -> UniquePtr<Handle_TDF_Data>;
+
+        pub fn Handle_TDF_Data_Root(h: &Handle_TDF_Data) -> UniquePtr<TDF_Label>;
+
+        pub fn TDF_Label_FindChild(lab: &TDF_Label, x: i32, b: bool) -> UniquePtr<TDF_Label>;
+
+        pub fn TDF_Label_GetShape(lab: &TDF_Label) -> UniquePtr<TopoDS_Shape>;
+        pub fn TDF_Label_Displace(lab: &TDF_Label, loc: &TopLoc_Location);
+        pub fn TDF_Label_Dump(lab: &TDF_Label);
+
+        #[cxx_name = "construct_unique"]
+        pub fn TNaming_Builder_ctor(
+            lab: &TDF_Label,
+        ) -> UniquePtr<TNaming_Builder>;
+
+        pub fn Generated(self: Pin<&mut TNaming_Builder>, shape: &TopoDS_Shape);
+
     }
 }
 
