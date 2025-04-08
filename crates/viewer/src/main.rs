@@ -196,7 +196,13 @@ impl GameApp for ViewerApp {
             client_rect: vec2(width as f32, height as f32),
             camera: OrbitCamera::new(width, height, Vec3::new(40.0, -40.0, 20.0)),
             depth_texture,
-            text_system: TextSystem::new(device, surface_texture_format, width, height),
+            text_system: TextSystem::new(
+                device,
+                surface_texture_format,
+                Some(depth_texture_format),
+                width,
+                height,
+            ),
             fps_counter: FPSCounter::new(),
             line_drawer: EdgeDrawer::new(
                 device,
@@ -368,9 +374,6 @@ impl GameApp for ViewerApp {
             gap_size,
         );
 
-        drop(render_pass);
-
-        // TODO(bschwind) - Pass in the render_pass to the text_system too.
         self.text_system.render_horizontal(
             TextAlignment {
                 x: AxisAlign::Start(10),
@@ -379,10 +382,11 @@ impl GameApp for ViewerApp {
                 max_height: None,
             },
             &[StyledText::default_styling(&format!("FPS: {}", self.fps_counter.fps()))],
-            &mut frame_encoder.encoder,
-            &smaa_render_target,
+            &mut render_pass,
             graphics_device.queue(),
         );
+
+        drop(render_pass);
 
         graphics_device.queue().submit(Some(frame_encoder.encoder.finish()));
 
