@@ -79,9 +79,7 @@ impl EdgeDrawer {
     pub fn draw(
         &self,
         rendered_line: &RenderedLine,
-        encoder: &mut wgpu::CommandEncoder,
-        render_target: &wgpu::TextureView,
-        depth_view: Option<&wgpu::TextureView>,
+        render_pass: &mut wgpu::RenderPass,
         queue: &wgpu::Queue,
         camera_matrix: Mat4,
         transform: Mat4,
@@ -108,29 +106,8 @@ impl EdgeDrawer {
 
         queue.write_buffer(&self.buffers.solid_vertex_uniform, 0, bytemuck::bytes_of(&uniforms));
 
-        encoder.push_debug_group("Line drawer");
+        render_pass.push_debug_group("Line drawer");
         {
-            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                label: None,
-                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: render_target,
-                    resolve_target: None,
-                    ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store },
-                })],
-                depth_stencil_attachment: depth_view.map(|view| {
-                    wgpu::RenderPassDepthStencilAttachment {
-                        view,
-                        depth_ops: Some(wgpu::Operations {
-                            load: wgpu::LoadOp::Load,
-                            store: wgpu::StoreOp::Store,
-                        }),
-                        stencil_ops: None,
-                    }
-                }),
-                occlusion_query_set: None,
-                timestamp_writes: None,
-            });
-
             let instance_buffer_size = rendered_line.vertex_buf.size();
             let one_instance_size = std::mem::size_of::<LineVertex3>() as u64;
 
@@ -169,7 +146,7 @@ impl EdgeDrawer {
                 render_pass.draw(0..vertex_count, range);
             }
         }
-        encoder.pop_debug_group();
+        render_pass.pop_debug_group();
     }
 
     fn build_pipeline(

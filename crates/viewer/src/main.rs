@@ -196,7 +196,13 @@ impl GameApp for ViewerApp {
             client_rect: vec2(width as f32, height as f32),
             camera: OrbitCamera::new(width, height, Vec3::new(40.0, -40.0, 20.0)),
             depth_texture,
-            text_system: TextSystem::new(device, surface_texture_format, width, height),
+            text_system: TextSystem::new(
+                device,
+                surface_texture_format,
+                Some(depth_texture_format),
+                width,
+                height,
+            ),
             fps_counter: FPSCounter::new(),
             line_drawer: EdgeDrawer::new(
                 device,
@@ -324,10 +330,31 @@ impl GameApp for ViewerApp {
         let camera_matrix = self.camera.matrix();
         let transform = Mat4::IDENTITY;
 
+        let mut render_pass =
+            frame_encoder.encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("Model render pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &smaa_render_target,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.3, g: 0.3, b: 0.3, a: 1.0 }),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                    view: &self.depth_texture.view,
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: wgpu::StoreOp::Store,
+                    }),
+                    stencil_ops: None,
+                }),
+                occlusion_query_set: None,
+                timestamp_writes: None,
+            });
+
         self.surface_drawer.render(
-            &mut frame_encoder.encoder,
-            &smaa_render_target,
-            &self.depth_texture.view,
+            &mut render_pass,
             graphics_device.queue(),
             &self.cad_mesh,
             camera_matrix,
@@ -339,9 +366,7 @@ impl GameApp for ViewerApp {
 
         self.line_drawer.draw(
             &self.rendered_edges,
-            &mut frame_encoder.encoder,
-            &smaa_render_target,
-            Some(&self.depth_texture.view),
+            &mut render_pass,
             graphics_device.queue(),
             camera_matrix,
             transform,
@@ -357,10 +382,11 @@ impl GameApp for ViewerApp {
                 max_height: None,
             },
             &[StyledText::default_styling(&format!("FPS: {}", self.fps_counter.fps()))],
-            &mut frame_encoder.encoder,
-            &smaa_render_target,
+            &mut render_pass,
             graphics_device.queue(),
         );
+
+        drop(render_pass);
 
         graphics_device.queue().submit(Some(frame_encoder.encoder.finish()));
 

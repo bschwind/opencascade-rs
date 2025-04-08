@@ -122,9 +122,7 @@ impl SurfaceDrawer {
     #[allow(clippy::too_many_arguments)]
     pub fn render(
         &self,
-        encoder: &mut wgpu::CommandEncoder,
-        render_target: &wgpu::TextureView,
-        depth_view: &wgpu::TextureView,
+        render_pass: &mut wgpu::RenderPass,
         queue: &wgpu::Queue,
         cad_mesh: &CadMesh,
         camera_matrix: Mat4,
@@ -133,28 +131,6 @@ impl SurfaceDrawer {
         let uniforms = CadMeshUniforms { proj: camera_matrix, transform };
 
         queue.write_buffer(&self.vertex_uniform, 0, bytemuck::bytes_of(&uniforms));
-
-        let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-            label: Some("CadMesh render pass"),
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: render_target,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.3, g: 0.3, b: 0.3, a: 1.0 }),
-                    store: wgpu::StoreOp::Store,
-                },
-            })],
-            depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
-                view: depth_view,
-                depth_ops: Some(wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(1.0),
-                    store: wgpu::StoreOp::Store,
-                }),
-                stencil_ops: None,
-            }),
-            occlusion_query_set: None,
-            timestamp_writes: None,
-        });
 
         render_pass.set_pipeline(&self.pipeline);
         render_pass.set_bind_group(0, &self.uniform_bind_group, &[]);
