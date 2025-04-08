@@ -370,6 +370,7 @@ impl GameApp for ViewerApp {
 
         drop(render_pass);
 
+        // TODO(bschwind) - Pass in the render_pass to the text_system too.
         self.text_system.render_horizontal(
             TextAlignment {
                 x: AxisAlign::Start(10),
