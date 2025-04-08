@@ -324,10 +324,31 @@ impl GameApp for ViewerApp {
         let camera_matrix = self.camera.matrix();
         let transform = Mat4::IDENTITY;
 
+        let mut render_pass =
+            frame_encoder.encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("Model render pass"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: &smaa_render_target,
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.3, g: 0.3, b: 0.3, a: 1.0 }),
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
+                    view: &self.depth_texture.view,
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: wgpu::StoreOp::Store,
+                    }),
+                    stencil_ops: None,
+                }),
+                occlusion_query_set: None,
+                timestamp_writes: None,
+            });
+
         self.surface_drawer.render(
-            &mut frame_encoder.encoder,
-            &smaa_render_target,
-            &self.depth_texture.view,
+            &mut render_pass,
             graphics_device.queue(),
             &self.cad_mesh,
             camera_matrix,
@@ -339,15 +360,15 @@ impl GameApp for ViewerApp {
 
         self.line_drawer.draw(
             &self.rendered_edges,
-            &mut frame_encoder.encoder,
-            &smaa_render_target,
-            Some(&self.depth_texture.view),
+            &mut render_pass,
             graphics_device.queue(),
             camera_matrix,
             transform,
             dash_size,
             gap_size,
         );
+
+        drop(render_pass);
 
         self.text_system.render_horizontal(
             TextAlignment {
