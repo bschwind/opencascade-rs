@@ -4,7 +4,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
-use opencascade_sys::ffi;
+use opencascade_sys::{b_rep_mesh::IncrementalMesh, ffi, top_loc::Location};
 
 #[derive(Debug)]
 pub struct Mesh {
@@ -15,12 +15,12 @@ pub struct Mesh {
 }
 
 pub struct Mesher {
-    pub(crate) inner: UniquePtr<ffi::BRepMesh_IncrementalMesh>,
+    pub(crate) inner: UniquePtr<IncrementalMesh>,
 }
 
 impl Mesher {
     pub fn try_new(shape: &Shape, triangulation_tolerance: f64) -> Result<Self, Error> {
-        let inner = ffi::BRepMesh_IncrementalMesh_ctor(&shape.inner, triangulation_tolerance);
+        let inner = IncrementalMesh::new(&shape.inner, triangulation_tolerance);
 
         if inner.IsDone() {
             Ok(Self { inner })
@@ -38,7 +38,7 @@ impl Mesher {
         let triangulated_shape = Shape::from_shape(self.inner.pin_mut().Shape());
 
         for face in triangulated_shape.faces() {
-            let mut location = ffi::TopLoc_Location_ctor();
+            let mut location = Location::new();
 
             let triangulation_handle =
                 ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
@@ -50,8 +50,8 @@ impl Mesher {
             let face_point_count = triangulation.NbNodes();
 
             for i in 1..=face_point_count {
-                let mut point = ffi::Poly_Triangulation_Node(triangulation, i);
-                point.pin_mut().Transform(&ffi::TopLoc_Location_Transformation(&location));
+                let mut point = triangulation.node(i);
+                point.pin_mut().Transform(&location.transform());
                 vertices.push(dvec3(point.X(), point.Y(), point.Z()));
             }
 
@@ -62,7 +62,7 @@ impl Mesher {
             let mut v_max = f64::NEG_INFINITY;
 
             for i in 1..=(face_point_count) {
-                let uv = ffi::Poly_Triangulation_UV(triangulation, i);
+                let uv = triangulation.uv(i);
                 let (u, v) = (uv.X(), uv.Y());
 
                 u_min = u_min.min(u);
@@ -92,7 +92,7 @@ impl Mesher {
 
             // TODO(bschwind) - Why do we start at 1 here?
             for i in 1..(normal_array.Length() as usize) {
-                let normal = ffi::Poly_Triangulation_Normal(triangulation, i as i32);
+                let normal = triangulation.normal(i as i32);
                 normals.push(dvec3(normal.X(), normal.Y(), normal.Z()));
             }
 
