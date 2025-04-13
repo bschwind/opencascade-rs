@@ -134,6 +134,37 @@ fn get_shape_edges(shape: &Shape, graphics_device: &GraphicsDevice) -> RenderedL
     line_builder.build(graphics_device.device())
 }
 
+fn get_shape_edges_builder(shape: &Shape, graphics_device: &GraphicsDevice) -> LineBuilder {
+    // Pre-render the model edges.
+    let line_thickness = 3.0;
+    let mut line_builder = LineBuilder::new();
+
+    for edge in shape.edges() {
+        let mut segments = vec![];
+
+        let mut last_point: Option<DVec3> = None;
+        let mut length_so_far = 0.0;
+
+        for point in edge.approximation_segments() {
+            if let Some(last_point) = last_point {
+                length_so_far += (point - last_point).length();
+            }
+
+            segments.push(LineVertex3::new(
+                vec3(point.x as f32, point.y as f32, point.z as f32),
+                line_thickness,
+                length_so_far as f32,
+            ));
+
+            last_point = Some(point);
+        }
+
+        line_builder.add_round_line_strip(&segments);
+    }
+
+    line_builder
+}
+
 impl GameApp for ViewerApp {
     fn window_title() -> &'static str {
         "Viewer"
@@ -177,6 +208,7 @@ impl GameApp for ViewerApp {
 
         let cad_mesh = get_shape_mesh(&shape, graphics_device);
         let rendered_edges = get_shape_edges(&shape, graphics_device);
+        let line_builder = get_shape_edges_builder(&shape, graphics_device);
 
         // Create SMAA target
         let (width, height) = graphics_device.surface_dimensions();
@@ -192,6 +224,11 @@ impl GameApp for ViewerApp {
         let depth_texture = DepthTexture::new(device, width, height);
         let depth_texture_format = depth_texture.format();
 
+        let mut line_drawer =
+            EdgeDrawer::new(device, surface_texture_format, depth_texture_format, width, height);
+
+        line_drawer.update_line_buffer(device, line_builder);
+
         Self {
             client_rect: vec2(width as f32, height as f32),
             camera: OrbitCamera::new(width, height, Vec3::new(40.0, -40.0, 20.0)),
@@ -204,13 +241,7 @@ impl GameApp for ViewerApp {
                 height,
             ),
             fps_counter: FPSCounter::new(),
-            line_drawer: EdgeDrawer::new(
-                device,
-                surface_texture_format,
-                depth_texture_format,
-                width,
-                height,
-            ),
+            line_drawer,
             surface_drawer: SurfaceDrawer::new(
                 device,
                 surface_texture_format,

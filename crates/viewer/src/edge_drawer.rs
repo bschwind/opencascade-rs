@@ -15,11 +15,16 @@ struct Buffers {
     dashed_vertex_uniform: wgpu::Buffer,
     round_strip_geometry: wgpu::Buffer,
     round_strip_geometry_len: usize,
+
+    position_buffer: wgpu::Buffer,
+    instance_buffer: wgpu::Buffer,
 }
 
 struct BindGroups {
     solid_vertex_uniform: wgpu::BindGroup,
     dashed_vertex_uniform: wgpu::BindGroup,
+    static_vertex_bind_group: wgpu::BindGroup,
+    dynamic_strip_buffer_bind_group: wgpu::BindGroup,
 }
 
 pub struct EdgeDrawer {
@@ -30,6 +35,8 @@ pub struct EdgeDrawer {
     screen_width: u32,
     screen_height: u32,
     draw_back_edges: bool,
+
+    num_vertices: u32,
 }
 
 impl EdgeDrawer {
@@ -50,10 +57,8 @@ impl EdgeDrawer {
             wgpu::CompareFunction::Greater,
         );
 
-        let layout = solid_line_strip_pipeline.get_bind_group_layout(0);
-
         let buffers = Self::build_buffers(device);
-        let bind_groups = Self::build_bind_groups(device, &layout, &buffers);
+        let bind_groups = Self::build_bind_groups(device, &solid_line_strip_pipeline, &buffers);
 
         Self {
             solid_line_strip_pipeline,
@@ -63,6 +68,7 @@ impl EdgeDrawer {
             screen_width,
             screen_height,
             draw_back_edges: false,
+            num_vertices: 0,
         }
     }
 
@@ -108,43 +114,51 @@ impl EdgeDrawer {
 
         render_pass.push_debug_group("Line drawer");
         {
-            let instance_buffer_size = rendered_line.vertex_buf.size();
-            let one_instance_size = std::mem::size_of::<LineVertex3>() as u64;
+            // let instance_buffer_size = rendered_line.vertex_buf.size();
+            // let one_instance_size = std::mem::size_of::<LineVertex3>() as u64;
 
-            render_pass.set_vertex_buffer(0, self.buffers.round_strip_geometry.slice(..));
-            render_pass.set_vertex_buffer(
-                1,
-                rendered_line.vertex_buf.slice(..(instance_buffer_size - one_instance_size)),
-            );
-            render_pass.set_vertex_buffer(2, rendered_line.vertex_buf.slice(one_instance_size..));
+            // render_pass.set_vertex_buffer(0, self.buffers.round_strip_geometry.slice(..));
+            // render_pass.set_vertex_buffer(
+            //     0,
+            //     rendered_line.vertex_buf.slice(..(instance_buffer_size - one_instance_size)),
+            // );
+            // render_pass.set_vertex_buffer(1, rendered_line.vertex_buf.slice(one_instance_size..));
 
             // Render dashed line strips
-            if self.draw_back_edges {
-                render_pass.set_pipeline(&self.dashed_line_strip_pipeline);
-                render_pass.set_bind_group(0, &self.bind_groups.dashed_vertex_uniform, &[]);
+            // dbg!(&rendered_line.strip_instances);
+            // if self.draw_back_edges {
+            //     render_pass.set_pipeline(&self.dashed_line_strip_pipeline);
+            //     render_pass.set_bind_group(0, &self.bind_groups.dashed_vertex_uniform, &[]);
 
-                let mut offset = 0usize;
-                let vertex_count = self.buffers.round_strip_geometry_len as u32;
+            //     let mut offset = 0usize;
+            //     let vertex_count = self.buffers.round_strip_geometry_len as u32;
 
-                for line_strip_size in &rendered_line.line_sizes {
-                    let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
-                    offset += line_strip_size;
-                    render_pass.draw(0..vertex_count, range);
-                }
-            }
+            //     for line_strip_size in &rendered_line.line_sizes {
+            //         let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
+            //         offset += line_strip_size;
+            //         render_pass.draw(0..vertex_count, range);
+            //     }
+            // }
 
             // Render solid line strips
             render_pass.set_pipeline(&self.solid_line_strip_pipeline);
             render_pass.set_bind_group(0, &self.bind_groups.solid_vertex_uniform, &[]);
+            render_pass.set_bind_group(1, &self.bind_groups.static_vertex_bind_group, &[]);
+            render_pass.set_bind_group(2, &self.bind_groups.dynamic_strip_buffer_bind_group, &[]);
 
-            let mut offset = 0usize;
-            let vertex_count = self.buffers.round_strip_geometry_len as u32;
+            // let mut offset = 0usize;
+            // let vertex_count = self.buffers.round_strip_geometry_len as u32;
 
-            for line_strip_size in &rendered_line.line_sizes {
-                let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
-                offset += line_strip_size;
-                render_pass.draw(0..vertex_count, range);
-            }
+            // for line_strip_size in &rendered_line.line_sizes {
+            //     let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
+            //     offset += line_strip_size;
+            //     render_pass.draw(0..vertex_count, range);
+            // }
+
+            render_pass.draw(
+                0..(self.num_vertices * self.buffers.round_strip_geometry_len as u32),
+                0..(rendered_line.strip_instances.len() as u32),
+            );
         }
         render_pass.pop_debug_group();
     }
@@ -175,10 +189,56 @@ impl EdgeDrawer {
                 label: None,
             });
 
+        let static_vertex_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Storage { read_only: true },
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }],
+                label: None,
+            });
+
+        let dynamic_vertex_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::VERTEX,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    },
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::VERTEX,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Storage { read_only: true },
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
+                    },
+                ],
+                label: None,
+            });
+
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Round line strip renderer"),
-                bind_group_layouts: &[&vertex_bind_group_layout],
+                bind_group_layouts: &[
+                    &vertex_bind_group_layout,
+                    &static_vertex_bind_group_layout,
+                    &dynamic_vertex_bind_group_layout,
+                ],
                 push_constant_ranges: &[],
             });
 
@@ -189,29 +249,29 @@ impl EdgeDrawer {
                 module: &draw_shader,
                 entry_point: Some("main_vs"),
                 buffers: &[
-                    wgpu::VertexBufferLayout {
-                        array_stride: std::mem::size_of::<RoundLineStripVertex>() as u64,
-                        step_mode: wgpu::VertexStepMode::Vertex,
-                        attributes: &wgpu::vertex_attr_array![
-                            0 => Float32x3, // XY position of this particular vertex, with Z indicating sides.
-                        ],
-                    },
-                    wgpu::VertexBufferLayout {
-                        array_stride: std::mem::size_of::<LineVertex3>() as u64,
-                        step_mode: wgpu::VertexStepMode::Instance,
-                        attributes: &wgpu::vertex_attr_array![
-                            1 => Float32x4, // Point A
-                            2 => Float32x4, // Length so far
-                        ],
-                    },
-                    wgpu::VertexBufferLayout {
-                        array_stride: std::mem::size_of::<LineVertex3>() as u64,
-                        step_mode: wgpu::VertexStepMode::Instance,
-                        attributes: &wgpu::vertex_attr_array![
-                            3 => Float32x4, // Point B
-                            4 => Float32x4, // Length so far
-                        ],
-                    },
+                    // wgpu::VertexBufferLayout {
+                    //     array_stride: std::mem::size_of::<RoundLineStripVertex>() as u64,
+                    //     step_mode: wgpu::VertexStepMode::Vertex,
+                    //     attributes: &wgpu::vertex_attr_array![
+                    //         0 => Float32x3, // XY position of this particular vertex, with Z indicating sides.
+                    //     ],
+                    // },
+                    // wgpu::VertexBufferLayout {
+                    //     array_stride: std::mem::size_of::<LineVertex3>() as u64,
+                    //     step_mode: wgpu::VertexStepMode::Instance,
+                    //     attributes: &wgpu::vertex_attr_array![
+                    //         0 => Float32x4, // Point A
+                    //         1 => Float32x4, // Length so far
+                    //     ],
+                    // },
+                    // wgpu::VertexBufferLayout {
+                    //     array_stride: std::mem::size_of::<LineVertex3>() as u64,
+                    //     step_mode: wgpu::VertexStepMode::Instance,
+                    //     attributes: &wgpu::vertex_attr_array![
+                    //         2 => Float32x4, // Point B
+                    //         3 => Float32x4, // Length so far
+                    //     ],
+                    // },
                 ],
                 compilation_options: wgpu::PipelineCompilationOptions::default(),
             },
@@ -250,11 +310,15 @@ impl EdgeDrawer {
 
     fn build_bind_groups(
         device: &wgpu::Device,
-        bind_group_layout: &wgpu::BindGroupLayout,
+        pipeline: &wgpu::RenderPipeline,
         buffers: &Buffers,
     ) -> BindGroups {
+        let uniform_bind_group_layout = pipeline.get_bind_group_layout(0);
+        let static_vertex_bind_group_layout = pipeline.get_bind_group_layout(1);
+        let vertex_pos_bind_group_layout = pipeline.get_bind_group_layout(2);
+
         let solid_vertex_uniform = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: bind_group_layout,
+            layout: &uniform_bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
                 binding: 0,
                 resource: buffers.solid_vertex_uniform.as_entire_binding(),
@@ -263,7 +327,7 @@ impl EdgeDrawer {
         });
 
         let dashed_vertex_uniform = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            layout: bind_group_layout,
+            layout: &uniform_bind_group_layout,
             entries: &[wgpu::BindGroupEntry {
                 binding: 0,
                 resource: buffers.dashed_vertex_uniform.as_entire_binding(),
@@ -271,7 +335,37 @@ impl EdgeDrawer {
             label: None,
         });
 
-        BindGroups { solid_vertex_uniform, dashed_vertex_uniform }
+        let static_vertex_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            layout: &static_vertex_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: buffers.round_strip_geometry.as_entire_binding(),
+            }],
+            label: None,
+        });
+
+        let dynamic_strip_buffer_bind_group =
+            device.create_bind_group(&wgpu::BindGroupDescriptor {
+                layout: &vertex_pos_bind_group_layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: buffers.position_buffer.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: buffers.instance_buffer.as_entire_binding(),
+                    },
+                ],
+                label: None,
+            });
+
+        BindGroups {
+            solid_vertex_uniform,
+            dashed_vertex_uniform,
+            static_vertex_bind_group,
+            dynamic_strip_buffer_bind_group,
+        }
     }
 
     fn build_buffers(device: &wgpu::Device) -> Buffers {
@@ -330,10 +424,25 @@ impl EdgeDrawer {
                 .push(RoundLineStripVertex { pos: [0.5 * frac_1.cos(), 0.5 * frac_1.sin(), 1.0] });
         }
 
+        // TODO(bschwind) - set this as a storage buffer
         let round_strip_geometry = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Round line segment geometry buffer"),
             contents: bytemuck::cast_slice(&round_strip_vertices),
-            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        });
+
+        let position_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Edge Drawer vertex position buffer"),
+            size: 1, // Needs to be at least one, or else create_bind_group panics.
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+
+        let instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Edge Drawer instance buffer"),
+            size: 1, // Needs to be at least one, or else create_bind_group panics.
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
         });
 
         Buffers {
@@ -341,23 +450,80 @@ impl EdgeDrawer {
             dashed_vertex_uniform,
             round_strip_geometry,
             round_strip_geometry_len: round_strip_vertices.len(),
+            position_buffer,
+            instance_buffer,
         }
+    }
+
+    pub fn update_line_buffer(&mut self, device: &wgpu::Device, line_builder: LineBuilder) {
+        self.num_vertices = line_builder.round_line_strips.len() as u32;
+
+        self.buffers.position_buffer =
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Updated line position buffer"),
+                contents: bytemuck::cast_slice(&line_builder.round_line_strips),
+                usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            });
+
+        self.buffers.instance_buffer =
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Updated instance buffer"),
+                contents: bytemuck::cast_slice(&line_builder.strip_instances),
+                usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            });
+
+        let vertex_pos_bind_group_layout = self.solid_line_strip_pipeline.get_bind_group_layout(2);
+
+        // Update our bind group
+        dbg!("updating bind group");
+        self.bind_groups.dynamic_strip_buffer_bind_group =
+            device.create_bind_group(&wgpu::BindGroupDescriptor {
+                layout: &vertex_pos_bind_group_layout,
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: self.buffers.position_buffer.as_entire_binding(),
+                    },
+                    wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: self.buffers.instance_buffer.as_entire_binding(),
+                    },
+                ],
+                label: None,
+            });
     }
 }
 
 pub struct LineBuilder {
     round_line_strips: Vec<LineVertex3>,
     round_line_strip_indices: Vec<usize>,
+    strip_instances: Vec<LineStripInstance>,
+}
+
+#[repr(C)]
+#[derive(Default, Debug, Copy, Clone, Pod, Zeroable)]
+struct LineStripInstance {
+    start_index: u32,
+    count: u32,
 }
 
 impl LineBuilder {
     pub fn new() -> Self {
-        Self { round_line_strips: Vec::new(), round_line_strip_indices: Vec::new() }
+        Self {
+            round_line_strips: Vec::new(),
+            round_line_strip_indices: Vec::new(),
+            strip_instances: Vec::new(),
+        }
     }
 
     /// A special-case where round line joins and caps are desired. This can be achieved
     /// with a single draw call.
     pub fn add_round_line_strip(&mut self, positions: &[LineVertex3]) {
+        self.strip_instances.push(LineStripInstance {
+            start_index: self.round_line_strips.len() as u32,
+            count: positions.len() as u32,
+        });
+
         self.round_line_strips.extend_from_slice(positions);
         self.round_line_strip_indices.push(positions.len());
     }
@@ -371,7 +537,7 @@ impl LineBuilder {
 
         let line_sizes = self.round_line_strip_indices;
 
-        RenderedLine { vertex_buf, line_sizes }
+        RenderedLine { vertex_buf, line_sizes, strip_instances: self.strip_instances }
     }
 }
 
@@ -379,6 +545,7 @@ impl LineBuilder {
 pub struct RenderedLine {
     vertex_buf: wgpu::Buffer,
     line_sizes: Vec<usize>,
+    strip_instances: Vec<LineStripInstance>,
 }
 
 #[repr(C)]
