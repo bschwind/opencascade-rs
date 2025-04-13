@@ -192,6 +192,11 @@ impl GameApp for ViewerApp {
         let depth_texture = DepthTexture::new(device, width, height);
         let depth_texture_format = depth_texture.format();
 
+        let mut line_drawer =
+            EdgeDrawer::new(device, surface_texture_format, depth_texture_format, width, height);
+
+        line_drawer.update_line_buffer(device, &rendered_edges);
+
         Self {
             client_rect: vec2(width as f32, height as f32),
             camera: OrbitCamera::new(width, height, Vec3::new(40.0, -40.0, 20.0)),
@@ -204,13 +209,7 @@ impl GameApp for ViewerApp {
                 height,
             ),
             fps_counter: FPSCounter::new(),
-            line_drawer: EdgeDrawer::new(
-                device,
-                surface_texture_format,
-                depth_texture_format,
-                width,
-                height,
-            ),
+            line_drawer,
             surface_drawer: SurfaceDrawer::new(
                 device,
                 surface_texture_format,

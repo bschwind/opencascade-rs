@@ -15,6 +15,8 @@ struct Buffers {
     dashed_vertex_uniform: wgpu::Buffer,
     round_strip_geometry: wgpu::Buffer,
     round_strip_geometry_len: usize,
+
+    indirect_buffer: wgpu::Buffer,
 }
 
 struct BindGroups {
@@ -137,14 +139,22 @@ impl EdgeDrawer {
             render_pass.set_pipeline(&self.solid_line_strip_pipeline);
             render_pass.set_bind_group(0, &self.bind_groups.solid_vertex_uniform, &[]);
 
-            let mut offset = 0usize;
-            let vertex_count = self.buffers.round_strip_geometry_len as u32;
+            // let mut offset = 0usize;
+            // let vertex_count = self.buffers.round_strip_geometry_len as u32;
 
-            for line_strip_size in &rendered_line.line_sizes {
-                let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
-                offset += line_strip_size;
-                render_pass.draw(0..vertex_count, range);
-            }
+            // for line_strip_size in &rendered_line.line_sizes {
+            //     let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
+            //     offset += line_strip_size;
+            //     render_pass.draw(0..vertex_count, range);
+            // }
+
+            let buffer_offset = 0;
+            let draw_count = rendered_line.line_sizes.len();
+            render_pass.multi_draw_indirect(
+                &self.buffers.indirect_buffer,
+                buffer_offset,
+                draw_count as u32,
+            );
         }
         render_pass.pop_debug_group();
     }
@@ -336,13 +346,63 @@ impl EdgeDrawer {
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
+        let indirect_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+            size: 0,
+            usage: wgpu::BufferUsages::INDIRECT,
+            mapped_at_creation: false,
+        });
+
         Buffers {
             solid_vertex_uniform,
             dashed_vertex_uniform,
             round_strip_geometry,
             round_strip_geometry_len: round_strip_vertices.len(),
+            indirect_buffer,
         }
     }
+
+    pub fn update_line_buffer(&mut self, device: &wgpu::Device, rendered_line: &RenderedLine) {
+        let mut offset = 0usize;
+        let vertex_count = self.buffers.round_strip_geometry_len as u32;
+
+        let mut indirect_vals = vec![];
+
+        for line_strip_size in &rendered_line.line_sizes {
+            // let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
+
+            // render_pass.draw(0..vertex_count, range);
+
+            let args = DrawIndirectArgs {
+                vertex_count: vertex_count - 1,
+                instance_count: *line_strip_size as u32 - 1,
+                first_vertex: 0,
+                first_instance: offset as u32,
+            };
+
+            offset += line_strip_size;
+
+            indirect_vals.push(args);
+        }
+
+        dbg!(&indirect_vals);
+
+        self.buffers.indirect_buffer =
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Indirect render buffer"),
+                contents: bytemuck::cast_slice(&indirect_vals[..]),
+                usage: wgpu::BufferUsages::INDIRECT,
+            });
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Pod, Zeroable)]
+pub struct DrawIndirectArgs {
+    pub vertex_count: u32,
+    pub instance_count: u32,
+    pub first_vertex: u32,
+    pub first_instance: u32,
 }
 
 pub struct LineBuilder {
