@@ -1,12 +1,12 @@
 use crate::{
-    edge_drawer::{EdgeDrawer, LineBuilder, LineVertex3, RenderedLine},
+    edge_drawer::{EdgeDrawer, LineBuilder, RenderedLine, SegmentInstance},
     surface_drawer::{CadMesh, SurfaceDrawer},
     wasm_engine::WasmEngine,
 };
 use anyhow::Error;
 use camera::OrbitCamera;
 use clap::Parser;
-use glam::{vec2, vec3, DVec3, Mat4, Quat, Vec2, Vec3};
+use glam::{vec2, vec4, DVec3, Mat4, Quat, Vec2, Vec3};
 use kicad_parser::board::BoardLayer;
 use opencascade::{
     kicad::KicadPcb,
@@ -116,14 +116,21 @@ fn get_shape_edges(shape: &Shape, graphics_device: &GraphicsDevice) -> RenderedL
 
         for point in edge.approximation_segments() {
             if let Some(last_point) = last_point {
+                let point_a_length = length_so_far;
                 length_so_far += (point - last_point).length();
-            }
+                let point_b_length = length_so_far;
 
-            segments.push(LineVertex3::new(
-                vec3(point.x as f32, point.y as f32, point.z as f32),
-                line_thickness,
-                length_so_far as f32,
-            ));
+                segments.push(SegmentInstance {
+                    pos_a: vec4(
+                        last_point.x as f32,
+                        last_point.y as f32,
+                        last_point.z as f32,
+                        line_thickness,
+                    ),
+                    pos_b: vec4(point.x as f32, point.y as f32, point.z as f32, line_thickness),
+                    lengths: vec4(point_a_length as f32, point_b_length as f32, 0.0, 0.0),
+                });
+            }
 
             last_point = Some(point);
         }
