@@ -18,13 +18,10 @@ struct VertexInput {
     point_a: vec4<f32>,
 
     @location(2)
-    length_so_far_a: vec4<f32>,
-
-    @location(3)
     point_b: vec4<f32>,
 
-    @location(4)
-    length_so_far_b: vec4<f32>,
+    @location(3)
+    lengths_so_far: vec4<f32>,
 };
 
 struct VertexOutput {
@@ -61,7 +58,7 @@ fn main_vs(input: VertexInput) -> VertexOutput {
     let clip = mix(clip0, clip1, vec4<f32>(input.pos.z));
 
     out.pos = vec4<f32>(clip.w * ((2.0 * final_pos) / globals.resolution.xy - 1.0), clip.z, clip.w);
-    out.dist = mix(input.length_so_far_a.x, input.length_so_far_b.x, input.pos.z);
+    out.dist = mix(input.lengths_so_far.x, input.lengths_so_far.y, input.pos.z);
 
     return out;
 }
