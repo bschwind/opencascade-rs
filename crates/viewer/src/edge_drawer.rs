@@ -6,7 +6,7 @@
 // Dashed Line Rendering - https://stackoverflow.com/a/54543267
 
 use bytemuck::{Pod, Zeroable};
-use glam::{vec4, Mat4, Vec3, Vec4};
+use glam::{vec4, Mat4, Vec4};
 use simple_game::graphics::GraphicsDevice;
 use wgpu::util::DeviceExt;
 
@@ -108,43 +108,24 @@ impl EdgeDrawer {
 
         render_pass.push_debug_group("Line drawer");
         {
-            let instance_buffer_size = rendered_line.vertex_buf.size();
-            let one_instance_size = std::mem::size_of::<LineVertex3>() as u64;
-
             render_pass.set_vertex_buffer(0, self.buffers.round_strip_geometry.slice(..));
-            render_pass.set_vertex_buffer(
-                1,
-                rendered_line.vertex_buf.slice(..(instance_buffer_size - one_instance_size)),
-            );
-            render_pass.set_vertex_buffer(2, rendered_line.vertex_buf.slice(one_instance_size..));
+            render_pass.set_vertex_buffer(1, rendered_line.instance_buf.slice(..));
 
             // Render dashed line strips
             if self.draw_back_edges {
                 render_pass.set_pipeline(&self.dashed_line_strip_pipeline);
                 render_pass.set_bind_group(0, &self.bind_groups.dashed_vertex_uniform, &[]);
 
-                let mut offset = 0usize;
                 let vertex_count = self.buffers.round_strip_geometry_len as u32;
-
-                for line_strip_size in &rendered_line.line_sizes {
-                    let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
-                    offset += line_strip_size;
-                    render_pass.draw(0..vertex_count, range);
-                }
+                render_pass.draw(0..vertex_count, 0..rendered_line.segment_count)
             }
 
             // Render solid line strips
             render_pass.set_pipeline(&self.solid_line_strip_pipeline);
             render_pass.set_bind_group(0, &self.bind_groups.solid_vertex_uniform, &[]);
 
-            let mut offset = 0usize;
             let vertex_count = self.buffers.round_strip_geometry_len as u32;
-
-            for line_strip_size in &rendered_line.line_sizes {
-                let range = (offset as u32)..(offset + line_strip_size - 1) as u32;
-                offset += line_strip_size;
-                render_pass.draw(0..vertex_count, range);
-            }
+            render_pass.draw(0..vertex_count, 0..rendered_line.segment_count)
         }
         render_pass.pop_debug_group();
     }
@@ -197,19 +178,12 @@ impl EdgeDrawer {
                         ],
                     },
                     wgpu::VertexBufferLayout {
-                        array_stride: std::mem::size_of::<LineVertex3>() as u64,
+                        array_stride: std::mem::size_of::<SegmentInstance>() as u64,
                         step_mode: wgpu::VertexStepMode::Instance,
                         attributes: &wgpu::vertex_attr_array![
                             1 => Float32x4, // Point A
-                            2 => Float32x4, // Length so far
-                        ],
-                    },
-                    wgpu::VertexBufferLayout {
-                        array_stride: std::mem::size_of::<LineVertex3>() as u64,
-                        step_mode: wgpu::VertexStepMode::Instance,
-                        attributes: &wgpu::vertex_attr_array![
-                            3 => Float32x4, // Point B
-                            4 => Float32x4, // Length so far
+                            2 => Float32x4, // Point B
+                            3 => Float32x4, // Lengths so far
                         ],
                     },
                 ],
@@ -346,39 +320,35 @@ impl EdgeDrawer {
 }
 
 pub struct LineBuilder {
-    round_line_strips: Vec<LineVertex3>,
-    round_line_strip_indices: Vec<usize>,
+    segment_instances: Vec<SegmentInstance>,
 }
 
 impl LineBuilder {
     pub fn new() -> Self {
-        Self { round_line_strips: Vec::new(), round_line_strip_indices: Vec::new() }
+        Self { segment_instances: Vec::new() }
     }
 
     /// A special-case where round line joins and caps are desired. This can be achieved
     /// with a single draw call.
-    pub fn add_round_line_strip(&mut self, positions: &[LineVertex3]) {
-        self.round_line_strips.extend_from_slice(positions);
-        self.round_line_strip_indices.push(positions.len());
+    pub fn add_round_line_strip(&mut self, positions: &[SegmentInstance]) {
+        self.segment_instances.extend_from_slice(positions);
     }
 
     pub fn build(self, device: &wgpu::Device) -> RenderedLine {
-        let vertex_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let instance_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Rendered line vertex buffer"),
-            contents: bytemuck::cast_slice(&self.round_line_strips),
+            contents: bytemuck::cast_slice(&self.segment_instances),
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
-        let line_sizes = self.round_line_strip_indices;
-
-        RenderedLine { vertex_buf, line_sizes }
+        RenderedLine { instance_buf, segment_count: self.segment_instances.len() as u32 }
     }
 }
 
 #[derive(Debug)]
 pub struct RenderedLine {
-    vertex_buf: wgpu::Buffer,
-    line_sizes: Vec<usize>,
+    instance_buf: wgpu::Buffer,
+    segment_count: u32,
 }
 
 #[repr(C)]
@@ -391,19 +361,13 @@ struct LineUniforms {
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Pod, Zeroable)]
-pub struct LineVertex3 {
+pub struct SegmentInstance {
     /// XYZ position of the line vertex, W = line thickness
-    pos: Vec4,
-    length_so_far: Vec4,
-}
-
-impl LineVertex3 {
-    pub fn new(pos: Vec3, thickness: f32, length_so_far: f32) -> Self {
-        Self {
-            pos: vec4(pos.x, pos.y, pos.z, thickness),
-            length_so_far: vec4(length_so_far, 0.0, 0.0, 0.0),
-        }
-    }
+    pub pos_a: Vec4,
+    /// XYZ position of the line vertex, W = line thickness
+    pub pos_b: Vec4,
+    /// X - length so far for pos_a, Y - length so far for pos_b
+    pub lengths: Vec4,
 }
 
 #[repr(C)]
