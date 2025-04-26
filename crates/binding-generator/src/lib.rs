@@ -1,3 +1,4 @@
+use regex::Regex;
 use std::{
     collections::HashSet,
     fs::{read_dir, read_to_string},
@@ -37,12 +38,15 @@ impl OcctPackage {
                 .replace("Standard_DEPRECATED", "//Standard_DEPRECATED")
                 .replace("Standard_EXPORT", "/*Standard_EXPORT*/");
 
+            let handle_regex = Regex::new(r"Handle\((?<inner>[^)]*)\)").unwrap();
+            let header_contents = handle_regex.replace(&header_contents, "Handle_${inner}");
+
             let mut parser = tree_sitter::Parser::new();
             let language = tree_sitter_cpp::LANGUAGE;
 
             parser.set_language(&language.into()).expect("Error loading C++ parser");
 
-            let tree = parser.parse(&header_contents, None).unwrap();
+            let tree = parser.parse(&*header_contents, None).unwrap();
 
             // Forward declare classes
             for_each_match(
@@ -56,19 +60,18 @@ impl OcctPackage {
                 },
             );
 
-            // Classes to bind to
-            for_each_match(
-                &queries::class(),
-                tree.root_node(),
-                header_contents.as_bytes(),
-                |_q, query_match| {
-                    let class_node = query_match.captures[0].node;
+            let src_bytes = header_contents.as_bytes();
 
-                    let new_class =
-                        OcctClass::new(&header_contents, class_node, header_contents.as_bytes());
-                    classes.push(new_class);
-                },
-            );
+            // Classes to bind to
+            for_each_match(&queries::class(), tree.root_node(), src_bytes, |query, query_match| {
+                let result = QueryResult { query, query_match, src_contents: src_bytes };
+                let class_node = result.capture_node("class");
+                let class_name = result.capture_text("class_name");
+
+                let new_class =
+                    OcctClass::new(class_name.to_string(), *class_node, header_contents.as_bytes());
+                classes.push(new_class);
+            });
         }
 
         dbg!(&forward_declare_classes);
@@ -80,13 +83,14 @@ impl OcctPackage {
 #[derive(Debug)]
 pub struct OcctClass {
     name: String,
+    functions: Vec<Function>,
     constructors: Vec<()>,
     methods: Vec<Function>,
     static_methods: Vec<()>,
 }
 
 impl OcctClass {
-    pub fn new(_src: &str, class_node: Node, header_contents: &[u8]) -> Self {
+    pub fn new(name: String, class_node: Node, header_contents: &[u8]) -> Self {
         // Build up regions of public and private access in the header file.
         let mut access_regions = vec![];
         for_each_match(
@@ -97,6 +101,7 @@ impl OcctClass {
                 let access_node = query_match.captures[0].node;
                 let access_text = query_match.captures[0].node.utf8_text(header_contents).unwrap();
                 let is_public = access_text == "public";
+
                 access_regions.push((is_public, access_node.start_position().row));
             },
         );
@@ -146,12 +151,7 @@ impl OcctClass {
             }
         });
 
-        Self {
-            name: "lol".to_string(),
-            constructors: vec![],
-            methods: vec![],
-            static_methods: vec![],
-        }
+        Self { name, functions, constructors: vec![], methods: vec![], static_methods: vec![] }
     }
 }
 
@@ -193,6 +193,11 @@ impl<'a> QueryResult<'a> {
             .node
             .utf8_text(self.src_contents)
             .unwrap()
+    }
+
+    fn capture_node(&self, name: &str) -> &'a Node {
+        let index = self.query.capture_index_for_name(name).unwrap();
+        &self.query_match.captures.iter().find(|c| c.index == index).unwrap().node
     }
 
     fn capture_text_opt(&self, name: &str) -> Option<&'a str> {
