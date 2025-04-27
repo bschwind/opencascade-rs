@@ -14,6 +14,7 @@ pub mod ffi {
         TopAbs_SHAPE,
     }
 
+    #[derive(Debug)]
     #[repr(u32)]
     pub enum TopAbs_Orientation {
         TopAbs_FORWARD,
@@ -462,11 +463,13 @@ pub mod ffi {
 
         pub fn IsNull(self: &TopoDS_Shape) -> bool;
         pub fn IsEqual(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
+        pub fn IsSame(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
         pub fn ShapeType(self: &TopoDS_Shape) -> TopAbs_ShapeEnum;
 
         type TopAbs_Orientation;
         pub fn Orientation(self: &TopoDS_Shape) -> TopAbs_Orientation;
         pub fn Orientation(self: &TopoDS_Face) -> TopAbs_Orientation;
+        pub fn Orientation(self: &TopoDS_Edge) -> TopAbs_Orientation;
 
         // Compound Shapes
         type TopoDS_Compound;
@@ -898,9 +901,14 @@ pub mod ffi {
         ) -> UniquePtr<BRepAlgoAPI_Cut>;
 
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
+        // TODO pub fn Shape1(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepAlgoAPI_Cut>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Cut) -> bool;
         pub fn Generated<'a>(
+            self: Pin<&'a mut BRepAlgoAPI_Cut>,
+            shape: &'a TopoDS_Shape,
+        ) -> &'a TopTools_ListOfShape;
+        pub fn Modified<'a>(
             self: Pin<&'a mut BRepAlgoAPI_Cut>,
             shape: &'a TopoDS_Shape,
         ) -> &'a TopTools_ListOfShape;
@@ -1068,6 +1076,14 @@ pub mod ffi {
 
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_Transform>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepBuilderAPI_Transform>, progress: &Message_ProgressRange);
+        pub fn Generated<'a>(
+            self: Pin<&'a mut BRepBuilderAPI_Transform>,
+            shape: &'a TopoDS_Shape,
+        ) -> &'a TopTools_ListOfShape;
+        pub fn Modified<'a>(
+            self: Pin<&'a mut BRepBuilderAPI_Transform>,
+            shape: &'a TopoDS_Shape,
+        ) -> &'a TopTools_ListOfShape;
         pub fn IsDone(self: &BRepBuilderAPI_Transform) -> bool;
 
         type BRepBuilderAPI_GTransform;
@@ -1098,6 +1114,8 @@ pub mod ffi {
         pub fn ExplorerCurrentShape(explorer: &TopExp_Explorer) -> UniquePtr<TopoDS_Shape>;
         pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
 
+        pub fn ShapeAnalysis_Edge_FirstVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
+        pub fn ShapeAnalysis_Edge_LastVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
         pub fn TopExp_FirstVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
         pub fn TopExp_LastVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
         pub fn TopExp_EdgeVertices(
@@ -1123,6 +1141,8 @@ pub mod ffi {
             last: &mut f64,
         ) -> UniquePtr<HandleGeomCurve>;
         pub fn BRep_Tool_Pnt(vertex: &TopoDS_Vertex) -> UniquePtr<gp_Pnt>;
+        //pub fn BRep_Tool_HasContinuity(e: &TopoDS_Edge, f1: &TopoDS_Face, f2: &TopoDS_Face) -> bool;
+        //pub fn BRep_Tool_Continuity(e: &TopoDS_Edge, f1: &TopoDS_Face, f2: &TopoDS_Face) -> i32;
         pub fn BRep_Tool_Triangulation(
             face: &TopoDS_Face,
             location: Pin<&mut TopLoc_Location>,
@@ -1371,9 +1391,11 @@ pub mod ffi {
             wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
         );
 
+/*
         type Handle_TDF_Data;
         type TDF_Label;
         type TNaming_Builder;
+        type TDF_ChildIterator;
 
         pub fn new_Handle_TDF_Data() -> UniquePtr<Handle_TDF_Data>;
 
@@ -1383,6 +1405,7 @@ pub mod ffi {
 
         pub fn TDF_Label_GetShape(lab: &TDF_Label) -> UniquePtr<TopoDS_Shape>;
         pub fn TDF_Label_Displace(lab: &TDF_Label, loc: &TopLoc_Location);
+        pub fn TDF_Label_Subtract(root: &TDF_Label, lab: &TDF_Label, other: &TopoDS_Shape);
         pub fn TDF_Label_Dump(lab: &TDF_Label);
 
         #[cxx_name = "construct_unique"]
@@ -1391,6 +1414,33 @@ pub mod ffi {
         ) -> UniquePtr<TNaming_Builder>;
 
         pub fn Generated(self: Pin<&mut TNaming_Builder>, shape: &TopoDS_Shape);
+
+        pub fn TDF_ChildIterator_ctor(lab: &TDF_Label, allLevels: bool) -> UniquePtr<TDF_ChildIterator>;
+        pub fn TDF_ChildIterator_More(it: &TDF_ChildIterator) -> bool;
+        pub fn TDF_ChildIterator_Next(it: Pin<&mut TDF_ChildIterator>);
+        pub fn TDF_ChildIterator_Value(it: &TDF_ChildIterator) -> UniquePtr<TDF_Label>;
+
+        pub fn TDF_Label_AddIntegerAttribute(lab: &TDF_Label, v: i32);
+*/
+
+/*
+inline Standard_Boolean
+TDF_Label_HasIntegerAttribute(const TDF_Label &lab) {
+    return lab.IsAttribute(TDataStd_Integer::GetID());
+}
+
+inline Standard_Integer
+TDF_Label_GetIntegerAttribute(const TDF_Label &lab) {
+    Handle(TDataStd_Integer) ResultNS;
+    lab.FindAttribute(TDataStd_Integer::GetID(), ResultNS);
+    return ResultNS->Get();
+}
+
+inline void
+TDF_Label_AddIntegerAttribute(const TDF_Label &lab, Standard_Integer v) {
+    TDataStd_Integer::Set(lab, v);
+}
+*/
 
     }
 }
