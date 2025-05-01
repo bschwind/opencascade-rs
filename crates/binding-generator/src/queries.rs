@@ -29,22 +29,42 @@ pub fn functions() -> String {
     (
         (field_declaration_list
             [
-                (field_declaration
-                     (storage_class_specifier)? @storage
-                     [(type_identifier) (primitive_type)] @return_type
-                     (function_declarator
-                         declarator: (field_identifier) @func_name
-                     ) @func
+                (function_definition)
+                (_
+                    (function_declarator)
                 )
-                (function_definition
-                    (storage_class_specifier)? @storage
-                    [(type_identifier) (primitive_type)] @return_type
-                    (function_declarator
-                        declarator: (field_identifier) @func_name
-                    ) @func
+                (_
+                    (_
+                        (function_declarator)
+                    )
                 )
-            ] @method
+            ] @function
         ) @fields
+    )
+    "
+    .to_string()
+}
+
+pub fn function_definition() -> String {
+    "
+    (
+            (storage_class_specifier)? @storage_specifier
+            ([(type_identifier) (primitive_type)])? @type
+            [
+                (function_declarator
+                    (identifier) @name
+                    (parameter_list) @params
+                    (type_qualifier)? @is_const
+                )
+                (call_expression
+                    (identifier) @name
+                    (argument_list) @params
+                )
+                (init_declarator
+                    (identifier) @name
+                    (argument_list) @params
+                )
+            ]
     )
     "
     .to_string()

@@ -74,7 +74,7 @@ impl OcctPackage {
             });
         }
 
-        dbg!(&forward_declare_classes);
+        // dbg!(&classes);
 
         Self { name: package_name.into(), forward_declare_classes, classes, enums }
     }
@@ -112,7 +112,7 @@ impl OcctClass {
 
         // Only extract public functions
         for_each_match(&queries::functions(), class_node, header_contents, |query, query_match| {
-            let index = query.capture_index_for_name("method").unwrap();
+            let index = query.capture_index_for_name("function").unwrap();
             let func_node = query_match.captures.iter().find(|c| c.index == index).unwrap().node;
 
             let result = QueryResult { query, query_match, src_contents: header_contents };
@@ -127,27 +127,10 @@ impl OcctClass {
                 .unwrap_or(false);
 
             if is_public {
-                let func_name = result.capture_text("func_name");
-                let storage_class = result.capture_text_opt("storage");
-                let func_text = result.capture_text("method");
-                let return_type = result.capture_text("return_type");
+                let function_text = result.capture_text("function");
+                let function = Function::new(function_text, &name);
 
-                dbg!(storage_class);
-                dbg!(func_name);
-                dbg!(return_type);
-                dbg!(func_text);
-
-                functions.push(Function {
-                    name: func_name.to_string(),
-                    return_type: if return_type == "void" {
-                        None
-                    } else {
-                        Some(return_type.to_string())
-                    },
-                    args: vec![],
-                    function_type: FunctionType::Constructor,
-                    is_virtual: false,
-                });
+                functions.push(function);
             }
         });
 
@@ -166,6 +149,7 @@ fn for_each_match(
     src_contents: &[u8],
     mut func: impl FnMut(&Query, &QueryMatch),
 ) {
+    // TODO(bschwind) - Query construction is slow, cache this
     let query = Query::new(&tree_sitter_cpp::LANGUAGE.into(), query_str).unwrap();
     let mut cursor = QueryCursor::new();
 
@@ -224,4 +208,57 @@ pub struct Function {
     args: Vec<String>,
     function_type: FunctionType,
     is_virtual: bool,
+}
+
+impl Function {
+    pub fn new(function_text: &str, class_name: &str) -> Self {
+        let mut parser = tree_sitter::Parser::new();
+        let language = tree_sitter_cpp::LANGUAGE;
+
+        parser.set_language(&language.into()).expect("Error loading C++ parser");
+
+        let tree = parser.parse(function_text, None).unwrap();
+
+        let mut storage_class = None;
+        let mut function_name = None;
+        let mut return_type = None;
+
+        for_each_match(
+            &queries::function_definition(),
+            tree.root_node(),
+            function_text.as_bytes(),
+            |query, query_match| {
+                let result =
+                    QueryResult { query, query_match, src_contents: function_text.as_bytes() };
+
+                storage_class =
+                    result.capture_text_opt("storage_specifier").map(|sc| sc.to_string());
+                function_name = Some(result.capture_text("name").to_string());
+                return_type = result.capture_text_opt("type").map(|t| t.to_string());
+            },
+        );
+
+        let function_name = function_name.unwrap();
+
+        // TODO(bschwind) - Brittle, but may be fine for now.
+        let is_virtual = function_text.contains("virtual");
+        let is_static = storage_class == Some("static".to_string());
+        let is_constructor = function_name == class_name;
+
+        let function_type = if is_constructor {
+            FunctionType::Constructor
+        } else if is_static {
+            FunctionType::Static
+        } else {
+            FunctionType::Method
+        };
+
+        Self {
+            name: function_name,
+            return_type: if return_type == Some("void".to_string()) { None } else { return_type },
+            args: vec![],
+            function_type,
+            is_virtual,
+        }
+    }
 }
