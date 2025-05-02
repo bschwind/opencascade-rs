@@ -14,10 +14,10 @@ notify = "6"
 opencascade = { version = "0.2", path = "../opencascade", default-features = false }
 simple-game = { git = "https://github.com/bschwind/simple-game.git", rev = "19f800cf5c29a41e44caaab2baf62b5cbddb5ce2" }
 smaa = "0.16"
-wasmtime = "20"
+wasmtime = "32"
 wgpu = "24"
 winit = { version = "0.30", features = ["rwh_05"] }
-wit-component = { version = "0.209", default-features = false }
+wit-component = { version = "0.229", default-features = false }
 
 [build-dependencies]
 naga = { version = "24", features = ["wgsl-in"] }

@@ -6,7 +6,7 @@ Use [cargo watch](https://crates.io/crates/cargo-watch) to listen for file chang
 
 ```
 # From the project root
-$ cargo watch -x "build -p wasm-example --release --target wasm32-unknown-unknown"
+$ cargo watch --delay 0 -x "build -p wasm-example --release --target wasm32-unknown-unknown"
 ```
 
 Run the viewer app with:
