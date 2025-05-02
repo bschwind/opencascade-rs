@@ -160,6 +160,23 @@ fn for_each_match(
     }
 }
 
+fn run_single_match(
+    query_str: &str,
+    node: Node,
+    src_contents: &[u8],
+    mut func: impl FnMut(&Query, &QueryMatch),
+) {
+    // TODO(bschwind) - Query construction is slow, cache this
+    let query = Query::new(&tree_sitter_cpp::LANGUAGE.into(), query_str).unwrap();
+    let mut cursor = QueryCursor::new();
+
+    let mut matches = cursor.matches(&query, node, src_contents);
+
+    if let Some(query_match) = matches.next() {
+        func(&query, query_match);
+    }
+}
+
 struct QueryResult<'a> {
     query: &'a Query,
     query_match: &'a QueryMatch<'a, 'a>,
@@ -222,8 +239,9 @@ impl Function {
         let mut storage_class = None;
         let mut function_name = None;
         let mut return_type = None;
+        let mut params = None;
 
-        for_each_match(
+        run_single_match(
             &queries::function_definition(),
             tree.root_node(),
             function_text.as_bytes(),
@@ -235,6 +253,7 @@ impl Function {
                     result.capture_text_opt("storage_specifier").map(|sc| sc.to_string());
                 function_name = Some(result.capture_text("name").to_string());
                 return_type = result.capture_text_opt("type").map(|t| t.to_string());
+                params = Some(result.capture_text("params").to_string());
             },
         );
 
