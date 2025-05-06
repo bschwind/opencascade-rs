@@ -34,6 +34,12 @@ impl Section {
     }
 }
 
+/// Creates a `Section` from two shapes, performs the intersection, and returns the resulting edges.
+pub fn edges(target: &Shape, tool: &Shape) -> Vec<Shape> {
+    let section = Section::new(target, tool);
+    section.section_edges()
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

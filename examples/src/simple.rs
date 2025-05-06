@@ -3,7 +3,7 @@ use glam::dvec3;
 use opencascade::{
     angle::Angle::Radians,
     primitives::{Compound, IntoShape, Shape},
-    section::Section,
+    section,
     workplane::Workplane,
 };
 
@@ -29,7 +29,7 @@ pub fn shape() -> Shape {
         .into_shape();
 
     // Compute the intersection edges between the swept shape and the transformed rectangle
-    let edges = Section::new(&shape, &p).section_edges();
+    let edges = section::edges(&shape, &p);
 
     // Combine the intersection edges, the swept shape, and the rectangle's edges into a compound shape
     Compound::from_shapes(
