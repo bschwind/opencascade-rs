@@ -516,3 +516,7 @@ inline const TopoDS_Shape &TopTools_HSequenceOfShape_value(const HandleTopTools_
                                                            Standard_Integer index) {
   return handle->Value(index);
 }
+
+// BRep Algo API Casts
+
+inline std::unique_ptr<BRepAlgoAPI_BuilderAlgo> cast(std::unique_ptr<BRepAlgoAPI_Section> section) { return section; }
