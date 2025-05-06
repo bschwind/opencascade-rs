@@ -37,7 +37,7 @@ mod test {
 
         let mut s = Section::new(&a, &b);
         s.build(None);
-        let mut ba = ffi::cast(s.inner);
+        let mut ba = ffi::cast_section_to_builderalgo(s.inner);
         assert_eq!(ba.pin_mut().SectionEdges().Size(), 1);
 
         let v = ffi::shape_list_to_vector(ba.pin_mut().SectionEdges());
