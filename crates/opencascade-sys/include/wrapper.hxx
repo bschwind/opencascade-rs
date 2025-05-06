@@ -517,6 +517,9 @@ inline const TopoDS_Shape &TopTools_HSequenceOfShape_value(const HandleTopTools_
   return handle->Value(index);
 }
 
-// BRep Algo API Casts
-
-inline std::unique_ptr<BRepAlgoAPI_BuilderAlgo> cast(std::unique_ptr<BRepAlgoAPI_Section> section) { return section; }
+// BRep Algo API
+inline std::unique_ptr<BRepAlgoAPI_BuilderAlgo>
+cast_section_to_builderalgo(std::unique_ptr<BRepAlgoAPI_Section> section) {
+  return section;
+}
+// namespace BRepAlgoAPI
