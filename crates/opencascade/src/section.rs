@@ -1,4 +1,4 @@
-use crate::primitives::Face;
+use crate::primitives::{Face, Shape};
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
@@ -21,13 +21,27 @@ impl Section {
 
         self.inner.pin_mut().Build(mpr);
     }
+
+    pub fn section_edges(self) -> Vec<Shape> {
+        // TODO: Given that the OCCT name is "SectionEdges", can we return a Vec<Edge>?
+
+        let mut ba = ffi::cast_section_to_builderalgo(self.inner);
+        let edges = ffi::shape_list_to_vector(ba.pin_mut().SectionEdges());
+
+        let mut vec = vec![];
+
+        for e in edges.iter() {
+            vec.push(Shape::from_shape(e));
+        }
+
+        vec
+    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::primitives::Edge;
-    use crate::workplane::Workplane;
+    use crate::{primitives::ShapeType, workplane::Workplane};
     use glam::dvec3;
 
     #[test]
@@ -37,14 +51,22 @@ mod test {
 
         let mut s = Section::new(&a, &b);
         s.build(None);
-        let mut ba = ffi::cast_section_to_builderalgo(s.inner);
-        assert_eq!(ba.pin_mut().SectionEdges().Size(), 1);
 
-        let v = ffi::shape_list_to_vector(ba.pin_mut().SectionEdges());
-        let itm = v.get(0).unwrap();
-        assert_eq!(itm.ShapeType(), ffi::TopAbs_ShapeEnum::TopAbs_EDGE);
-        let edge = Edge::from_edge(ffi::TopoDS_cast_to_edge(itm));
-        assert_eq!(edge.start_point(), dvec3(0., -0.5, 0.));
-        assert_eq!(edge.end_point(), dvec3(0., 0.5, 0.));
+        let edges = s.section_edges();
+        assert_eq!(edges.len(), 1);
+
+        let itm = edges.get(0);
+
+        assert!(itm.is_some());
+
+        let s = itm.unwrap();
+
+        assert_eq!(s.shape_type(), ShapeType::Edge);
+
+        for e in s.edges() {
+            // There should be only one edge
+            assert_eq!(e.start_point(), dvec3(0., -0.5, 0.));
+            assert_eq!(e.end_point(), dvec3(0., 0.5, 0.));
+        }
     }
 }
