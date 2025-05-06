@@ -26,7 +26,9 @@ impl Section {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::primitives::Edge;
     use crate::workplane::Workplane;
+    use glam::dvec3;
 
     #[test]
     fn section_new() {
@@ -37,5 +39,12 @@ mod test {
         s.build(None);
         let mut ba = ffi::cast(s.inner);
         assert_eq!(ba.pin_mut().SectionEdges().Size(), 1);
+
+        let v = ffi::shape_list_to_vector(ba.pin_mut().SectionEdges());
+        let itm = v.get(0).unwrap();
+        assert_eq!(itm.ShapeType(), ffi::TopAbs_ShapeEnum::TopAbs_EDGE);
+        let edge = Edge::from_edge(ffi::TopoDS_cast_to_edge(itm));
+        assert_eq!(edge.start_point(), dvec3(0., -0.5, 0.));
+        assert_eq!(edge.end_point(), dvec3(0., 0.5, 0.));
     }
 }
