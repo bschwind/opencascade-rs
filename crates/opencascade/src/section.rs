@@ -1,4 +1,4 @@
-use crate::primitives::{Face, Shape};
+use crate::primitives::Shape;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
@@ -6,11 +6,11 @@ pub struct Section {
     pub(crate) inner: UniquePtr<ffi::BRepAlgoAPI_Section>,
 }
 impl Section {
-    pub fn new(s1: &Face, s2: &Face) -> Section {
+    pub fn new(target: &Shape, tool: &Shape) -> Section {
         Section {
             inner: ffi::BRepAlgoAPI_Section_ctor(
-                ffi::cast_face_to_shape(s1.inner.as_ref().expect("s1 was null")),
-                ffi::cast_face_to_shape(s2.inner.as_ref().expect("s2 was null")),
+                target.inner.as_ref().expect("Target was null"),
+                tool.inner.as_ref().expect("Tool was null"),
             ),
         }
     }
@@ -41,7 +41,10 @@ impl Section {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::{primitives::ShapeType, workplane::Workplane};
+    use crate::{
+        primitives::{IntoShape, ShapeType},
+        workplane::Workplane,
+    };
     use glam::dvec3;
 
     #[test]
@@ -49,7 +52,7 @@ mod test {
         let a = Workplane::xy().rect(1., 1.).to_face();
         let b = Workplane::yz().rect(1., 1.).to_face();
 
-        let mut s = Section::new(&a, &b);
+        let mut s = Section::new(&a.into_shape(), &b.into_shape());
         s.build(None);
 
         let edges = s.section_edges();
