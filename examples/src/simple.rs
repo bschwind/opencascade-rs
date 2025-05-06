@@ -8,23 +8,32 @@ use opencascade::{
 };
 
 pub fn shape() -> Shape {
+    // Create a wire by sketching two arcs on the XY plane
     let s = Workplane::xy()
         .sketch()
         .arc((0., -2.), (1., -1.), (0., 0.))
         .arc((0., 0.), (-1., 1.), (0., 2.))
         .wire();
 
+    // Create a circular face on the YZ plane
     let f = Workplane::yz().circle(0., 0., 0.5).to_face();
 
+    // Sweep the circular face along the wire to create a 3D shape
     let shape = f.sweep_along(&s).into_shape();
 
+    // Create a cutting plane and rotate
     let p = Workplane::yz()
         .rect(10., 10.)
-        .transform(dvec3(0., 0., 0.), dvec3(0., 0., 1.), Radians(f64::consts::PI / 6.))
+        .transform(dvec3(0., 0., 0.), dvec3(0., 0., 1.), Radians(f64::consts::PI / 8.))
         .to_face()
         .into_shape();
 
+    // Compute the intersection edges between the swept shape and the transformed rectangle
     let edges = Section::new(&shape, &p).section_edges();
 
-    Compound::from_shapes(vec![edges, vec![shape], vec![p]].iter().flatten()).into_shape()
+    // Combine the intersection edges, the swept shape, and the rectangle's edges into a compound shape
+    Compound::from_shapes(
+        vec![edges, vec![shape], p.edges().map(|e| e.into_shape()).collect()].iter().flatten(),
+    )
+    .into_shape()
 }
