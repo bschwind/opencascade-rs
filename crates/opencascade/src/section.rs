@@ -2,10 +2,12 @@ use crate::primitives::Shape;
 use cxx::UniquePtr;
 use opencascade_sys::ffi;
 
+/// A wrapper around the `BRepAlgoAPI_Section` class.
 pub struct Section {
     pub(crate) inner: UniquePtr<ffi::BRepAlgoAPI_Section>,
 }
 impl Section {
+    /// Create a new `Section` to intersect `target` by `tool`.
     pub fn new(target: &Shape, tool: &Shape) -> Section {
         Section {
             inner: ffi::BRepAlgoAPI_Section_ctor(
@@ -15,13 +17,7 @@ impl Section {
         }
     }
 
-    pub fn build(&mut self, msg_prog: Option<&ffi::Message_ProgressRange>) {
-        let mpr =
-            if msg_prog.is_some() { msg_prog.unwrap() } else { &ffi::Message_ProgressRange_ctor() };
-
-        self.inner.pin_mut().Build(mpr);
-    }
-
+    /// Get the edges of the resulting intersection.
     pub fn section_edges(self) -> Vec<Shape> {
         // TODO: Given that the OCCT name is "SectionEdges", can we return a Vec<Edge>?
 
@@ -52,8 +48,7 @@ mod test {
         let a = Workplane::xy().rect(1., 1.).to_face();
         let b = Workplane::yz().rect(1., 1.).to_face();
 
-        let mut s = Section::new(&a.into_shape(), &b.into_shape());
-        s.build(None);
+        let s = Section::new(&a.into_shape(), &b.into_shape());
 
         let edges = s.section_edges();
         assert_eq!(edges.len(), 1);
