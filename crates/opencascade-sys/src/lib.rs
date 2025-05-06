@@ -873,8 +873,10 @@ pub mod ffi {
         pub fn Build(self: Pin<&mut BRepOffsetAPI_ThruSections>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepOffsetAPI_ThruSections) -> bool;
 
-        // Boolean Operations
-        type BRepAlgoAPI_Fuse;
+        pub type BRepAlgoAPI_BuilderAlgo;
+        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_BuilderAlgo>) -> &TopTools_ListOfShape;
+
+        pub type BRepAlgoAPI_Fuse;
         type BOPAlgo_GlueEnum;
 
         #[cxx_name = "construct_unique"]
@@ -930,6 +932,9 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepAlgoAPI_Section>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Section) -> bool;
+        pub fn cast_section_to_builderalgo(
+            section: UniquePtr<BRepAlgoAPI_Section>,
+        ) -> UniquePtr<BRepAlgoAPI_BuilderAlgo>;
 
         // Geometric processor
         type gp_Ax1;

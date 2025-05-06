@@ -4,6 +4,7 @@ pub mod angle;
 pub mod kicad;
 pub mod mesh;
 pub mod primitives;
+pub mod section;
 pub mod workplane;
 
 mod law_function;
