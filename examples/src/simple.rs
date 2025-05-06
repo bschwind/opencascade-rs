@@ -5,7 +5,7 @@ use opencascade::{
 };
 
 pub fn shape() -> Shape {
-    let f = Workplane::xy().rect(1., 2.);
+    let f = Workplane::xy().rect(1., 2.).to_face();
 
     f.extrude(DVec3::new(0., 0., 3.)).into_shape()
 }
