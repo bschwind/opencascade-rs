@@ -59,7 +59,7 @@ mod test {
         let edges = s.section_edges();
         assert_eq!(edges.len(), 1);
 
-        let itm = edges.get(0);
+        let itm = edges.first();
 
         assert!(itm.is_some());
 

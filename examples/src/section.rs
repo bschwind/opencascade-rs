@@ -32,7 +32,7 @@ pub fn shape() -> Shape {
     let edges = section::edges(&shape, &p);
 
     // Combine the intersection edges, the swept shape, and the rectangle's edges into a compound shape
-    let all_shapes = vec![
+    let all_shapes = [
         edges,                                       // Section edges
         vec![shape],                                 // The shape, run with this line commented out
         p.edges().map(|e| e.into_shape()).collect(), // The edges of the cutting plane
