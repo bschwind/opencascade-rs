@@ -14,6 +14,9 @@ use wasmtime::{
 
 wasmtime::component::bindgen!({
     path: "../model-api/wit",
+
+    // Host functions should return Result<>
+    trappable_imports: true,
     // This is where we map the types we declared in the WIT file
     // to their corresponding host type, which will be managed as
     // a wasmtime "Resource".
@@ -477,7 +480,7 @@ impl WasmEngine {
     pub fn shape(&self) -> Result<Shape> {
         let mut store = Store::new(&self.engine, ModelHost::new());
 
-        let (bindings, _) = ModelWorld::instantiate(&mut store, &self.component, &self.linker)?;
+        let bindings = ModelWorld::instantiate(&mut store, &self.component, &self.linker)?;
 
         bindings.call_init_model(&mut store)?;
         let shape = bindings.call_run(&mut store)?;
