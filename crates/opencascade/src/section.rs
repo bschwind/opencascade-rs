@@ -63,10 +63,9 @@ mod test {
 
         assert_eq!(s.shape_type(), ShapeType::Edge);
 
-        for e in s.edges() {
-            // There should be only one edge
-            assert_eq!(e.start_point(), dvec3(0., -0.5, 0.));
-            assert_eq!(e.end_point(), dvec3(0., 0.5, 0.));
-        }
+        let e = s.edges().next().expect("There should be only one edge");
+
+        assert_eq!(e.start_point(), dvec3(0., -0.5, 0.));
+        assert_eq!(e.end_point(), dvec3(0., 0.5, 0.));
     }
 }
