@@ -51,8 +51,8 @@ mod test {
 
     #[test]
     fn section_new() {
-        let a = Workplane::xy().rect(1., 1.).to_face();
-        let b = Workplane::yz().rect(1., 1.).to_face();
+        let a = Workplane::xy().rect(1.0, 1.0).to_face();
+        let b = Workplane::yz().rect(1.0, 1.0).to_face();
 
         let s = Section::new(&a.into_shape(), &b.into_shape());
 
@@ -65,7 +65,7 @@ mod test {
 
         let e = s.edges().next().expect("There should be only one edge");
 
-        assert_eq!(e.start_point(), dvec3(0., -0.5, 0.));
-        assert_eq!(e.end_point(), dvec3(0., 0.5, 0.));
+        assert_eq!(e.start_point(), dvec3(0.0, -0.5, 0.0));
+        assert_eq!(e.end_point(), dvec3(0.0, 0.5, 0.0));
     }
 }
