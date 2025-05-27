@@ -59,11 +59,7 @@ mod test {
         let edges = s.section_edges();
         assert_eq!(edges.len(), 1);
 
-        let itm = edges.first();
-
-        assert!(itm.is_some());
-
-        let s = itm.unwrap();
+        let s = edges.first().unwrap();
 
         assert_eq!(s.shape_type(), ShapeType::Edge);
 
