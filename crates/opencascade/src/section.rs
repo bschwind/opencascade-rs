@@ -14,8 +14,6 @@ impl Section {
 
     /// Get the edges of the resulting intersection.
     pub fn section_edges(self) -> Vec<Shape> {
-        // TODO: Given that the OCCT name is "SectionEdges", can we return a Vec<Edge>?
-
         let mut ba = ffi::cast_section_to_builderalgo(self.inner);
         let edges = ffi::shape_list_to_vector(ba.pin_mut().SectionEdges());
 
