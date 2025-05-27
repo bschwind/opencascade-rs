@@ -11,8 +11,8 @@ impl Section {
     pub fn new(target: &Shape, tool: &Shape) -> Section {
         Section {
             inner: ffi::BRepAlgoAPI_Section_ctor(
-                target.inner.as_ref().expect("Target was null"),
-                tool.inner.as_ref().expect("Tool was null"),
+                &target.inner,
+                &tool.inner,
             ),
         }
     }
