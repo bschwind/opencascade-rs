@@ -1,6 +1,7 @@
 #include "rust/cxx.h"
 #include <BOPAlgo_GlueEnum.hxx>
 #include <BRepAdaptor_Curve.hxx>
+#include <BRepAlgo.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
@@ -63,6 +64,7 @@
 #include <Poly_Connect.hxx>
 #include <STEPControl_Reader.hxx>
 #include <STEPControl_Writer.hxx>
+#include <ShapeAnalysis_Edge.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
@@ -84,6 +86,19 @@
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
+
+// OCAF stuff
+#include <TDF_Data.hxx>
+#include <TDF_Label.hxx>
+#include <TDF_LabelMap.hxx>
+#include <TDF_ChildIterator.hxx>
+#include <TDF_MapIteratorOfLabelMap.hxx>
+#include <TNaming_NamedShape.hxx>
+#include <TNaming_Selector.hxx>
+#include <TNaming_Tool.hxx>
+#include <TNaming_Builder.hxx>
+#include <TNaming.hxx>
+#include <TDataStd_Integer.hxx>
 
 // Generic template constructor
 template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
@@ -117,6 +132,207 @@ typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
 inline std::unique_ptr<Handle_TColgpHArray1OfPnt>
 new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(std::unique_ptr<TColgp_HArray1OfPnt> array) {
   return std::unique_ptr<Handle_TColgpHArray1OfPnt>(new Handle_TColgpHArray1OfPnt(array.release()));
+}
+
+/*
+typedef opencascade::handle<TDF_Data> Handle_TDF_Data;
+
+inline std::unique_ptr<Handle_TDF_Data>
+new_Handle_TDF_Data() {
+  return std::unique_ptr<Handle_TDF_Data>(new Handle_TDF_Data(new TDF_Data()));
+}
+
+inline std::unique_ptr<TDF_Label>
+Handle_TDF_Data_Root(const Handle_TDF_Data &h) {
+  return std::unique_ptr<TDF_Label>(new TDF_Label(h->Root()));
+}
+
+inline std::unique_ptr<TDF_Label>
+TDF_Label_FindChild(const TDF_Label &h, const Standard_Integer tag, const Standard_Boolean create) {
+  return std::unique_ptr<TDF_Label>(new TDF_Label(h.FindChild(tag, create)));
+}
+
+inline std::unique_ptr<TDF_ChildIterator>
+TDF_ChildIterator_ctor(const TDF_Label &lab, const Standard_Boolean allLevels) {
+  return std::unique_ptr<TDF_ChildIterator>(new TDF_ChildIterator(lab, allLevels));
+}
+
+inline Standard_Boolean
+TDF_ChildIterator_More(const TDF_ChildIterator& it)
+{
+  return it.More();
+}
+
+inline void
+TDF_ChildIterator_Next(TDF_ChildIterator& it)
+{
+  it.Next();
+}
+
+inline std::unique_ptr<TDF_Label>
+TDF_ChildIterator_Value(const TDF_ChildIterator& it)
+{
+  return std::unique_ptr<TDF_Label>(new TDF_Label(it.Value()));
+}
+
+inline Standard_Boolean
+TDF_Label_HasIntegerAttribute(const TDF_Label &lab) {
+    return lab.IsAttribute(TDataStd_Integer::GetID());
+}
+
+inline Standard_Integer
+TDF_Label_GetIntegerAttribute(const TDF_Label &lab) {
+    Handle(TDataStd_Integer) ResultNS;
+    lab.FindAttribute(TDataStd_Integer::GetID(), ResultNS);
+    return ResultNS->Get();
+}
+
+inline void
+TDF_Label_AddIntegerAttribute(const TDF_Label &lab, Standard_Integer v) {
+    TDataStd_Integer::Set(lab, v);
+}
+
+// TODO maybe FindAttribute should be exposed explicitly
+
+inline std::unique_ptr<TopoDS_Shape> 
+TopoDS_Shape_Moved(const TopoDS_Shape &shape, const TopLoc_Location& loc, bool raise_exception) {
+    return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(shape.Moved(loc, raise_exception)));
+}
+
+inline std::unique_ptr<TopoDS_Shape> 
+TDF_Label_GetShape(const TDF_Label &lab) {
+    Handle(TNaming_NamedShape) ResultNS;
+    lab.FindAttribute(TNaming_NamedShape::GetID(), ResultNS);
+    const TopoDS_Shape& s = ResultNS->Get();
+    return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(s));
+}
+
+inline void 
+TDF_Label_Dump(const TDF_Label& lab) {
+    lab.Dump(std::cout);
+}
+
+inline void
+TDF_Label_Displace(const TDF_Label &lab, const TopLoc_Location& loc) {
+    TNaming::Displace(lab, loc, Standard_True);//with oldshapes
+}
+*/
+
+// TODO remove this and expose all the things it calls at finer granularity
+inline void 
+unused_TDF_Label_Subtract(const TDF_Label& aLabel, const TDF_Label &lab, const TopoDS_Shape& TOOL)
+{
+    Handle(TNaming_NamedShape) ObjectNS;
+    lab.FindAttribute(TNaming_NamedShape::GetID(), ObjectNS);
+    TopoDS_Shape OBJECT = ObjectNS->Get();
+
+    TopTools_MapOfShape View;
+    TopExp_Explorer ShapeExplorer (OBJECT, TopAbs_EDGE);
+    BRepAlgoAPI_Cut mkCUT (OBJECT, TOOL);
+
+    //TDF_Label CutLabel = aLabel.FindChild(5); // TODO CutPOS 5
+
+  if (!mkCUT.IsDone()) {
+    //cout << "CUT: Algorithm failed" << endl;
+    return;
+  } else
+    {
+      TopTools_ListOfShape Larg;
+      Larg.Append(OBJECT);
+      Larg.Append(TOOL);
+
+      if (!BRepAlgo::IsValid(Larg, mkCUT.Shape(), Standard_True, Standard_False)) {
+
+        //cout << "CUT: Result is not valid" << endl;
+        return;
+      } else
+	{
+	 // push CUT results in DF as modification of Box1
+	  //TDF_Label Modified      = CutLabel.FindChild(2);
+	  //TDF_Label Deleted       = CutLabel.FindChild(3);
+	  //TDF_Label Intersections = CutLabel.FindChild(4);
+	  //TDF_Label NewFaces      = CutLabel.FindChild(5);
+
+	  TopoDS_Shape newS1 = mkCUT.Shape();
+	  const TopoDS_Shape& ObjSh = mkCUT.Shape1();
+
+	  //push in the DF result of CUT
+	  TNaming_Builder CutBuilder (lab); // TODO CutLabel
+	  // TNaming_Evolution == MODIFY
+	  CutBuilder.Modify (ObjSh, newS1);
+
+	  ShapeExplorer.Init(ObjSh, TopAbs_FACE);
+	  for (; ShapeExplorer.More(); ShapeExplorer.Next ()) {
+	    const TopoDS_Shape& Root = ShapeExplorer.Current ();
+	    //if (!View.Add(Root)) continue;
+	    const TopTools_ListOfShape& Shapes = mkCUT.Modified (Root);
+	    TopTools_ListIteratorOfListOfShape ShapesIterator (Shapes);
+	    for (;ShapesIterator.More (); ShapesIterator.Next ()) {
+	      const TopoDS_Shape& newShape = ShapesIterator.Value ();
+          std::cout << "a modified face" << std::endl;
+	      // TNaming_Evolution == MODIFY
+	      //if (!Root.IsSame (newShape)) ModBuilder.Modify (Root,newShape );
+	    }
+	  }
+
+/*
+	  //push in the DF modified faces
+	  View.Clear();
+	  TNaming_Builder ModBuilder(Modified);
+	  ShapeExplorer.Init(ObjSh, TopAbs_FACE);
+	  for (; ShapeExplorer.More(); ShapeExplorer.Next ()) {
+	    const TopoDS_Shape& Root = ShapeExplorer.Current ();
+	    if (!View.Add(Root)) continue;
+	    const TopTools_ListOfShape& Shapes = mkCUT.Modified (Root);
+	    TopTools_ListIteratorOfListOfShape ShapesIterator (Shapes);
+	    for (;ShapesIterator.More (); ShapesIterator.Next ()) {
+	      const TopoDS_Shape& newShape = ShapesIterator.Value ();
+	      // TNaming_Evolution == MODIFY
+	      if (!Root.IsSame (newShape)) ModBuilder.Modify (Root,newShape );
+	    }
+	  }
+
+	  //push in the DF deleted faces
+	  View.Clear();
+	  TNaming_Builder DelBuilder(Deleted);
+	  ShapeExplorer.Init (ObjSh,TopAbs_FACE);
+	  for (; ShapeExplorer.More(); ShapeExplorer.Next ()) {
+	    const TopoDS_Shape& Root = ShapeExplorer.Current ();
+	    if (!View.Add(Root)) continue;
+	    // TNaming_Evolution == DELETE
+	    if (mkCUT.IsDeleted (Root)) DelBuilder.Delete (Root);
+	  }
+
+	  // push in the DF section edges
+	  TNaming_Builder IntersBuilder(Intersections);
+	  TopTools_ListIteratorOfListOfShape its(mkCUT.SectionEdges());
+	  for (; its.More(); its.Next()) {
+	    // TNaming_Evolution == SELECTED
+	    IntersBuilder.Select(its.Value(),its.Value());
+	  }
+
+	  // push in the DF new faces added to the object:
+	  const TopoDS_Shape& ToolSh = mkCUT.Shape2();
+	  TNaming_Builder newBuilder (NewFaces);
+	  ShapeExplorer.Init(ToolSh, TopAbs_FACE);
+	  for (; ShapeExplorer.More(); ShapeExplorer.Next()) {
+	    const TopoDS_Shape& F = ShapeExplorer.Current();
+	    const TopTools_ListOfShape& modified = mkCUT.Modified(F);
+	    if (!modified.IsEmpty()) {
+	      TopTools_ListIteratorOfListOfShape itr(modified);
+	      for (; itr.More (); itr.Next ()) {
+		const TopoDS_Shape& newShape = itr.Value();
+		Handle(TNaming_NamedShape) NS = TNaming_Tool::NamedShape(newShape, NewFaces);
+		if (NS.IsNull() || NS->Evolution() != TNaming_MODIFY) {
+		  // TNaming_Evolution == GENERATED
+		  newBuilder.Generated(F, newShape);
+		}
+	      }
+	    }
+	  }
+      */
+	}
+    }
 }
 
 // Handle stuff
@@ -313,6 +529,16 @@ inline std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex &vertex) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(BRep_Tool::Pnt(vertex)));
 }
 
+/*
+inline Standard_Boolean BRep_Tool_HasContinuity(const TopoDS_Edge &e, const TopoDS_Face &f1, const TopoDS_Face &f2) {
+    return BRep_Tool::HasContinuity(e, f1, f2);
+}
+
+inline Standard_Integer BRep_Tool_Continuity(const TopoDS_Edge &e, const TopoDS_Face &f1, const TopoDS_Face &f2) {
+    return (Standard_Integer) BRep_Tool::Continuity(e, f1, f2);
+}
+*/
+
 inline std::unique_ptr<gp_Trsf> TopLoc_Location_Transformation(const TopLoc_Location &location) {
   return std::unique_ptr<gp_Trsf>(new gp_Trsf(location.Transformation()));
 }
@@ -330,6 +556,16 @@ inline std::unique_ptr<HandlePoly_Triangulation> BRep_Tool_Triangulation(const T
 
 inline std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer &explorer) {
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(explorer.Current()));
+}
+
+inline std::unique_ptr<TopoDS_Vertex> ShapeAnalysis_Edge_FirstVertex(const TopoDS_Edge &edge) {
+  ShapeAnalysis_Edge se;
+  return std::unique_ptr<TopoDS_Vertex>(new TopoDS_Vertex(se.FirstVertex(edge)));
+}
+
+inline std::unique_ptr<TopoDS_Vertex> ShapeAnalysis_Edge_LastVertex(const TopoDS_Edge &edge) {
+  ShapeAnalysis_Edge se;
+  return std::unique_ptr<TopoDS_Vertex>(new TopoDS_Vertex(se.LastVertex(edge)));
 }
 
 inline std::unique_ptr<TopoDS_Vertex> TopExp_FirstVertex(const TopoDS_Edge &edge) {
