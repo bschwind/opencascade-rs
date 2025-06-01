@@ -1,3 +1,4 @@
+use opencascade_sys::{b_rep_tools, shape_analysis::connect_edges_to_wires, top_loc::Location};
 use std::iter::once;
 
 use crate::{
@@ -97,7 +98,7 @@ impl Wire {
             EdgeConnection::Fuzzy { tolerance } => (tolerance, false),
         };
 
-        ffi::connect_edges_to_wires(edges.pin_mut(), tolerance, shared, wires.pin_mut());
+        connect_edges_to_wires(edges.pin_mut(), tolerance, shared, wires.pin_mut());
 
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 
@@ -163,7 +164,7 @@ impl Wire {
     pub fn fillet(&self, radius: f64) -> Wire {
         // Create a face from this wire
         let face = Face::from_wire(self).fillet(radius);
-        let inner = ffi::outer_wire(&face.inner);
+        let inner = b_rep_tools::outer_wire(&face.inner);
 
         Self { inner }
     }
@@ -172,7 +173,7 @@ impl Wire {
     #[must_use]
     pub fn chamfer(&self, distance_1: f64) -> Wire {
         let face = Face::from_wire(self).chamfer(distance_1);
-        let inner = ffi::outer_wire(&face.inner);
+        let inner = b_rep_tools::outer_wire(&face.inner);
 
         Self { inner }
     }
@@ -234,7 +235,7 @@ impl Wire {
 
         transform.pin_mut().SetRotation(&rotation_axis_vec, angle.radians());
         transform.pin_mut().set_translation_vec(&translation_vec);
-        let location = ffi::TopLoc_Location_from_transform(&transform);
+        let location = Location::from_transform(&transform);
 
         let wire_shape = ffi::cast_wire_to_shape(&self.inner);
         let mut wire_shape = Shape::from_shape(wire_shape).inner;

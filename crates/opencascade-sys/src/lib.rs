@@ -1,3 +1,14 @@
+pub mod b_rep_g_prop;
+pub mod b_rep_mesh;
+pub mod b_rep_tools;
+pub mod g_prop;
+pub mod gc_pnts;
+pub mod poly;
+pub mod shape_analysis;
+pub mod shape_upgrade;
+pub mod stl_api;
+pub mod top_loc;
+
 #[cxx::bridge]
 pub mod ffi {
     #[repr(u32)]
@@ -423,16 +434,12 @@ pub mod ffi {
         pub fn TopoDS_cast_to_compound(shape: &TopoDS_Shape) -> &TopoDS_Compound;
 
         #[cxx_name = "Move"]
-        pub fn translate(
-            self: Pin<&mut TopoDS_Shape>,
-            position: &TopLoc_Location,
-            raise_exception: bool,
-        );
+        pub fn translate(self: Pin<&mut TopoDS_Shape>, position: &Location, raise_exception: bool);
 
         #[cxx_name = "Location"]
         pub fn set_global_translation(
             self: Pin<&mut TopoDS_Shape>,
-            translation: &TopLoc_Location,
+            translation: &Location,
             raise_exception: bool,
         );
 
@@ -1130,7 +1137,7 @@ pub mod ffi {
         pub fn BRep_Tool_Pnt(vertex: &TopoDS_Vertex) -> UniquePtr<gp_Pnt>;
         pub fn BRep_Tool_Triangulation(
             face: &TopoDS_Face,
-            location: Pin<&mut TopLoc_Location>,
+            location: Pin<&mut Location>,
         ) -> UniquePtr<HandlePoly_Triangulation>;
 
         type BRepIntCurveSurface_Inter;
@@ -1219,39 +1226,11 @@ pub mod ffi {
         ) -> IFSelect_ReturnStatus;
         pub fn write_iges(writer: Pin<&mut IGESControl_Writer>, filename: String) -> bool;
 
-        type StlAPI_Writer;
+        #[cxx_name = "TopLoc_Location"]
+        type Location = crate::top_loc::Location;
 
-        #[cxx_name = "construct_unique"]
-        pub fn StlAPI_Writer_ctor() -> UniquePtr<StlAPI_Writer>;
-
-        // pub fn Write(self: Pin<&mut StlAPI_Writer>, shape: &TopoDS_Shape, filename: &c_char) -> bool;
-        pub fn write_stl(
-            writer: Pin<&mut StlAPI_Writer>,
-            shape: &TopoDS_Shape,
-            filename: String,
-        ) -> bool;
-
-        // Triangulation
-        type BRepMesh_IncrementalMesh;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepMesh_IncrementalMesh_ctor(
-            shape: &TopoDS_Shape,
-            deflection: f64,
-        ) -> UniquePtr<BRepMesh_IncrementalMesh>;
-
-        pub fn Shape(self: &BRepMesh_IncrementalMesh) -> &TopoDS_Shape;
-        pub fn IsDone(self: &BRepMesh_IncrementalMesh) -> bool;
-
-        type TopLoc_Location;
-        #[cxx_name = "construct_unique"]
-        pub fn TopLoc_Location_ctor() -> UniquePtr<TopLoc_Location>;
-
-        #[cxx_name = "construct_unique"]
-        pub fn TopLoc_Location_from_transform(transform: &gp_Trsf) -> UniquePtr<TopLoc_Location>;
-
-        pub fn TopLoc_Location_Transformation(location: &TopLoc_Location) -> UniquePtr<gp_Trsf>;
-
+        #[cxx_name = "Poly_Triangulation"]
+        type Poly_Triangulation = crate::poly::Triangulation;
         type HandlePoly_Triangulation;
 
         pub fn HandlePoly_Triangulation_ctor(
@@ -1264,117 +1243,7 @@ pub mod ffi {
             handle: &HandlePoly_Triangulation,
         ) -> Result<&Poly_Triangulation>;
 
-        type Poly_Triangulation;
-        #[cxx_name = "construct_unique"]
-        pub fn Poly_Triangulation_ctor(
-            nb_nodes: i32,
-            nb_triangles: i32,
-            has_uv: bool,
-            has_normals: bool,
-        ) -> UniquePtr<Poly_Triangulation>;
-        pub fn NbNodes(self: &Poly_Triangulation) -> i32;
-        pub fn NbTriangles(self: &Poly_Triangulation) -> i32;
-        pub fn HasNormals(self: &Poly_Triangulation) -> bool;
-        pub fn HasUVNodes(self: &Poly_Triangulation) -> bool;
-        pub fn Triangle(self: &Poly_Triangulation, index: i32) -> &Poly_Triangle;
-        pub fn SetTriangle(
-            self: Pin<&mut Poly_Triangulation>,
-            index: i32,
-            triangle: &Poly_Triangle,
-        );
-        pub fn SetNode(self: Pin<&mut Poly_Triangulation>, index: i32, node: &gp_Pnt);
-        pub fn SetNormal(self: Pin<&mut Poly_Triangulation>, index: i32, dir: &gp_Dir);
-        pub fn SetUVNode(self: Pin<&mut Poly_Triangulation>, index: i32, uv: &gp_Pnt2d);
-        pub fn Poly_Triangulation_Normal(
-            triangulation: &Poly_Triangulation,
-            index: i32,
-        ) -> UniquePtr<gp_Dir>;
-        pub fn Poly_Triangulation_Node(
-            triangulation: &Poly_Triangulation,
-            index: i32,
-        ) -> UniquePtr<gp_Pnt>;
-        pub fn Poly_Triangulation_UV(
-            triangulation: &Poly_Triangulation,
-            index: i32,
-        ) -> UniquePtr<gp_Pnt2d>;
-
-        type Poly_Triangle;
-        #[cxx_name = "construct_unique"]
-        pub fn Poly_Triangle_ctor(node1: i32, node2: i32, node3: i32) -> UniquePtr<Poly_Triangle>;
-        pub fn Value(self: &Poly_Triangle, index: i32) -> i32;
-
-        type Poly_Connect;
-        #[cxx_name = "construct_unique"]
-        pub fn Poly_Connect_ctor(
-            triangulation: &HandlePoly_Triangulation,
-        ) -> UniquePtr<Poly_Connect>;
-
         pub fn compute_normals(face: &TopoDS_Face, triangulation: &HandlePoly_Triangulation);
-
-        // Edge approximation
-        type GCPnts_TangentialDeflection;
-
-        #[cxx_name = "construct_unique"]
-        pub fn GCPnts_TangentialDeflection_ctor(
-            curve: &BRepAdaptor_Curve,
-            angular_deflection: f64,
-            curvature_deflection: f64,
-        ) -> UniquePtr<GCPnts_TangentialDeflection>;
-        pub fn NbPoints(self: &GCPnts_TangentialDeflection) -> i32;
-        pub fn GCPnts_TangentialDeflection_Value(
-            approximator: &GCPnts_TangentialDeflection,
-            index: i32,
-        ) -> UniquePtr<gp_Pnt>;
-
-        // Shape Properties
-        type GProp_GProps;
-        #[cxx_name = "construct_unique"]
-        pub fn GProp_GProps_ctor() -> UniquePtr<GProp_GProps>;
-        pub fn Mass(self: &GProp_GProps) -> f64;
-        pub fn StaticMoments(self: &GProp_GProps, lx: &mut f64, ly: &mut f64, lz: &mut f64);
-        pub fn MomentOfInertia(self: &GProp_GProps, axis: &gp_Ax1) -> f64;
-        pub fn RadiusOfGyration(self: &GProp_GProps, axis: &gp_Ax1) -> f64;
-        pub fn GProp_GProps_CentreOfMass(props: &GProp_GProps) -> UniquePtr<gp_Pnt>;
-
-        pub fn BRepGProp_LinearProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
-        pub fn BRepGProp_SurfaceProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
-        pub fn BRepGProp_VolumeProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
-
-        type BRepGProp_Face;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepGProp_Face_ctor(face: &TopoDS_Face) -> UniquePtr<BRepGProp_Face>;
-        pub fn Normal(
-            self: &BRepGProp_Face,
-            u: f64,
-            v: f64,
-            point: Pin<&mut gp_Pnt>,
-            normal: Pin<&mut gp_Vec>,
-        );
-
-        // BRepTools
-        pub fn outer_wire(face: &TopoDS_Face) -> UniquePtr<TopoDS_Wire>;
-
-        // Cleaning
-        type ShapeUpgrade_UnifySameDomain;
-
-        #[cxx_name = "construct_unique"]
-        pub fn ShapeUpgrade_UnifySameDomain_ctor(
-            shape: &TopoDS_Shape,
-            unify_edges: bool,
-            unify_faces: bool,
-            concat_b_splines: bool,
-        ) -> UniquePtr<ShapeUpgrade_UnifySameDomain>;
-        pub fn AllowInternalEdges(self: Pin<&mut ShapeUpgrade_UnifySameDomain>, allow: bool);
-        pub fn Build(self: Pin<&mut ShapeUpgrade_UnifySameDomain>);
-        pub fn Shape(self: &ShapeUpgrade_UnifySameDomain) -> &TopoDS_Shape;
-
-        pub fn connect_edges_to_wires(
-            edges: Pin<&mut HandleTopTools_HSequenceOfShape>,
-            tolerance: f64,
-            shared: bool,
-            wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
-        );
     }
 }
 

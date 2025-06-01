@@ -9,7 +9,11 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::ffi;
+use opencascade_sys::{
+    b_rep_g_prop::{self, BRepGProp, BRepGProp_SurfaceProperties},
+    b_rep_tools, ffi,
+    g_prop::GProps,
+};
 
 pub struct Face {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Face>,
@@ -225,7 +229,7 @@ impl Face {
         let law_function = law_function_from_graph(radius_values);
         let law_handle = ffi::Law_Function_to_handle(law_function);
 
-        let profile_wire = ffi::outer_wire(&self.inner);
+        let profile_wire = b_rep_tools::outer_wire(&self.inner);
         let mut make_pipe_shell =
             make_pipe_shell_with_law_function(&profile_wire, &path.inner, &law_handle);
 
@@ -247,12 +251,12 @@ impl Face {
     }
 
     pub fn center_of_mass(&self) -> DVec3 {
-        let mut props = ffi::GProp_GProps_ctor();
+        let mut props = GProps::new();
 
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
-        ffi::BRepGProp_SurfaceProperties(inner_shape, props.pin_mut());
+        BRepGProp_SurfaceProperties(inner_shape, props.pin_mut());
 
-        let center = ffi::GProp_GProps_CentreOfMass(&props);
+        let center = props.center_of_mass();
 
         dvec3(center.X(), center.Y(), center.Z())
     }
@@ -268,7 +272,7 @@ impl Face {
         let mut p = ffi::new_point(0.0, 0.0, 0.0);
         let mut normal = ffi::new_vec(0.0, 1.0, 0.0);
 
-        let face = ffi::BRepGProp_Face_ctor(&self.inner);
+        let face = b_rep_g_prop::Face::new(&self.inner);
         face.Normal(u, v, p.pin_mut(), normal.pin_mut());
 
         dvec3(normal.X(), normal.Y(), normal.Z())
@@ -338,10 +342,10 @@ impl Face {
     }
 
     pub fn surface_area(&self) -> f64 {
-        let mut props = ffi::GProp_GProps_ctor();
+        let mut props = GProps::new();
 
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
-        ffi::BRepGProp_SurfaceProperties(inner_shape, props.pin_mut());
+        BRepGProp::surface_properties(inner_shape, props.pin_mut());
 
         // Returns surface area, obviously.
         props.Mass()
@@ -353,7 +357,7 @@ impl Face {
 
     #[must_use]
     pub fn outer_wire(&self) -> Wire {
-        let inner = ffi::outer_wire(&self.inner);
+        let inner = b_rep_tools::outer_wire(&self.inner);
 
         Wire { inner }
     }
