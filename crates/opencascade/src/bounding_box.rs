@@ -6,34 +6,18 @@ use crate::primitives::Shape;
 
 pub struct BoundingBox {
     pub(crate) inner: UniquePtr<ffi::Bnd_Box>,
-    min: DVec3,
-    max: DVec3,
 }
 impl BoundingBox {
     /// Create a new, valid bounding box with zero dimensions and volume.
     pub fn new() -> BoundingBox {
-        let mut bnd_box = ffi::Bnd_Box_ctor();
+        let mut inner = ffi::Bnd_Box_ctor();
         let p = ffi::new_point(0., 0., 0.);
-        bnd_box.pin_mut().Set(&p);
-        Self { inner: bnd_box, min: DVec3::ZERO, max: DVec3::ZERO }
+        inner.pin_mut().Set(&p);
+        Self { inner }
     }
 
     pub fn is_void(&self) -> bool {
         self.inner.IsVoid()
-    }
-
-    /// The underlying OCC API uses mutable pointers to get values out of the
-    /// `Bnd_Box`. We wrap this method to write those values straight into
-    /// `DVec3`s to return in the Rust API.
-    fn get(&mut self) {
-        self.inner.Get(
-            &mut self.min.x,
-            &mut self.min.y,
-            &mut self.min.z,
-            &mut self.max.x,
-            &mut self.max.y,
-            &mut self.max.z,
-        );
     }
 
     pub fn get_gap(&self) -> f64 {
@@ -41,13 +25,13 @@ impl BoundingBox {
     }
 
     pub fn min(&mut self) -> DVec3 {
-        self.get();
-        self.min
+        let p = ffi::Bnd_Box_CornerMin(self.inner.pin_mut().as_ref());
+        glam::dvec3(p.X(), p.Y(), p.Z())
     }
 
     pub fn max(&mut self) -> DVec3 {
-        self.get();
-        self.max
+        let p = ffi::Bnd_Box_CornerMax(self.inner.pin_mut().as_ref());
+        glam::dvec3(p.X(), p.Y(), p.Z())
     }
 }
 
