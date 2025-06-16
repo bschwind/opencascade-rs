@@ -2,6 +2,8 @@ use cxx::UniquePtr;
 use glam::DVec3;
 use opencascade_sys::ffi;
 
+use crate::primitives::Shape;
+
 pub struct BoundingBox {
     pub(crate) inner: UniquePtr<ffi::Bnd_Box>,
     min: DVec3,
@@ -45,6 +47,13 @@ impl BoundingBox {
     }
 }
 
+/// Compute the axis-aligned bounding box of `shape` using the `BRepBndLib`
+/// package.
+pub fn aabb(shape: &Shape) -> BoundingBox {
+    let mut bb = BoundingBox::new();
+    bb
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -63,5 +72,15 @@ mod test {
         assert!(min.x == 0.0 && max.x == 0.0);
         assert!(min.y == 0.0 && max.y == 0.0);
         assert!(min.z == 0.0 && max.z == 0.0);
+    }
+
+    #[test]
+    fn get_bounding_box_of_sphere() {
+        let s = Shape::sphere(1.).build();
+
+        let mut bb = aabb(&s);
+
+        assert_eq!(bb.min(), glam::dvec3(-1., -1., -1.));
+        assert_eq!(bb.max(), glam::dvec3(1., 1., 1.));
     }
 }
