@@ -1,6 +1,8 @@
-use opencascade::bounding_box;
-use opencascade::primitives::{Compound, IntoShape, Shape};
-use opencascade::workplane::Workplane;
+use opencascade::{
+    bounding_box,
+    primitives::{Compound, IntoShape, Shape},
+    workplane::Workplane,
+};
 
 pub fn shape() -> Shape {
     let mut shapes = vec![];
