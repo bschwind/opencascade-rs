@@ -55,7 +55,7 @@ mod test {
     }
 
     #[test]
-    fn get_min_when_void() {
+    fn get_min_max_of_new_box() {
         let mut bb = BoundingBox::new();
         let min = bb.min();
         let max = bb.max();
