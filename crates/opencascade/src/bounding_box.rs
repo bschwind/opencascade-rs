@@ -36,6 +36,10 @@ impl BoundingBox {
         );
     }
 
+    pub fn get_gap(&self) -> f64 {
+        self.inner.GetGap()
+    }
+
     pub fn min(&mut self) -> DVec3 {
         self.get();
         self.min
@@ -85,7 +89,7 @@ mod test {
 
         let mut bb = aabb(&s);
 
-        assert_eq!(bb.min(), glam::dvec3(-1., -1., -1.));
-        assert_eq!(bb.max(), glam::dvec3(1., 1., 1.));
+        assert_eq!(bb.min(), glam::dvec3(-1., -1., -1.) + glam::DVec3::NEG_ONE * bb.get_gap());
+        assert_eq!(bb.max(), glam::dvec3(1., 1., 1.) + glam::DVec3::ONE * bb.get_gap());
     }
 }
