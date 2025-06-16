@@ -1397,6 +1397,8 @@ pub mod ffi {
         // BRepBndLib
         // Bounding boxes for curves and surfaces.
         type BRepBndLib;
+
+        pub fn BRepBndLib_Add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool);
     }
 }
 
