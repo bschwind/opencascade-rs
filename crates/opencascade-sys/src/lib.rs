@@ -1380,6 +1380,20 @@ pub mod ffi {
         // Describes a bounding box in 3D space.
         type Bnd_Box;
 
+        #[cxx_name = "construct_unique"]
+        pub fn Bnd_Box_ctor() -> UniquePtr<Bnd_Box>;
+        pub fn IsVoid(self: &Bnd_Box) -> bool;
+        pub fn Get(
+            self: &Bnd_Box,
+            xMin: &mut f64,
+            yMin: &mut f64,
+            zMin: &mut f64,
+            xMax: &mut f64,
+            yMax: &mut f64,
+            zMax: &mut f64,
+        );
+        pub fn Set(self: Pin<&mut Bnd_Box>, p: &gp_Pnt);
+
         // BRepBndLib
         // Bounding boxes for curves and surfaces.
         type BRepBndLib;

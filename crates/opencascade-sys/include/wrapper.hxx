@@ -524,3 +524,6 @@ cast_section_to_builderalgo(std::unique_ptr<BRepAlgoAPI_Section> section) {
   return section;
 }
 // namespace BRepAlgoAPI
+
+// Bnd_Box
+inline std::unique_ptr<Bnd_Box> Bnd_Box_ctor() { return std::unique_ptr<Bnd_Box>(new Bnd_Box()); }
