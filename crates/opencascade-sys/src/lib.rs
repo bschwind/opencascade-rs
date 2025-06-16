@@ -1376,6 +1376,10 @@ pub mod ffi {
             wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
         );
 
+        // BndBox
+        // Describes a bounding box in 3D space.
+        type Bnd_Box;
+
         // BRepBndLib
         // Bounding boxes for curves and surfaces.
         type BRepBndLib;
