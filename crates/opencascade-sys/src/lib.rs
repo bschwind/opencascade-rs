@@ -1375,6 +1375,10 @@ pub mod ffi {
             shared: bool,
             wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
         );
+
+        // BRepBndLib
+        // Bounding boxes for curves and surfaces.
+        type BRepBndLib;
     }
 }
 
