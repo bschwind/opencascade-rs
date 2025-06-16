@@ -4,16 +4,17 @@ use opencascade_sys::ffi;
 
 use crate::primitives::Shape;
 
+/// A wrapper around the `Bnd_Box` API of OCC. Note that a `Bnd_Box` has a `Gap`
+/// property, which is a small tolerance value added to all dimensions. This
+/// means that the point values of a `BoundingBox` will often be slightly larger
+/// or smaller than expected of the geometry of known shapes.
 pub struct BoundingBox {
     pub(crate) inner: UniquePtr<ffi::Bnd_Box>,
 }
 impl BoundingBox {
-    /// Create a new, valid bounding box with zero dimensions and volume.
-    pub fn new() -> BoundingBox {
-        let mut inner = ffi::Bnd_Box_ctor();
-        let p = ffi::new_point(0., 0., 0.);
-        inner.pin_mut().Set(&p);
-        Self { inner }
+    /// Create a new void box. A void box in OCC is defined as a box that contains no points.
+    pub fn void() -> BoundingBox {
+        Self { inner: ffi::Bnd_Box_ctor() }
     }
 
     pub fn is_void(&self) -> bool {
@@ -33,12 +34,17 @@ impl BoundingBox {
         let p = ffi::Bnd_Box_CornerMax(self.inner.as_ref().unwrap());
         glam::dvec3(p.X(), p.Y(), p.Z())
     }
+
+    /// Get a vector corresponding to the `gap` of this box in all dimensions.
+    pub fn gap_vec(&self) -> DVec3 {
+        glam::DVec3::ONE * self.get_gap()
+    }
 }
 
 /// Compute the axis-aligned bounding box of `shape` using the `BRepBndLib`
 /// package.
 pub fn aabb(shape: &Shape) -> BoundingBox {
-    let mut bb = BoundingBox::new();
+    let mut bb = BoundingBox::void();
     ffi::BRepBndLib_Add(
         shape.inner.as_ref().expect("Input shape ref was null"),
         bb.inner.pin_mut(),
@@ -53,18 +59,8 @@ mod test {
 
     #[test]
     fn create_bounding_box() {
-        let bb = BoundingBox::new();
-        assert!(!bb.is_void());
-    }
-
-    #[test]
-    fn get_min_max_of_new_box() {
-        let bb = BoundingBox::new();
-        let min = bb.min();
-        let max = bb.max();
-        assert!(min.x == 0.0 && max.x == 0.0);
-        assert!(min.y == 0.0 && max.y == 0.0);
-        assert!(min.z == 0.0 && max.z == 0.0);
+        let bb = BoundingBox::void();
+        assert!(bb.is_void());
     }
 
     #[test]
@@ -73,8 +69,8 @@ mod test {
 
         let bb = aabb(&s);
 
-        assert_eq!(bb.min(), glam::dvec3(-1., -1., -1.) + glam::DVec3::NEG_ONE * bb.get_gap());
-        assert_eq!(bb.max(), glam::dvec3(1., 1., 1.) + glam::DVec3::ONE * bb.get_gap());
+        assert_eq!(bb.min(), glam::dvec3(-1., -1., -1.) - bb.gap_vec());
+        assert_eq!(bb.max(), glam::dvec3(1., 1., 1.) + bb.gap_vec());
     }
 
     #[test]
@@ -82,7 +78,7 @@ mod test {
         let s = Shape::sphere(1.).at(glam::dvec3(1., 2., 3.)).build();
 
         let bb = aabb(&s);
-        let gap = glam::DVec3::ONE * bb.get_gap();
+        let gap = bb.gap_vec();
         assert_eq!(bb.min(), glam::dvec3(0., 1., 2.) - gap);
         assert_eq!(bb.max(), glam::dvec3(2., 3., 4.) + gap);
     }
