@@ -4,10 +4,11 @@ use opencascade_sys::ffi;
 
 pub struct BoundingBox {
     pub(crate) inner: UniquePtr<ffi::Bnd_Box>,
-    pub(crate) min: DVec3,
-    pub(crate) max: DVec3,
+    min: DVec3,
+    max: DVec3,
 }
 impl BoundingBox {
+    /// Create a new, valid bounding box with zero dimensions and volume.
     pub fn new() -> BoundingBox {
         let mut bnd_box = ffi::Bnd_Box_ctor();
         let p = ffi::new_point(0., 0., 0.);
@@ -19,7 +20,10 @@ impl BoundingBox {
         self.inner.IsVoid()
     }
 
-    pub fn min(&mut self) -> DVec3 {
+    /// The underlying OCC API uses mutable pointers to get values out of the
+    /// `Bnd_Box`. We wrap this method to write those values straight into
+    /// `DVec3`s to return in the Rust API.
+    fn get(&mut self) {
         self.inner.Get(
             &mut self.min.x,
             &mut self.min.y,
@@ -28,18 +32,15 @@ impl BoundingBox {
             &mut self.max.y,
             &mut self.max.z,
         );
+    }
+
+    pub fn min(&mut self) -> DVec3 {
+        self.get();
         self.min
     }
 
     pub fn max(&mut self) -> DVec3 {
-        self.inner.Get(
-            &mut self.min.x,
-            &mut self.min.y,
-            &mut self.min.z,
-            &mut self.max.x,
-            &mut self.max.y,
-            &mut self.max.z,
-        );
+        self.get();
         self.max
     }
 }
