@@ -24,13 +24,13 @@ impl BoundingBox {
         self.inner.GetGap()
     }
 
-    pub fn min(&mut self) -> DVec3 {
-        let p = ffi::Bnd_Box_CornerMin(self.inner.pin_mut().as_ref());
+    pub fn min(&self) -> DVec3 {
+        let p = ffi::Bnd_Box_CornerMin(self.inner.as_ref().unwrap());
         glam::dvec3(p.X(), p.Y(), p.Z())
     }
 
-    pub fn max(&mut self) -> DVec3 {
-        let p = ffi::Bnd_Box_CornerMax(self.inner.pin_mut().as_ref());
+    pub fn max(&self) -> DVec3 {
+        let p = ffi::Bnd_Box_CornerMax(self.inner.as_ref().unwrap());
         glam::dvec3(p.X(), p.Y(), p.Z())
     }
 }
@@ -59,7 +59,7 @@ mod test {
 
     #[test]
     fn get_min_max_of_new_box() {
-        let mut bb = BoundingBox::new();
+        let bb = BoundingBox::new();
         let min = bb.min();
         let max = bb.max();
         assert!(min.x == 0.0 && max.x == 0.0);
@@ -71,9 +71,19 @@ mod test {
     fn get_bounding_box_of_sphere() {
         let s = Shape::sphere(1.).build();
 
-        let mut bb = aabb(&s);
+        let bb = aabb(&s);
 
         assert_eq!(bb.min(), glam::dvec3(-1., -1., -1.) + glam::DVec3::NEG_ONE * bb.get_gap());
         assert_eq!(bb.max(), glam::dvec3(1., 1., 1.) + glam::DVec3::ONE * bb.get_gap());
+    }
+
+    #[test]
+    fn get_bounding_box_of_sphere_transformed() {
+        let s = Shape::sphere(1.).at(glam::dvec3(1., 2., 3.)).build();
+
+        let bb = aabb(&s);
+        let gap = glam::DVec3::ONE * bb.get_gap();
+        assert_eq!(bb.min(), glam::dvec3(0., 1., 2.) - gap);
+        assert_eq!(bb.max(), glam::dvec3(2., 3., 4.) + gap);
     }
 }

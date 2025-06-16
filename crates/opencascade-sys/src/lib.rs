@@ -1392,6 +1392,8 @@ pub mod ffi {
             yMax: &mut f64,
             zMax: &mut f64,
         );
+        pub fn Bnd_Box_CornerMin(b: &Bnd_Box) -> UniquePtr<gp_Pnt>;
+        pub fn Bnd_Box_CornerMax(b: &Bnd_Box) -> UniquePtr<gp_Pnt>;
         pub fn GetGap(self: &Bnd_Box) -> f64;
         pub fn Set(self: Pin<&mut Bnd_Box>, p: &gp_Pnt);
         pub fn SetGap(self: Pin<&mut Bnd_Box>, gap: f64);
