@@ -65,21 +65,21 @@ mod test {
 
     #[test]
     fn get_bounding_box_of_sphere() {
-        let s = Shape::sphere(1.).build();
+        let s = Shape::sphere(1.0).build();
 
         let bb = aabb(&s);
 
-        assert_eq!(bb.min(), glam::dvec3(-1., -1., -1.) - bb.gap_vec());
-        assert_eq!(bb.max(), glam::dvec3(1., 1., 1.) + bb.gap_vec());
+        assert_eq!(bb.min(), glam::dvec3(-1.0, -1.0, -1.0) - bb.gap_vec());
+        assert_eq!(bb.max(), glam::dvec3(1.0, 1.0, 1.0) + bb.gap_vec());
     }
 
     #[test]
     fn get_bounding_box_of_sphere_transformed() {
-        let s = Shape::sphere(1.).at(glam::dvec3(1., 2., 3.)).build();
+        let s = Shape::sphere(1.0).at(glam::dvec3(1.0, 2.0, 3.0)).build();
 
         let bb = aabb(&s);
         let gap = bb.gap_vec();
-        assert_eq!(bb.min(), glam::dvec3(0., 1., 2.) - gap);
-        assert_eq!(bb.max(), glam::dvec3(2., 3., 4.) + gap);
+        assert_eq!(bb.min(), glam::dvec3(0.0, 1.0, 2.0) - gap);
+        assert_eq!(bb.max(), glam::dvec3(2.0, 3.0, 4.0) + gap);
     }
 }
