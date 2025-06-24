@@ -2,6 +2,7 @@ use clap::ValueEnum;
 use opencascade::primitives::Shape;
 
 pub mod airfoil;
+pub mod bounding_box;
 pub mod box_shape;
 pub mod cable_bracket;
 pub mod chamfer;
@@ -26,6 +27,7 @@ pub mod zbox_case;
 #[derive(Debug, Copy, Clone, PartialEq, ValueEnum)]
 pub enum Example {
     Airfoil,
+    BoundingBox,
     CableBracket,
     BoxShape,
     Chamfer,
@@ -52,6 +54,7 @@ impl Example {
     pub fn shape(self) -> Shape {
         match self {
             Example::Airfoil => airfoil::shape(),
+            Example::BoundingBox => bounding_box::shape(),
             Example::CableBracket => cable_bracket::shape(),
             Example::BoxShape => box_shape::shape(),
             Example::Chamfer => chamfer::shape(),
