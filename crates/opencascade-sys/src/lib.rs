@@ -1027,6 +1027,21 @@ pub mod ffi {
         pub fn SetScale(self: Pin<&mut gp_Trsf>, point: &gp_Pnt, scale: f64);
         pub fn SetTranslation(self: Pin<&mut gp_Trsf>, point1: &gp_Pnt, point2: &gp_Pnt);
         pub fn Value(self: &gp_Trsf, the_row: i32, the_col: i32) -> f64;
+        pub fn SetValues(
+            self: Pin<&mut gp_Trsf>,
+            a11: f64,
+            a12: f64,
+            a13: f64,
+            a14: f64,
+            a21: f64,
+            a22: f64,
+            a23: f64,
+            a24: f64,
+            a31: f64,
+            a32: f64,
+            a33: f64,
+            a34: f64,
+        );
 
         #[cxx_name = "SetTranslationPart"]
         pub fn set_translation_vec(self: Pin<&mut gp_Trsf>, translation: &gp_Vec);
@@ -1403,6 +1418,8 @@ pub mod ffi {
         type BRepBndLib;
 
         pub fn BRepBndLib_Add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool);
+
+        // BRep
     }
 }
 

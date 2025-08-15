@@ -33,10 +33,16 @@ mod test {
             glam::dvec4(0.0, 0.0, 0.0, 1.0),
         );
 
-        let m = glam::DMat4::IDENTITY;
-
         let t = gp_trsf(&m);
 
-        assert_eq!(t.Value(0, 0), 0.0);
+        // 3D diagonal is 0
+        assert_eq!(t.Value(1, 1), 0.0);
+        assert_eq!(t.Value(2, 2), 0.0);
+        assert_eq!(t.Value(3, 3), 0.0);
+
+        // Permuted axes are preserved
+        assert_eq!(t.Value(1, 2), 1.0);
+        assert_eq!(t.Value(3, 1), 1.0);
+        assert_eq!(t.Value(2, 3), 1.0);
     }
 }
