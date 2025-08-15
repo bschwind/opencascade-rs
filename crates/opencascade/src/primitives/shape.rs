@@ -631,8 +631,12 @@ impl Shape {
         self.inner.pin_mut().set_global_translation(&location, false);
     }
 
+    /// Copy `self` using the upper 3x4 matrix of `transform`.
     pub fn transform(&self, transform: &DMat4) -> Self {
-        Self::from_shape(&self.inner)
+        let t = crate::transform::gp_trsf(transform);
+        // NOTE: Setting the copy argument does not seem to have an effect.
+        let mut res = ffi::BRepBuilderAPI_Transform_ctor(&self.inner, &t, true);
+        Self::from_shape(res.pin_mut().Shape())
     }
 
     pub fn mesh(&self) -> Result<Mesh, Error> {
