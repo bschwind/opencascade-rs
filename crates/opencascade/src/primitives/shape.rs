@@ -770,13 +770,12 @@ mod test {
     #[test]
     fn transform_shape() {
         let s = Workplane::xy().sketch().line_to(1.0, 2.0).wire().into_shape();
+        let t = s.transform(&glam::DMat4::from_translation(glam::dvec3(2.0, 3.0, 4.0)));
 
         for p in s.edges() {
             assert_eq!(p.start_point(), glam::dvec3(0.0, 0.0, 0.0));
             assert_eq!(p.end_point(), glam::dvec3(1.0, 2.0, 0.0));
         }
-
-        let t = s.transform(&glam::DMat4::from_translation(glam::dvec3(2.0, 3.0, 4.0)));
 
         for p in t.edges() {
             assert_eq!(p.start_point(), glam::dvec3(2.0, 3.0, 4.0));
