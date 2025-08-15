@@ -1418,8 +1418,6 @@ pub mod ffi {
         type BRepBndLib;
 
         pub fn BRepBndLib_Add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool);
-
-        // BRep
     }
 }
 
