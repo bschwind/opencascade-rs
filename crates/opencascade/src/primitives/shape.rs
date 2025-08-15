@@ -7,7 +7,7 @@ use crate::{
     Error,
 };
 use cxx::UniquePtr;
-use glam::{dvec2, dvec3, DVec3};
+use glam::{dvec2, dvec3, DMat4, DVec3};
 use opencascade_sys::ffi;
 use std::path::Path;
 
@@ -631,6 +631,10 @@ impl Shape {
         self.inner.pin_mut().set_global_translation(&location, false);
     }
 
+    pub fn transform(&self, transform: &DMat4) -> Self {
+        Self::from_shape(&self.inner)
+    }
+
     pub fn mesh(&self) -> Result<Mesh, Error> {
         self.mesh_with_tolerance(0.01)
     }
@@ -752,5 +756,27 @@ impl ChamferMaker {
 
     pub fn build(mut self) -> Shape {
         Shape::from_shape(self.inner.pin_mut().Shape())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{primitives::IntoShape, workplane::Workplane};
+
+    #[test]
+    fn transform_shape() {
+        let s = Workplane::xy().sketch().line_to(1.0, 2.0).wire().into_shape();
+
+        for p in s.edges() {
+            assert_eq!(p.start_point(), glam::dvec3(0.0, 0.0, 0.0));
+            assert_eq!(p.end_point(), glam::dvec3(1.0, 2.0, 0.0));
+        }
+
+        let t = s.transform(&glam::DMat4::from_translation(glam::dvec3(2.0, 3.0, 4.0)));
+
+        for p in t.edges() {
+            assert_eq!(p.start_point(), glam::dvec3(2.0, 3.0, 4.0));
+            assert_eq!(p.end_point(), glam::dvec3(3.0, 5.0, 4.0));
+        }
     }
 }
