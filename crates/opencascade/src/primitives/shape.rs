@@ -766,20 +766,31 @@ impl ChamferMaker {
 #[cfg(test)]
 mod test {
     use crate::{primitives::IntoShape, workplane::Workplane};
+    const TOLERANCE: f64 = 1e-10;
 
     #[test]
     fn transform_shape() {
+        let m = glam::dmat4(
+            glam::dvec4(0.0, 0.0, 1.0, 0.0),
+            glam::dvec4(1.0, 0.0, 0.0, 0.0),
+            glam::dvec4(0.0, 1.0, 0.0, 0.0),
+            glam::dvec4(5.0, 6.0, 7.0, 1.0),
+        );
         let s = Workplane::xy().sketch().line_to(1.0, 2.0).wire().into_shape();
-        let t = s.transform(&glam::DMat4::from_translation(glam::dvec3(2.0, 3.0, 4.0)));
+        let t = s.transform(&m);
 
         for p in s.edges() {
-            assert_eq!(p.start_point(), glam::dvec3(0.0, 0.0, 0.0));
-            assert_eq!(p.end_point(), glam::dvec3(1.0, 2.0, 0.0));
+            assert!(p.start_point().abs_diff_eq(glam::dvec3(0.0, 0.0, 0.0), TOLERANCE));
+            assert!(p.end_point().abs_diff_eq(glam::dvec3(1.0, 2.0, 0.0), TOLERANCE));
         }
 
         for p in t.edges() {
-            assert_eq!(p.start_point(), glam::dvec3(2.0, 3.0, 4.0));
-            assert_eq!(p.end_point(), glam::dvec3(3.0, 5.0, 4.0));
+            // The start point includes only offset
+            assert!(p.start_point().abs_diff_eq(glam::dvec3(5.0, 6.0, 7.0), TOLERANCE));
+            assert!(p
+                .end_point()
+                // The end point includes permutation and offset
+                .abs_diff_eq(glam::dvec3(2.0 + 5.0, 0.0 + 6.0, 1.0 + 7.0), TOLERANCE));
         }
     }
 }
