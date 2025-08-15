@@ -2,6 +2,13 @@ use cxx::UniquePtr;
 use glam::DMat4;
 use opencascade_sys::ffi;
 
+/// Create a `gp_Trsf` from a `DMat4`.
+///
+/// Note that OCC only allows setting values for the upper 3x4 matrix. I.e. the
+/// XYZ components of each column.
+///
+/// Additionally, OCC ensures orthogonality of the matrix before the method
+/// returns.
 pub fn gp_trsf(mat: &DMat4) -> UniquePtr<ffi::gp_Trsf> {
     let mut t = ffi::new_transform();
     t.pin_mut().SetValues(
@@ -26,6 +33,7 @@ mod test {
     use super::*;
     #[test]
     fn set_gp_trsf_values() {
+        // Matrix with permuted axes
         let m = glam::dmat4(
             glam::dvec4(0.0, 0.0, 1.0, 0.0),
             glam::dvec4(1.0, 0.0, 0.0, 0.0),
