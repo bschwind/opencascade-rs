@@ -1027,6 +1027,7 @@ pub mod ffi {
         pub fn SetScale(self: Pin<&mut gp_Trsf>, point: &gp_Pnt, scale: f64);
         pub fn SetTranslation(self: Pin<&mut gp_Trsf>, point1: &gp_Pnt, point2: &gp_Pnt);
         pub fn Value(self: &gp_Trsf, the_row: i32, the_col: i32) -> f64;
+        #[allow(clippy::too_many_arguments)]
         pub fn SetValues(
             self: Pin<&mut gp_Trsf>,
             a11: f64,
