@@ -2,8 +2,7 @@ use crate::{
     mesh::{Mesh, Mesher},
     primitives::{
         make_axis_1, make_axis_2, make_dir, make_point, make_point2d, make_vec, BooleanShape,
-        Compound, Edge, EdgeIterator, Face, FaceIterator, IntoShape, ShapeType, Shell, Solid,
-        Vertex, Wire,
+        Compound, Edge, EdgeIterator, Face, FaceIterator, ShapeType, Shell, Solid, Vertex, Wire,
     },
     Error,
 };
@@ -281,10 +280,16 @@ impl Shape {
         Self { inner }
     }
 
-    /// Make a shape that models empty space.
+    /// Make a shape that models empty space by returning an empty compound.
     pub fn empty() -> Self {
-        let shape = Self::cube(1.0);
-        shape.subtract(&shape).into_shape()
+        let mut compound = ffi::TopoDS_Compound_ctor();
+        let builder = ffi::BRep_Builder_ctor();
+        let topods_builder = ffi::BRep_Builder_upcast_to_topods_builder(&builder);
+        topods_builder.MakeCompound(compound.pin_mut());
+
+        let inner = ffi::TopoDS_Compound_as_shape(compound);
+
+        Self { inner }
     }
 
     /// Make a box with one corner at corner_1, and the opposite corner
