@@ -281,6 +281,7 @@ impl Shape {
         Self { inner }
     }
 
+    /// Make a shape that models empty space.
     pub fn empty() -> Self {
         let shape = Self::cube(1.0);
         shape.subtract(&shape).into_shape()
