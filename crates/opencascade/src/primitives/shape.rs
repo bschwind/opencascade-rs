@@ -2,7 +2,8 @@ use crate::{
     mesh::{Mesh, Mesher},
     primitives::{
         make_axis_1, make_axis_2, make_dir, make_point, make_point2d, make_vec, BooleanShape,
-        Compound, Edge, EdgeIterator, Face, FaceIterator, ShapeType, Shell, Solid, Vertex, Wire,
+        Compound, Edge, EdgeIterator, Face, FaceIterator, IntoShape, ShapeType, Shell, Solid,
+        Vertex, Wire,
     },
     Error,
 };
@@ -278,6 +279,11 @@ impl Shape {
         let inner = ffi::TopoDS_Shape_to_owned(shape);
 
         Self { inner }
+    }
+
+    pub fn empty() -> Self {
+        let shape = Self::cube(1.0);
+        shape.subtract(&shape).into_shape()
     }
 
     /// Make a box with one corner at corner_1, and the opposite corner

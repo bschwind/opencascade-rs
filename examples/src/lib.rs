@@ -14,6 +14,7 @@ pub mod keyboard_case;
 pub mod keycap;
 pub mod letter_a;
 pub mod offset_2d;
+pub mod pentafoil;
 pub mod rounded_chamfer;
 pub mod section;
 pub mod swept_face;
@@ -39,6 +40,7 @@ pub enum Example {
     Keycap,
     LetterA,
     Offset2d,
+    Pentafoil,
     RoundedChamfer,
     Section,
     SweptFace,
@@ -66,6 +68,7 @@ impl Example {
             Example::Keycap => keycap::shape(),
             Example::LetterA => letter_a::shape(),
             Example::Offset2d => offset_2d::shape(),
+            Example::Pentafoil => pentafoil::shape(),
             Example::RoundedChamfer => rounded_chamfer::shape(),
             Example::Section => section::shape(),
             Example::SweptFace => swept_face::shape(),
