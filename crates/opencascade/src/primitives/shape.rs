@@ -280,8 +280,12 @@ impl Shape {
         Self { inner }
     }
 
-    /// Make a shape that models empty space by returning an empty compound.
+    /// Make a shape that models empty space.
     pub fn empty() -> Self {
+        // NOTE: It may seem like using `TopoDS_Shape()` directly should work,
+        //       but shape operations such as union fail on actual "null shapes".
+
+        // Construct an empty compound
         let mut compound = ffi::TopoDS_Compound_ctor();
         let builder = ffi::BRep_Builder_ctor();
         let topods_builder = ffi::BRep_Builder_upcast_to_topods_builder(&builder);
