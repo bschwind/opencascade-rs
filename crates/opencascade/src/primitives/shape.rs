@@ -280,6 +280,22 @@ impl Shape {
         Self { inner }
     }
 
+    /// Make a shape that models empty space.
+    pub fn empty() -> Self {
+        // NOTE: It may seem like using `TopoDS_Shape()` directly should work,
+        //       but shape operations such as union fail on actual "null shapes".
+
+        // Construct an empty compound
+        let mut compound = ffi::TopoDS_Compound_ctor();
+        let builder = ffi::BRep_Builder_ctor();
+        let topods_builder = ffi::BRep_Builder_upcast_to_topods_builder(&builder);
+        topods_builder.MakeCompound(compound.pin_mut());
+
+        let inner = ffi::TopoDS_Compound_as_shape(compound);
+
+        Self { inner }
+    }
+
     /// Make a box with one corner at corner_1, and the opposite corner
     /// at corner_2.
     pub fn box_from_corners(corner_1: DVec3, corner_2: DVec3) -> Self {
