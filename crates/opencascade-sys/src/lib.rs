@@ -948,6 +948,8 @@ pub mod ffi {
         pub fn gp_OZ() -> &'static gp_Ax1;
         pub fn gp_DZ() -> &'static gp_Dir;
 
+        pub fn Transform(self: Pin<&mut gp_Dir>, transform: &gp_Trsf);
+
         pub fn X(self: &gp_Dir) -> f64;
         pub fn Y(self: &gp_Dir) -> f64;
         pub fn Z(self: &gp_Dir) -> f64;
