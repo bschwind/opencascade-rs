@@ -7,7 +7,7 @@ use crate::{
     Error,
 };
 use cxx::UniquePtr;
-use glam::{dvec2, dvec3, DVec3};
+use glam::{dvec2, dvec3, DMat4, DVec3};
 use opencascade_sys::ffi;
 use std::path::Path;
 
@@ -647,6 +647,14 @@ impl Shape {
         self.inner.pin_mut().set_global_translation(&location, false);
     }
 
+    /// Copy `self` using the upper 3x4 matrix of `transform`.
+    pub fn transform(&self, transform: &DMat4) -> Self {
+        let t = crate::transform::gp_trsf(transform);
+        // NOTE: Setting the copy argument does not seem to have an effect.
+        let mut res = ffi::BRepBuilderAPI_Transform_ctor(&self.inner, &t, true);
+        Self::from_shape(res.pin_mut().Shape())
+    }
+
     pub fn mesh(&self) -> Result<Mesh, Error> {
         self.mesh_with_tolerance(0.01)
     }
@@ -768,5 +776,37 @@ impl ChamferMaker {
 
     pub fn build(mut self) -> Shape {
         Shape::from_shape(self.inner.pin_mut().Shape())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::{primitives::IntoShape, workplane::Workplane};
+    const TOLERANCE: f64 = 1e-10;
+
+    #[test]
+    fn transform_shape() {
+        let m = glam::dmat4(
+            glam::dvec4(0.0, 0.0, 1.0, 0.0),
+            glam::dvec4(1.0, 0.0, 0.0, 0.0),
+            glam::dvec4(0.0, 1.0, 0.0, 0.0),
+            glam::dvec4(5.0, 6.0, 7.0, 1.0),
+        );
+        let s = Workplane::xy().sketch().line_to(1.0, 2.0).wire().into_shape();
+        let t = s.transform(&m);
+
+        for p in s.edges() {
+            assert!(p.start_point().abs_diff_eq(glam::dvec3(0.0, 0.0, 0.0), TOLERANCE));
+            assert!(p.end_point().abs_diff_eq(glam::dvec3(1.0, 2.0, 0.0), TOLERANCE));
+        }
+
+        for p in t.edges() {
+            // The start point includes only offset
+            assert!(p.start_point().abs_diff_eq(glam::dvec3(5.0, 6.0, 7.0), TOLERANCE));
+            assert!(p
+                .end_point()
+                // The end point includes permutation and offset
+                .abs_diff_eq(glam::dvec3(2.0 + 5.0, 0.0 + 6.0, 1.0 + 7.0), TOLERANCE));
+        }
     }
 }
