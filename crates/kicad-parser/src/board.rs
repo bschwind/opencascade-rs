@@ -6,11 +6,11 @@ use crate::graphics::{GraphicArc, GraphicCircle, GraphicLine, GraphicRect};
 
 #[derive(Debug, Clone, Default)]
 pub struct KicadBoard {
-    graphic_lines: Vec<GraphicLine>,
-    graphic_arcs: Vec<GraphicArc>,
-    graphic_circles: Vec<GraphicCircle>,
-    graphic_rects: Vec<GraphicRect>,
-    footprints: Vec<Footprint>,
+    pub graphic_lines: Vec<GraphicLine>,
+    pub graphic_arcs: Vec<GraphicArc>,
+    pub graphic_circles: Vec<GraphicCircle>,
+    pub graphic_rects: Vec<GraphicRect>,
+    pub footprints: Vec<Footprint>,
 }
 
 impl KicadBoard {
@@ -107,8 +107,10 @@ impl KicadBoard {
 pub struct Footprint {
     pub location: (f64, f64),
     pub rotation_degrees: f64,
-    graphic_lines: Vec<GraphicLine>,
-    graphic_arcs: Vec<GraphicArc>,
+    // NOTE: The assumption that FootprintLine and GraphicLine are equivalent may not be correct
+    pub graphic_lines: Vec<GraphicLine>,
+    // NOTE: The assumption that FootprintArc and GraphicArc are equivalent may not be correct
+    pub graphic_arcs: Vec<GraphicArc>,
 }
 
 impl Footprint {
@@ -156,16 +158,6 @@ impl Footprint {
         }
 
         Ok(footprint)
-    }
-
-    pub fn lines(&self) -> impl Iterator<Item = &GraphicLine> {
-        // TODO - map from footprint space to world space
-        self.graphic_lines.iter()
-    }
-
-    pub fn arcs(&self) -> impl Iterator<Item = &GraphicArc> {
-        // TODO - map from footprint space to world space
-        self.graphic_arcs.iter()
     }
 }
 
