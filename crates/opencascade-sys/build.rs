@@ -47,6 +47,10 @@ fn main() {
 
     if is_windows {
         println!("cargo:rustc-link-lib=dylib=user32");
+        println!("cargo:rustc-link-lib=dylib=advapi32");
+        println!("cargo:rustc-link-lib=dylib=gdi32");
+        println!("cargo:rustc-link-lib=dylib=shell32");
+        println!("cargo:rustc-link-lib=dylib=comdlg32");
     }
 
     let mut build = cxx_build::bridge("src/lib.rs");
