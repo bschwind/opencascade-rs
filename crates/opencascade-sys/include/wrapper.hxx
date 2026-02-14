@@ -51,6 +51,9 @@
 #include <GeomAbs_JoinType.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BezierSurface.hxx>
+#include <Geom_BSplineCurve.hxx>
+#include <GeomConvert_CompCurveToBSplineCurve.hxx>
+#include <TColStd_Array1OfReal.hxx>
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
@@ -539,4 +542,106 @@ inline std::unique_ptr<gp_Pnt> Bnd_Box_CornerMax(const Bnd_Box &box) {
 // BRepBndLib
 inline void BRepBndLib_Add(const TopoDS_Shape &shape, Bnd_Box &box, const Standard_Boolean useTriangulation) {
   BRepBndLib::Add(shape, box, useTriangulation);
+}
+
+// ============================================================================
+// BSpline Curve Data Extraction
+// ============================================================================
+
+// Get the BSpline curve handle from an edge (if it is a BSpline)
+inline std::unique_ptr<HandleGeomBSplineCurve>
+Edge_BSplineCurve(const TopoDS_Edge &edge) {
+  Standard_Real first, last;
+  opencascade::handle<Geom_Curve> curve = BRep_Tool::Curve(edge, first, last);
+  if (curve.IsNull()) return nullptr;
+
+  // Try direct cast first
+  opencascade::handle<Geom_BSplineCurve> bspline =
+      opencascade::handle<Geom_BSplineCurve>::DownCast(curve);
+
+  if (bspline.IsNull()) {
+    // Convert via Geom_TrimmedCurve (which IS a Geom_BoundedCurve)
+    opencascade::handle<Geom_TrimmedCurve> trimmed =
+        new Geom_TrimmedCurve(curve, first, last);
+    GeomConvert_CompCurveToBSplineCurve converter;
+    if (converter.Add(trimmed, 1e-7)) {
+      bspline = converter.BSplineCurve();
+    }
+  }
+
+  if (bspline.IsNull()) return nullptr;
+  return std::unique_ptr<HandleGeomBSplineCurve>(new HandleGeomBSplineCurve(bspline));
+}
+
+// BSpline properties
+inline int32_t Geom_BSplineCurve_Degree(const HandleGeomBSplineCurve &handle) {
+  return handle->Degree();
+}
+
+inline int32_t Geom_BSplineCurve_NbPoles(const HandleGeomBSplineCurve &handle) {
+  return handle->NbPoles();
+}
+
+inline int32_t Geom_BSplineCurve_NbKnots(const HandleGeomBSplineCurve &handle) {
+  return handle->NbKnots();
+}
+
+inline bool Geom_BSplineCurve_IsRational(const HandleGeomBSplineCurve &handle) {
+  return handle->IsRational();
+}
+
+// Bulk extraction: copy all poles into flat array [x1,y1,z1,x2,y2,z2,...]
+// Caller must ensure out.size() >= NbPoles * 3
+inline void Geom_BSplineCurve_Poles(
+    const HandleGeomBSplineCurve &handle, rust::Slice<double> out) {
+  int32_t n = handle->NbPoles();
+  for (int32_t i = 1; i <= n && (i-1)*3+2 < static_cast<int32_t>(out.size()); ++i) {
+    gp_Pnt p = handle->Pole(i);
+    out[(i-1)*3]   = p.X();
+    out[(i-1)*3+1] = p.Y();
+    out[(i-1)*3+2] = p.Z();
+  }
+}
+
+// Bulk extraction: copy all knots (with multiplicities expanded)
+// Uses KnotSequence() which returns the flat knot vector
+// Caller must ensure out.size() >= NbPoles + Degree + 1
+inline void Geom_BSplineCurve_KnotSequence(
+    const HandleGeomBSplineCurve &handle, rust::Slice<double> out) {
+  const TColStd_Array1OfReal &seq = handle->KnotSequence();
+  int32_t len = seq.Length();
+  for (int32_t i = 0; i < len && i < static_cast<int32_t>(out.size()); ++i) {
+    out[i] = seq.Value(seq.Lower() + i);
+  }
+}
+
+// Bulk extraction: copy all weights
+// Caller must ensure out.size() >= NbPoles
+inline void Geom_BSplineCurve_Weights(
+    const HandleGeomBSplineCurve &handle, rust::Slice<double> out) {
+  int32_t n = handle->NbPoles();
+  for (int32_t i = 1; i <= n && (i-1) < static_cast<int32_t>(out.size()); ++i) {
+    out[i-1] = handle->Weight(i);
+  }
+}
+
+// Keep individual accessors for flexibility
+inline std::unique_ptr<gp_Pnt> Geom_BSplineCurve_Pole(
+    const HandleGeomBSplineCurve &handle, int32_t index) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(handle->Pole(index)));
+}
+
+inline double Geom_BSplineCurve_Knot(
+    const HandleGeomBSplineCurve &handle, int32_t index) {
+  return handle->Knot(index);
+}
+
+inline int32_t Geom_BSplineCurve_Multiplicity(
+    const HandleGeomBSplineCurve &handle, int32_t index) {
+  return handle->Multiplicity(index);
+}
+
+inline double Geom_BSplineCurve_Weight(
+    const HandleGeomBSplineCurve &handle, int32_t index) {
+  return handle->Weight(index);
 }
