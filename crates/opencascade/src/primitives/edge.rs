@@ -5,6 +5,16 @@ use opencascade_sys::ffi;
 
 use super::make_vec;
 
+/// B-spline curve data extracted from an Edge
+#[derive(Debug, Clone)]
+pub struct BSplineData {
+    pub degree: i32,
+    pub poles: Vec<DVec3>,
+    /// Flat knot vector (knots repeated by their multiplicities)
+    pub knots: Vec<f64>,
+    pub weights: Option<Vec<f64>>,
+}
+
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum EdgeType {
     Line,
@@ -162,6 +172,45 @@ impl Edge {
         let curve = ffi::BRepAdaptor_Curve_ctor(&self.inner);
 
         EdgeType::from(curve.GetType())
+    }
+
+    /// Extract B-spline curve data from this edge.
+    /// Returns None if the edge is not a B-spline or cannot be converted.
+    pub fn bspline_data(&self) -> Option<BSplineData> {
+        let bspline_handle = ffi::Edge_BSplineCurve(&self.inner);
+        if bspline_handle.is_null() {
+            return None;
+        }
+
+        let degree = ffi::Geom_BSplineCurve_Degree(&bspline_handle);
+        let nb_poles = ffi::Geom_BSplineCurve_NbPoles(&bspline_handle);
+        let is_rational = ffi::Geom_BSplineCurve_IsRational(&bspline_handle);
+
+        // Flat knot vector length = nb_poles + degree + 1
+        let nb_knots_flat = (nb_poles + degree + 1) as usize;
+
+        // Bulk extract poles as flat [x,y,z,x,y,z,...] array
+        let mut poles_flat = vec![0.0; nb_poles as usize * 3];
+        ffi::Geom_BSplineCurve_Poles(&bspline_handle, &mut poles_flat);
+
+        // Convert flat array to Vec<DVec3>
+        let poles: Vec<DVec3> =
+            poles_flat.chunks_exact(3).map(|c| dvec3(c[0], c[1], c[2])).collect();
+
+        // Bulk extract flat knot sequence
+        let mut knots = vec![0.0; nb_knots_flat];
+        ffi::Geom_BSplineCurve_KnotSequence(&bspline_handle, &mut knots);
+
+        // Bulk extract weights if rational
+        let weights = if is_rational {
+            let mut w = vec![0.0; nb_poles as usize];
+            ffi::Geom_BSplineCurve_Weights(&bspline_handle, &mut w);
+            Some(w)
+        } else {
+            None
+        };
+
+        Some(BSplineData { degree, poles, knots, weights })
     }
 }
 
