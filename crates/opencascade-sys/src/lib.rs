@@ -119,6 +119,7 @@ pub mod ffi {
 
         pub fn IsNull(self: &HandleStandardType) -> bool;
         pub fn IsNull(self: &HandleGeomCurve) -> bool;
+        pub fn IsNull(self: &HandleGeomBSplineCurve) -> bool;
         pub fn IsNull(self: &HandleGeomTrimmedCurve) -> bool;
         pub fn IsNull(self: &HandleGeomSurface) -> bool;
         pub fn IsNull(self: &HandleGeomBezierSurface) -> bool;
@@ -1130,6 +1131,27 @@ pub mod ffi {
             last: &mut f64,
         ) -> UniquePtr<HandleGeomCurve>;
         pub fn BRep_Tool_Pnt(vertex: &TopoDS_Vertex) -> UniquePtr<gp_Pnt>;
+
+        // BSpline curve data extraction
+        pub fn Edge_BSplineCurve(edge: &TopoDS_Edge) -> UniquePtr<HandleGeomBSplineCurve>;
+        pub fn Geom_BSplineCurve_Degree(handle: &HandleGeomBSplineCurve) -> i32;
+        pub fn Geom_BSplineCurve_NbPoles(handle: &HandleGeomBSplineCurve) -> i32;
+        pub fn Geom_BSplineCurve_NbKnots(handle: &HandleGeomBSplineCurve) -> i32;
+        pub fn Geom_BSplineCurve_IsRational(handle: &HandleGeomBSplineCurve) -> bool;
+
+        // Bulk extraction (more efficient - single FFI call)
+        pub fn Geom_BSplineCurve_Poles(handle: &HandleGeomBSplineCurve, out: &mut [f64]);
+        pub fn Geom_BSplineCurve_KnotSequence(handle: &HandleGeomBSplineCurve, out: &mut [f64]);
+        pub fn Geom_BSplineCurve_Weights(handle: &HandleGeomBSplineCurve, out: &mut [f64]);
+
+        // Individual accessors (for flexibility)
+        pub fn Geom_BSplineCurve_Pole(
+            handle: &HandleGeomBSplineCurve,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt>;
+        pub fn Geom_BSplineCurve_Knot(handle: &HandleGeomBSplineCurve, index: i32) -> f64;
+        pub fn Geom_BSplineCurve_Multiplicity(handle: &HandleGeomBSplineCurve, index: i32) -> i32;
+        pub fn Geom_BSplineCurve_Weight(handle: &HandleGeomBSplineCurve, index: i32) -> f64;
         pub fn BRep_Tool_Triangulation(
             face: &TopoDS_Face,
             location: Pin<&mut TopLoc_Location>,
