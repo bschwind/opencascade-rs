@@ -42,6 +42,7 @@ impl Mesher {
 
             let triangulation_handle =
                 ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
+            let transform = ffi::TopLoc_Location_Transformation(&location);
 
             let triangulation = ffi::HandlePoly_Triangulation_Get(&triangulation_handle)
                 .map_err(|_| Error::UntriangulatedFace)?;
@@ -51,7 +52,7 @@ impl Mesher {
 
             for i in 1..=face_point_count {
                 let mut point = ffi::Poly_Triangulation_Node(triangulation, i);
-                point.pin_mut().Transform(&ffi::TopLoc_Location_Transformation(&location));
+                point.pin_mut().Transform(&transform);
                 vertices.push(dvec3(point.X(), point.Y(), point.Z()));
             }
 
@@ -85,15 +86,16 @@ impl Mesher {
             }
 
             // Add in the normals.
-            // TODO(bschwind) - Use `location` to transform the normals.
             let normal_array = ffi::TColgp_Array1OfDir_ctor(0, face_point_count);
 
             ffi::compute_normals(&face.inner, &triangulation_handle);
 
             // TODO(bschwind) - Why do we start at 1 here?
             for i in 1..(normal_array.Length() as usize) {
-                let normal = ffi::Poly_Triangulation_Normal(triangulation, i as i32);
-                normals.push(dvec3(normal.X(), normal.Y(), normal.Z()));
+                let mut normal = ffi::Poly_Triangulation_Normal(triangulation, i as i32);
+                normal.pin_mut().Transform(&transform);
+                let m = if face.orientation() == FaceOrientation::Forward { 1. } else { -1. };
+                normals.push(dvec3(normal.X() * m, normal.Y() * m, normal.Z() * m));
             }
 
             for i in 1..=triangulation.NbTriangles() {
