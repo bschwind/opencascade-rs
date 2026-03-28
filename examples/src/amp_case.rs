@@ -5,12 +5,16 @@ use opencascade::{
 };
 
 pub fn shape() -> Shape {
+    let tolerance = 0.3;
+
     // The origin of the coordinate system is the closest bottom left corner of
     // the PC box, when viewing its ports from behind.
     let case_thickness = 1.5;
-    let case_width = 89.0; // Measured 88.0
+    let case_width = 88.5;
+    let case_width = case_width + tolerance;
     let case_height = 50.0; // Not measured, arbitrary value
-    let case_depth = 39.0; // measured 38.05;
+    let case_depth = 38.5; // measured 38.05;
+    let case_depth = case_depth + tolerance;
 
     let lip_thickness = 2.0;
 
