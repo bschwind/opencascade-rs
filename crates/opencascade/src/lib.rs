@@ -10,6 +10,7 @@ pub mod workplane;
 
 mod law_function;
 mod make_pipe_shell;
+pub mod tdf;
 
 #[derive(Error, Debug)]
 pub enum Error {

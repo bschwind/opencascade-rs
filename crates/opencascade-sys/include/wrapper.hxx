@@ -79,6 +79,8 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
+#include <TDF_Data.hxx>
+#include <TDF_Label.hxx>
 #include <gp.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Ax3.hxx>
@@ -87,6 +89,24 @@
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
+
+// BEGIN Tdf stuff
+inline std::unique_ptr<TDF_Data> TDF_Data_new() {
+    return std::unique_ptr<TDF_Data>(new TDF_Data());
+}
+
+inline std::unique_ptr<TDF_Label> TDF_Data_root(const TDF_Data& data) {
+    return std::unique_ptr<TDF_Label>(new TDF_Label(data.Root()));
+}
+
+inline std::unique_ptr<TDF_Label> TDF_Label_new_child(const TDF_Label& label) {
+    return std::unique_ptr<TDF_Label>(new TDF_Label(label.NewChild()));
+}
+
+inline bool TDF_Label_is_null(const TDF_Label& label) {
+    return label.IsNull();
+}
+// END Tdf stuff
 
 // Generic template constructor
 template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
