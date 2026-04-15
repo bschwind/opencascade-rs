@@ -82,6 +82,7 @@
 #include <TDF_Data.hxx>
 #include <TDF_Label.hxx>
 #include <TDF_Delta.hxx>
+#include <TDF_Transaction.hxx>
 #include <gp.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Ax3.hxx>
@@ -109,6 +110,25 @@ inline std::unique_ptr<TDF_Label> TDF_Label_new_child(const TDF_Label& label) {
 
 inline bool TDF_Label_is_null(const TDF_Label& label) {
     return label.IsNull();
+}
+inline std::unique_ptr<TDF_Transaction> TDF_Transaction_new(const HandleTdfData& data) {
+    return std::unique_ptr<TDF_Transaction>(new TDF_Transaction(data));
+}
+
+inline Standard_Integer TDF_Transaction_open(TDF_Transaction& transaction) {
+    return transaction.Open();
+}
+
+inline std::unique_ptr<HandleTdfDelta> TDF_Transaction_commit(TDF_Transaction& transaction) {
+    return std::unique_ptr<HandleTdfDelta>(new opencascade::handle<TDF_Delta>(transaction.Commit(true)));
+}
+
+inline void TDF_Transaction_abort(TDF_Transaction& transaction) {
+    transaction.Abort();
+}
+
+inline bool TDF_Transaction_is_open(const TDF_Transaction& transaction) {
+    return transaction.IsOpen();
 }
 // END Tdf stuff
 

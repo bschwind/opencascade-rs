@@ -77,11 +77,18 @@ pub mod ffi {
         // TDF_Data management
         type HandleTdfData;
         type TDF_Label;
+        type TDF_Transaction;
+        type HandleTdfDelta;
 
         pub fn TDF_Data_new() -> UniquePtr<HandleTdfData>;
         pub fn TDF_Data_root(data: &HandleTdfData) -> UniquePtr<TDF_Label>;
         pub fn TDF_Label_new_child(label: &TDF_Label) -> UniquePtr<TDF_Label>;
         pub fn TDF_Label_is_null(label: &TDF_Label) -> bool;
+        pub fn TDF_Transaction_new(data: &HandleTdfData) -> UniquePtr<TDF_Transaction>;
+        pub fn TDF_Transaction_open(transaction: Pin<&mut TDF_Transaction>) -> i32;
+        pub fn TDF_Transaction_commit(transaction: Pin<&mut TDF_Transaction>) -> UniquePtr<HandleTdfDelta>;
+        pub fn TDF_Transaction_abort(transaction: Pin<&mut TDF_Transaction>);
+        pub fn TDF_Transaction_is_open(transaction: &TDF_Transaction) -> bool;
 
         // Handles
         type HandleStandardType;
