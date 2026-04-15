@@ -81,6 +81,7 @@
 #include <TopoDS_Shape.hxx>
 #include <TDF_Data.hxx>
 #include <TDF_Label.hxx>
+#include <TDF_Delta.hxx>
 #include <gp.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Ax3.hxx>
@@ -91,12 +92,15 @@
 #include <gp_Vec.hxx>
 
 // BEGIN Tdf stuff
-inline std::unique_ptr<TDF_Data> TDF_Data_new() {
-    return std::unique_ptr<TDF_Data>(new TDF_Data());
+typedef opencascade::handle<TDF_Data> HandleTdfData;
+typedef opencascade::handle<TDF_Delta> HandleTdfDelta;
+
+inline std::unique_ptr<HandleTdfData> TDF_Data_new() {
+    return std::unique_ptr<HandleTdfData>(new opencascade::handle<TDF_Data>(new TDF_Data()));
 }
 
-inline std::unique_ptr<TDF_Label> TDF_Data_root(const TDF_Data& data) {
-    return std::unique_ptr<TDF_Label>(new TDF_Label(data.Root()));
+inline std::unique_ptr<TDF_Label> TDF_Data_root(const HandleTdfData& data) {
+    return std::unique_ptr<TDF_Label>(new TDF_Label(data->Root()));
 }
 
 inline std::unique_ptr<TDF_Label> TDF_Label_new_child(const TDF_Label& label) {

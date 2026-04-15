@@ -10,22 +10,16 @@ use std::marker::PhantomData;
 /// };
 /// ```
 pub struct TdfData {
-    inner: UniquePtr<ffi::TDF_Data>,
+    inner: UniquePtr<ffi::HandleTdfData>,
 }
-
 
 impl TdfData {
     pub fn new() -> Self {
-        Self {
-            inner: ffi::TDF_Data_new(),
-        }
+        Self { inner: ffi::TDF_Data_new() }
     }
 
     pub fn root(&self) -> TdfLabel<'_> {
-        TdfLabel {
-            inner: ffi::TDF_Data_root(self.inner.as_ref().unwrap()),
-            _phantom: PhantomData,
-        }
+        TdfLabel { inner: ffi::TDF_Data_root(self.inner.as_ref().unwrap()), _phantom: PhantomData }
     }
 }
 
@@ -51,6 +45,11 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_tdf_data_constructs() {
+        let doc = TdfData::new();
+        drop(doc);
+    }
+    #[test]
     fn test_tdf_data_root_is_not_null() {
         let doc = TdfData::new();
         let root = doc.root();
@@ -65,5 +64,4 @@ mod tests {
         assert!(!root.is_null());
         // drop(child);
     }
-
 }

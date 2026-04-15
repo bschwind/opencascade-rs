@@ -75,11 +75,11 @@ pub mod ffi {
         pub fn Message_ProgressRange_ctor() -> UniquePtr<Message_ProgressRange>;
 
         // TDF_Data management
-        type TDF_Data;
+        type HandleTdfData;
         type TDF_Label;
 
-        pub fn TDF_Data_new() -> UniquePtr<TDF_Data>;
-        pub fn TDF_Data_root(data: &TDF_Data) -> UniquePtr<TDF_Label>;
+        pub fn TDF_Data_new() -> UniquePtr<HandleTdfData>;
+        pub fn TDF_Data_root(data: &HandleTdfData) -> UniquePtr<TDF_Label>;
         pub fn TDF_Label_new_child(label: &TDF_Label) -> UniquePtr<TDF_Label>;
         pub fn TDF_Label_is_null(label: &TDF_Label) -> bool;
 
