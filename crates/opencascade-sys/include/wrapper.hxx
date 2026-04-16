@@ -83,6 +83,9 @@
 #include <TDF_Label.hxx>
 #include <TDF_Delta.hxx>
 #include <TDF_Transaction.hxx>
+#include <TNaming_Builder.hxx>
+#include <TNaming_NamedShape.hxx>
+#include <TNaming_Tool.hxx>
 #include <gp.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Ax3.hxx>
@@ -130,6 +133,65 @@ inline void TDF_Transaction_abort(TDF_Transaction& transaction) {
 inline bool TDF_Transaction_is_open(const TDF_Transaction& transaction) {
     return transaction.IsOpen();
 }
+inline std::unique_ptr<HandleTdfDelta> TDF_Data_undo(
+    HandleTdfData& data,
+    const HandleTdfDelta& delta
+) {
+    return std::unique_ptr<HandleTdfDelta>(
+        new HandleTdfDelta(data->Undo(delta, Standard_True))
+    );
+}
+
+inline std::unique_ptr<TopoDS_Shape> TNaming_NamedShape_Get(
+    const Handle_TNaming_NamedShape& ns
+) {
+    return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(ns->Get()));
+}
+
+// BEGIN TNaming section of Tdf stuff
+
+
+
+inline std::unique_ptr<TNaming_Builder> TNaming_Builder_ctor(const TDF_Label& label) {
+    return std::unique_ptr<TNaming_Builder>(new TNaming_Builder(label));
+}
+
+inline void TNaming_Builder_generated(TNaming_Builder& builder, const TopoDS_Shape& newShape) {
+    builder.Generated(newShape);
+}
+
+inline void TNaming_Builder_generated_with_old(TNaming_Builder& builder, const TopoDS_Shape& oldShape, const TopoDS_Shape& newShape) {
+    builder.Generated(oldShape, newShape);
+}
+
+inline void TNaming_Builder_modify(TNaming_Builder& builder, const TopoDS_Shape& oldShape, const TopoDS_Shape& newShape) {
+    builder.Modify(oldShape, newShape);
+}
+
+inline void TNaming_Builder_delete(TNaming_Builder& builder, const TopoDS_Shape& oldShape) {
+    builder.Delete(oldShape);
+}
+
+inline void TNaming_Builder_select(TNaming_Builder& builder, const TopoDS_Shape& shape, const TopoDS_Shape& inShape) {
+    builder.Select(shape, inShape);
+}
+
+inline std::unique_ptr<Handle_TNaming_NamedShape> TNaming_Builder_named_shape(
+    const TNaming_Builder& builder
+) {
+    return std::unique_ptr<Handle_TNaming_NamedShape>(
+        new Handle_TNaming_NamedShape(builder.NamedShape())
+    );
+}
+
+inline std::unique_ptr<TopoDS_Shape> TNaming_Tool_original_shape(
+    const Handle_TNaming_NamedShape& ns
+) {
+    return std::unique_ptr<TopoDS_Shape>(
+        new TopoDS_Shape(TNaming_Tool::OriginalShape(ns))
+    );
+}
+// END TNaming section of Tdf stuff
 // END Tdf stuff
 
 // Generic template constructor

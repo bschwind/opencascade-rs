@@ -678,6 +678,14 @@ impl Shape {
         Self::from_shape(upgrader.Shape())
     }
 
+    /// Reads the translation component of this shape's location transform.
+    /// For shapes with composed locations (e.g. nested assemblies), this
+    /// reflects the full composed transform, not just the outermost translation.
+    pub fn translation(&self) -> DVec3 {
+        let location = self.inner.as_ref().unwrap().Location();
+        let trsf = ffi::TopLoc_Location_Transformation(&location);
+        DVec3::new(trsf.Value(1, 4), trsf.Value(2, 4), trsf.Value(3, 4))
+    }
     pub fn set_global_translation(&mut self, translation: DVec3) {
         let mut transform = ffi::new_transform();
         let translation_vec = make_vec(translation);

@@ -86,9 +86,50 @@ pub mod ffi {
         pub fn TDF_Label_is_null(label: &TDF_Label) -> bool;
         pub fn TDF_Transaction_new(data: &HandleTdfData) -> UniquePtr<TDF_Transaction>;
         pub fn TDF_Transaction_open(transaction: Pin<&mut TDF_Transaction>) -> i32;
-        pub fn TDF_Transaction_commit(transaction: Pin<&mut TDF_Transaction>) -> UniquePtr<HandleTdfDelta>;
+        pub fn TDF_Transaction_commit(
+            transaction: Pin<&mut TDF_Transaction>,
+        ) -> UniquePtr<HandleTdfDelta>;
         pub fn TDF_Transaction_abort(transaction: Pin<&mut TDF_Transaction>);
         pub fn TDF_Transaction_is_open(transaction: &TDF_Transaction) -> bool;
+        pub fn TDF_Data_undo(
+            data: Pin<&mut HandleTdfData>,
+            delta: &HandleTdfDelta,
+        ) -> UniquePtr<HandleTdfDelta>;
+
+        // TNaming
+        type TNaming_Builder;
+
+        pub fn TNaming_Builder_ctor(label: &TDF_Label) -> UniquePtr<TNaming_Builder>;
+        pub fn TNaming_Builder_generated(
+            builder: Pin<&mut TNaming_Builder>,
+            new_shape: &TopoDS_Shape,
+        );
+        pub fn TNaming_Builder_generated_with_old(
+            builder: Pin<&mut TNaming_Builder>,
+            old_shape: &TopoDS_Shape,
+            new_shape: &TopoDS_Shape,
+        );
+        pub fn TNaming_Builder_modify(
+            builder: Pin<&mut TNaming_Builder>,
+            old_shape: &TopoDS_Shape,
+            new_shape: &TopoDS_Shape,
+        );
+        pub fn TNaming_Builder_delete(builder: Pin<&mut TNaming_Builder>, old_shape: &TopoDS_Shape);
+        pub fn TNaming_Builder_select(
+            builder: Pin<&mut TNaming_Builder>,
+            shape: &TopoDS_Shape,
+            in_shape: &TopoDS_Shape,
+        );
+        type Handle_TNaming_NamedShape;
+
+        pub fn TNaming_Builder_named_shape(
+            builder: &TNaming_Builder,
+        ) -> UniquePtr<Handle_TNaming_NamedShape>;
+
+        pub fn TNaming_Tool_original_shape(
+            ns: &Handle_TNaming_NamedShape,
+        ) -> UniquePtr<TopoDS_Shape>;
+        pub fn TNaming_NamedShape_Get(ns: &Handle_TNaming_NamedShape) -> UniquePtr<TopoDS_Shape>;
 
         // Handles
         type HandleStandardType;
@@ -478,7 +519,9 @@ pub mod ffi {
 
         pub fn IsNull(self: &TopoDS_Shape) -> bool;
         pub fn IsEqual(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
+        pub fn IsSame(self: &TopoDS_Shape, other: &TopoDS_Shape) -> bool;
         pub fn ShapeType(self: &TopoDS_Shape) -> TopAbs_ShapeEnum;
+        pub fn Location(self: &TopoDS_Shape) -> &TopLoc_Location;
 
         type TopAbs_Orientation;
         pub fn Orientation(self: &TopoDS_Shape) -> TopAbs_Orientation;
@@ -1262,6 +1305,7 @@ pub mod ffi {
         pub fn IsDone(self: &BRepMesh_IncrementalMesh) -> bool;
 
         type TopLoc_Location;
+        pub fn IsIdentity(self: &TopLoc_Location) -> bool;
         #[cxx_name = "construct_unique"]
         pub fn TopLoc_Location_ctor() -> UniquePtr<TopLoc_Location>;
 
