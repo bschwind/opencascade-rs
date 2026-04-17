@@ -27,7 +27,7 @@ enum Format {
 
 fn main() {
     let args = Args::parse();
-    let model = args.example.shape();
+    let model = args.example.shape().unwrap();
 
     let format = args.format.unwrap_or_else(|| {
         let extension = args.output.extension().unwrap_or_else(|| {

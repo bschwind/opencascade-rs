@@ -556,6 +556,18 @@ inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFi
 }
 
 // Chamfers
+inline void BRepFilletAPI_MakeChamfer_Build_safe(
+    BRepFilletAPI_MakeChamfer& self,
+    const Message_ProgressRange& pr
+) {
+    try {
+        self.Build(pr);
+    } catch (const Standard_Failure& e) {
+        std::string msg = "OCCT: ";
+        msg += e.GetMessageString() ? e.GetMessageString() : "(no message)";
+        throw std::runtime_error(msg);
+    }
+}
 inline std::unique_ptr<TopoDS_Edge>
 BRepFilletAPI_MakeFillet2d_add_chamfer(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Edge &edge1,
                                        const TopoDS_Edge &edge2, const Standard_Real dist1, const Standard_Real dist2) {

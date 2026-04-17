@@ -79,7 +79,7 @@ struct SupportPost {
 }
 
 impl SupportPost {
-    fn shape(&self) -> Shape {
+    fn shape(&self) -> Result<Shape, opencascade::Error> {
         let bottom_z = CASE_FLOOR_Z;
         let top_z = TOP_PLATE_BOTTOM_Z;
 
@@ -121,7 +121,7 @@ impl SupportPost {
             },
         };
 
-        cylinder.union(&box_part).subtract(&m2_drill_hole).into()
+        Ok(cylinder.union(&box_part).subtract(&m2_drill_hole).into())
     }
 }
 
@@ -183,7 +183,7 @@ const PINHOLE_BUTTON_RADIUS: f64 = 1.1;
 
 const PINHOLE_LOCATIONS: &[DVec2] = &[DVec2::new(35.85, -53.95), DVec2::new(8.425, -86.075)];
 
-fn case_outer_box() -> Shape {
+fn case_outer_box() -> Result<Shape, opencascade::Error> {
     let mut workplane = Workplane::xy();
     workplane.set_translation(dvec3(0.0, 0.0, CASE_BOTTOM_Z));
 
@@ -392,13 +392,13 @@ fn push_slot(center: DVec2) -> Shape {
         .into()
 }
 
-pub fn shape() -> Shape {
+pub fn shape() -> Result<Shape, opencascade::Error> {
     let inner_box = case_inner_box();
     let top_shelf = pcb_top_shelf();
     let bottom_shelf = pcb_bottom_shelf();
     let usb_cutout = usb_connector_cutout();
 
-    let case = case_outer_box()
+    let case = case_outer_box()?
         .subtract(&inner_box)
         .fillet_new_edges(0.3)
         .union(&top_shelf)
@@ -410,12 +410,12 @@ pub fn shape() -> Shape {
         .filter(|e| e.start_point().y > 0.0) // Only chamfer edges on the exterior of the case
         .collect();
 
-    let case = case.chamfer_edges(1.0, new_edges);
+    let case = case.chamfer_edges(1.0, new_edges)?;
 
     let mut case = case.into_shape();
 
     for support_post in SUPPORT_POSTS {
-        case = case.union(&support_post.shape()).into();
+        case = case.union(&support_post.shape()?).into();
     }
 
     let usb_overhang = pcb_usb_overhang();
@@ -473,7 +473,7 @@ pub fn shape() -> Shape {
 
     // test_plate.into()
 
-    case.write_step("keyboard.step").unwrap();
-    feet.write_step("case_feet.step").unwrap();
-    case
+    case.write_step("keyboard.step")?;
+    feet.write_step("case_feet.step")?;
+    Ok(case)
 }

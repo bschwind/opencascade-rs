@@ -1,6 +1,6 @@
 use opencascade::primitives::Shape;
 
-pub fn shape() -> Shape {
+pub fn shape() -> Result<Shape, opencascade::Error> {
     let my_box = Shape::box_with_dimensions(10.0, 10.0, 1.0);
     let another_box = Shape::box_with_dimensions(1.0, 1.0, 0.8);
 

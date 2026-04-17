@@ -7,6 +7,7 @@ use crate::{
     Error,
 };
 use cxx::UniquePtr;
+use ffi::BRepFilletAPI_MakeChamfer_Build_safe;
 use glam::{dvec2, dvec3, DVec3};
 use opencascade_sys::ffi;
 use std::path::Path;
@@ -414,7 +415,7 @@ impl Shape {
     }
 
     #[must_use]
-    pub fn chamfer_edge(&self, distance: f64, edge: &Edge) -> Self {
+    pub fn chamfer_edge(&self, distance: f64, edge: &Edge) -> Result<Self, crate::Error> {
         self.chamfer_edges(distance, [edge])
     }
 
@@ -460,14 +461,22 @@ impl Shape {
         &self,
         distance: f64,
         edges: impl IntoIterator<Item = T>,
-    ) -> Self {
+    ) -> Result<Self, crate::Error> {
         let mut make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
 
         for edge in edges.into_iter() {
             make_chamfer.pin_mut().add_edge(distance, &edge.as_ref().inner);
         }
+        ffi::BRepFilletAPI_MakeChamfer_Build_safe(
+            make_chamfer.pin_mut(),
+            &ffi::Message_ProgressRange_ctor(),
+        )
+        .map_err(|e| crate::Error::ChamferFailed(e.what().to_string()))?;
+        if !make_chamfer.IsDone() {
+            return Err(crate::Error::ChamferFailed("IsDone = false".to_string()));
+        }
 
-        Self::from_shape(make_chamfer.pin_mut().Shape())
+        Ok(Self::from_shape(make_chamfer.pin_mut().Shape()))
     }
 
     /// Performs fillet of `radius` on all edges of the shape
@@ -478,7 +487,7 @@ impl Shape {
 
     /// Performs chamfer of `distance` on all edges of the shape
     #[must_use]
-    pub fn chamfer(&self, distance: f64) -> Self {
+    pub fn chamfer(&self, distance: f64) -> Result<Self, crate::Error> {
         self.chamfer_edges(distance, self.edges())
     }
 

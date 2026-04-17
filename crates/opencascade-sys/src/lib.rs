@@ -832,7 +832,10 @@ pub mod ffi {
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeChamfer>, distance: f64, edge: &TopoDS_Edge);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeChamfer>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeChamfer>, progress: &Message_ProgressRange);
+        pub fn BRepFilletAPI_MakeChamfer_Build_safe(
+            self_: Pin<&mut BRepFilletAPI_MakeChamfer>,
+            progress: &Message_ProgressRange,
+        ) -> Result<()>;
         pub fn IsDone(self: &BRepFilletAPI_MakeChamfer) -> bool;
 
         // Offset
