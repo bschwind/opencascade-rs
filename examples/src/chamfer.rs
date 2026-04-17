@@ -4,7 +4,7 @@ use opencascade::{
     workplane::Workplane,
 };
 
-pub fn shape() -> Shape {
+pub fn shape() -> Result<Shape, opencascade::Error> {
     // A tapering chamfer from bottom to top 2->1
     let base = Workplane::xy().rect(10.0, 10.0).chamfer(2.0);
     let top = Workplane::xy().rect(10.0, 10.0).translate(dvec3(0.0, 0.0, 10.0)).chamfer(1.0);
@@ -16,7 +16,7 @@ pub fn shape() -> Shape {
     let handle_face = Face::from_wire(&handle);
 
     let handle_body = handle_face.extrude(dvec3(0.0, 0.0, -10.1));
-    let chamfered_shape = chamfered_box.union(&handle_body).chamfer_new_edges(0.5);
+    let chamfered_shape = chamfered_box.union(&handle_body).chamfer_new_edges(0.5)?;
 
     // Chamfer the top of the protrusion
     let top_edges = chamfered_shape

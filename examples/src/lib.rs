@@ -53,23 +53,23 @@ pub enum Example {
 }
 
 impl Example {
-    pub fn shape(self) -> Shape {
-        match self {
+    pub fn shape(self) -> Result<Shape, opencascade::Error> {
+        let res = match self {
             Example::Airfoil => airfoil::shape(),
             Example::BoundingBox => bounding_box::shape(),
-            Example::CableBracket => cable_bracket::shape(),
-            Example::BoxShape => box_shape::shape(),
-            Example::Chamfer => chamfer::shape(),
+            Example::CableBracket => cable_bracket::shape()?,
+            Example::BoxShape => box_shape::shape()?,
+            Example::Chamfer => chamfer::shape()?,
             Example::FlatEthernetBracket => flat_ethernet_bracket::shape(),
             Example::Gizmo => gizmo::shape(),
             Example::HeaterCoil => heater_coil::shape(),
             Example::HighLevelBottle => high_level_bottle::shape(),
-            Example::KeyboardCase => keyboard_case::shape(),
-            Example::Keycap => keycap::shape(),
+            Example::KeyboardCase => keyboard_case::shape()?,
+            Example::Keycap => keycap::shape()?,
             Example::LetterA => letter_a::shape(),
             Example::Offset2d => offset_2d::shape(),
             Example::Pentafoil => pentafoil::shape(),
-            Example::RoundedChamfer => rounded_chamfer::shape(),
+            Example::RoundedChamfer => rounded_chamfer::shape()?,
             Example::Section => section::shape(),
             Example::SweptFace => swept_face::shape(),
             Example::SweptFaceVariable => swept_face_variable::shape(),
@@ -78,6 +78,7 @@ impl Example {
             Example::TurnersCube => turners_cube::shape(),
             Example::VariableFillet => variable_fillet::shape(),
             Example::ZboxCase => zbox_case::shape(),
-        }
+        };
+    Ok(res)
     }
 }

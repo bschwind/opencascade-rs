@@ -79,6 +79,13 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
+#include <TDF_Data.hxx>
+#include <TDF_Label.hxx>
+#include <TDF_Delta.hxx>
+#include <TDF_Transaction.hxx>
+#include <TNaming_Builder.hxx>
+#include <TNaming_NamedShape.hxx>
+#include <TNaming_Tool.hxx>
 #include <gp.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Ax3.hxx>
@@ -87,6 +94,105 @@
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
+
+// BEGIN Tdf stuff
+typedef opencascade::handle<TDF_Data> HandleTdfData;
+typedef opencascade::handle<TDF_Delta> HandleTdfDelta;
+
+inline std::unique_ptr<HandleTdfData> TDF_Data_new() {
+    return std::unique_ptr<HandleTdfData>(new opencascade::handle<TDF_Data>(new TDF_Data()));
+}
+
+inline std::unique_ptr<TDF_Label> TDF_Data_root(const HandleTdfData& data) {
+    return std::unique_ptr<TDF_Label>(new TDF_Label(data->Root()));
+}
+
+inline std::unique_ptr<TDF_Label> TDF_Label_new_child(const TDF_Label& label) {
+    return std::unique_ptr<TDF_Label>(new TDF_Label(label.NewChild()));
+}
+
+inline bool TDF_Label_is_null(const TDF_Label& label) {
+    return label.IsNull();
+}
+inline std::unique_ptr<TDF_Transaction> TDF_Transaction_new(const HandleTdfData& data) {
+    return std::unique_ptr<TDF_Transaction>(new TDF_Transaction(data));
+}
+
+inline Standard_Integer TDF_Transaction_open(TDF_Transaction& transaction) {
+    return transaction.Open();
+}
+
+inline std::unique_ptr<HandleTdfDelta> TDF_Transaction_commit(TDF_Transaction& transaction) {
+    return std::unique_ptr<HandleTdfDelta>(new opencascade::handle<TDF_Delta>(transaction.Commit(true)));
+}
+
+inline void TDF_Transaction_abort(TDF_Transaction& transaction) {
+    transaction.Abort();
+}
+
+inline bool TDF_Transaction_is_open(const TDF_Transaction& transaction) {
+    return transaction.IsOpen();
+}
+inline std::unique_ptr<HandleTdfDelta> TDF_Data_undo(
+    HandleTdfData& data,
+    const HandleTdfDelta& delta
+) {
+    return std::unique_ptr<HandleTdfDelta>(
+        new HandleTdfDelta(data->Undo(delta, Standard_True))
+    );
+}
+
+inline std::unique_ptr<TopoDS_Shape> TNaming_NamedShape_Get(
+    const Handle_TNaming_NamedShape& ns
+) {
+    return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(ns->Get()));
+}
+
+// BEGIN TNaming section of Tdf stuff
+
+
+
+inline std::unique_ptr<TNaming_Builder> TNaming_Builder_ctor(const TDF_Label& label) {
+    return std::unique_ptr<TNaming_Builder>(new TNaming_Builder(label));
+}
+
+inline void TNaming_Builder_generated(TNaming_Builder& builder, const TopoDS_Shape& newShape) {
+    builder.Generated(newShape);
+}
+
+inline void TNaming_Builder_generated_with_old(TNaming_Builder& builder, const TopoDS_Shape& oldShape, const TopoDS_Shape& newShape) {
+    builder.Generated(oldShape, newShape);
+}
+
+inline void TNaming_Builder_modify(TNaming_Builder& builder, const TopoDS_Shape& oldShape, const TopoDS_Shape& newShape) {
+    builder.Modify(oldShape, newShape);
+}
+
+inline void TNaming_Builder_delete(TNaming_Builder& builder, const TopoDS_Shape& oldShape) {
+    builder.Delete(oldShape);
+}
+
+inline void TNaming_Builder_select(TNaming_Builder& builder, const TopoDS_Shape& shape, const TopoDS_Shape& inShape) {
+    builder.Select(shape, inShape);
+}
+
+inline std::unique_ptr<Handle_TNaming_NamedShape> TNaming_Builder_named_shape(
+    const TNaming_Builder& builder
+) {
+    return std::unique_ptr<Handle_TNaming_NamedShape>(
+        new Handle_TNaming_NamedShape(builder.NamedShape())
+    );
+}
+
+inline std::unique_ptr<TopoDS_Shape> TNaming_Tool_original_shape(
+    const Handle_TNaming_NamedShape& ns
+) {
+    return std::unique_ptr<TopoDS_Shape>(
+        new TopoDS_Shape(TNaming_Tool::OriginalShape(ns))
+    );
+}
+// END TNaming section of Tdf stuff
+// END Tdf stuff
 
 // Generic template constructor
 template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
@@ -450,6 +556,18 @@ inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFi
 }
 
 // Chamfers
+inline void BRepFilletAPI_MakeChamfer_Build_safe(
+    BRepFilletAPI_MakeChamfer& self,
+    const Message_ProgressRange& pr
+) {
+    try {
+        self.Build(pr);
+    } catch (const Standard_Failure& e) {
+        std::string msg = "OCCT: ";
+        msg += e.GetMessageString() ? e.GetMessageString() : "(no message)";
+        throw std::runtime_error(msg);
+    }
+}
 inline std::unique_ptr<TopoDS_Edge>
 BRepFilletAPI_MakeFillet2d_add_chamfer(BRepFilletAPI_MakeFillet2d &make_fillet, const TopoDS_Edge &edge1,
                                        const TopoDS_Edge &edge2, const Standard_Real dist1, const Standard_Real dist2) {

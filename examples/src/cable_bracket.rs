@@ -5,7 +5,7 @@ use opencascade::{
 };
 use std::f64::consts::PI;
 
-pub fn shape() -> Shape {
+pub fn shape() -> Result<Shape, opencascade::Error> {
     let width = 15.0;
     let thickness = 2.5;
     let cable_radius = 6.0 / 2.0;
@@ -60,12 +60,12 @@ pub fn shape() -> Shape {
             3.0,
         );
 
-        bracket = bracket.subtract(&cylinder).chamfer_new_edges(0.3);
+        bracket = bracket.subtract(&cylinder).chamfer_new_edges(0.3)?;
     }
 
     for x_pos in [drill_point, -drill_point] {
         bracket = bracket.drill_hole(dvec3(-x_pos, 0.0, 0.0), DVec3::Z, thumbtack_pin_radius);
     }
 
-    bracket
+    Ok(bracket)
 }

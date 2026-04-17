@@ -164,7 +164,7 @@ impl GameApp for ViewerApp {
 
             // pcb.edge_cuts().to_face().extrude(glam::dvec3(0.0, 0.0, 1.6)).into()
         } else if let Some(example) = args.example {
-            example.shape()
+            example.shape().unwrap()
         } else if let Some(wasm_path) = args.wasm_path {
             let engine = WasmEngine::new(wasm_path);
             let shape = engine.shape();

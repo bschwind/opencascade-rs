@@ -41,7 +41,7 @@ impl BooleanShape {
     }
 
     #[must_use]
-    pub fn chamfer_new_edges(&self, distance: f64) -> Shape {
+    pub fn chamfer_new_edges(&self, distance: f64) -> Result<Shape, crate::Error> {
         self.shape.chamfer_edges(distance, &self.new_edges)
     }
 }
