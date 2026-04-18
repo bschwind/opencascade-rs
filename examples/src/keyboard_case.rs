@@ -26,7 +26,7 @@ const ORIGIN: DVec3 = DVec3::new(0.0, 0.0, 0.0);
 
 // Case
 const CASE_WALL_THICKNESS: f64 = 3.5;
-const CASE_LIP_HEIGHT: f64 = 1.0;
+const CASE_LIP_HEIGHT: f64 = 11.0;
 
 const CASE_TOP: f64 = PCB_TOP + CASE_WALL_THICKNESS;
 const CASE_TOP_Z: f64 = TOP_PLATE_TOP_Z + CASE_LIP_HEIGHT;
@@ -394,52 +394,52 @@ fn push_slot(center: DVec2) -> Shape {
 
 pub fn shape() -> Shape {
     let inner_box = case_inner_box();
-    let top_shelf = pcb_top_shelf();
-    let bottom_shelf = pcb_bottom_shelf();
-    let usb_cutout = usb_connector_cutout();
+    // let top_shelf = pcb_top_shelf();
+    // let bottom_shelf = pcb_bottom_shelf();
+    // let usb_cutout = usb_connector_cutout();
 
     let case = case_outer_box()
         .subtract(&inner_box)
-        .fillet_new_edges(0.3)
-        .union(&top_shelf)
-        .union(&bottom_shelf)
-        .subtract(&usb_cutout);
+        .fillet_new_edges(0.3);
+        // .union(&top_shelf)
+        // .union(&bottom_shelf)
+        // .subtract(&usb_cutout);
 
-    let new_edges: Vec<_> = case
-        .new_edges()
-        .filter(|e| e.start_point().y > 0.0) // Only chamfer edges on the exterior of the case
-        .collect();
+    // let new_edges: Vec<_> = case
+    //     .new_edges()
+    //     .filter(|e| e.start_point().y > 0.0) // Only chamfer edges on the exterior of the case
+    //     .collect();
 
-    let case = case.chamfer_edges(1.0, new_edges);
+    // let case = case.chamfer_edges(1.0, new_edges);
 
     let mut case = case.into_shape();
 
-    for support_post in SUPPORT_POSTS {
-        case = case.union(&support_post.shape()).into();
-    }
+    // for support_post in SUPPORT_POSTS {
+    //     case = case.union(&support_post.shape()).into();
+    // }
 
-    let usb_overhang = pcb_usb_overhang();
+    // let usb_overhang = pcb_usb_overhang();
 
-    case = case.subtract(&usb_overhang).into();
+    // case = case.subtract(&usb_overhang).into();
 
-    for feet_cutout in FEET_CUTOUTS {
-        let pos = DVec3::from((*feet_cutout, CASE_FLOOR_Z));
-        let dir = DVec3::new(0.0, 0.0, -1.0);
+    // for feet_cutout in FEET_CUTOUTS {
+    //     let pos = DVec3::from((*feet_cutout, CASE_FLOOR_Z));
+    //     let dir = DVec3::new(0.0, 0.0, -1.0);
 
-        case = case.drill_hole(pos, dir, BOTTOM_CUTOUT_RADIUS);
-    }
+    //     case = case.drill_hole(pos, dir, BOTTOM_CUTOUT_RADIUS);
+    // }
 
-    for pinhole_pos in PINHOLE_LOCATIONS {
-        let pos = DVec3::from((*pinhole_pos, CASE_FLOOR_Z));
-        let dir = DVec3::new(0.0, 0.0, -1.0);
+    // for pinhole_pos in PINHOLE_LOCATIONS {
+    //     let pos = DVec3::from((*pinhole_pos, CASE_FLOOR_Z));
+    //     let dir = DVec3::new(0.0, 0.0, -1.0);
 
-        case = case.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
-    }
+    //     case = case.drill_hole(pos, dir, PINHOLE_BUTTON_RADIUS);
+    // }
 
-    for slot_center in PUSH_SLOT_LOCATIONS {
-        let slot = push_slot(*slot_center);
-        case = case.subtract(&slot).into();
-    }
+    // for slot_center in PUSH_SLOT_LOCATIONS {
+    //     let slot = push_slot(*slot_center);
+    //     case = case.subtract(&slot).into();
+    // }
 
     // For exporting to smaller 3D printers
     // let corner_1 = DVec3::new(CASE_LEFT, CASE_BOTTOM, CASE_BOTTOM_Z);
@@ -454,11 +454,11 @@ pub fn shape() -> Shape {
 
     // shape.write_stl("keyboard_half.stl").unwrap();
 
-    let foot_z_extrude = 2.5;
-    let feet_indentation = case_feet(CASE_FOOT_THICKNESS + 0.1, foot_z_extrude);
-    let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude * 2.0);
+    // let foot_z_extrude = 2.5;
+    // let feet_indentation = case_feet(CASE_FOOT_THICKNESS + 0.1, foot_z_extrude);
+    // let feet = case_feet(CASE_FOOT_THICKNESS, -foot_z_extrude * 2.0);
 
-    let case = case.subtract(&feet_indentation).into_shape();
+    // let case = case.subtract(&feet_indentation).into_shape();
     // let case = case.union(&feet).into_shape();
 
     // let pcb_center = dvec2(PCB_WIDTH / 2.0, ((CASE_BOTTOM - CASE_TOP) / 2.0) + 0.8);
@@ -474,6 +474,6 @@ pub fn shape() -> Shape {
     // test_plate.into()
 
     case.write_step("keyboard.step").unwrap();
-    feet.write_step("case_feet.step").unwrap();
+    // feet.write_step("case_feet.step").unwrap();
     case
 }
