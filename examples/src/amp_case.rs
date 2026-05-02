@@ -5,18 +5,18 @@ use opencascade::{
 };
 
 pub fn shape() -> Shape {
-    let tolerance = 0.3;
+    let tolerance = 0.2;
 
     // The origin of the coordinate system is the closest bottom left corner of
     // the PC box, when viewing its ports from behind.
-    let case_thickness = 1.5;
-    let case_width = 88.5;
+    let case_thickness = 2.0;
+    let case_width = 205.0;
     let case_width = case_width + tolerance;
-    let case_height = 50.0; // Not measured, arbitrary value
-    let case_depth = 38.5; // measured 38.05;
+    let case_height = 60.0; // Not measured, arbitrary value
+    let case_depth = 25.6; // measured 38.05;
     let case_depth = case_depth + tolerance;
 
-    let lip_thickness = 2.0;
+    let lip_thickness = 3.0;
 
     let hook_thickness = 3.0;
     let wire_gap = 2.6;
@@ -42,8 +42,8 @@ pub fn shape() -> Shape {
     // Add the back hooks
     let bottom_face = case_box.faces().farthest(Direction::NegZ);
 
-    for x_offset in [-25.0, 25.0] {
-        let hook_vertical_offset_from_center = -10.0;
+    for x_offset in [-50.0, 0.0, 50.0] {
+        let hook_vertical_offset_from_center = -15.0;
         let hook_width = 40.0;
         let hook_attachment_height = 20.0;
 
@@ -76,10 +76,10 @@ pub fn shape() -> Shape {
     }
 
     // Punch some holes in the back for optional zipties
-    for x_offset in [-100.0, -50.0, 0.0, 50.0, 100.0] {
+    for x_offset in [-25.0, 25.0] {
         let ziptie_hole = bottom_face
             .workplane()
-            .translated(dvec3(x_offset, -20.0, 0.0))
+            .translated(dvec3(x_offset, -15.0, 0.0))
             .circle(0.0, 0.0, 2.25)
             .to_face()
             .extrude(dvec3(0.0, 0.0, 10.0))
@@ -95,7 +95,7 @@ pub fn shape() -> Shape {
         .faces()
         .farthest(Direction::PosZ)
         .workplane()
-        .translated(dvec3(0.0, case_height / 2.0, 0.0))
+        .translated(dvec3(0.0, case_height / 2.0 + 40.0, 0.0))
         .circle(0.0, 0.0, (case_width - radius_reduction) / 2.0)
         .to_face();
 
