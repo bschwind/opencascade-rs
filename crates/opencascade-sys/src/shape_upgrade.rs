@@ -1,11 +1,9 @@
-use std::pin::Pin;
-
 pub use inner::*;
 
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("opencascade-sys/include/wrapper.hxx");
+        include!("opencascade-sys/include/shape_upgrade.hxx");
 
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
 
@@ -19,9 +17,15 @@ mod inner {
             unify_faces: bool,
             concat_b_splines: bool,
         ) -> UniquePtr<UnifySameDomain>;
-        fn AllowInternalEdges(self: Pin<&mut UnifySameDomain>, allow: bool);
-        fn Build(self: Pin<&mut UnifySameDomain>);
-        fn Shape(self: &UnifySameDomain) -> &TopoDS_Shape;
+
+        #[cxx_name = "AllowInternalEdges"]
+        pub fn allow_internal_edges(self: Pin<&mut UnifySameDomain>, allow: bool);
+
+        #[cxx_name = "Build"]
+        pub fn build(self: Pin<&mut UnifySameDomain>);
+
+        #[cxx_name = "Shape"]
+        pub fn shape(self: &UnifySameDomain) -> &TopoDS_Shape;
     }
 }
 
@@ -33,17 +37,5 @@ impl UnifySameDomain {
         concat_b_splines: bool,
     ) -> cxx::UniquePtr<Self> {
         UnifySameDomain_new(shape, unify_edges, unify_faces, concat_b_splines)
-    }
-
-    pub fn allow_internal_edges(self: Pin<&mut UnifySameDomain>, allow: bool) {
-        self.AllowInternalEdges(allow)
-    }
-
-    pub fn build(self: Pin<&mut UnifySameDomain>) {
-        self.Build()
-    }
-
-    pub fn shape(&self) -> &TopoDS_Shape {
-        self.Shape()
     }
 }

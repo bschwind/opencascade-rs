@@ -1,6 +1,3 @@
-use opencascade_sys::{b_rep_tools, shape_analysis::connect_edges_to_wires, top_loc::Location};
-use std::iter::once;
-
 use crate::{
     angle::{Angle, ToAngle},
     law_function::law_function_from_graph,
@@ -10,7 +7,8 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::ffi;
+use opencascade_sys::{b_rep_tools, ffi, top_loc::Location};
+use std::iter::once;
 
 pub struct Wire {
     pub(crate) inner: UniquePtr<ffi::TopoDS_Wire>,

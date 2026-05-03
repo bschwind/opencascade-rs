@@ -675,10 +675,10 @@ impl Shape {
     #[must_use]
     pub fn clean(&self) -> Self {
         let mut upgrader = UnifySameDomain::new(&self.inner, true, true, true);
-        upgrader.pin_mut().AllowInternalEdges(false);
-        upgrader.pin_mut().Build();
+        upgrader.pin_mut().allow_internal_edges(false);
+        upgrader.pin_mut().build();
 
-        Self::from_shape(upgrader.Shape())
+        Self::from_shape(upgrader.shape())
     }
 
     pub fn set_global_translation(&mut self, translation: DVec3) {
