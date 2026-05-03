@@ -530,8 +530,3 @@ cast_section_to_builderalgo(std::unique_ptr<BRepAlgoAPI_Section> section) {
   return section;
 }
 // namespace BRepAlgoAPI
-
-// BRepBndLib
-inline void BRepBndLib_Add(const TopoDS_Shape &shape, Bnd_Box &box, const Standard_Boolean useTriangulation) {
-  BRepBndLib::Add(shape, box, useTriangulation);
-}

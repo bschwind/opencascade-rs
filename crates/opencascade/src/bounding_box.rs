@@ -1,6 +1,5 @@
 use cxx::UniquePtr;
 use glam::DVec3;
-use opencascade_sys::ffi;
 
 use crate::primitives::Shape;
 
@@ -45,7 +44,7 @@ impl BoundingBox {
 /// package.
 pub fn aabb(shape: &Shape) -> BoundingBox {
     let mut bb = BoundingBox::void();
-    ffi::BRepBndLib_Add(
+    opencascade_sys::b_rep_bnd_lib::add(
         shape.inner.as_ref().expect("Input shape ref was null"),
         bb.inner.pin_mut(),
         true,

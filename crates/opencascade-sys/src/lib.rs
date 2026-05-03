@@ -1,3 +1,4 @@
+pub mod b_rep_bnd_lib;
 pub mod b_rep_g_prop;
 pub mod b_rep_mesh;
 pub mod b_rep_tools;
@@ -1262,11 +1263,6 @@ pub mod ffi {
             shared: bool,
             wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
         );
-
-        type Bnd_Box = crate::bnd::BoundingBox;
-        type BRepBndLib;
-
-        pub fn BRepBndLib_Add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool);
     }
 }
 
