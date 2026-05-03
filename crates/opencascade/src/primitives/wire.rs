@@ -130,9 +130,9 @@ impl Wire {
     #[must_use]
     pub fn mirror_along_axis(&self, axis_origin: DVec3, axis_dir: DVec3) -> Self {
         let axis_dir = make_dir(axis_dir);
-        let axis = ffi::gp_Ax1_ctor(&make_point(axis_origin), &axis_dir);
+        let axis = opencascade_sys::gp::gp_Ax1_ctor(&make_point(axis_origin), &axis_dir);
 
-        let mut transform = ffi::new_transform();
+        let mut transform = opencascade_sys::gp::new_transform();
 
         transform.pin_mut().set_mirror_axis(&axis);
 
@@ -231,9 +231,9 @@ impl Wire {
 
     #[must_use]
     pub fn transform(&self, translation: DVec3, rotation_axis: DVec3, angle: Angle) -> Self {
-        let mut transform = ffi::new_transform();
+        let mut transform = opencascade_sys::gp::new_transform();
         let rotation_axis_vec =
-            ffi::gp_Ax1_ctor(&make_point(DVec3::ZERO), &make_dir(rotation_axis));
+            opencascade_sys::gp::gp_Ax1_ctor(&make_point(DVec3::ZERO), &make_dir(rotation_axis));
         let translation_vec = make_vec(translation);
 
         transform.pin_mut().SetRotation(&rotation_axis_vec, angle.radians());

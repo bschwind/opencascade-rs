@@ -6,6 +6,7 @@ pub mod bin_tools;
 pub mod bnd;
 pub mod g_prop;
 pub mod gc_pnts;
+pub mod gp;
 pub mod poly;
 pub mod shape_analysis;
 pub mod shape_upgrade;
@@ -337,34 +338,21 @@ pub mod ffi {
 
         pub fn ellipse_value(ellipse: &HandleGeom2d_Ellipse, u: f64) -> UniquePtr<gp_Pnt2d>;
 
-        // Points
-        type gp_Pnt;
-        type gp_Pnt2d;
+        type gp_Pnt = crate::gp::gp_Pnt;
+        type gp_Pnt2d = crate::gp::gp_Pnt2d;
+        type gp_Vec = crate::gp::gp_Vec;
+        type gp_Dir = crate::gp::gp_Dir;
 
-        #[cxx_name = "construct_unique"]
-        pub fn new_point(x: f64, y: f64, z: f64) -> UniquePtr<gp_Pnt>;
+        type gp_Ax1 = crate::gp::gp_Ax1;
+        type gp_Ax2 = crate::gp::gp_Ax2;
+        type gp_Ax3 = crate::gp::gp_Ax3;
+        type gp_Dir2d = crate::gp::gp_Dir2d;
+        type gp_Ax2d = crate::gp::gp_Ax2d;
+        type gp_Trsf = crate::gp::gp_Trsf;
+        type gp_GTrsf = crate::gp::gp_GTrsf;
 
-        pub fn X(self: &gp_Pnt) -> f64;
-        pub fn Y(self: &gp_Pnt) -> f64;
-        pub fn Z(self: &gp_Pnt) -> f64;
-        pub fn Distance(self: &gp_Pnt, other: &gp_Pnt) -> f64;
-        pub fn Transform(self: Pin<&mut gp_Pnt>, transform: &gp_Trsf);
-
-        #[cxx_name = "construct_unique"]
-        pub fn new_point_2d(x: f64, y: f64) -> UniquePtr<gp_Pnt2d>;
-
-        pub fn X(self: &gp_Pnt2d) -> f64;
-        pub fn Y(self: &gp_Pnt2d) -> f64;
-        pub fn Distance(self: &gp_Pnt2d, other: &gp_Pnt2d) -> f64;
-
-        type gp_Vec;
-
-        #[cxx_name = "construct_unique"]
-        pub fn new_vec(x: f64, y: f64, z: f64) -> UniquePtr<gp_Vec>;
-
-        pub fn X(self: &gp_Vec) -> f64;
-        pub fn Y(self: &gp_Vec) -> f64;
-        pub fn Z(self: &gp_Vec) -> f64;
+        type gp_Circ = crate::gp::gp_Circ;
+        type gp_Lin = crate::gp::gp_Lin;
 
         // Edge types
         type GeomAbs_CurveType;
@@ -382,12 +370,6 @@ pub mod ffi {
             p2: &gp_Pnt2d,
         ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
 
-        // Lines
-        type gp_Lin;
-
-        #[cxx_name = "construct_unique"]
-        pub fn gp_Lin_ctor(point: &gp_Pnt, dir: &gp_Dir) -> UniquePtr<gp_Lin>;
-
         // Arcs
         type GC_MakeArcOfCircle;
 
@@ -401,12 +383,6 @@ pub mod ffi {
         pub fn GC_MakeArcOfCircle_Value(
             arc: &GC_MakeArcOfCircle,
         ) -> UniquePtr<HandleGeomTrimmedCurve>;
-
-        // Circles
-        type gp_Circ;
-
-        #[cxx_name = "construct_unique"]
-        pub fn gp_Circ_ctor(axis: &gp_Ax2, radius: f64) -> UniquePtr<gp_Circ>;
 
         // Shapes
         type TopoDS_Vertex;
@@ -946,42 +922,6 @@ pub mod ffi {
             section: UniquePtr<BRepAlgoAPI_Section>,
         ) -> UniquePtr<BRepAlgoAPI_BuilderAlgo>;
 
-        // Geometric processor
-        type gp_Ax1;
-        type gp_Ax2;
-        type gp_Ax3;
-        type gp_Dir;
-        type gp_Dir2d;
-        type gp_Ax2d;
-        pub fn gp_OX() -> &'static gp_Ax1;
-        pub fn gp_OY() -> &'static gp_Ax1;
-        pub fn gp_OZ() -> &'static gp_Ax1;
-        pub fn gp_DZ() -> &'static gp_Dir;
-
-        pub fn Transform(self: Pin<&mut gp_Dir>, transform: &gp_Trsf);
-
-        pub fn X(self: &gp_Dir) -> f64;
-        pub fn Y(self: &gp_Dir) -> f64;
-        pub fn Z(self: &gp_Dir) -> f64;
-
-        #[cxx_name = "construct_unique"]
-        pub fn gp_Ax1_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax1>;
-
-        #[cxx_name = "construct_unique"]
-        pub fn gp_Ax2_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
-
-        #[cxx_name = "construct_unique"]
-        pub fn gp_Ax3_from_gp_Ax2(axis: &gp_Ax2) -> UniquePtr<gp_Ax3>;
-
-        #[cxx_name = "construct_unique"]
-        pub fn gp_Dir_ctor(x: f64, y: f64, z: f64) -> UniquePtr<gp_Dir>;
-
-        #[cxx_name = "construct_unique"]
-        pub fn gp_Dir2d_ctor(x: f64, y: f64) -> UniquePtr<gp_Dir2d>;
-
-        #[cxx_name = "construct_unique"]
-        pub fn gp_Ax2d_ctor(point: &gp_Pnt2d, dir: &gp_Dir2d) -> UniquePtr<gp_Ax2d>;
-
         // Geometry Interpolation
         type GeomAPI_Interpolate;
 
@@ -1026,28 +966,6 @@ pub mod ffi {
         pub fn Geom_BezierCurve_to_handle(
             law: UniquePtr<Geom_BezierCurve>,
         ) -> UniquePtr<HandleGeomBezierCurve>;
-
-        // Transforms
-        type gp_Trsf;
-
-        #[cxx_name = "construct_unique"]
-        pub fn new_transform() -> UniquePtr<gp_Trsf>;
-
-        #[rust_name = "set_mirror_axis"]
-        pub fn SetMirror(self: Pin<&mut gp_Trsf>, axis: &gp_Ax1);
-        pub fn SetRotation(self: Pin<&mut gp_Trsf>, axis: &gp_Ax1, angle: f64);
-        pub fn SetScale(self: Pin<&mut gp_Trsf>, point: &gp_Pnt, scale: f64);
-        pub fn SetTranslation(self: Pin<&mut gp_Trsf>, point1: &gp_Pnt, point2: &gp_Pnt);
-        pub fn Value(self: &gp_Trsf, the_row: i32, the_col: i32) -> f64;
-
-        #[cxx_name = "SetTranslationPart"]
-        pub fn set_translation_vec(self: Pin<&mut gp_Trsf>, translation: &gp_Vec);
-
-        type gp_GTrsf;
-        #[cxx_name = "construct_unique"]
-        pub fn new_gp_GTrsf() -> UniquePtr<gp_GTrsf>;
-        pub fn SetValue(self: Pin<&mut gp_GTrsf>, the_row: i32, the_col: i32, the_value: f64);
-        pub fn Value(self: &gp_GTrsf, the_row: i32, the_col: i32) -> f64;
 
         type BRepBuilderAPI_MakeSolid;
 

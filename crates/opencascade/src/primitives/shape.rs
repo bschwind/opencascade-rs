@@ -302,7 +302,7 @@ impl Shape {
         let min_corner = corner_1.min(corner_2);
         let max_corner = corner_1.max(corner_2);
 
-        let point = ffi::new_point(min_corner.x, min_corner.y, min_corner.z);
+        let point = opencascade_sys::gp::new_point(min_corner.x, min_corner.y, min_corner.z);
         let diff = max_corner - min_corner;
         let mut my_box = ffi::BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
 
@@ -682,7 +682,7 @@ impl Shape {
     }
 
     pub fn set_global_translation(&mut self, translation: DVec3) {
-        let mut transform = ffi::new_transform();
+        let mut transform = opencascade_sys::gp::new_transform();
         let translation_vec = make_vec(translation);
         transform.pin_mut().set_translation_vec(&translation_vec);
 
@@ -716,7 +716,7 @@ impl Shape {
         let tolerance = 0.0001;
         intersector.pin_mut().Init(
             &self.inner,
-            &ffi::gp_Lin_ctor(&make_point(line_origin), &make_dir(line_dir)),
+            &opencascade_sys::gp::gp_Lin_ctor(&make_point(line_origin), &make_dir(line_dir)),
             tolerance,
         );
 

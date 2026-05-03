@@ -269,8 +269,8 @@ impl Face {
 
         projector.LowerDistanceParameters(&mut u, &mut v);
 
-        let mut p = ffi::new_point(0.0, 0.0, 0.0);
-        let mut normal = ffi::new_vec(0.0, 1.0, 0.0);
+        let mut p = opencascade_sys::gp::new_point(0.0, 0.0, 0.0);
+        let mut normal = opencascade_sys::gp::new_vec(0.0, 1.0, 0.0);
 
         let face = b_rep_g_prop::Face::new(&self.inner);
         face.Normal(u, v, p.pin_mut(), normal.pin_mut());

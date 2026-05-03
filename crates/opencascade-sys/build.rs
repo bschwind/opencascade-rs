@@ -59,6 +59,7 @@ fn main() {
         "src/bnd.rs",
         "src/g_prop.rs",
         "src/gc_pnts.rs",
+        "src/gp.rs",
         "src/lib.rs",
         "src/poly.rs",
         "src/shape_analysis.rs",

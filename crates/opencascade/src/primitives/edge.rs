@@ -82,7 +82,7 @@ impl Edge {
     pub fn circle(center: DVec3, normal: DVec3, radius: f64) -> Self {
         let axis = make_axis_2(center, normal);
 
-        let make_circle = ffi::gp_Circ_ctor(&axis, radius);
+        let make_circle = opencascade_sys::gp::gp_Circ_ctor(&axis, radius);
         let make_edge = ffi::BRepBuilderAPI_MakeEdge_circle(&make_circle);
 
         Self::from_make_edge(make_edge)

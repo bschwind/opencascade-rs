@@ -88,27 +88,27 @@ impl<T: Into<Shape>> IntoShape for T {
 }
 
 pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
-    ffi::new_point(p.x, p.y, p.z)
+    opencascade_sys::gp::new_point(p.x, p.y, p.z)
 }
 
 pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::gp_Pnt2d> {
-    ffi::new_point_2d(p.x, p.y)
+    opencascade_sys::gp::new_point_2d(p.x, p.y)
 }
 
 fn make_dir(p: DVec3) -> UniquePtr<ffi::gp_Dir> {
-    ffi::gp_Dir_ctor(p.x, p.y, p.z)
+    opencascade_sys::gp::gp_Dir_ctor(p.x, p.y, p.z)
 }
 
 fn make_vec(vec: DVec3) -> UniquePtr<ffi::gp_Vec> {
-    ffi::new_vec(vec.x, vec.y, vec.z)
+    opencascade_sys::gp::new_vec(vec.x, vec.y, vec.z)
 }
 
 fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax1> {
-    ffi::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
+    opencascade_sys::gp::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
 }
 
 pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
-    ffi::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
+    opencascade_sys::gp::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
 }
 
 pub struct EdgeIterator {
