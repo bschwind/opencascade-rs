@@ -571,8 +571,10 @@ impl Shape {
     }
 
     pub fn write_brep_text(&self, path: impl AsRef<Path>) -> Result<(), Error> {
-        let success =
-            ffi::write_brep_text(&self.inner, path.as_ref().to_string_lossy().to_string());
+        let success = opencascade_sys::b_rep_tools::write(
+            &self.inner,
+            path.as_ref().to_string_lossy().to_string(),
+        );
 
         if success {
             Ok(())
@@ -582,7 +584,7 @@ impl Shape {
     }
 
     pub fn read_brep_text(path: impl AsRef<Path>) -> Result<Self, Error> {
-        let inner = ffi::read_brep_text(path.as_ref().to_string_lossy().to_string());
+        let inner = opencascade_sys::b_rep_tools::read(path.as_ref().to_string_lossy().to_string());
 
         if inner.is_null() {
             Err(Error::BrepReadFailed)
@@ -592,7 +594,10 @@ impl Shape {
     }
 
     pub fn write_brep_bin(&self, path: impl AsRef<Path>) -> Result<(), Error> {
-        let success = ffi::write_brep_bin(&self.inner, path.as_ref().to_string_lossy().to_string());
+        let success = opencascade_sys::bin_tools::write(
+            &self.inner,
+            path.as_ref().to_string_lossy().to_string(),
+        );
 
         if success {
             Ok(())
@@ -602,7 +607,7 @@ impl Shape {
     }
 
     pub fn read_brep_bin(path: impl AsRef<Path>) -> Result<Self, Error> {
-        let inner = ffi::read_brep_bin(path.as_ref().to_string_lossy().to_string());
+        let inner = opencascade_sys::bin_tools::read(path.as_ref().to_string_lossy().to_string());
 
         if inner.is_null() {
             Err(Error::BrepReadFailed)

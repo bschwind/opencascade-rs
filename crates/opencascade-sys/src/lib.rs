@@ -2,6 +2,7 @@ pub mod b_rep_bnd_lib;
 pub mod b_rep_g_prop;
 pub mod b_rep_mesh;
 pub mod b_rep_tools;
+pub mod bin_tools;
 pub mod bnd;
 pub mod g_prop;
 pub mod gc_pnts;
@@ -1248,14 +1249,6 @@ pub mod ffi {
         ) -> Result<&Poly_Triangulation>;
 
         pub fn compute_normals(face: &TopoDS_Face, triangulation: &HandlePoly_Triangulation);
-
-        // BRepTools
-        pub fn write_brep_text(shape: &TopoDS_Shape, path: String) -> bool;
-        pub fn read_brep_text(path: String) -> UniquePtr<TopoDS_Shape>;
-
-        // BinTools
-        pub fn write_brep_bin(shape: &TopoDS_Shape, path: String) -> bool;
-        pub fn read_brep_bin(path: String) -> UniquePtr<TopoDS_Shape>;
 
         pub fn connect_edges_to_wires(
             edges: Pin<&mut HandleTopTools_HSequenceOfShape>,

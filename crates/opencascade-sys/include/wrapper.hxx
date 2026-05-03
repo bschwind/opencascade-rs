@@ -441,37 +441,6 @@ BRepFilletAPI_MakeFillet2d_add_chamfer_angle(BRepFilletAPI_MakeFillet2d &make_fi
   return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddChamfer(edge, vertex, dist, angle)));
 }
 
-// BRepTools
-inline std::unique_ptr<TopoDS_Wire> outer_wire(const TopoDS_Face &face) {
-  return std::unique_ptr<TopoDS_Wire>(new TopoDS_Wire(BRepTools::OuterWire(face)));
-}
-
-inline bool write_brep_text(const TopoDS_Shape &shape, rust::String path) {
-  return BRepTools::Write(shape, path.c_str());
-}
-
-inline std::unique_ptr<TopoDS_Shape> read_brep_text(rust::String path) {
-  BRep_Builder builder;
-  auto shape = std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape());
-  if (BRepTools::Read(*shape, path.c_str(), builder)) {
-    return shape;
-  }
-  return std::unique_ptr<TopoDS_Shape>(nullptr);
-}
-
-// BinTools
-inline bool write_brep_bin(const TopoDS_Shape &shape, rust::String path) {
-  return BinTools::Write(shape, path.c_str());
-}
-
-inline std::unique_ptr<TopoDS_Shape> read_brep_bin(rust::String path) {
-  auto shape = std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape());
-  if (BinTools::Read(*shape, path.c_str())) {
-    return shape;
-  }
-  return std::unique_ptr<TopoDS_Shape>(nullptr);
-}
-
 // Collections
 inline void map_shapes(const TopoDS_Shape &S, const TopAbs_ShapeEnum T, TopTools_IndexedMapOfShape &M) {
   TopExp::MapShapes(S, T, M);

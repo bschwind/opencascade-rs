@@ -5,11 +5,17 @@ mod inner {
     unsafe extern "C++" {
         include!("b_rep_tools.hxx");
 
+        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
         type TopoDS_Face = crate::ffi::TopoDS_Face;
         type TopoDS_Wire = crate::ffi::TopoDS_Wire;
 
         type BRepTools;
 
         fn outer_wire(face: &TopoDS_Face) -> UniquePtr<TopoDS_Wire>;
+
+        #[cxx_name = "write_brep_text"]
+        pub fn write(shape: &TopoDS_Shape, path: String) -> bool;
+        #[cxx_name = "read_brep_text"]
+        pub fn read(path: String) -> UniquePtr<TopoDS_Shape>;
     }
 }
