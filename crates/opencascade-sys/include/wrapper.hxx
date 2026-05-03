@@ -384,10 +384,6 @@ inline bool write_iges(IGESControl_Writer &writer, rust::String theFileName) {
   return writer.Write(theFileName.c_str());
 }
 
-inline bool write_stl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust::String theFileName) {
-  return writer.Write(theShape, theFileName.c_str());
-}
-
 // Fillets
 inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFilletAPI_MakeFillet2d &make_fillet,
                                                                           const TopoDS_Vertex &vertex,

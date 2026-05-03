@@ -5,7 +5,7 @@ use std::pin::Pin;
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("opencascade-sys/include/wrapper.hxx");
+        include!("opencascade-sys/include/stl_api.hxx");
 
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
 
@@ -15,7 +15,6 @@ mod inner {
         #[cxx_name = "construct_unique"]
         fn Writer_new() -> UniquePtr<Writer>;
 
-        // fn Write(self: Pin<&mut Writer>, shape: &TopoDS_Shape, filename: &c_char) -> bool;
         fn write_stl(writer: Pin<&mut Writer>, shape: &TopoDS_Shape, filename: String) -> bool;
     }
 }
