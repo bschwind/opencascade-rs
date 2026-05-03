@@ -49,10 +49,12 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=user32");
     }
 
+    // TODO(bschwind) - Iterate over the src/ directory to populate this.
     let rust_bridges = [
         "src/b_rep_g_prop.rs",
         "src/b_rep_mesh.rs",
         "src/b_rep_tools.rs",
+        "src/bnd.rs",
         "src/g_prop.rs",
         "src/gc_pnts.rs",
         "src/lib.rs",
