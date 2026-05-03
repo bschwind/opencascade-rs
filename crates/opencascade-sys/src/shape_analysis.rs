@@ -1,34 +1,21 @@
-use std::pin::Pin;
-
 pub use inner::*;
 
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("opencascade-sys/include/wrapper.hxx");
+        include!("opencascade-sys/include/shape_analysis.hxx");
 
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
-        type HandleTopTools_HSequenceOfShape = crate::ffi::HandleTopTools_HSequenceOfShape;
+        type Handle_TopTools_HSequenceOfShape = crate::ffi::Handle_TopTools_HSequenceOfShape;
 
         #[cxx_name = "ShapeAnalysis_FreeBounds"]
         type FreeBounds;
 
-        fn connect_edges_to_wires(
-            edges: Pin<&mut HandleTopTools_HSequenceOfShape>,
+        pub fn connect_edges_to_wires(
+            edges: Pin<&mut Handle_TopTools_HSequenceOfShape>,
             tolerance: f64,
             shared: bool,
-            wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
+            wires: Pin<&mut Handle_TopTools_HSequenceOfShape>,
         );
-    }
-}
-
-impl FreeBounds {
-    pub fn connect_edges_to_wires(
-        edges: Pin<&mut HandleTopTools_HSequenceOfShape>,
-        tolerance: f64,
-        shared: bool,
-        wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
-    ) {
-        connect_edges_to_wires(edges, tolerance, shared, wires);
     }
 }

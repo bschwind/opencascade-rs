@@ -84,21 +84,26 @@ impl Wire {
         unordered_edges: impl IntoIterator<Item = T>,
         edge_connection: EdgeConnection,
     ) -> Self {
-        let mut edges = ffi::new_HandleTopTools_HSequenceOfShape();
+        let mut edges = ffi::new_Handle_TopTools_HSequenceOfShape();
 
         for edge in unordered_edges {
             let edge_shape = ffi::cast_edge_to_shape(&edge.as_ref().inner);
             ffi::TopTools_HSequenceOfShape_append(edges.pin_mut(), edge_shape);
         }
 
-        let mut wires = ffi::new_HandleTopTools_HSequenceOfShape();
+        let mut wires = ffi::new_Handle_TopTools_HSequenceOfShape();
 
         let (tolerance, shared) = match edge_connection {
             EdgeConnection::Exact => (0.0, true),
             EdgeConnection::Fuzzy { tolerance } => (tolerance, false),
         };
 
-        connect_edges_to_wires(edges.pin_mut(), tolerance, shared, wires.pin_mut());
+        opencascade_sys::shape_analysis::connect_edges_to_wires(
+            edges.pin_mut(),
+            tolerance,
+            shared,
+            wires.pin_mut(),
+        );
 
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 

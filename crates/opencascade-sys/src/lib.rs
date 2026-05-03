@@ -101,7 +101,7 @@ pub mod ffi {
         type HandleGeom2d_Ellipse;
         type HandleGeom2d_TrimmedCurve;
         type HandleGeom_CylindricalSurface;
-        type HandleTopTools_HSequenceOfShape;
+        type Handle_TopTools_HSequenceOfShape;
         type HandleLawFunction;
 
         type Handle_TColgpHArray1OfPnt;
@@ -141,7 +141,7 @@ pub mod ffi {
         pub fn IsNull(self: &HandleGeom2d_Ellipse) -> bool;
         pub fn IsNull(self: &HandleGeom2d_TrimmedCurve) -> bool;
         pub fn IsNull(self: &HandleGeom_CylindricalSurface) -> bool;
-        pub fn IsNull(self: &HandleTopTools_HSequenceOfShape) -> bool;
+        pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
 
         pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
 
@@ -259,21 +259,21 @@ pub mod ffi {
 
         pub fn Length(self: &TopTools_HSequenceOfShape) -> i32;
 
-        pub fn new_HandleTopTools_HSequenceOfShape() -> UniquePtr<HandleTopTools_HSequenceOfShape>;
+        pub fn new_Handle_TopTools_HSequenceOfShape() -> UniquePtr<Handle_TopTools_HSequenceOfShape>;
         pub fn TopTools_HSequenceOfShape_append(
-            handle: Pin<&mut HandleTopTools_HSequenceOfShape>,
+            handle: Pin<&mut Handle_TopTools_HSequenceOfShape>,
             shape: &TopoDS_Shape,
         );
 
-        pub fn TopTools_HSequenceOfShape_length(handle: &HandleTopTools_HSequenceOfShape) -> i32;
+        pub fn TopTools_HSequenceOfShape_length(handle: &Handle_TopTools_HSequenceOfShape) -> i32;
         pub fn TopTools_HSequenceOfShape_value(
-            handle: &HandleTopTools_HSequenceOfShape,
+            handle: &Handle_TopTools_HSequenceOfShape,
             index: i32,
         ) -> &TopoDS_Shape;
 
         #[cxx_name = "handle_try_deref"]
         pub fn HandleTopTools_HSequenceOfShape_Get(
-            handle: &HandleTopTools_HSequenceOfShape,
+            handle: &Handle_TopTools_HSequenceOfShape,
         ) -> Result<&TopTools_HSequenceOfShape>;
 
         // Law Function
@@ -1249,13 +1249,6 @@ pub mod ffi {
         ) -> Result<&Poly_Triangulation>;
 
         pub fn compute_normals(face: &TopoDS_Face, triangulation: &HandlePoly_Triangulation);
-
-        pub fn connect_edges_to_wires(
-            edges: Pin<&mut HandleTopTools_HSequenceOfShape>,
-            tolerance: f64,
-            shared: bool,
-            wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
-        );
     }
 }
 
