@@ -3,7 +3,7 @@ pub use inner::*;
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("b_rep_tools.hxx");
+        include!("opencascade-sys/include/b_rep_tools.hxx");
 
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
         type TopoDS_Face = crate::ffi::TopoDS_Face;
