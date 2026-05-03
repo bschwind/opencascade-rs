@@ -111,7 +111,6 @@ typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
 typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
 typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
-typedef opencascade::handle<Poly_Triangulation> HandlePoly_Triangulation;
 typedef opencascade::handle<Law_Function> HandleLawFunction;
 
 typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
@@ -314,17 +313,6 @@ inline std::unique_ptr<gp_Trsf> TopLoc_Location_Transformation(const TopLoc_Loca
   return std::unique_ptr<gp_Trsf>(new gp_Trsf(location.Transformation()));
 }
 
-inline std::unique_ptr<HandlePoly_Triangulation>
-HandlePoly_Triangulation_ctor(std::unique_ptr<Poly_Triangulation> triangulation) {
-  return std::unique_ptr<HandlePoly_Triangulation>(new HandlePoly_Triangulation(triangulation.release()));
-}
-
-inline std::unique_ptr<HandlePoly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
-                                                                         TopLoc_Location &location) {
-  return std::unique_ptr<HandlePoly_Triangulation>(
-      new opencascade::handle<Poly_Triangulation>(BRep_Tool::Triangulation(face, location)));
-}
-
 inline std::unique_ptr<TopoDS_Shape> ExplorerCurrentShape(const TopExp_Explorer &explorer) {
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(explorer.Current()));
 }
@@ -400,25 +388,6 @@ inline bool write_stl(StlAPI_Writer &writer, const TopoDS_Shape &theShape, rust:
   return writer.Write(theShape, theFileName.c_str());
 }
 
-inline std::unique_ptr<gp_Dir> Poly_Triangulation_Normal(const Poly_Triangulation &triangulation,
-                                                         const Standard_Integer index) {
-  return std::unique_ptr<gp_Dir>(new gp_Dir(triangulation.Normal(index)));
-}
-
-inline std::unique_ptr<gp_Pnt> Poly_Triangulation_Node(const Poly_Triangulation &triangulation,
-                                                       const Standard_Integer index) {
-  return std::unique_ptr<gp_Pnt>(new gp_Pnt(triangulation.Node(index)));
-}
-
-inline std::unique_ptr<gp_Pnt2d> Poly_Triangulation_UV(const Poly_Triangulation &triangulation,
-                                                       const Standard_Integer index) {
-  return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(triangulation.UVNode(index)));
-}
-
-inline void compute_normals(const TopoDS_Face &face, const Handle(Poly_Triangulation) & triangulation) {
-  BRepLib_ToolTriangulatedShape::ComputeNormals(face, triangulation);
-}
-
 // Fillets
 inline std::unique_ptr<TopoDS_Edge> BRepFilletAPI_MakeFillet2d_add_fillet(BRepFilletAPI_MakeFillet2d &make_fillet,
                                                                           const TopoDS_Vertex &vertex,
@@ -485,6 +454,16 @@ inline Standard_Integer TopTools_HSequenceOfShape_length(const Handle_TopTools_H
 inline const TopoDS_Shape &TopTools_HSequenceOfShape_value(const Handle_TopTools_HSequenceOfShape &handle,
                                                            Standard_Integer index) {
   return handle->Value(index);
+}
+
+inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
+                                                                         TopLoc_Location &location) {
+  return std::unique_ptr<Handle_Poly_Triangulation>(
+      new opencascade::handle<Poly_Triangulation>(BRep_Tool::Triangulation(face, location)));
+}
+
+inline void compute_normals(const TopoDS_Face &face, const Handle(Poly_Triangulation) & triangulation) {
+  BRepLib_ToolTriangulatedShape::ComputeNormals(face, triangulation);
 }
 
 // BRep Algo API

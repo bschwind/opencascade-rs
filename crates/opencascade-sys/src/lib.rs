@@ -1064,7 +1064,7 @@ pub mod ffi {
 
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeShapeOnMesh_ctor(
-            mesh: &HandlePoly_Triangulation,
+            mesh: &Handle_Poly_Triangulation,
         ) -> UniquePtr<BRepBuilderAPI_MakeShapeOnMesh>;
 
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeShapeOnMesh>) -> &TopoDS_Shape;
@@ -1143,7 +1143,7 @@ pub mod ffi {
         pub fn BRep_Tool_Triangulation(
             face: &TopoDS_Face,
             location: Pin<&mut Location>,
-        ) -> UniquePtr<HandlePoly_Triangulation>;
+        ) -> UniquePtr<Handle_Poly_Triangulation>;
 
         type BRepIntCurveSurface_Inter;
 
@@ -1236,19 +1236,15 @@ pub mod ffi {
 
         #[cxx_name = "Poly_Triangulation"]
         type Poly_Triangulation = crate::poly::Triangulation;
-        type HandlePoly_Triangulation;
+        type Handle_Poly_Triangulation;
 
-        pub fn HandlePoly_Triangulation_ctor(
-            triangulation: UniquePtr<Poly_Triangulation>,
-        ) -> UniquePtr<HandlePoly_Triangulation>;
-
-        pub fn IsNull(self: &HandlePoly_Triangulation) -> bool;
+        pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
         #[cxx_name = "handle_try_deref"]
-        pub fn HandlePoly_Triangulation_Get(
-            handle: &HandlePoly_Triangulation,
+        pub fn Handle_Poly_Triangulation_Get(
+            handle: &Handle_Poly_Triangulation,
         ) -> Result<&Poly_Triangulation>;
 
-        pub fn compute_normals(face: &TopoDS_Face, triangulation: &HandlePoly_Triangulation);
+        pub fn compute_normals(face: &TopoDS_Face, triangulation: &Handle_Poly_Triangulation);
     }
 }
 

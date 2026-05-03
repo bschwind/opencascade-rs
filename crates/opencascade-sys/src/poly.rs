@@ -4,11 +4,11 @@ pub use inner::*;
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("opencascade-sys/include/wrapper.hxx");
+        include!("opencascade-sys/include/poly.hxx");
 
         type gp_Pnt = crate::ffi::gp_Pnt;
         type gp_Pnt2d = crate::ffi::gp_Pnt2d;
-        type HandlePoly_Triangulation = crate::ffi::HandlePoly_Triangulation;
+        type Handle_Poly_Triangulation = crate::ffi::Handle_Poly_Triangulation;
         type gp_Dir = crate::ffi::gp_Dir;
         type BRepAdaptor_Curve = crate::ffi::BRepAdaptor_Curve;
 
@@ -46,7 +46,11 @@ mod inner {
         #[cxx_name = "Poly_Connect"]
         type Connect;
         #[cxx_name = "construct_unique"]
-        fn Connect_new(triangulation: &HandlePoly_Triangulation) -> UniquePtr<Connect>;
+        fn Connect_new(triangulation: &Handle_Poly_Triangulation) -> UniquePtr<Connect>;
+
+        pub fn Handle_Poly_Triangulation_ctor(
+            triangulation: UniquePtr<Triangulation>,
+        ) -> UniquePtr<Handle_Poly_Triangulation>;
     }
 }
 
