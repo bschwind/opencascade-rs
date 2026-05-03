@@ -138,11 +138,6 @@ inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve &curv
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
 }
 
-inline std::unique_ptr<gp_Pnt> GCPnts_TangentialDeflection_Value(const GCPnts_TangentialDeflection &approximator,
-                                                                 Standard_Integer i) {
-  return std::unique_ptr<gp_Pnt>(new gp_Pnt(approximator.Value(i)));
-}
-
 inline std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurface(const HandleGeomSurface &surface) {
   HandleGeomPlane plane_handle = opencascade::handle<Geom_Plane>::DownCast(surface);
   return std::unique_ptr<HandleGeomPlane>(new opencascade::handle<Geom_Plane>(plane_handle));
@@ -423,23 +418,6 @@ inline std::unique_ptr<gp_Pnt2d> Poly_Triangulation_UV(const Poly_Triangulation 
 
 inline void compute_normals(const TopoDS_Face &face, const Handle(Poly_Triangulation) & triangulation) {
   BRepLib_ToolTriangulatedShape::ComputeNormals(face, triangulation);
-}
-
-// Shape Properties
-inline std::unique_ptr<gp_Pnt> GProp_GProps_CentreOfMass(const GProp_GProps &props) {
-  return std::unique_ptr<gp_Pnt>(new gp_Pnt(props.CentreOfMass()));
-}
-
-inline void BRepGProp_LinearProperties(const TopoDS_Shape &shape, GProp_GProps &props) {
-  BRepGProp::LinearProperties(shape, props);
-}
-
-inline void BRepGProp_SurfaceProperties(const TopoDS_Shape &shape, GProp_GProps &props) {
-  BRepGProp::SurfaceProperties(shape, props);
-}
-
-inline void BRepGProp_VolumeProperties(const TopoDS_Shape &shape, GProp_GProps &props) {
-  BRepGProp::VolumeProperties(shape, props);
 }
 
 // Fillets

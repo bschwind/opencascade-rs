@@ -5,7 +5,7 @@ pub use inner::*;
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("opencascade-sys/include/wrapper.hxx");
+        include!("opencascade-sys/include/g_prop.hxx");
 
         type gp_Ax1 = crate::ffi::gp_Ax1;
         type gp_Pnt = crate::ffi::gp_Pnt;

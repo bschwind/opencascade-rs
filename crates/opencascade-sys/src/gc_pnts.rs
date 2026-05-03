@@ -4,7 +4,7 @@ pub use inner::*;
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("opencascade-sys/include/wrapper.hxx");
+        include!("opencascade-sys/include/gc_pnts.hxx");
 
         type gp_Pnt = crate::ffi::gp_Pnt;
         type BRepAdaptor_Curve = crate::ffi::BRepAdaptor_Curve;

@@ -5,11 +5,10 @@ pub use inner::*;
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("opencascade-sys/include/wrapper.hxx");
+        include!("opencascade-sys/include/b_rep_g_prop.hxx");
 
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
         type TopoDS_Face = crate::ffi::TopoDS_Face;
-        type gp_Ax1 = crate::ffi::gp_Ax1;
         type gp_Pnt = crate::ffi::gp_Pnt;
         type gp_Vec = crate::ffi::gp_Vec;
 

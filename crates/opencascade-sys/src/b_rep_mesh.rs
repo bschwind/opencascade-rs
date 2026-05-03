@@ -4,7 +4,7 @@ pub use inner::*;
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("opencascade-sys/include/wrapper.hxx");
+        include!("opencascade-sys/include/b_rep_mesh.hxx");
 
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
 
