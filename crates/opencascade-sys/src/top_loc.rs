@@ -4,7 +4,7 @@ pub use inner::*;
 #[cxx::bridge]
 mod inner {
     unsafe extern "C++" {
-        include!("opencascade-sys/include/wrapper.hxx");
+        include!("opencascade-sys/include/top_loc.hxx");
 
         type gp_Trsf = crate::ffi::gp_Trsf;
 
