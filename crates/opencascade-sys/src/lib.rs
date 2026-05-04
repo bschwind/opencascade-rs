@@ -101,6 +101,7 @@ pub mod ffi {
         type Handle_Geom_CylindricalSurface;
         type Handle_TopTools_HSequenceOfShape;
         type Handle_Law_Function;
+        type Handle_Poly_Triangulation;
 
         type Handle_TColgp_HArray1OfPnt;
         pub fn new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(
@@ -121,8 +122,14 @@ pub mod ffi {
         pub fn IsNull(self: &Handle_Geom2d_TrimmedCurve) -> bool;
         pub fn IsNull(self: &Handle_Geom_CylindricalSurface) -> bool;
         pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
+        pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
 
         pub fn HandleGeomCurve_Value(curve: &Handle_Geom_Curve, u: f64) -> UniquePtr<gp_Pnt>;
+
+        #[cxx_name = "handle_try_deref"]
+        pub fn Handle_Poly_Triangulation_Get(
+            handle: &Handle_Poly_Triangulation,
+        ) -> Result<&Poly_Triangulation>;
 
         // Types from sub-modules
         type TColgp_Array1OfPnt2d = crate::t_col_gp::TColgp_Array1OfPnt2d;
@@ -149,6 +156,8 @@ pub mod ffi {
         type gp_Lin = crate::gp::gp_Lin;
         type GeomAbs_CurveType = crate::geom_abs::GeomAbs_CurveType;
         type GeomAbs_JoinType = crate::geom_abs::GeomAbs_JoinType;
+        type TopLoc_Location = crate::top_loc::TopLoc_Location;
+        type Poly_Triangulation = crate::poly::Poly_Triangulation;
 
         // Shapes
         type TopoDS_Vertex;
@@ -249,7 +258,6 @@ pub mod ffi {
 
         type BOPAlgo_GlueEnum;
 
-        // Topology Explorer
         type TopAbs_ShapeEnum;
 
         type BRepIntCurveSurface_Inter;
@@ -275,17 +283,6 @@ pub mod ffi {
         pub fn W(self: &BRepIntCurveSurface_Inter) -> f64;
 
         type IFSelect_ReturnStatus;
-
-        type TopLoc_Location = crate::top_loc::TopLoc_Location;
-
-        type Poly_Triangulation = crate::poly::Poly_Triangulation;
-        type Handle_Poly_Triangulation;
-
-        pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
-        #[cxx_name = "handle_try_deref"]
-        pub fn Handle_Poly_Triangulation_Get(
-            handle: &Handle_Poly_Triangulation,
-        ) -> Result<&Poly_Triangulation>;
 
         pub fn compute_normals(face: &TopoDS_Face, triangulation: &Handle_Poly_Triangulation);
 
