@@ -8,7 +8,9 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec3};
-use opencascade_sys::{ffi, shape_upgrade::UnifySameDomain, stl_api, top_loc::Location};
+use opencascade_sys::{
+    ffi, shape_upgrade::ShapeUpgrade_UnifySameDomain, stl_api, top_loc::TopLoc_Location,
+};
 use std::path::Path;
 
 pub struct Shape {
@@ -659,7 +661,7 @@ impl Shape {
         path: P,
         triangulation_tolerance: f64,
     ) -> Result<(), Error> {
-        let mut stl_writer = stl_api::Writer::new();
+        let mut stl_writer = stl_api::StlAPI_Writer::new();
         let mesher = Mesher::try_new(self, triangulation_tolerance)?;
         let success = stl_writer
             .pin_mut()
@@ -674,7 +676,7 @@ impl Shape {
 
     #[must_use]
     pub fn clean(&self) -> Self {
-        let mut upgrader = UnifySameDomain::new(&self.inner, true, true, true);
+        let mut upgrader = ShapeUpgrade_UnifySameDomain::new(&self.inner, true, true, true);
         upgrader.pin_mut().allow_internal_edges(false);
         upgrader.pin_mut().build();
 
@@ -686,7 +688,7 @@ impl Shape {
         let translation_vec = make_vec(translation);
         transform.pin_mut().set_translation_vec(&translation_vec);
 
-        let location = Location::from_transform(&transform);
+        let location = TopLoc_Location::from_transform(&transform);
 
         self.inner.pin_mut().set_global_translation(&location, false);
     }

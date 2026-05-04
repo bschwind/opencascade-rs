@@ -8,8 +8,7 @@ mod inner {
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
         type Handle_TopTools_HSequenceOfShape = crate::ffi::Handle_TopTools_HSequenceOfShape;
 
-        #[cxx_name = "ShapeAnalysis_FreeBounds"]
-        type FreeBounds;
+        type ShapeAnalysis_FreeBounds;
 
         pub fn connect_edges_to_wires(
             edges: Pin<&mut Handle_TopTools_HSequenceOfShape>,

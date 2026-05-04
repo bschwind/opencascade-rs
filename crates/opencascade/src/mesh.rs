@@ -4,7 +4,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
-use opencascade_sys::{b_rep_mesh::IncrementalMesh, ffi, top_loc::Location};
+use opencascade_sys::{b_rep_mesh::BRepMesh_IncrementalMesh, ffi, top_loc::TopLoc_Location};
 
 #[derive(Debug)]
 pub struct Mesh {
@@ -15,12 +15,12 @@ pub struct Mesh {
 }
 
 pub struct Mesher {
-    pub(crate) inner: UniquePtr<IncrementalMesh>,
+    pub(crate) inner: UniquePtr<BRepMesh_IncrementalMesh>,
 }
 
 impl Mesher {
     pub fn try_new(shape: &Shape, triangulation_tolerance: f64) -> Result<Self, Error> {
-        let inner = IncrementalMesh::new(&shape.inner, triangulation_tolerance);
+        let inner = BRepMesh_IncrementalMesh::new(&shape.inner, triangulation_tolerance);
 
         if inner.IsDone() {
             Ok(Self { inner })
@@ -38,7 +38,7 @@ impl Mesher {
         let triangulated_shape = Shape::from_shape(self.inner.pin_mut().Shape());
 
         for face in triangulated_shape.faces() {
-            let mut location = Location::new();
+            let mut location = TopLoc_Location::new();
 
             let triangulation_handle =
                 ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());

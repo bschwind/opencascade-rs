@@ -9,24 +9,23 @@ mod inner {
         type gp_Pnt = crate::ffi::gp_Pnt;
         type BRepAdaptor_Curve = crate::ffi::BRepAdaptor_Curve;
 
-        #[cxx_name = "GCPnts_TangentialDeflection"]
-        type TangentialDeflection;
+        type GCPnts_TangentialDeflection;
 
         #[cxx_name = "construct_unique"]
         fn TangentialDeflection_new(
             curve: &BRepAdaptor_Curve,
             angular_deflection: f64,
             curvature_deflection: f64,
-        ) -> UniquePtr<TangentialDeflection>;
-        fn NbPoints(self: &TangentialDeflection) -> i32;
+        ) -> UniquePtr<GCPnts_TangentialDeflection>;
+        fn NbPoints(self: &GCPnts_TangentialDeflection) -> i32;
         fn GCPnts_TangentialDeflection_Value(
-            approximator: &TangentialDeflection,
+            approximator: &GCPnts_TangentialDeflection,
             index: i32,
         ) -> UniquePtr<gp_Pnt>;
     }
 }
 
-impl TangentialDeflection {
+impl GCPnts_TangentialDeflection {
     pub fn new(
         curve: &BRepAdaptor_Curve,
         angular_deflection: f64,

@@ -8,19 +8,20 @@ mod inner {
 
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
 
-        #[cxx_name = "BRepMesh_IncrementalMesh"]
-        type IncrementalMesh;
+        type BRepMesh_IncrementalMesh;
 
         #[cxx_name = "construct_unique"]
-        fn IncrementalMesh_new(shape: &TopoDS_Shape, deflection: f64)
-            -> UniquePtr<IncrementalMesh>;
+        fn IncrementalMesh_new(
+            shape: &TopoDS_Shape,
+            deflection: f64,
+        ) -> UniquePtr<BRepMesh_IncrementalMesh>;
 
-        fn Shape(self: &IncrementalMesh) -> &TopoDS_Shape;
-        fn IsDone(self: &IncrementalMesh) -> bool;
+        fn Shape(self: &BRepMesh_IncrementalMesh) -> &TopoDS_Shape;
+        fn IsDone(self: &BRepMesh_IncrementalMesh) -> bool;
     }
 }
 
-impl IncrementalMesh {
+impl BRepMesh_IncrementalMesh {
     pub fn new(shape: &TopoDS_Shape, deflection: f64) -> UniquePtr<Self> {
         IncrementalMesh_new(shape, deflection)
     }

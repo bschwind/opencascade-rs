@@ -8,12 +8,12 @@ use crate::primitives::Shape;
 /// means that the point values of a `BoundingBox` will often be slightly larger
 /// or smaller than expected of the geometry of known shapes.
 pub struct BoundingBox {
-    pub(crate) inner: UniquePtr<opencascade_sys::bnd::BoundingBox>,
+    pub(crate) inner: UniquePtr<opencascade_sys::bnd::Bnd_Box>,
 }
 impl BoundingBox {
     /// Create a new void box. A void box in OCC is defined as a box that contains no points.
     pub fn void() -> BoundingBox {
-        Self { inner: opencascade_sys::bnd::BoundingBox::new() }
+        Self { inner: opencascade_sys::bnd::Bnd_Box::new() }
     }
 
     pub fn is_void(&self) -> bool {

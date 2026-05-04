@@ -413,12 +413,16 @@ pub mod ffi {
         pub fn TopoDS_cast_to_compound(shape: &TopoDS_Shape) -> &TopoDS_Compound;
 
         #[cxx_name = "Move"]
-        pub fn translate(self: Pin<&mut TopoDS_Shape>, position: &Location, raise_exception: bool);
+        pub fn translate(
+            self: Pin<&mut TopoDS_Shape>,
+            position: &TopLoc_Location,
+            raise_exception: bool,
+        );
 
         #[cxx_name = "Location"]
         pub fn set_global_translation(
             self: Pin<&mut TopoDS_Shape>,
-            translation: &Location,
+            translation: &TopLoc_Location,
             raise_exception: bool,
         );
 
@@ -1060,7 +1064,7 @@ pub mod ffi {
         pub fn BRep_Tool_Pnt(vertex: &TopoDS_Vertex) -> UniquePtr<gp_Pnt>;
         pub fn BRep_Tool_Triangulation(
             face: &TopoDS_Face,
-            location: Pin<&mut Location>,
+            location: Pin<&mut TopLoc_Location>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
 
         type BRepIntCurveSurface_Inter;
@@ -1149,11 +1153,9 @@ pub mod ffi {
         ) -> IFSelect_ReturnStatus;
         pub fn write_iges(writer: Pin<&mut IGESControl_Writer>, filename: String) -> bool;
 
-        #[cxx_name = "TopLoc_Location"]
-        type Location = crate::top_loc::Location;
+        type TopLoc_Location = crate::top_loc::TopLoc_Location;
 
-        #[cxx_name = "Poly_Triangulation"]
-        type Poly_Triangulation = crate::poly::Triangulation;
+        type Poly_Triangulation = crate::poly::Poly_Triangulation;
         type Handle_Poly_Triangulation;
 
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;

@@ -9,22 +9,29 @@ mod inner {
 
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
 
-        #[cxx_name = "StlAPI_Writer"]
-        type Writer;
+        type StlAPI_Writer;
 
         #[cxx_name = "construct_unique"]
-        fn Writer_new() -> UniquePtr<Writer>;
+        fn StlAPI_Writer_new() -> UniquePtr<StlAPI_Writer>;
 
-        fn write_stl(writer: Pin<&mut Writer>, shape: &TopoDS_Shape, filename: String) -> bool;
+        fn write_stl(
+            writer: Pin<&mut StlAPI_Writer>,
+            shape: &TopoDS_Shape,
+            filename: String,
+        ) -> bool;
     }
 }
 
-impl Writer {
+impl StlAPI_Writer {
     pub fn new() -> UniquePtr<Self> {
-        Writer_new()
+        StlAPI_Writer_new()
     }
 
-    pub fn write_stl(self: Pin<&mut Writer>, shape: &TopoDS_Shape, filename: String) -> bool {
+    pub fn write_stl(
+        self: Pin<&mut StlAPI_Writer>,
+        shape: &TopoDS_Shape,
+        filename: String,
+    ) -> bool {
         write_stl(self, shape, filename)
     }
 }

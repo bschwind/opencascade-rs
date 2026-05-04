@@ -6,55 +6,58 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/poly.hxx");
 
-        type gp_Pnt = crate::ffi::gp_Pnt;
-        type gp_Pnt2d = crate::ffi::gp_Pnt2d;
+        type gp_Pnt = crate::gp::gp_Pnt;
+        type gp_Pnt2d = crate::gp::gp_Pnt2d;
         type Handle_Poly_Triangulation = crate::ffi::Handle_Poly_Triangulation;
-        type gp_Dir = crate::ffi::gp_Dir;
+        type gp_Dir = crate::gp::gp_Dir;
         type BRepAdaptor_Curve = crate::ffi::BRepAdaptor_Curve;
 
-        #[cxx_name = "Poly_Triangulation"]
-        type Triangulation;
+        type Poly_Triangulation;
         #[cxx_name = "construct_unique"]
         fn Triangulation_new(
             nb_nodes: i32,
             nb_triangles: i32,
             has_uv: bool,
             has_normals: bool,
-        ) -> UniquePtr<Triangulation>;
-        fn NbNodes(self: &Triangulation) -> i32;
-        fn NbTriangles(self: &Triangulation) -> i32;
-        fn HasNormals(self: &Triangulation) -> bool;
-        fn HasUVNodes(self: &Triangulation) -> bool;
-        fn Triangle(self: &Triangulation, index: i32) -> &Triangle;
-        fn SetTriangle(self: Pin<&mut Triangulation>, index: i32, triangle: &Triangle);
-        fn SetNode(self: Pin<&mut Triangulation>, index: i32, node: &gp_Pnt);
-        fn SetNormal(self: Pin<&mut Triangulation>, index: i32, dir: &gp_Dir);
-        fn SetUVNode(self: Pin<&mut Triangulation>, index: i32, uv: &gp_Pnt2d);
+        ) -> UniquePtr<Poly_Triangulation>;
+        fn NbNodes(self: &Poly_Triangulation) -> i32;
+        fn NbTriangles(self: &Poly_Triangulation) -> i32;
+        fn HasNormals(self: &Poly_Triangulation) -> bool;
+        fn HasUVNodes(self: &Poly_Triangulation) -> bool;
+        fn Triangle(self: &Poly_Triangulation, index: i32) -> &Poly_Triangle;
+        fn SetTriangle(self: Pin<&mut Poly_Triangulation>, index: i32, triangle: &Poly_Triangle);
+        fn SetNode(self: Pin<&mut Poly_Triangulation>, index: i32, node: &gp_Pnt);
+        fn SetNormal(self: Pin<&mut Poly_Triangulation>, index: i32, dir: &gp_Dir);
+        fn SetUVNode(self: Pin<&mut Poly_Triangulation>, index: i32, uv: &gp_Pnt2d);
         fn Poly_Triangulation_Normal(
-            triangulation: &Triangulation,
+            triangulation: &Poly_Triangulation,
             index: i32,
         ) -> UniquePtr<gp_Dir>;
-        fn Poly_Triangulation_Node(triangulation: &Triangulation, index: i32) -> UniquePtr<gp_Pnt>;
-        fn Poly_Triangulation_UV(triangulation: &Triangulation, index: i32) -> UniquePtr<gp_Pnt2d>;
+        fn Poly_Triangulation_Node(
+            triangulation: &Poly_Triangulation,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt>;
+        fn Poly_Triangulation_UV(
+            triangulation: &Poly_Triangulation,
+            index: i32,
+        ) -> UniquePtr<gp_Pnt2d>;
 
-        #[cxx_name = "Poly_Triangle"]
-        type Triangle;
+        type Poly_Triangle;
         #[cxx_name = "construct_unique"]
-        fn Triangle_new(node1: i32, node2: i32, node3: i32) -> UniquePtr<Triangle>;
-        fn Value(self: &Triangle, index: i32) -> i32;
+        fn Triangle_new(node1: i32, node2: i32, node3: i32) -> UniquePtr<Poly_Triangle>;
+        fn Value(self: &Poly_Triangle, index: i32) -> i32;
 
-        #[cxx_name = "Poly_Connect"]
-        type Connect;
+        type Poly_Connect;
         #[cxx_name = "construct_unique"]
-        fn Connect_new(triangulation: &Handle_Poly_Triangulation) -> UniquePtr<Connect>;
+        fn Connect_new(triangulation: &Handle_Poly_Triangulation) -> UniquePtr<Poly_Connect>;
 
         pub fn Handle_Poly_Triangulation_ctor(
-            triangulation: UniquePtr<Triangulation>,
+            triangulation: UniquePtr<Poly_Triangulation>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
     }
 }
 
-impl Triangulation {
+impl Poly_Triangulation {
     pub fn new(
         nb_nodes: i32,
         nb_triangles: i32,

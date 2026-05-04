@@ -7,8 +7,7 @@ mod inner {
 
         type TopoDS_Shape = crate::ffi::TopoDS_Shape;
 
-        #[cxx_name = "ShapeUpgrade_UnifySameDomain"]
-        type UnifySameDomain;
+        type ShapeUpgrade_UnifySameDomain;
 
         #[cxx_name = "construct_unique"]
         pub fn UnifySameDomain_new(
@@ -16,20 +15,20 @@ mod inner {
             unify_edges: bool,
             unify_faces: bool,
             concat_b_splines: bool,
-        ) -> UniquePtr<UnifySameDomain>;
+        ) -> UniquePtr<ShapeUpgrade_UnifySameDomain>;
 
         #[cxx_name = "AllowInternalEdges"]
-        pub fn allow_internal_edges(self: Pin<&mut UnifySameDomain>, allow: bool);
+        pub fn allow_internal_edges(self: Pin<&mut ShapeUpgrade_UnifySameDomain>, allow: bool);
 
         #[cxx_name = "Build"]
-        pub fn build(self: Pin<&mut UnifySameDomain>);
+        pub fn build(self: Pin<&mut ShapeUpgrade_UnifySameDomain>);
 
         #[cxx_name = "Shape"]
-        pub fn shape(self: &UnifySameDomain) -> &TopoDS_Shape;
+        pub fn shape(self: &ShapeUpgrade_UnifySameDomain) -> &TopoDS_Shape;
     }
 }
 
-impl UnifySameDomain {
+impl ShapeUpgrade_UnifySameDomain {
     pub fn new(
         shape: &TopoDS_Shape,
         unify_edges: bool,

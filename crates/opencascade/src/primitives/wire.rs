@@ -7,7 +7,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::{b_rep_tools, ffi, top_loc::Location};
+use opencascade_sys::{b_rep_tools, ffi, top_loc::TopLoc_Location};
 use std::iter::once;
 
 pub struct Wire {
@@ -238,7 +238,7 @@ impl Wire {
 
         transform.pin_mut().SetRotation(&rotation_axis_vec, angle.radians());
         transform.pin_mut().set_translation_vec(&translation_vec);
-        let location = Location::from_transform(&transform);
+        let location = TopLoc_Location::from_transform(&transform);
 
         let wire_shape = ffi::cast_wire_to_shape(&self.inner);
         let mut wire_shape = Shape::from_shape(wire_shape).inner;

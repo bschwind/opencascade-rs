@@ -12,7 +12,7 @@ use glam::{dvec3, DVec3};
 use opencascade_sys::{
     b_rep_g_prop::{self, BRepGProp, BRepGProp_SurfaceProperties},
     b_rep_tools, ffi,
-    g_prop::GProps,
+    g_prop::GProp_GProps,
 };
 
 pub struct Face {
@@ -251,7 +251,7 @@ impl Face {
     }
 
     pub fn center_of_mass(&self) -> DVec3 {
-        let mut props = GProps::new();
+        let mut props = GProp_GProps::new();
 
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
         BRepGProp_SurfaceProperties(inner_shape, props.pin_mut());
@@ -272,7 +272,7 @@ impl Face {
         let mut p = opencascade_sys::gp::new_point(0.0, 0.0, 0.0);
         let mut normal = opencascade_sys::gp::new_vec(0.0, 1.0, 0.0);
 
-        let face = b_rep_g_prop::Face::new(&self.inner);
+        let face = b_rep_g_prop::BRepGProp_Face::new(&self.inner);
         face.Normal(u, v, p.pin_mut(), normal.pin_mut());
 
         dvec3(normal.X(), normal.Y(), normal.Z())
@@ -342,7 +342,7 @@ impl Face {
     }
 
     pub fn surface_area(&self) -> f64 {
-        let mut props = GProps::new();
+        let mut props = GProp_GProps::new();
 
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
         BRepGProp::surface_properties(inner_shape, props.pin_mut());
