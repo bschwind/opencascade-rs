@@ -218,7 +218,7 @@ impl Wire {
         radius_values: impl IntoIterator<Item = (f64, f64)>,
     ) -> Shell {
         let law_function = law_function_from_graph(radius_values);
-        let law_handle = ffi::Law_Function_to_handle(law_function);
+        let law_handle = opencascade_sys::law::Law_Function_to_handle(law_function);
 
         let mut make_pipe_shell =
             make_pipe_shell_with_law_function(&self.inner, &path.inner, &law_handle);

@@ -7,6 +7,7 @@ pub mod bnd;
 pub mod g_prop;
 pub mod gc_pnts;
 pub mod gp;
+pub mod law;
 pub mod poly;
 pub mod shape_analysis;
 pub mod shape_upgrade;
@@ -105,7 +106,7 @@ pub mod ffi {
         type HandleGeom2d_TrimmedCurve;
         type HandleGeom_CylindricalSurface;
         type Handle_TopTools_HSequenceOfShape;
-        type HandleLawFunction;
+        type Handle_Law_Function;
 
         type Handle_TColgpHArray1OfPnt;
         pub fn new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(
@@ -157,23 +158,6 @@ pub mod ffi {
         type TopTools_IndexedDataMapOfShapeListOfShape =
             crate::top_tools::TopTools_IndexedDataMapOfShapeListOfShape;
         type TopTools_HSequenceOfShape = crate::top_tools::TopTools_HSequenceOfShape;
-
-        // Law Function
-        type Law_Function;
-
-        pub fn Law_Function_to_handle(law: UniquePtr<Law_Function>)
-            -> UniquePtr<HandleLawFunction>;
-
-        // Law Interpol
-
-        type Law_Interpol;
-
-        #[cxx_name = "construct_unique"]
-        pub fn Law_Interpol_ctor() -> UniquePtr<Law_Interpol>;
-        pub fn Law_Interpol_into_Law_Function(
-            interpol: UniquePtr<Law_Interpol>,
-        ) -> UniquePtr<Law_Function>;
-        pub fn Set(self: Pin<&mut Law_Interpol>, array: &TColgp_Array1OfPnt2d, periodic: bool);
 
         // Geometry
         type Geom_TrimmedCurve;
@@ -721,7 +705,7 @@ pub mod ffi {
         pub fn SetLaw(
             self: Pin<&mut BRepOffsetAPI_MakePipeShell>,
             profile: &TopoDS_Shape,
-            law: &HandleLawFunction,
+            law: &Handle_Law_Function,
             with_contact: bool,
             with_correction: bool,
         );
@@ -1056,6 +1040,7 @@ pub mod ffi {
     }
 
     impl UniquePtr<Handle_TopTools_HSequenceOfShape> {}
+    impl UniquePtr<Handle_Law_Function> {}
 }
 
 // Gross, but is this okay?

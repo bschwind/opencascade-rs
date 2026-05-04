@@ -5,7 +5,7 @@ use opencascade_sys::ffi;
 pub(crate) fn make_pipe_shell_with_law_function(
     profile: &ffi::TopoDS_Wire,
     spine: &ffi::TopoDS_Wire,
-    law_function: &ffi::HandleLawFunction,
+    law_function: &ffi::Handle_Law_Function,
 ) -> UniquePtr<ffi::BRepOffsetAPI_MakePipeShell> {
     let mut make_pipe_shell = ffi::BRepOffsetAPI_MakePipeShell_ctor(spine);
     make_pipe_shell.pin_mut().SetMode(false);

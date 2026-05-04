@@ -111,7 +111,6 @@ typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
 typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
 typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
-typedef opencascade::handle<Law_Function> HandleLawFunction;
 
 typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
 
@@ -225,16 +224,6 @@ inline void MakeThickSolidByJoin(BRepOffsetAPI_MakeThickSolid &make_thick_solid,
                                  const TopTools_ListOfShape &closing_faces, const Standard_Real offset,
                                  const Standard_Real tolerance) {
   make_thick_solid.MakeThickSolidByJoin(shape, closing_faces, offset, tolerance);
-}
-
-// Law_Function stuff
-inline std::unique_ptr<HandleLawFunction> Law_Function_to_handle(std::unique_ptr<Law_Function> law_function) {
-  return std::unique_ptr<HandleLawFunction>(new HandleLawFunction(law_function.release()));
-}
-
-// Law_Interpol stuff
-inline std::unique_ptr<Law_Function> Law_Interpol_into_Law_Function(std::unique_ptr<Law_Interpol> law_interpol) {
-  return std::unique_ptr<Law_Function>(law_interpol.release());
 }
 
 // Shape stuff
