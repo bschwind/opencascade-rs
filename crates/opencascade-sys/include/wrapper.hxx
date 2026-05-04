@@ -54,9 +54,6 @@
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
-#include <Geom_Plane.hxx>
-#include <Geom_Surface.hxx>
-#include <Geom_TrimmedCurve.hxx>
 #include <IGESControl_Reader.hxx>
 #include <IGESControl_Writer.hxx>
 #include <Law_Function.hxx>
@@ -102,16 +99,10 @@ template <typename T> std::unique_ptr<std::vector<T>> list_to_vector(const NColl
 typedef opencascade::handle<Standard_Type> HandleStandardType;
 typedef opencascade::handle<Geom_Curve> HandleGeomCurve;
 typedef opencascade::handle<Geom_BSplineCurve> HandleGeomBSplineCurve;
-typedef opencascade::handle<Geom_BezierCurve> HandleGeomBezierCurve;
 typedef opencascade::handle<Geom_TrimmedCurve> HandleGeomTrimmedCurve;
-typedef opencascade::handle<Geom_Surface> HandleGeomSurface;
-typedef opencascade::handle<Geom_BezierSurface> HandleGeomBezierSurface;
-typedef opencascade::handle<Geom_Plane> HandleGeomPlane;
 typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
 typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
 typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
-typedef opencascade::handle<Geom_CylindricalSurface> HandleGeom_CylindricalSurface;
-
 typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
 
 inline std::unique_ptr<Handle_TColgpHArray1OfPnt>
@@ -127,7 +118,7 @@ template <typename T> const T &handle_try_deref(const opencascade::handle<T> &ha
   return *handle;
 }
 
-inline const HandleStandardType &DynamicType(const HandleGeomSurface &surface) { return surface->DynamicType(); }
+inline const HandleStandardType &DynamicType(const Handle_Geom_Surface &surface) { return surface->DynamicType(); }
 
 inline rust::String type_name(const HandleStandardType &handle) { return std::string(handle->Name()); }
 
@@ -135,41 +126,11 @@ inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve &curv
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
 }
 
-inline std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurface(const HandleGeomSurface &surface) {
-  HandleGeomPlane plane_handle = opencascade::handle<Geom_Plane>::DownCast(surface);
-  return std::unique_ptr<HandleGeomPlane>(new opencascade::handle<Geom_Plane>(plane_handle));
-}
-
 // Collections
 
 // Geometry
-inline const gp_Pnt &handle_geom_plane_location(const HandleGeomPlane &plane) { return plane->Location(); }
-
-inline std::unique_ptr<HandleGeom_CylindricalSurface> Geom_CylindricalSurface_ctor(const gp_Ax3 &axis, double radius) {
-  return std::unique_ptr<HandleGeom_CylindricalSurface>(
-      new opencascade::handle<Geom_CylindricalSurface>(new Geom_CylindricalSurface(axis, radius)));
-}
-
-inline std::unique_ptr<HandleGeomBSplineCurve> GeomAPI_Interpolate_Curve(const GeomAPI_Interpolate &interpolate) {
-  return std::unique_ptr<HandleGeomBSplineCurve>(new opencascade::handle<Geom_BSplineCurve>(interpolate.Curve()));
-}
-
-inline std::unique_ptr<HandleGeomBezierCurve>
-Geom_BezierCurve_to_handle(std::unique_ptr<Geom_BezierCurve> bezier_curve) {
-  return std::unique_ptr<HandleGeomBezierCurve>(new HandleGeomBezierCurve(bezier_curve.release()));
-}
-
-inline std::unique_ptr<HandleGeomSurface> cylinder_to_surface(const HandleGeom_CylindricalSurface &cylinder_handle) {
-  return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(cylinder_handle));
-}
-
-inline std::unique_ptr<HandleGeomBezierSurface> Geom_BezierSurface_ctor(const TColgp_Array2OfPnt &poles) {
-  return std::unique_ptr<HandleGeomBezierSurface>(
-      new opencascade::handle<Geom_BezierSurface>(new Geom_BezierSurface(poles)));
-}
-
-inline std::unique_ptr<HandleGeomSurface> bezier_to_surface(const HandleGeomBezierSurface &bezier_handle) {
-  return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(bezier_handle));
+inline std::unique_ptr<Handle_Geom_BSplineCurve> GeomAPI_Interpolate_Curve(const GeomAPI_Interpolate &interpolate) {
+  return std::unique_ptr<Handle_Geom_BSplineCurve>(new opencascade::handle<Geom_BSplineCurve>(interpolate.Curve()));
 }
 
 inline std::unique_ptr<HandleGeom2d_Ellipse> Geom2d_Ellipse_ctor(const gp_Ax2d &axis, double major_radius,
@@ -253,8 +214,8 @@ inline std::unique_ptr<TopoDS_Shape> TopoDS_Shell_as_shape(std::unique_ptr<TopoD
 inline const TopoDS_Builder &BRep_Builder_upcast_to_topods_builder(const BRep_Builder &builder) { return builder; }
 
 // Transforms
-inline std::unique_ptr<HandleGeomSurface> BRep_Tool_Surface(const TopoDS_Face &face) {
-  return std::unique_ptr<HandleGeomSurface>(new opencascade::handle<Geom_Surface>(BRep_Tool::Surface(face)));
+inline std::unique_ptr<Handle_Geom_Surface> BRep_Tool_Surface(const TopoDS_Face &face) {
+  return std::unique_ptr<Handle_Geom_Surface>(new opencascade::handle<Geom_Surface>(BRep_Tool::Surface(face)));
 }
 
 inline std::unique_ptr<HandleGeomCurve> BRep_Tool_Curve(const TopoDS_Edge &edge, Standard_Real &first,

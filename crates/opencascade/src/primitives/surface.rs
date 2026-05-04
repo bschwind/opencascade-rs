@@ -4,7 +4,7 @@ use glam::DVec3;
 use opencascade_sys::ffi;
 
 pub struct Surface {
-    pub(crate) inner: UniquePtr<ffi::HandleGeomSurface>,
+    pub(crate) inner: UniquePtr<ffi::Handle_Geom_Surface>,
 }
 
 impl Surface {
@@ -26,8 +26,8 @@ impl Surface {
             }
         }
 
-        let bezier = ffi::Geom_BezierSurface_ctor(&pole_array);
-        let inner = ffi::bezier_to_surface(&bezier);
+        let bezier = opencascade_sys::geom::Geom_BezierSurface_ctor(&pole_array);
+        let inner = opencascade_sys::geom::bezier_to_surface(&bezier);
 
         Self { inner }
     }

@@ -6,6 +6,7 @@ pub mod bin_tools;
 pub mod bnd;
 pub mod g_prop;
 pub mod gc_pnts;
+pub mod geom;
 pub mod gp;
 pub mod law;
 pub mod poly;
@@ -96,15 +97,15 @@ pub mod ffi {
         type HandleStandardType;
         type HandleGeomCurve;
         type HandleGeomBSplineCurve;
-        type HandleGeomBezierCurve;
+        type Handle_Geom_BezierCurve;
         type HandleGeomTrimmedCurve;
-        type HandleGeomSurface;
-        type HandleGeomBezierSurface;
-        type HandleGeomPlane;
+        type Handle_Geom_Surface;
+        type Handle_Geom_BezierSurface;
+        type Handle_Geom_Plane;
         type HandleGeom2d_Curve;
         type HandleGeom2d_Ellipse;
         type HandleGeom2d_TrimmedCurve;
-        type HandleGeom_CylindricalSurface;
+        type Handle_Geom_CylindricalSurface;
         type Handle_TopTools_HSequenceOfShape;
         type Handle_Law_Function;
 
@@ -113,7 +114,7 @@ pub mod ffi {
             array: UniquePtr<TColgp_HArray1OfPnt>,
         ) -> UniquePtr<Handle_TColgpHArray1OfPnt>;
 
-        pub fn DynamicType(surface: &HandleGeomSurface) -> &HandleStandardType;
+        pub fn DynamicType(surface: &Handle_Geom_Surface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
 
         #[cxx_name = "construct_unique"]
@@ -123,7 +124,7 @@ pub mod ffi {
 
         #[cxx_name = "construct_unique"]
         pub fn new_HandleGeomCurve_from_HandleGeom_BezierCurve(
-            bezier_curve_handle: &HandleGeomBezierCurve,
+            bezier_curve_handle: &Handle_Geom_BezierCurve,
         ) -> UniquePtr<HandleGeomCurve>;
 
         #[cxx_name = "construct_unique"]
@@ -131,20 +132,16 @@ pub mod ffi {
             trimmed_curve_handle: &HandleGeomTrimmedCurve,
         ) -> UniquePtr<HandleGeomCurve>;
 
-        pub fn new_HandleGeomPlane_from_HandleGeomSurface(
-            geom_surface_handle: &HandleGeomSurface,
-        ) -> UniquePtr<HandleGeomPlane>;
-
         pub fn IsNull(self: &HandleStandardType) -> bool;
         pub fn IsNull(self: &HandleGeomCurve) -> bool;
         pub fn IsNull(self: &HandleGeomTrimmedCurve) -> bool;
-        pub fn IsNull(self: &HandleGeomSurface) -> bool;
-        pub fn IsNull(self: &HandleGeomBezierSurface) -> bool;
-        pub fn IsNull(self: &HandleGeomPlane) -> bool;
+        pub fn IsNull(self: &Handle_Geom_Surface) -> bool;
+        pub fn IsNull(self: &Handle_Geom_BezierSurface) -> bool;
+        pub fn IsNull(self: &Handle_Geom_Plane) -> bool;
         pub fn IsNull(self: &HandleGeom2d_Curve) -> bool;
         pub fn IsNull(self: &HandleGeom2d_Ellipse) -> bool;
         pub fn IsNull(self: &HandleGeom2d_TrimmedCurve) -> bool;
-        pub fn IsNull(self: &HandleGeom_CylindricalSurface) -> bool;
+        pub fn IsNull(self: &Handle_Geom_CylindricalSurface) -> bool;
         pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
 
         pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
@@ -160,29 +157,9 @@ pub mod ffi {
         type TopTools_HSequenceOfShape = crate::top_tools::TopTools_HSequenceOfShape;
 
         // Geometry
-        type Geom_TrimmedCurve;
-        type Geom_CylindricalSurface;
-        type Geom_BezierSurface;
         type Geom2d_Ellipse;
         type Geom2d_Curve;
         type Geom2d_TrimmedCurve;
-
-        pub fn handle_geom_plane_location(plane: &HandleGeomPlane) -> &gp_Pnt;
-
-        pub fn Geom_CylindricalSurface_ctor(
-            axis: &gp_Ax3,
-            radius: f64,
-        ) -> UniquePtr<HandleGeom_CylindricalSurface>;
-        pub fn cylinder_to_surface(
-            cylinder_handle: &HandleGeom_CylindricalSurface,
-        ) -> UniquePtr<HandleGeomSurface>;
-
-        pub fn Geom_BezierSurface_ctor(
-            poles: &TColgp_Array2OfPnt,
-        ) -> UniquePtr<HandleGeomBezierSurface>;
-        pub fn bezier_to_surface(
-            bezier_handle: &HandleGeomBezierSurface,
-        ) -> UniquePtr<HandleGeomSurface>;
 
         pub fn Geom2d_Ellipse_ctor(
             axis: &gp_Ax2d,
@@ -378,7 +355,7 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeEdge_CurveSurface2d(
             curve_handle: &HandleGeom2d_Curve,
-            surface_handle: &HandleGeomSurface,
+            surface_handle: &Handle_Geom_Surface,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
 
         pub fn Vertex1(self: &BRepBuilderAPI_MakeEdge) -> &TopoDS_Vertex;
@@ -418,7 +395,7 @@ pub mod ffi {
         ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeFace_surface(
-            surface: &HandleGeomSurface,
+            surface: &Handle_Geom_Surface,
             edge_tolerance: f64,
         ) -> UniquePtr<BRepBuilderAPI_MakeFace>;
 
@@ -820,21 +797,9 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn GeomAPI_ProjectPointOnSurf_ctor(
             origin: &gp_Pnt,
-            surface: &HandleGeomSurface,
+            surface: &Handle_Geom_Surface,
         ) -> UniquePtr<GeomAPI_ProjectPointOnSurf>;
         pub fn LowerDistanceParameters(self: &GeomAPI_ProjectPointOnSurf, u: &mut f64, v: &mut f64);
-
-        // Bezier Curve
-        type Geom_BezierCurve;
-
-        #[cxx_name = "construct_unique"]
-        pub fn Geom_BezierCurve_ctor_points(
-            poles: &TColgp_HArray1OfPnt,
-        ) -> UniquePtr<Geom_BezierCurve>;
-
-        pub fn Geom_BezierCurve_to_handle(
-            law: UniquePtr<Geom_BezierCurve>,
-        ) -> UniquePtr<HandleGeomBezierCurve>;
 
         type BRepBuilderAPI_MakeSolid;
 
@@ -920,7 +885,7 @@ pub mod ffi {
             vertex: Pin<&mut TopoDS_Vertex>,
         ) -> bool;
 
-        pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<HandleGeomSurface>;
+        pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<Handle_Geom_Surface>;
         pub fn BRep_Tool_Curve(
             edge: &TopoDS_Edge,
             first: &mut f64,
@@ -1041,6 +1006,10 @@ pub mod ffi {
 
     impl UniquePtr<Handle_TopTools_HSequenceOfShape> {}
     impl UniquePtr<Handle_Law_Function> {}
+    impl UniquePtr<Handle_Geom_CylindricalSurface> {}
+    impl UniquePtr<Handle_Geom_BezierSurface> {}
+    impl UniquePtr<Handle_Geom_BezierCurve> {}
+    impl UniquePtr<Handle_Geom_Plane> {}
 }
 
 // Gross, but is this okay?

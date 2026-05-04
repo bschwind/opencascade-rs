@@ -70,8 +70,8 @@ impl Edge {
             array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
         }
 
-        let bezier = ffi::Geom_BezierCurve_ctor_points(&array);
-        let bezier_handle = ffi::Geom_BezierCurve_to_handle(bezier);
+        let bezier = opencascade_sys::geom::Geom_BezierCurve_ctor_points(&array);
+        let bezier_handle = opencascade_sys::geom::Geom_BezierCurve_to_handle(bezier);
         let curve_handle = ffi::new_HandleGeomCurve_from_HandleGeom_BezierCurve(&bezier_handle);
 
         let mut make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);

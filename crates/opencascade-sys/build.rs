@@ -57,6 +57,7 @@ fn main() {
         "src/b_rep_tools.rs",
         "src/bin_tools.rs",
         "src/bnd.rs",
+        "src/geom.rs",
         "src/g_prop.rs",
         "src/gc_pnts.rs",
         "src/gp.rs",
