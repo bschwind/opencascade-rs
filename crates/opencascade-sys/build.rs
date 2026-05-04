@@ -59,6 +59,7 @@ fn main() {
         "src/bnd.rs",
         "src/geom.rs",
         "src/geom2d.rs",
+        "src/geom_abs.rs",
         "src/geom_api.rs",
         "src/g_prop.rs",
         "src/gc_pnts.rs",

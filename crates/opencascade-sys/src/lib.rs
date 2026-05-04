@@ -8,6 +8,7 @@ pub mod g_prop;
 pub mod gc_pnts;
 pub mod geom;
 pub mod geom2d;
+pub mod geom_abs;
 pub mod geom_api;
 pub mod gp;
 pub mod law;
@@ -59,28 +60,6 @@ pub mod ffi {
         BOPAlgo_GlueOff,
         BOPAlgo_GlueShift,
         BOPAlgo_GlueFull,
-    }
-
-    #[derive(Debug)]
-    #[repr(u32)]
-    pub enum GeomAbs_CurveType {
-        GeomAbs_Line,
-        GeomAbs_Circle,
-        GeomAbs_Ellipse,
-        GeomAbs_Hyperbola,
-        GeomAbs_Parabola,
-        GeomAbs_BezierCurve,
-        GeomAbs_BSplineCurve,
-        GeomAbs_OffsetCurve,
-        GeomAbs_OtherCurve,
-    }
-
-    #[repr(u32)]
-    #[derive(Debug)]
-    pub enum GeomAbs_JoinType {
-        GeomAbs_Arc,
-        GeomAbs_Tangent,
-        GeomAbs_Intersection,
     }
 
     unsafe extern "C++" {
@@ -147,7 +126,6 @@ pub mod ffi {
         type gp_Pnt2d = crate::gp::gp_Pnt2d;
         type gp_Vec = crate::gp::gp_Vec;
         type gp_Dir = crate::gp::gp_Dir;
-
         type gp_Ax1 = crate::gp::gp_Ax1;
         type gp_Ax2 = crate::gp::gp_Ax2;
         type gp_Ax3 = crate::gp::gp_Ax3;
@@ -155,12 +133,10 @@ pub mod ffi {
         type gp_Ax2d = crate::gp::gp_Ax2d;
         type gp_Trsf = crate::gp::gp_Trsf;
         type gp_GTrsf = crate::gp::gp_GTrsf;
-
         type gp_Circ = crate::gp::gp_Circ;
         type gp_Lin = crate::gp::gp_Lin;
-
-        // Edge types
-        type GeomAbs_CurveType;
+        type GeomAbs_CurveType = crate::geom_abs::GeomAbs_CurveType;
+        type GeomAbs_JoinType = crate::geom_abs::GeomAbs_JoinType;
 
         // Segments
         type GC_MakeSegment;
@@ -591,8 +567,6 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeOffset>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepOffsetAPI_MakeOffset>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepOffsetAPI_MakeOffset) -> bool;
-
-        type GeomAbs_JoinType;
 
         // Solids
         type BRepOffsetAPI_MakeThickSolid;
