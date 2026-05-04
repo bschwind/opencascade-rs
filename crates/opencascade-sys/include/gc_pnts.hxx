@@ -1,6 +1,6 @@
-#include <bindings_common.hxx>
-#include <GCPnts_TangentialDeflection.hxx>
 #include <BRepAdaptor_Curve.hxx>
+#include <GCPnts_TangentialDeflection.hxx>
+#include <bindings_common.hxx>
 
 inline std::unique_ptr<gp_Pnt> GCPnts_TangentialDeflection_Value(const GCPnts_TangentialDeflection &approximator,
                                                                  Standard_Integer i) {

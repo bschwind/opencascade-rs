@@ -1,7 +1,7 @@
-#include <bindings_common.hxx>
 #include <BRepTools.hxx>
 #include <BRep_Builder.hxx>
 #include <TopoDS_Wire.hxx>
+#include <bindings_common.hxx>
 
 inline std::unique_ptr<TopoDS_Wire> outer_wire(const TopoDS_Face &face) {
   return std::unique_ptr<TopoDS_Wire>(new TopoDS_Wire(BRepTools::OuterWire(face)));

@@ -1,6 +1,6 @@
-#include <bindings_common.hxx>
 #include <BinTools.hxx>
 #include <TopoDS_Shape.hxx>
+#include <bindings_common.hxx>
 
 inline bool write_brep_bin(const TopoDS_Shape &shape, rust::String path) {
   return BinTools::Write(shape, path.c_str());

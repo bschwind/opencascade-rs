@@ -1,6 +1,6 @@
-#include <bindings_common.hxx>
 #include <BRepGProp.hxx>
 #include <BRepGProp_Face.hxx>
+#include <bindings_common.hxx>
 
 inline void BRepGProp_LinearProperties(const TopoDS_Shape &shape, GProp_GProps &props) {
   BRepGProp::LinearProperties(shape, props);

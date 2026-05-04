@@ -143,7 +143,6 @@ inline std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurfa
 
 // Collections
 
-
 // Geometry
 inline const gp_Pnt &handle_geom_plane_location(const HandleGeomPlane &plane) { return plane->Location(); }
 
@@ -371,7 +370,7 @@ BRepFilletAPI_MakeFillet2d_add_chamfer_angle(BRepFilletAPI_MakeFillet2d &make_fi
 }
 
 inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,
-                                                                         TopLoc_Location &location) {
+                                                                          TopLoc_Location &location) {
   return std::unique_ptr<Handle_Poly_Triangulation>(
       new opencascade::handle<Poly_Triangulation>(BRep_Tool::Triangulation(face, location)));
 }

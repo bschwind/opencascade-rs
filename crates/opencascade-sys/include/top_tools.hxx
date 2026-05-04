@@ -1,9 +1,9 @@
-#include <bindings_common.hxx>
-#include <TopTools_HSequenceOfShape.hxx>
-#include <TopTools_ListOfShape.hxx>
-#include <TopTools_IndexedMapOfShape.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopExp.hxx>
+#include <TopTools_HSequenceOfShape.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
+#include <TopTools_ListOfShape.hxx>
+#include <TopoDS_Face.hxx>
+#include <bindings_common.hxx>
 
 inline void shape_list_append_face(TopTools_ListOfShape &list, const TopoDS_Face &face) { list.Append(face); }
 

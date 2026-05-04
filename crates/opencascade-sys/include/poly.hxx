@@ -1,6 +1,6 @@
-#include <bindings_common.hxx>
 #include <Poly_Connect.hxx>
 #include <Poly_Triangulation.hxx>
+#include <bindings_common.hxx>
 
 inline std::unique_ptr<Handle_Poly_Triangulation>
 Handle_Poly_Triangulation_ctor(std::unique_ptr<Poly_Triangulation> triangulation) {
