@@ -65,7 +65,8 @@ impl Solid {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
-        let mut cut_operation = ffi::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+        let mut cut_operation =
+            opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
 
         let edge_list = cut_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
@@ -86,7 +87,8 @@ impl Solid {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
-        let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
+        let mut fuse_operation =
+            opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 
@@ -106,7 +108,10 @@ impl Solid {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
 
-        let mut fuse_operation = ffi::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+        let mut fuse_operation = opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Common_ctor(
+            inner_shape,
+            other_inner_shape,
+        );
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::shape_list_to_vector(edge_list);
 

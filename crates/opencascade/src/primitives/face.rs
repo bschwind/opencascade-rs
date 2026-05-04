@@ -343,7 +343,8 @@ impl Face {
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
 
-        let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
+        let mut fuse_operation =
+            opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
 
@@ -357,7 +358,10 @@ impl Face {
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
 
-        let mut common_operation = ffi::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+        let mut common_operation = opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Common_ctor(
+            inner_shape,
+            other_inner_shape,
+        );
 
         let common_shape = common_operation.pin_mut().Shape();
 
@@ -370,7 +374,8 @@ impl Face {
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
 
-        let mut fuse_operation = ffi::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+        let mut fuse_operation =
+            opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
 
         let cut_shape = fuse_operation.pin_mut().Shape();
 
@@ -487,7 +492,8 @@ impl CompoundFace {
         let inner_shape = ffi::cast_compound_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_compound_to_shape(&other.inner);
 
-        let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
+        let mut fuse_operation =
+            opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
 
@@ -501,7 +507,10 @@ impl CompoundFace {
         let inner_shape = ffi::cast_compound_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_compound_to_shape(&other.inner);
 
-        let mut common_operation = ffi::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+        let mut common_operation = opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Common_ctor(
+            inner_shape,
+            other_inner_shape,
+        );
 
         let common_shape = common_operation.pin_mut().Shape();
 
@@ -515,7 +524,8 @@ impl CompoundFace {
         let inner_shape = ffi::cast_compound_to_shape(&self.inner);
         let other_inner_shape = ffi::cast_compound_to_shape(&other.inner);
 
-        let mut fuse_operation = ffi::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+        let mut fuse_operation =
+            opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
 
         let cut_shape = fuse_operation.pin_mut().Shape();
 

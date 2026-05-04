@@ -1,5 +1,6 @@
 pub mod b_rep;
 pub mod b_rep_adaptor;
+pub mod b_rep_algo_api;
 pub mod b_rep_bnd_lib;
 pub mod b_rep_builder_api;
 pub mod b_rep_feat;
@@ -246,68 +247,7 @@ pub mod ffi {
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
 
-        pub type BRepAlgoAPI_BuilderAlgo;
-        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_BuilderAlgo>) -> &TopTools_ListOfShape;
-
-        pub type BRepAlgoAPI_Fuse;
         type BOPAlgo_GlueEnum;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepAlgoAPI_Fuse_ctor(
-            shape_1: &TopoDS_Shape,
-            shape_2: &TopoDS_Shape,
-        ) -> UniquePtr<BRepAlgoAPI_Fuse>;
-
-        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepAlgoAPI_Fuse>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepAlgoAPI_Fuse) -> bool;
-        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Fuse>) -> &TopTools_ListOfShape;
-        pub fn SetGlue(self: Pin<&mut BRepAlgoAPI_Fuse>, glue: BOPAlgo_GlueEnum);
-
-        type BRepAlgoAPI_Cut;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepAlgoAPI_Cut_ctor(
-            shape_1: &TopoDS_Shape,
-            shape_2: &TopoDS_Shape,
-        ) -> UniquePtr<BRepAlgoAPI_Cut>;
-
-        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepAlgoAPI_Cut>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepAlgoAPI_Cut) -> bool;
-        pub fn Generated<'a>(
-            self: Pin<&'a mut BRepAlgoAPI_Cut>,
-            shape: &'a TopoDS_Shape,
-        ) -> &'a TopTools_ListOfShape;
-        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Cut>) -> &TopTools_ListOfShape;
-
-        type BRepAlgoAPI_Common;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepAlgoAPI_Common_ctor(
-            shape_1: &TopoDS_Shape,
-            shape_2: &TopoDS_Shape,
-        ) -> UniquePtr<BRepAlgoAPI_Common>;
-
-        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepAlgoAPI_Common>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepAlgoAPI_Common) -> bool;
-        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Common>) -> &TopTools_ListOfShape;
-
-        type BRepAlgoAPI_Section;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepAlgoAPI_Section_ctor(
-            shape_1: &TopoDS_Shape,
-            shape_2: &TopoDS_Shape,
-        ) -> UniquePtr<BRepAlgoAPI_Section>;
-
-        pub fn Shape(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepAlgoAPI_Section>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepAlgoAPI_Section) -> bool;
-        pub fn cast_section_to_builderalgo(
-            section: UniquePtr<BRepAlgoAPI_Section>,
-        ) -> UniquePtr<BRepAlgoAPI_BuilderAlgo>;
 
         // Topology Explorer
         type TopAbs_ShapeEnum;

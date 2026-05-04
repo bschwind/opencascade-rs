@@ -1,9 +1,5 @@
 #include "rust/cxx.h"
 #include <BOPAlgo_GlueEnum.hxx>
-#include <BRepAlgoAPI_Common.hxx>
-#include <BRepAlgoAPI_Cut.hxx>
-#include <BRepAlgoAPI_Fuse.hxx>
-#include <BRepAlgoAPI_Section.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepGProp.hxx>
 #include <BRepGProp_Face.hxx>
@@ -128,10 +124,3 @@ inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurv
 inline void compute_normals(const TopoDS_Face &face, const Handle(Poly_Triangulation) & triangulation) {
   BRepLib_ToolTriangulatedShape::ComputeNormals(face, triangulation);
 }
-
-// BRep Algo API
-inline std::unique_ptr<BRepAlgoAPI_BuilderAlgo>
-cast_section_to_builderalgo(std::unique_ptr<BRepAlgoAPI_Section> section) {
-  return section;
-}
-// namespace BRepAlgoAPI

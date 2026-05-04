@@ -53,6 +53,7 @@ fn main() {
     let rust_bridges = [
         "src/b_rep.rs",
         "src/b_rep_adaptor.rs",
+        "src/b_rep_algo_api.rs",
         "src/b_rep_bnd_lib.rs",
         "src/b_rep_builder_api.rs",
         "src/b_rep_feat.rs",
