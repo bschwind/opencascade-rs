@@ -251,7 +251,7 @@ impl Face {
     }
 
     pub fn edges(&self) -> EdgeIterator {
-        let explorer = ffi::TopExp_Explorer_ctor(
+        let explorer = opencascade_sys::top_exp::TopExp_Explorer_ctor(
             ffi::cast_face_to_shape(&self.inner),
             ffi::TopAbs_ShapeEnum::TopAbs_EDGE,
         );

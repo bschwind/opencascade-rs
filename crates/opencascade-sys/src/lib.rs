@@ -18,6 +18,7 @@ pub mod shape_analysis;
 pub mod shape_upgrade;
 pub mod stl_api;
 pub mod t_col_gp;
+pub mod top_exp;
 pub mod top_loc;
 pub mod top_tools;
 
@@ -731,37 +732,7 @@ pub mod ffi {
         pub fn IsDone(self: &BRepBuilderAPI_GTransform) -> bool;
 
         // Topology Explorer
-        type TopExp_Explorer;
         type TopAbs_ShapeEnum;
-
-        #[cxx_name = "construct_unique"]
-        pub fn TopExp_Explorer_ctor(
-            shape: &TopoDS_Shape,
-            to_find: TopAbs_ShapeEnum,
-        ) -> UniquePtr<TopExp_Explorer>;
-
-        pub fn More(self: &TopExp_Explorer) -> bool;
-        pub fn Next(self: Pin<&mut TopExp_Explorer>);
-        pub fn ExplorerCurrentShape(explorer: &TopExp_Explorer) -> UniquePtr<TopoDS_Shape>;
-        pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
-
-        pub fn TopExp_FirstVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
-        pub fn TopExp_LastVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
-        pub fn TopExp_EdgeVertices(
-            edge: &TopoDS_Edge,
-            vertex_first: Pin<&mut TopoDS_Vertex>,
-            vertex_last: Pin<&mut TopoDS_Vertex>,
-        );
-        pub fn TopExp_WireVertices(
-            wire: &TopoDS_Wire,
-            vertex_first: Pin<&mut TopoDS_Vertex>,
-            vertex_last: Pin<&mut TopoDS_Vertex>,
-        );
-        pub fn TopExp_CommonVertex(
-            edge_1: &TopoDS_Edge,
-            edge_2: &TopoDS_Edge,
-            vertex: Pin<&mut TopoDS_Vertex>,
-        ) -> bool;
 
         pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<Handle_Geom_Surface>;
         pub fn BRep_Tool_Curve(
@@ -905,5 +876,4 @@ unsafe impl Send for ffi::TopoDS_Solid {}
 unsafe impl Send for ffi::TopoDS_Compound {}
 unsafe impl Send for ffi::TopoDS_Shape {}
 
-unsafe impl Send for ffi::TopExp_Explorer {}
 unsafe impl Send for ffi::BRepFilletAPI_MakeChamfer {}

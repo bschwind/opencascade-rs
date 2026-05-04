@@ -112,7 +112,7 @@ pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
 }
 
 pub struct EdgeIterator {
-    explorer: UniquePtr<ffi::TopExp_Explorer>,
+    explorer: UniquePtr<opencascade_sys::top_exp::TopExp_Explorer>,
 }
 
 impl Iterator for EdgeIterator {
@@ -149,7 +149,7 @@ impl EdgeIterator {
 }
 
 pub struct FaceIterator {
-    explorer: UniquePtr<ffi::TopExp_Explorer>,
+    explorer: UniquePtr<opencascade_sys::top_exp::TopExp_Explorer>,
 }
 
 #[derive(Debug, Copy, Clone)]
