@@ -14,8 +14,6 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
-#include <BRepFeat_MakeCylindricalHole.hxx>
-#include <BRepFeat_MakeDPrism.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
 #include <BRepFilletAPI_MakeFillet.hxx>
 #include <BRepFilletAPI_MakeFillet2d.hxx>
@@ -172,11 +170,6 @@ inline std::unique_ptr<TopoDS_Face> BRepIntCurveSurface_Inter_face(const BRepInt
 
 inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurveSurface_Inter &intersector) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(intersector.Pnt()));
-}
-
-// BRepFeat
-inline std::unique_ptr<BRepFeat_MakeCylindricalHole> BRepFeat_MakeCylindricalHole_ctor() {
-  return std::unique_ptr<BRepFeat_MakeCylindricalHole>(new BRepFeat_MakeCylindricalHole());
 }
 
 // Fillets

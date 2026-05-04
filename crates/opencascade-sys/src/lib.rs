@@ -1,4 +1,5 @@
 pub mod b_rep_bnd_lib;
+pub mod b_rep_feat;
 pub mod b_rep_g_prop;
 pub mod b_rep_mesh;
 pub mod b_rep_tools;
@@ -344,25 +345,6 @@ pub mod ffi {
         pub fn Shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepPrimAPI_MakePrism>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakePrism) -> bool;
-
-        type BRepFeat_MakeDPrism;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepFeat_MakeDPrism_ctor(
-            shape: &TopoDS_Shape,
-            profile_base: &TopoDS_Face,
-            sketch_base: &TopoDS_Face,
-            angle: f64,
-            fuse: i32, // 0 = subtractive, 1 = additive
-            modify: bool,
-        ) -> UniquePtr<BRepFeat_MakeDPrism>;
-
-        #[cxx_name = "Perform"]
-        pub fn perform_until_face(self: Pin<&mut BRepFeat_MakeDPrism>, until: &TopoDS_Shape);
-
-        #[cxx_name = "Perform"]
-        pub fn perform_with_height(self: Pin<&mut BRepFeat_MakeDPrism>, height: f64);
-        pub fn Shape(self: Pin<&mut BRepFeat_MakeDPrism>) -> &TopoDS_Shape;
 
         type BRepPrimAPI_MakeRevol;
 
@@ -770,17 +752,6 @@ pub mod ffi {
         pub fn V(self: &BRepIntCurveSurface_Inter) -> f64;
         pub fn W(self: &BRepIntCurveSurface_Inter) -> f64;
 
-        // BRepFeat
-        type BRepFeat_MakeCylindricalHole;
-        pub fn BRepFeat_MakeCylindricalHole_ctor() -> UniquePtr<BRepFeat_MakeCylindricalHole>;
-        pub fn Init(
-            self: Pin<&mut BRepFeat_MakeCylindricalHole>,
-            shape: &TopoDS_Shape,
-            axis: &gp_Ax1,
-        );
-        pub fn Perform(self: Pin<&mut BRepFeat_MakeCylindricalHole>, radius: f64);
-        pub fn Build(self: Pin<&mut BRepFeat_MakeCylindricalHole>);
-        pub fn Shape(self: &BRepFeat_MakeCylindricalHole) -> &TopoDS_Shape;
         type IFSelect_ReturnStatus;
 
         type TopLoc_Location = crate::top_loc::TopLoc_Location;

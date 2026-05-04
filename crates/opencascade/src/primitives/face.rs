@@ -75,7 +75,7 @@ impl Face {
         let fuse = 1; // 0 = subtractive, 1 = additive
         let modify = false;
 
-        let mut make_prism = ffi::BRepFeat_MakeDPrism_ctor(
+        let mut make_prism = opencascade_sys::b_rep_feat::BRepFeat_MakeDPrism_ctor(
             &shape_with_face.inner,
             profile_base,
             &sketch_base,
@@ -98,7 +98,7 @@ impl Face {
         let fuse = 0; // 0 = subtractive, 1 = additive
         let modify = false;
 
-        let mut make_prism = ffi::BRepFeat_MakeDPrism_ctor(
+        let mut make_prism = opencascade_sys::b_rep_feat::BRepFeat_MakeDPrism_ctor(
             &shape_with_face.inner,
             profile_base,
             &sketch_base,

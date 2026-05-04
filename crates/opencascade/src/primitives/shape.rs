@@ -794,7 +794,7 @@ impl Shape {
     pub fn drill_hole(&self, p: DVec3, dir: DVec3, radius: f64) -> Self {
         let hole_axis = make_axis_1(p, dir);
 
-        let mut make_hole = ffi::BRepFeat_MakeCylindricalHole_ctor();
+        let mut make_hole = opencascade_sys::b_rep_feat::BRepFeat_MakeCylindricalHole_ctor();
         make_hole.pin_mut().Init(&self.inner, &hole_axis);
 
         make_hole.pin_mut().Perform(radius);
