@@ -790,8 +790,15 @@ impl Shape {
             );
         }
 
-        let mut solid_maker = ffi::BRepOffsetAPI_MakeThickSolid_ctor();
-        ffi::MakeThickSolidByJoin(solid_maker.pin_mut(), &self.inner, &faces_list, offset, 0.001);
+        let mut solid_maker =
+            opencascade_sys::b_rep_offset_api::BRepOffsetAPI_MakeThickSolid_ctor();
+        opencascade_sys::b_rep_offset_api::MakeThickSolidByJoin(
+            solid_maker.pin_mut(),
+            &self.inner,
+            &faces_list,
+            offset,
+            0.001,
+        );
 
         Self::from_shape(solid_maker.pin_mut().Shape())
     }

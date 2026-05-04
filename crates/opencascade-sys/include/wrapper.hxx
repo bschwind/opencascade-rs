@@ -11,11 +11,6 @@
 #include <BRepLib.hxx>
 #include <BRepLib_ToolTriangulatedShape.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
-#include <BRepOffsetAPI_MakeOffset.hxx>
-#include <BRepOffsetAPI_MakePipe.hxx>
-#include <BRepOffsetAPI_MakePipeShell.hxx>
-#include <BRepOffsetAPI_MakeThickSolid.hxx>
-#include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepTools.hxx>
 #include <BinTools.hxx>
 #include <GCE2d_MakeSegment.hxx>
@@ -96,12 +91,6 @@ inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const Handle_Geom_Curve &cu
 
 // BRepLib
 inline bool BRepLibBuildCurves3d(const TopoDS_Shape &shape) { return BRepLib::BuildCurves3d(shape); }
-
-inline void MakeThickSolidByJoin(BRepOffsetAPI_MakeThickSolid &make_thick_solid, const TopoDS_Shape &shape,
-                                 const TopTools_ListOfShape &closing_faces, const Standard_Real offset,
-                                 const Standard_Real tolerance) {
-  make_thick_solid.MakeThickSolidByJoin(shape, closing_faces, offset, tolerance);
-}
 
 // Shape stuff
 inline const TopoDS_Vertex &TopoDS_cast_to_vertex(const TopoDS_Shape &shape) { return TopoDS::Vertex(shape); }

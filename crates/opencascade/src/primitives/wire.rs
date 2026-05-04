@@ -192,8 +192,10 @@ impl Wire {
     /// Offset the wire by a given distance and join settings
     #[must_use]
     pub fn offset(&self, distance: f64, join_type: JoinType) -> Self {
-        let mut make_offset =
-            ffi::BRepOffsetAPI_MakeOffset_wire_ctor(&self.inner, join_type.into());
+        let mut make_offset = opencascade_sys::b_rep_offset_api::BRepOffsetAPI_MakeOffset_wire_ctor(
+            &self.inner,
+            join_type.into(),
+        );
         make_offset.pin_mut().Perform(distance, 0.0);
 
         let offset_shape = make_offset.pin_mut().Shape();
@@ -206,7 +208,10 @@ impl Wire {
     #[must_use]
     pub fn sweep_along(&self, path: &Wire) -> Shell {
         let profile_shape = ffi::cast_wire_to_shape(&self.inner);
-        let mut make_pipe = ffi::BRepOffsetAPI_MakePipe_ctor(&path.inner, profile_shape);
+        let mut make_pipe = opencascade_sys::b_rep_offset_api::BRepOffsetAPI_MakePipe_ctor(
+            &path.inner,
+            profile_shape,
+        );
 
         let pipe_shape = make_pipe.pin_mut().Shape();
         let result_shell = ffi::TopoDS_cast_to_shell(pipe_shape);
