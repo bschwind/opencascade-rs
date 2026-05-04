@@ -43,7 +43,9 @@ impl Wire {
         Self { inner }
     }
 
-    fn from_make_wire(mut make_wire: UniquePtr<ffi::BRepBuilderAPI_MakeWire>) -> Self {
+    fn from_make_wire(
+        mut make_wire: UniquePtr<opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeWire>,
+    ) -> Self {
         Self::from_wire(make_wire.pin_mut().Wire())
     }
 
@@ -54,7 +56,7 @@ impl Wire {
         }
 
         let (first, last) = (points.first().unwrap(), points.last().unwrap());
-        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+        let mut make_wire = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
 
         if points.len() == 2 {
             make_wire.pin_mut().add_edge(&Edge::segment(*first, *last).inner);
@@ -69,7 +71,7 @@ impl Wire {
     }
 
     pub fn from_edges<'a>(edges: impl IntoIterator<Item = &'a Edge>) -> Self {
-        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+        let mut make_wire = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
 
         for edge in edges.into_iter() {
             make_wire.pin_mut().add_edge(&edge.inner);
@@ -106,7 +108,7 @@ impl Wire {
             wires.pin_mut(),
         );
 
-        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+        let mut make_wire = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
 
         let wire_len = opencascade_sys::top_tools::TopTools_HSequenceOfShape_length(&wires);
 
@@ -122,7 +124,7 @@ impl Wire {
     }
 
     pub fn from_wires<'a>(wires: impl IntoIterator<Item = &'a Wire>) -> Self {
-        let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+        let mut make_wire = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
 
         for wire in wires.into_iter() {
             make_wire.pin_mut().add_wire(&wire.inner);
@@ -142,7 +144,9 @@ impl Wire {
 
         let wire_shape = ffi::cast_wire_to_shape(&self.inner);
 
-        let mut brep_transform = ffi::BRepBuilderAPI_Transform_ctor(wire_shape, &transform, false);
+        let mut brep_transform = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_Transform_ctor(
+            wire_shape, &transform, false,
+        );
 
         let mirrored_shape = brep_transform.pin_mut().Shape();
         let mirrored_wire = ffi::TopoDS_cast_to_wire(mirrored_shape);
@@ -257,7 +261,10 @@ impl Wire {
 
     pub fn to_face(self) -> Face {
         let only_plane = false;
-        let make_face = ffi::BRepBuilderAPI_MakeFace_wire(&self.inner, only_plane);
+        let make_face = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeFace_wire(
+            &self.inner,
+            only_plane,
+        );
 
         Face::from_face(make_face.Face())
     }
@@ -267,7 +274,7 @@ impl Wire {
 }
 
 pub struct WireBuilder {
-    inner: UniquePtr<ffi::BRepBuilderAPI_MakeWire>,
+    inner: UniquePtr<opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeWire>,
 }
 
 impl Default for WireBuilder {
@@ -278,7 +285,7 @@ impl Default for WireBuilder {
 
 impl WireBuilder {
     pub fn new() -> Self {
-        let make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
+        let make_wire = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
 
         Self { inner: make_wire }
     }

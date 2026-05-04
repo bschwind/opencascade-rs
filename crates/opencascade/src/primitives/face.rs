@@ -32,13 +32,18 @@ impl Face {
         Self { inner }
     }
 
-    fn from_make_face(make_face: UniquePtr<ffi::BRepBuilderAPI_MakeFace>) -> Self {
+    fn from_make_face(
+        make_face: UniquePtr<opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeFace>,
+    ) -> Self {
         Self::from_face(make_face.Face())
     }
 
     pub fn from_wire(wire: &Wire) -> Self {
         let only_plane = false;
-        let make_face = ffi::BRepBuilderAPI_MakeFace_wire(&wire.inner, only_plane);
+        let make_face = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeFace_wire(
+            &wire.inner,
+            only_plane,
+        );
 
         Self::from_make_face(make_face)
     }
@@ -46,7 +51,10 @@ impl Face {
     pub fn from_surface(surface: &Surface) -> Self {
         const EDGE_TOLERANCE: f64 = 0.0001;
 
-        let make_face = ffi::BRepBuilderAPI_MakeFace_surface(&surface.inner, EDGE_TOLERANCE);
+        let make_face = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeFace_surface(
+            &surface.inner,
+            EDGE_TOLERANCE,
+        );
 
         Self::from_make_face(make_face)
     }

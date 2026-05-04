@@ -25,7 +25,9 @@ impl AsRef<Vertex> for Vertex {
 
 impl Vertex {
     pub fn new(point: DVec3) -> Self {
-        let mut make_vertex = ffi::BRepBuilderAPI_MakeVertex_gp_Pnt(&make_point(point));
+        let mut make_vertex = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeVertex_gp_Pnt(
+            &make_point(point),
+        );
         let vertex = make_vertex.pin_mut().Vertex();
         let inner = ffi::TopoDS_Vertex_to_owned(vertex);
 

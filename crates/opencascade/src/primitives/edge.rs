@@ -52,13 +52,17 @@ impl Edge {
         Self { inner }
     }
 
-    fn from_make_edge(mut make_edge: UniquePtr<ffi::BRepBuilderAPI_MakeEdge>) -> Self {
+    fn from_make_edge(
+        mut make_edge: UniquePtr<opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge>,
+    ) -> Self {
         Self::from_edge(make_edge.pin_mut().Edge())
     }
 
     pub fn segment(p1: DVec3, p2: DVec3) -> Self {
-        let make_edge =
-            ffi::BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt(&make_point(p1), &make_point(p2));
+        let make_edge = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt(
+            &make_point(p1),
+            &make_point(p2),
+        );
 
         Self::from_make_edge(make_edge)
     }
@@ -75,7 +79,10 @@ impl Edge {
         let curve_handle =
             opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_BezierCurve(&bezier_handle);
 
-        let mut make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
+        let mut make_edge =
+            opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+                &curve_handle,
+            );
         let edge = make_edge.pin_mut().Edge();
         Self::from_edge(edge)
     }
@@ -84,7 +91,8 @@ impl Edge {
         let axis = make_axis_2(center, normal);
 
         let make_circle = opencascade_sys::gp::gp_Circ_ctor(&axis, radius);
-        let make_edge = ffi::BRepBuilderAPI_MakeEdge_circle(&make_circle);
+        let make_edge =
+            opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_circle(&make_circle);
 
         Self::from_make_edge(make_edge)
     }
@@ -116,7 +124,10 @@ impl Edge {
             &bspline_handle,
         );
 
-        let mut make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
+        let mut make_edge =
+            opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+                &curve_handle,
+            );
         let edge = make_edge.pin_mut().Edge();
         Self::from_edge(edge)
     }
@@ -128,7 +139,7 @@ impl Edge {
             &make_point(p3),
         );
 
-        let make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+        let make_edge = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
             &opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
                 &opencascade_sys::gc::GC_MakeArcOfCircle_Value(&make_arc),
             ),
