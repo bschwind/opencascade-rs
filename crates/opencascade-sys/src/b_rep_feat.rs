@@ -6,8 +6,8 @@ mod inner {
         include!("opencascade-sys/include/b_rep_feat.hxx");
 
         type gp_Ax1 = crate::gp::gp_Ax1;
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
-        type TopoDS_Face = crate::ffi::TopoDS_Face;
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
+        type TopoDS_Face = crate::topo_ds::TopoDS_Face;
 
         type BRepFeat_MakeDPrism;
         #[cxx_name = "construct_unique"]

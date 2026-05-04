@@ -5,7 +5,7 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/b_rep_algo_api.hxx");
 
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopTools_ListOfShape = crate::top_tools::TopTools_ListOfShape;
         type Message_ProgressRange = crate::ffi::Message_ProgressRange;
         type BOPAlgo_GlueEnum = crate::ffi::BOPAlgo_GlueEnum;

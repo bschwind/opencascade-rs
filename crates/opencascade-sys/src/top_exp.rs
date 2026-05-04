@@ -5,10 +5,10 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/top_exp.hxx");
 
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
-        type TopoDS_Edge = crate::ffi::TopoDS_Edge;
-        type TopoDS_Vertex = crate::ffi::TopoDS_Vertex;
-        type TopoDS_Wire = crate::ffi::TopoDS_Wire;
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
+        type TopoDS_Edge = crate::topo_ds::TopoDS_Edge;
+        type TopoDS_Vertex = crate::topo_ds::TopoDS_Vertex;
+        type TopoDS_Wire = crate::topo_ds::TopoDS_Wire;
         type TopAbs_ShapeEnum = crate::ffi::TopAbs_ShapeEnum;
 
         type TopExp_Explorer;

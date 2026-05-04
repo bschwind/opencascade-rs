@@ -85,6 +85,7 @@ fn main() {
         "src/top_exp.rs",
         "src/top_loc.rs",
         "src/top_tools.rs",
+        "src/topo_ds.rs",
     ];
 
     let mut build = cxx_build::bridges(rust_bridges);

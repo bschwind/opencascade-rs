@@ -9,7 +9,7 @@ mod inner {
         type gp_Vec = crate::gp::gp_Vec;
         type gp_Ax1 = crate::gp::gp_Ax1;
         type gp_Ax2 = crate::gp::gp_Ax2;
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type Message_ProgressRange = crate::ffi::Message_ProgressRange;
 
         type BRepPrimAPI_MakePrism;

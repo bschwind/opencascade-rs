@@ -11,7 +11,7 @@ use opencascade_sys::{b_rep_tools, ffi, top_loc::TopLoc_Location};
 use std::iter::once;
 
 pub struct Wire {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Wire>,
+    pub(crate) inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Wire>,
 }
 
 impl AsRef<Wire> for Wire {
@@ -37,8 +37,8 @@ impl Default for EdgeConnection {
 }
 
 impl Wire {
-    pub(crate) fn from_wire(wire: &ffi::TopoDS_Wire) -> Self {
-        let inner = ffi::TopoDS_Wire_to_owned(wire);
+    pub(crate) fn from_wire(wire: &opencascade_sys::topo_ds::TopoDS_Wire) -> Self {
+        let inner = opencascade_sys::topo_ds::TopoDS_Wire_to_owned(wire);
 
         Self { inner }
     }
@@ -87,7 +87,7 @@ impl Wire {
         let mut edges = opencascade_sys::top_tools::new_Handle_TopTools_HSequenceOfShape();
 
         for edge in unordered_edges {
-            let edge_shape = ffi::cast_edge_to_shape(&edge.as_ref().inner);
+            let edge_shape = opencascade_sys::topo_ds::cast_edge_to_shape(&edge.as_ref().inner);
             opencascade_sys::top_tools::TopTools_HSequenceOfShape_append(
                 edges.pin_mut(),
                 edge_shape,
@@ -115,7 +115,7 @@ impl Wire {
         for index in 1..=wire_len {
             let wire_shape =
                 opencascade_sys::top_tools::TopTools_HSequenceOfShape_value(&wires, index);
-            let wire = ffi::TopoDS_cast_to_wire(wire_shape);
+            let wire = opencascade_sys::topo_ds::TopoDS_cast_to_wire(wire_shape);
 
             make_wire.pin_mut().add_wire(wire);
         }
@@ -142,14 +142,14 @@ impl Wire {
 
         transform.pin_mut().set_mirror_axis(&axis);
 
-        let wire_shape = ffi::cast_wire_to_shape(&self.inner);
+        let wire_shape = opencascade_sys::topo_ds::cast_wire_to_shape(&self.inner);
 
         let mut brep_transform = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_Transform_ctor(
             wire_shape, &transform, false,
         );
 
         let mirrored_shape = brep_transform.pin_mut().Shape();
-        let mirrored_wire = ffi::TopoDS_cast_to_wire(mirrored_shape);
+        let mirrored_wire = opencascade_sys::topo_ds::TopoDS_cast_to_wire(mirrored_shape);
 
         Self::from_wire(mirrored_wire)
     }
@@ -199,7 +199,7 @@ impl Wire {
         make_offset.pin_mut().Perform(distance, 0.0);
 
         let offset_shape = make_offset.pin_mut().Shape();
-        let result_wire = ffi::TopoDS_cast_to_wire(offset_shape);
+        let result_wire = opencascade_sys::topo_ds::TopoDS_cast_to_wire(offset_shape);
 
         Self::from_wire(result_wire)
     }
@@ -207,14 +207,14 @@ impl Wire {
     /// Sweep the wire along a path to produce a shell
     #[must_use]
     pub fn sweep_along(&self, path: &Wire) -> Shell {
-        let profile_shape = ffi::cast_wire_to_shape(&self.inner);
+        let profile_shape = opencascade_sys::topo_ds::cast_wire_to_shape(&self.inner);
         let mut make_pipe = opencascade_sys::b_rep_offset_api::BRepOffsetAPI_MakePipe_ctor(
             &path.inner,
             profile_shape,
         );
 
         let pipe_shape = make_pipe.pin_mut().Shape();
-        let result_shell = ffi::TopoDS_cast_to_shell(pipe_shape);
+        let result_shell = opencascade_sys::topo_ds::TopoDS_cast_to_shell(pipe_shape);
 
         Shell::from_shell(result_shell)
     }
@@ -232,7 +232,7 @@ impl Wire {
         let mut make_pipe_shell =
             make_pipe_shell_with_law_function(&self.inner, &path.inner, &law_handle);
         let pipe_shape = make_pipe_shell.pin_mut().Shape();
-        let result_shell = ffi::TopoDS_cast_to_shell(pipe_shape);
+        let result_shell = opencascade_sys::topo_ds::TopoDS_cast_to_shell(pipe_shape);
 
         Shell::from_shell(result_shell)
     }
@@ -253,13 +253,13 @@ impl Wire {
         transform.pin_mut().set_translation_vec(&translation_vec);
         let location = TopLoc_Location::from_transform(&transform);
 
-        let wire_shape = ffi::cast_wire_to_shape(&self.inner);
+        let wire_shape = opencascade_sys::topo_ds::cast_wire_to_shape(&self.inner);
         let mut wire_shape = Shape::from_shape(wire_shape).inner;
 
         let raise_exception = false;
         wire_shape.pin_mut().translate(&location, raise_exception);
 
-        let translated_wire = ffi::TopoDS_cast_to_wire(&wire_shape);
+        let translated_wire = opencascade_sys::topo_ds::TopoDS_cast_to_wire(&wire_shape);
 
         Self::from_wire(translated_wire)
     }

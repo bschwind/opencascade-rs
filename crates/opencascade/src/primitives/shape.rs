@@ -25,7 +25,7 @@ impl AsRef<Shape> for Shape {
 
 impl From<Vertex> for Shape {
     fn from(vertex: Vertex) -> Self {
-        let shape = ffi::cast_vertex_to_shape(&vertex.inner);
+        let shape = opencascade_sys::topo_ds::cast_vertex_to_shape(&vertex.inner);
 
         Self::from_shape(shape)
     }
@@ -33,7 +33,7 @@ impl From<Vertex> for Shape {
 
 impl From<&Vertex> for Shape {
     fn from(vertex: &Vertex) -> Self {
-        let shape = ffi::cast_vertex_to_shape(&vertex.inner);
+        let shape = opencascade_sys::topo_ds::cast_vertex_to_shape(&vertex.inner);
 
         Self::from_shape(shape)
     }
@@ -41,7 +41,7 @@ impl From<&Vertex> for Shape {
 
 impl From<Edge> for Shape {
     fn from(edge: Edge) -> Self {
-        let shape = ffi::cast_edge_to_shape(&edge.inner);
+        let shape = opencascade_sys::topo_ds::cast_edge_to_shape(&edge.inner);
 
         Self::from_shape(shape)
     }
@@ -49,7 +49,7 @@ impl From<Edge> for Shape {
 
 impl From<&Edge> for Shape {
     fn from(edge: &Edge) -> Self {
-        let shape = ffi::cast_edge_to_shape(&edge.inner);
+        let shape = opencascade_sys::topo_ds::cast_edge_to_shape(&edge.inner);
 
         Self::from_shape(shape)
     }
@@ -57,7 +57,7 @@ impl From<&Edge> for Shape {
 
 impl From<Wire> for Shape {
     fn from(wire: Wire) -> Self {
-        let shape = ffi::cast_wire_to_shape(&wire.inner);
+        let shape = opencascade_sys::topo_ds::cast_wire_to_shape(&wire.inner);
 
         Self::from_shape(shape)
     }
@@ -65,7 +65,7 @@ impl From<Wire> for Shape {
 
 impl From<&Wire> for Shape {
     fn from(wire: &Wire) -> Self {
-        let shape = ffi::cast_wire_to_shape(&wire.inner);
+        let shape = opencascade_sys::topo_ds::cast_wire_to_shape(&wire.inner);
 
         Self::from_shape(shape)
     }
@@ -73,7 +73,7 @@ impl From<&Wire> for Shape {
 
 impl From<Face> for Shape {
     fn from(face: Face) -> Self {
-        let shape = ffi::cast_face_to_shape(&face.inner);
+        let shape = opencascade_sys::topo_ds::cast_face_to_shape(&face.inner);
 
         Self::from_shape(shape)
     }
@@ -81,7 +81,7 @@ impl From<Face> for Shape {
 
 impl From<&Face> for Shape {
     fn from(face: &Face) -> Self {
-        let shape = ffi::cast_face_to_shape(&face.inner);
+        let shape = opencascade_sys::topo_ds::cast_face_to_shape(&face.inner);
 
         Self::from_shape(shape)
     }
@@ -89,7 +89,7 @@ impl From<&Face> for Shape {
 
 impl From<Shell> for Shape {
     fn from(shell: Shell) -> Self {
-        let shape = ffi::cast_shell_to_shape(&shell.inner);
+        let shape = opencascade_sys::topo_ds::cast_shell_to_shape(&shell.inner);
 
         Self::from_shape(shape)
     }
@@ -97,7 +97,7 @@ impl From<Shell> for Shape {
 
 impl From<&Shell> for Shape {
     fn from(shell: &Shell) -> Self {
-        let shape = ffi::cast_shell_to_shape(&shell.inner);
+        let shape = opencascade_sys::topo_ds::cast_shell_to_shape(&shell.inner);
 
         Self::from_shape(shape)
     }
@@ -105,7 +105,7 @@ impl From<&Shell> for Shape {
 
 impl From<Solid> for Shape {
     fn from(solid: Solid) -> Self {
-        let shape = ffi::cast_solid_to_shape(&solid.inner);
+        let shape = opencascade_sys::topo_ds::cast_solid_to_shape(&solid.inner);
 
         Self::from_shape(shape)
     }
@@ -113,7 +113,7 @@ impl From<Solid> for Shape {
 
 impl From<&Solid> for Shape {
     fn from(solid: &Solid) -> Self {
-        let shape = ffi::cast_solid_to_shape(&solid.inner);
+        let shape = opencascade_sys::topo_ds::cast_solid_to_shape(&solid.inner);
 
         Self::from_shape(shape)
     }
@@ -121,7 +121,7 @@ impl From<&Solid> for Shape {
 
 impl From<Compound> for Shape {
     fn from(compound: Compound) -> Self {
-        let shape = ffi::cast_compound_to_shape(&compound.inner);
+        let shape = opencascade_sys::topo_ds::cast_compound_to_shape(&compound.inner);
 
         Self::from_shape(shape)
     }
@@ -129,7 +129,7 @@ impl From<Compound> for Shape {
 
 impl From<&Compound> for Shape {
     fn from(compound: &Compound) -> Self {
-        let shape = ffi::cast_compound_to_shape(&compound.inner);
+        let shape = opencascade_sys::topo_ds::cast_compound_to_shape(&compound.inner);
 
         Self::from_shape(shape)
     }
@@ -281,7 +281,7 @@ impl TorusBuilder {
 
 impl Shape {
     pub(crate) fn from_shape(shape: &ffi::TopoDS_Shape) -> Self {
-        let inner = ffi::TopoDS_Shape_to_owned(shape);
+        let inner = opencascade_sys::topo_ds::TopoDS_Shape_to_owned(shape);
 
         Self { inner }
     }
@@ -292,13 +292,13 @@ impl Shape {
         //       but shape operations such as union fail on actual "null shapes".
 
         // Construct an empty compound
-        let mut compound = ffi::TopoDS_Compound_ctor();
+        let mut compound = opencascade_sys::topo_ds::TopoDS_Compound_ctor();
         let builder = opencascade_sys::b_rep::BRep_Builder_ctor();
         let topods_builder =
             opencascade_sys::b_rep::BRep_Builder_upcast_to_topods_builder(&builder);
         topods_builder.MakeCompound(compound.pin_mut());
 
-        let inner = ffi::TopoDS_Compound_as_shape(compound);
+        let inner = opencascade_sys::topo_ds::TopoDS_Compound_as_shape(compound);
 
         Self { inner }
     }
@@ -505,11 +505,11 @@ impl Shape {
             opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(&self.inner, &other.inner);
 
         let edge_list = cut_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
+        let vec = opencascade_sys::topo_ds::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
+            let edge = opencascade_sys::topo_ds::TopoDS_cast_to_edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 
@@ -650,11 +650,11 @@ impl Shape {
         let mut fuse_operation =
             opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
+        let vec = opencascade_sys::topo_ds::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
+            let edge = opencascade_sys::topo_ds::TopoDS_cast_to_edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 
@@ -668,11 +668,11 @@ impl Shape {
         let mut fuse_operation =
             opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Common_ctor(&self.inner, &other.inner);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
+        let vec = opencascade_sys::topo_ds::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
+            let edge = opencascade_sys::topo_ds::TopoDS_cast_to_edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 

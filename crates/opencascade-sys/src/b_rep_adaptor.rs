@@ -7,7 +7,7 @@ mod inner {
 
         type gp_Pnt = crate::gp::gp_Pnt;
         type GeomAbs_CurveType = crate::geom_abs::GeomAbs_CurveType;
-        type TopoDS_Edge = crate::ffi::TopoDS_Edge;
+        type TopoDS_Edge = crate::topo_ds::TopoDS_Edge;
 
         type BRepAdaptor_Curve;
         #[cxx_name = "construct_unique"]

@@ -5,7 +5,7 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/iges_control.hxx");
 
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type IFSelect_ReturnStatus = crate::ffi::IFSelect_ReturnStatus;
         type Message_ProgressRange = crate::ffi::Message_ProgressRange;
 

@@ -4,10 +4,9 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::ffi;
 
 pub struct Solid {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Solid>,
+    pub(crate) inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Solid>,
 }
 
 impl AsRef<Solid> for Solid {
@@ -17,8 +16,8 @@ impl AsRef<Solid> for Solid {
 }
 
 impl Solid {
-    pub(crate) fn from_solid(solid: &ffi::TopoDS_Solid) -> Self {
-        let inner = ffi::TopoDS_Solid_to_owned(solid);
+    pub(crate) fn from_solid(solid: &opencascade_sys::topo_ds::TopoDS_Solid) -> Self {
+        let inner = opencascade_sys::topo_ds::TopoDS_Solid_to_owned(solid);
 
         Self { inner }
     }
@@ -29,7 +28,7 @@ impl Solid {
     // the result of combining two shapes.
     #[must_use]
     pub fn fillet_edge(&self, radius: f64, edge: &Edge) -> Compound {
-        let inner_shape = ffi::cast_solid_to_shape(&self.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_solid_to_shape(&self.inner);
 
         let mut make_fillet =
             opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet_ctor(inner_shape);
@@ -37,7 +36,7 @@ impl Solid {
 
         let filleted_shape = make_fillet.pin_mut().Shape();
 
-        let compound = ffi::TopoDS_cast_to_compound(filleted_shape);
+        let compound = opencascade_sys::topo_ds::TopoDS_cast_to_compound(filleted_shape);
 
         Compound::from_compound(compound)
     }
@@ -55,25 +54,25 @@ impl Solid {
         make_loft.pin_mut().CheckCompatibility(true);
 
         let shape = make_loft.pin_mut().Shape();
-        let solid = ffi::TopoDS_cast_to_solid(shape);
+        let solid = opencascade_sys::topo_ds::TopoDS_cast_to_solid(shape);
 
         Self::from_solid(solid)
     }
 
     #[must_use]
     pub fn subtract(&self, other: &Solid) -> BooleanShape {
-        let inner_shape = ffi::cast_solid_to_shape(&self.inner);
-        let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_solid_to_shape(&self.inner);
+        let other_inner_shape = opencascade_sys::topo_ds::cast_solid_to_shape(&other.inner);
 
         let mut cut_operation =
             opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
 
         let edge_list = cut_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
+        let vec = opencascade_sys::topo_ds::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
+            let edge = opencascade_sys::topo_ds::TopoDS_cast_to_edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 
@@ -84,17 +83,17 @@ impl Solid {
 
     #[must_use]
     pub fn union(&self, other: &Solid) -> BooleanShape {
-        let inner_shape = ffi::cast_solid_to_shape(&self.inner);
-        let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_solid_to_shape(&self.inner);
+        let other_inner_shape = opencascade_sys::topo_ds::cast_solid_to_shape(&other.inner);
 
         let mut fuse_operation =
             opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
+        let vec = opencascade_sys::topo_ds::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
+            let edge = opencascade_sys::topo_ds::TopoDS_cast_to_edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 
@@ -105,19 +104,19 @@ impl Solid {
 
     #[must_use]
     pub fn intersect(&self, other: &Solid) -> BooleanShape {
-        let inner_shape = ffi::cast_solid_to_shape(&self.inner);
-        let other_inner_shape = ffi::cast_solid_to_shape(&other.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_solid_to_shape(&self.inner);
+        let other_inner_shape = opencascade_sys::topo_ds::cast_solid_to_shape(&other.inner);
 
         let mut fuse_operation = opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Common_ctor(
             inner_shape,
             other_inner_shape,
         );
         let edge_list = fuse_operation.pin_mut().SectionEdges();
-        let vec = ffi::shape_list_to_vector(edge_list);
+        let vec = opencascade_sys::topo_ds::shape_list_to_vector(edge_list);
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::TopoDS_cast_to_edge(shape);
+            let edge = opencascade_sys::topo_ds::TopoDS_cast_to_edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 

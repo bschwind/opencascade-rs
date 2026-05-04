@@ -5,7 +5,7 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/shape_analysis.hxx");
 
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type Handle_TopTools_HSequenceOfShape = crate::ffi::Handle_TopTools_HSequenceOfShape;
 
         type ShapeAnalysis_FreeBounds;

@@ -11,7 +11,6 @@ mod inner {
         type gp_Pnt = crate::ffi::gp_Pnt;
 
         type GProp_GProps;
-
         #[cxx_name = "construct_unique"]
         fn GProps_new() -> UniquePtr<GProp_GProps>;
         fn Mass(self: &GProp_GProps) -> f64;

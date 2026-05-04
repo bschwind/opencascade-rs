@@ -1,10 +1,9 @@
 use crate::primitives::make_point;
 use cxx::UniquePtr;
 use glam::DVec3;
-use opencascade_sys::ffi;
 
 pub struct Vertex {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Vertex>,
+    pub(crate) inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Vertex>,
 }
 
 // You'll see several of these `impl AsRef` blocks for the various primitive
@@ -29,7 +28,7 @@ impl Vertex {
             &make_point(point),
         );
         let vertex = make_vertex.pin_mut().Vertex();
-        let inner = ffi::TopoDS_Vertex_to_owned(vertex);
+        let inner = opencascade_sys::topo_ds::TopoDS_Vertex_to_owned(vertex);
 
         Self { inner }
     }

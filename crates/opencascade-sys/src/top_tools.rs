@@ -7,8 +7,8 @@ mod inner {
 
         type Handle_TopTools_HSequenceOfShape = crate::ffi::Handle_TopTools_HSequenceOfShape;
         type TopAbs_ShapeEnum = crate::ffi::TopAbs_ShapeEnum;
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
-        type TopoDS_Face = crate::ffi::TopoDS_Face;
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
+        type TopoDS_Face = crate::topo_ds::TopoDS_Face;
 
         type TopTools_ListOfShape;
         #[cxx_name = "construct_unique"]

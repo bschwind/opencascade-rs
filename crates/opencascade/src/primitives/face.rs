@@ -27,7 +27,7 @@ impl AsRef<Face> for Face {
 
 impl Face {
     pub(crate) fn from_face(face: &ffi::TopoDS_Face) -> Self {
-        let inner = ffi::TopoDS_Face_to_owned(face);
+        let inner = opencascade_sys::topo_ds::TopoDS_Face_to_owned(face);
 
         Self { inner }
     }
@@ -66,7 +66,7 @@ impl Face {
         let copy = false;
         let canonize = true;
 
-        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
         let mut make_solid = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakePrism_ctor(
             inner_shape,
             &prism_vec,
@@ -74,7 +74,7 @@ impl Face {
             canonize,
         );
         let extruded_shape = make_solid.pin_mut().Shape();
-        let solid = ffi::TopoDS_cast_to_solid(extruded_shape);
+        let solid = opencascade_sys::topo_ds::TopoDS_cast_to_solid(extruded_shape);
 
         Solid::from_solid(solid)
     }
@@ -82,7 +82,7 @@ impl Face {
     #[must_use]
     pub fn extrude_to_face(&self, shape_with_face: &Shape, face: &Face) -> Shape {
         let profile_base = &self.inner;
-        let sketch_base = ffi::TopoDS_Face_ctor();
+        let sketch_base = opencascade_sys::topo_ds::TopoDS_Face_ctor();
         let angle = 0.0;
         let fuse = 1; // 0 = subtractive, 1 = additive
         let modify = false;
@@ -96,7 +96,7 @@ impl Face {
             modify,
         );
 
-        let until_face = ffi::cast_face_to_shape(&face.inner);
+        let until_face = opencascade_sys::topo_ds::cast_face_to_shape(&face.inner);
         make_prism.pin_mut().perform_until_face(until_face);
 
         Shape::from_shape(make_prism.pin_mut().Shape())
@@ -105,7 +105,7 @@ impl Face {
     #[must_use]
     pub fn subtractive_extrude(&self, shape_with_face: &Shape, height: f64) -> Shape {
         let profile_base = &self.inner;
-        let sketch_base = ffi::TopoDS_Face_ctor();
+        let sketch_base = opencascade_sys::topo_ds::TopoDS_Face_ctor();
         let angle = 0.0;
         let fuse = 0; // 0 = subtractive, 1 = additive
         let modify = false;
@@ -131,7 +131,7 @@ impl Face {
         let angle = angle.map(Angle::radians).unwrap_or(std::f64::consts::PI * 2.0);
         let copy = false;
 
-        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
         let mut make_solid = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeRevol_ctor(
             inner_shape,
             &revol_vec,
@@ -139,7 +139,7 @@ impl Face {
             copy,
         );
         let revolved_shape = make_solid.pin_mut().Shape();
-        let solid = ffi::TopoDS_cast_to_solid(revolved_shape);
+        let solid = opencascade_sys::topo_ds::TopoDS_cast_to_solid(revolved_shape);
 
         Solid::from_solid(solid)
     }
@@ -150,7 +150,7 @@ impl Face {
         let mut make_fillet =
             opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
 
-        let face_shape = ffi::cast_face_to_shape(&self.inner);
+        let face_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
 
         // We use a shape map here to avoid duplicates.
         let mut shape_map = opencascade_sys::top_tools::new_indexed_map_of_shape();
@@ -161,7 +161,7 @@ impl Face {
         );
 
         for i in 1..=shape_map.Extent() {
-            let vertex = ffi::TopoDS_cast_to_vertex(shape_map.FindKey(i));
+            let vertex = opencascade_sys::topo_ds::TopoDS_cast_to_vertex(shape_map.FindKey(i));
             opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_add_fillet(
                 make_fillet.pin_mut(),
                 vertex,
@@ -172,7 +172,7 @@ impl Face {
         make_fillet.pin_mut().Build(&ffi::Message_ProgressRange_ctor());
 
         let result_shape = make_fillet.pin_mut().Shape();
-        let result_face = ffi::TopoDS_cast_to_face(result_shape);
+        let result_face = opencascade_sys::topo_ds::TopoDS_cast_to_face(result_shape);
 
         Self::from_face(result_face)
     }
@@ -183,7 +183,7 @@ impl Face {
         // TODO - Support asymmetric chamfers.
         let distance_2 = distance_1;
 
-        let face_shape = ffi::cast_face_to_shape(&self.inner);
+        let face_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
 
         let mut make_fillet =
             opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
@@ -207,20 +207,20 @@ impl Face {
 
         // Chamfer at vertex of all edges.
         for i in 1..=vertex_map.Extent() {
-            let edges = ffi::shape_list_to_vector(data_map.FindFromIndex(i));
+            let edges = opencascade_sys::topo_ds::shape_list_to_vector(data_map.FindFromIndex(i));
             let edge_1 = edges.get(0).expect("Vertex has no edges");
             let edge_2 = edges.get(1).expect("Vertex has only one edge");
             opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_add_chamfer(
                 make_fillet.pin_mut(),
-                ffi::TopoDS_cast_to_edge(edge_1),
-                ffi::TopoDS_cast_to_edge(edge_2),
+                opencascade_sys::topo_ds::TopoDS_cast_to_edge(edge_1),
+                opencascade_sys::topo_ds::TopoDS_cast_to_edge(edge_2),
                 distance_1,
                 distance_2,
             );
         }
 
         let filleted_shape = make_fillet.pin_mut().Shape();
-        let result_face = ffi::TopoDS_cast_to_face(filleted_shape);
+        let result_face = opencascade_sys::topo_ds::TopoDS_cast_to_face(filleted_shape);
 
         Self::from_face(result_face)
     }
@@ -235,7 +235,7 @@ impl Face {
         make_offset.pin_mut().Perform(distance, 0.0);
 
         let offset_shape = make_offset.pin_mut().Shape();
-        let result_wire = ffi::TopoDS_cast_to_wire(offset_shape);
+        let result_wire = opencascade_sys::topo_ds::TopoDS_cast_to_wire(offset_shape);
         let wire = Wire::from_wire(result_wire);
 
         wire.to_face()
@@ -244,14 +244,14 @@ impl Face {
     /// Sweep the face along a path to produce a solid
     #[must_use]
     pub fn sweep_along(&self, path: &Wire) -> Solid {
-        let profile_shape = ffi::cast_face_to_shape(&self.inner);
+        let profile_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
         let mut make_pipe = opencascade_sys::b_rep_offset_api::BRepOffsetAPI_MakePipe_ctor(
             &path.inner,
             profile_shape,
         );
 
         let pipe_shape = make_pipe.pin_mut().Shape();
-        let result_solid = ffi::TopoDS_cast_to_solid(pipe_shape);
+        let result_solid = opencascade_sys::topo_ds::TopoDS_cast_to_solid(pipe_shape);
 
         Solid::from_solid(result_solid)
     }
@@ -273,14 +273,14 @@ impl Face {
         make_pipe_shell.pin_mut().Build(&ffi::Message_ProgressRange_ctor());
         make_pipe_shell.pin_mut().MakeSolid();
         let pipe_shape = make_pipe_shell.pin_mut().Shape();
-        let result_solid = ffi::TopoDS_cast_to_solid(pipe_shape);
+        let result_solid = opencascade_sys::topo_ds::TopoDS_cast_to_solid(pipe_shape);
 
         Solid::from_solid(result_solid)
     }
 
     pub fn edges(&self) -> EdgeIterator {
         let explorer = opencascade_sys::top_exp::TopExp_Explorer_ctor(
-            ffi::cast_face_to_shape(&self.inner),
+            opencascade_sys::topo_ds::cast_face_to_shape(&self.inner),
             ffi::TopAbs_ShapeEnum::TopAbs_EDGE,
         );
 
@@ -290,7 +290,7 @@ impl Face {
     pub fn center_of_mass(&self) -> DVec3 {
         let mut props = GProp_GProps::new();
 
-        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
         BRepGProp_SurfaceProperties(inner_shape, props.pin_mut());
 
         let center = props.center_of_mass();
@@ -340,23 +340,23 @@ impl Face {
     }
 
     pub fn union(&self, other: &Face) -> CompoundFace {
-        let inner_shape = ffi::cast_face_to_shape(&self.inner);
-        let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
+        let other_inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&other.inner);
 
         let mut fuse_operation =
             opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
 
-        let compound = ffi::TopoDS_cast_to_compound(fuse_shape);
+        let compound = opencascade_sys::topo_ds::TopoDS_cast_to_compound(fuse_shape);
 
         CompoundFace::from_compound(compound)
     }
 
     #[must_use]
     pub fn intersect(&self, other: &Face) -> CompoundFace {
-        let inner_shape = ffi::cast_face_to_shape(&self.inner);
-        let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
+        let other_inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&other.inner);
 
         let mut common_operation = opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Common_ctor(
             inner_shape,
@@ -365,21 +365,21 @@ impl Face {
 
         let common_shape = common_operation.pin_mut().Shape();
 
-        let compound = ffi::TopoDS_cast_to_compound(common_shape);
+        let compound = opencascade_sys::topo_ds::TopoDS_cast_to_compound(common_shape);
 
         CompoundFace::from_compound(compound)
     }
 
     pub fn subtract(&self, other: &Face) -> CompoundFace {
-        let inner_shape = ffi::cast_face_to_shape(&self.inner);
-        let other_inner_shape = ffi::cast_face_to_shape(&other.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
+        let other_inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&other.inner);
 
         let mut fuse_operation =
             opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
 
         let cut_shape = fuse_operation.pin_mut().Shape();
 
-        let compound = ffi::TopoDS_cast_to_compound(cut_shape);
+        let compound = opencascade_sys::topo_ds::TopoDS_cast_to_compound(cut_shape);
 
         CompoundFace::from_compound(compound)
     }
@@ -387,7 +387,7 @@ impl Face {
     pub fn surface_area(&self) -> f64 {
         let mut props = GProp_GProps::new();
 
-        let inner_shape = ffi::cast_face_to_shape(&self.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_face_to_shape(&self.inner);
         BRepGProp::surface_properties(inner_shape, props.pin_mut());
 
         // Returns surface area, obviously.
@@ -407,7 +407,7 @@ impl Face {
 }
 
 pub struct CompoundFace {
-    inner: UniquePtr<ffi::TopoDS_Compound>,
+    inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Compound>,
 }
 
 impl AsRef<CompoundFace> for CompoundFace {
@@ -418,31 +418,31 @@ impl AsRef<CompoundFace> for CompoundFace {
 
 impl From<Face> for CompoundFace {
     fn from(face: Face) -> Self {
-        let face = ffi::cast_face_to_shape(&face.inner);
-        let mut compound = ffi::TopoDS_Compound_ctor();
+        let face = opencascade_sys::topo_ds::cast_face_to_shape(&face.inner);
+        let mut compound = opencascade_sys::topo_ds::TopoDS_Compound_ctor();
         let brep_builder = opencascade_sys::b_rep::BRep_Builder_ctor();
         let topo_builder =
             opencascade_sys::b_rep::BRep_Builder_upcast_to_topods_builder(&brep_builder);
         topo_builder.MakeCompound(compound.pin_mut());
-        let mut compound_shape = ffi::TopoDS_Compound_as_shape(compound);
+        let mut compound_shape = opencascade_sys::topo_ds::TopoDS_Compound_as_shape(compound);
         topo_builder.Add(compound_shape.pin_mut(), face);
-        Self::from_compound(ffi::TopoDS_cast_to_compound(&compound_shape))
+        Self::from_compound(opencascade_sys::topo_ds::TopoDS_cast_to_compound(&compound_shape))
     }
 }
 
 impl CompoundFace {
-    pub(crate) fn from_compound(compound: &ffi::TopoDS_Compound) -> Self {
-        let inner = ffi::TopoDS_Compound_to_owned(compound);
+    pub(crate) fn from_compound(compound: &opencascade_sys::topo_ds::TopoDS_Compound) -> Self {
+        let inner = opencascade_sys::topo_ds::TopoDS_Compound_to_owned(compound);
 
         Self { inner }
     }
 
     #[must_use]
     pub fn clean(&self) -> Self {
-        let shape = ffi::cast_compound_to_shape(&self.inner);
+        let shape = opencascade_sys::topo_ds::cast_compound_to_shape(&self.inner);
         let shape = Shape::from_shape(shape).clean();
 
-        let compound = ffi::TopoDS_cast_to_compound(&shape.inner);
+        let compound = opencascade_sys::topo_ds::TopoDS_cast_to_compound(&shape.inner);
 
         Self::from_compound(compound)
     }
@@ -454,7 +454,7 @@ impl CompoundFace {
         let copy = false;
         let canonize = true;
 
-        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_compound_to_shape(&self.inner);
 
         let mut make_solid = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakePrism_ctor(
             inner_shape,
@@ -474,7 +474,7 @@ impl CompoundFace {
         let angle = angle.map(Angle::radians).unwrap_or(std::f64::consts::PI * 2.0);
         let copy = false;
 
-        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_compound_to_shape(&self.inner);
 
         let mut make_solid = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeRevol_ctor(
             inner_shape,
@@ -489,23 +489,23 @@ impl CompoundFace {
 
     #[must_use]
     pub fn union(&self, other: &CompoundFace) -> CompoundFace {
-        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
-        let other_inner_shape = ffi::cast_compound_to_shape(&other.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_compound_to_shape(&self.inner);
+        let other_inner_shape = opencascade_sys::topo_ds::cast_compound_to_shape(&other.inner);
 
         let mut fuse_operation =
             opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
 
-        let compound = ffi::TopoDS_cast_to_compound(fuse_shape);
+        let compound = opencascade_sys::topo_ds::TopoDS_cast_to_compound(fuse_shape);
 
         CompoundFace::from_compound(compound)
     }
 
     #[must_use]
     pub fn intersect(&self, other: &CompoundFace) -> CompoundFace {
-        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
-        let other_inner_shape = ffi::cast_compound_to_shape(&other.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_compound_to_shape(&self.inner);
+        let other_inner_shape = opencascade_sys::topo_ds::cast_compound_to_shape(&other.inner);
 
         let mut common_operation = opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Common_ctor(
             inner_shape,
@@ -514,33 +514,33 @@ impl CompoundFace {
 
         let common_shape = common_operation.pin_mut().Shape();
 
-        let compound = ffi::TopoDS_cast_to_compound(common_shape);
+        let compound = opencascade_sys::topo_ds::TopoDS_cast_to_compound(common_shape);
 
         CompoundFace::from_compound(compound)
     }
 
     #[must_use]
     pub fn subtract(&self, other: &CompoundFace) -> CompoundFace {
-        let inner_shape = ffi::cast_compound_to_shape(&self.inner);
-        let other_inner_shape = ffi::cast_compound_to_shape(&other.inner);
+        let inner_shape = opencascade_sys::topo_ds::cast_compound_to_shape(&self.inner);
+        let other_inner_shape = opencascade_sys::topo_ds::cast_compound_to_shape(&other.inner);
 
         let mut fuse_operation =
             opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
 
         let cut_shape = fuse_operation.pin_mut().Shape();
 
-        let compound = ffi::TopoDS_cast_to_compound(cut_shape);
+        let compound = opencascade_sys::topo_ds::TopoDS_cast_to_compound(cut_shape);
 
         CompoundFace::from_compound(compound)
     }
 
     pub fn set_global_translation(&mut self, translation: DVec3) {
-        let shape = ffi::cast_compound_to_shape(&self.inner);
+        let shape = opencascade_sys::topo_ds::cast_compound_to_shape(&self.inner);
         let mut shape = Shape::from_shape(shape);
 
         shape.set_global_translation(translation);
 
-        let compound = ffi::TopoDS_cast_to_compound(&shape.inner);
+        let compound = opencascade_sys::topo_ds::TopoDS_cast_to_compound(&shape.inner);
         *self = Self::from_compound(compound);
     }
 }

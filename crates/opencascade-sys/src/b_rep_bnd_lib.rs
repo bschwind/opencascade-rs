@@ -7,11 +7,10 @@ mod inner {
         include!("opencascade-sys/include/b_rep_bnd_lib.hxx");
 
         type gp_Pnt = crate::ffi::gp_Pnt;
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
-
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type Bnd_Box = crate::bnd::Bnd_Box;
-        type BRepBndLib;
 
+        type BRepBndLib;
         pub fn BRepBndLib_Add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool);
     }
 }

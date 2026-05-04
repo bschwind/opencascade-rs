@@ -36,7 +36,7 @@ impl From<ffi::GeomAbs_CurveType> for EdgeType {
 }
 
 pub struct Edge {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Edge>,
+    pub(crate) inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Edge>,
 }
 
 impl AsRef<Edge> for Edge {
@@ -46,8 +46,8 @@ impl AsRef<Edge> for Edge {
 }
 
 impl Edge {
-    pub(crate) fn from_edge(edge: &ffi::TopoDS_Edge) -> Self {
-        let inner = ffi::TopoDS_Edge_to_owned(edge);
+    pub(crate) fn from_edge(edge: &opencascade_sys::topo_ds::TopoDS_Edge) -> Self {
+        let inner = opencascade_sys::topo_ds::TopoDS_Edge_to_owned(edge);
 
         Self { inner }
     }

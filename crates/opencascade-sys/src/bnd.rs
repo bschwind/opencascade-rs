@@ -10,7 +10,6 @@ mod inner {
 
         // Describes a bounding box in 3D space.
         type Bnd_Box;
-
         #[cxx_name = "construct_unique"]
         fn Bnd_Box_new() -> UniquePtr<Bnd_Box>;
         fn IsVoid(self: &Bnd_Box) -> bool;

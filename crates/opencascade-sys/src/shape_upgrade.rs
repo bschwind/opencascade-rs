@@ -5,7 +5,7 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/shape_upgrade.hxx");
 
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
 
         type ShapeUpgrade_UnifySameDomain;
 

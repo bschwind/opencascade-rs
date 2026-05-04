@@ -5,10 +5,10 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/b_rep_fillet_api.hxx");
 
-        type TopoDS_Shape = crate::ffi::TopoDS_Shape;
-        type TopoDS_Edge = crate::ffi::TopoDS_Edge;
-        type TopoDS_Face = crate::ffi::TopoDS_Face;
-        type TopoDS_Vertex = crate::ffi::TopoDS_Vertex;
+        type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
+        type TopoDS_Edge = crate::topo_ds::TopoDS_Edge;
+        type TopoDS_Face = crate::topo_ds::TopoDS_Face;
+        type TopoDS_Vertex = crate::topo_ds::TopoDS_Vertex;
         type TColgp_Array1OfPnt2d = crate::t_col_gp::TColgp_Array1OfPnt2d;
         type Message_ProgressRange = crate::ffi::Message_ProgressRange;
 

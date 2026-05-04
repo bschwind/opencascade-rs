@@ -4,7 +4,7 @@ use opencascade_sys::ffi;
 use crate::primitives::Wire;
 
 pub struct Shell {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Shell>,
+    pub(crate) inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Shell>,
 }
 
 impl AsRef<Shell> for Shell {
@@ -14,8 +14,8 @@ impl AsRef<Shell> for Shell {
 }
 
 impl Shell {
-    pub(crate) fn from_shell(shell: &ffi::TopoDS_Shell) -> Self {
-        let inner = ffi::TopoDS_Shell_to_owned(shell);
+    pub(crate) fn from_shell(shell: &opencascade_sys::topo_ds::TopoDS_Shell) -> Self {
+        let inner = opencascade_sys::topo_ds::TopoDS_Shell_to_owned(shell);
 
         Self { inner }
     }
@@ -33,7 +33,7 @@ impl Shell {
         make_loft.pin_mut().CheckCompatibility(true);
 
         let shape = make_loft.pin_mut().Shape();
-        let shell = ffi::TopoDS_cast_to_shell(shape);
+        let shell = opencascade_sys::topo_ds::TopoDS_cast_to_shell(shape);
 
         Self::from_shell(shell)
     }
