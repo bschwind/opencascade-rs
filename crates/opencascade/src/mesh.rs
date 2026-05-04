@@ -41,7 +41,7 @@ impl Mesher {
             let mut location = TopLoc_Location::new();
 
             let triangulation_handle =
-                ffi::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
+                opencascade_sys::b_rep::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
 
             let triangulation = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle)
                 .map_err(|_| Error::UntriangulatedFace)?;

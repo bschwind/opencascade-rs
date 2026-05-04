@@ -289,8 +289,9 @@ impl Shape {
 
         // Construct an empty compound
         let mut compound = ffi::TopoDS_Compound_ctor();
-        let builder = ffi::BRep_Builder_ctor();
-        let topods_builder = ffi::BRep_Builder_upcast_to_topods_builder(&builder);
+        let builder = opencascade_sys::b_rep::BRep_Builder_ctor();
+        let topods_builder =
+            opencascade_sys::b_rep::BRep_Builder_upcast_to_topods_builder(&builder);
         topods_builder.MakeCompound(compound.pin_mut());
 
         let inner = ffi::TopoDS_Compound_as_shape(compound);

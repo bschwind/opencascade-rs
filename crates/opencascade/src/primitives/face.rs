@@ -271,7 +271,7 @@ impl Face {
     }
 
     pub fn normal_at(&self, pos: DVec3) -> DVec3 {
-        let surface = ffi::BRep_Tool_Surface(&self.inner);
+        let surface = opencascade_sys::b_rep::BRep_Tool_Surface(&self.inner);
         let projector =
             opencascade_sys::geom_api::GeomAPI_ProjectPointOnSurf_ctor(&make_point(pos), &surface);
         let mut u: f64 = 0.0;
@@ -387,8 +387,9 @@ impl From<Face> for CompoundFace {
     fn from(face: Face) -> Self {
         let face = ffi::cast_face_to_shape(&face.inner);
         let mut compound = ffi::TopoDS_Compound_ctor();
-        let brep_builder = ffi::BRep_Builder_ctor();
-        let topo_builder = ffi::BRep_Builder_upcast_to_topods_builder(&brep_builder);
+        let brep_builder = opencascade_sys::b_rep::BRep_Builder_ctor();
+        let topo_builder =
+            opencascade_sys::b_rep::BRep_Builder_upcast_to_topods_builder(&brep_builder);
         topo_builder.MakeCompound(compound.pin_mut());
         let mut compound_shape = ffi::TopoDS_Compound_as_shape(compound);
         topo_builder.Add(compound_shape.pin_mut(), face);

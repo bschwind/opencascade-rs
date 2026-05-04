@@ -1,3 +1,4 @@
+pub mod b_rep;
 pub mod b_rep_bnd_lib;
 pub mod b_rep_feat;
 pub mod b_rep_g_prop;
@@ -225,7 +226,6 @@ pub mod ffi {
 
         pub fn TopoDS_Shell_as_shape(shell: UniquePtr<TopoDS_Shell>) -> UniquePtr<TopoDS_Shape>;
 
-        type BRep_Builder;
         type TopoDS_Builder;
 
         #[cxx_name = "construct_unique"]
@@ -234,10 +234,6 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Shell_ctor() -> UniquePtr<TopoDS_Shell>;
 
-        #[cxx_name = "construct_unique"]
-        pub fn BRep_Builder_ctor() -> UniquePtr<BRep_Builder>;
-
-        pub fn BRep_Builder_upcast_to_topods_builder(builder: &BRep_Builder) -> &TopoDS_Builder;
         pub fn MakeCompound(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Compound>);
         pub fn MakeShell(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Shell>);
         pub fn Add(self: &TopoDS_Builder, shape: Pin<&mut TopoDS_Shape>, compound: &TopoDS_Shape);
@@ -718,18 +714,6 @@ pub mod ffi {
         // Topology Explorer
         type TopAbs_ShapeEnum;
 
-        pub fn BRep_Tool_Surface(face: &TopoDS_Face) -> UniquePtr<Handle_Geom_Surface>;
-        pub fn BRep_Tool_Curve(
-            edge: &TopoDS_Edge,
-            first: &mut f64,
-            last: &mut f64,
-        ) -> UniquePtr<Handle_Geom_Curve>;
-        pub fn BRep_Tool_Pnt(vertex: &TopoDS_Vertex) -> UniquePtr<gp_Pnt>;
-        pub fn BRep_Tool_Triangulation(
-            face: &TopoDS_Face,
-            location: Pin<&mut TopLoc_Location>,
-        ) -> UniquePtr<Handle_Poly_Triangulation>;
-
         type BRepIntCurveSurface_Inter;
 
         #[cxx_name = "construct_unique"]
@@ -786,6 +770,9 @@ pub mod ffi {
     impl UniquePtr<Handle_Geom_BSplineCurve> {}
     impl UniquePtr<Handle_Geom_TrimmedCurve> {}
     impl UniquePtr<Handle_Geom2d_TrimmedCurve> {}
+    impl UniquePtr<Handle_Geom_Surface> {}
+    impl UniquePtr<Handle_Geom_Curve> {}
+    impl UniquePtr<Handle_Poly_Triangulation> {}
 }
 
 // Gross, but is this okay?
