@@ -7,6 +7,7 @@ pub mod bnd;
 pub mod g_prop;
 pub mod gc_pnts;
 pub mod geom;
+pub mod geom2d;
 pub mod gp;
 pub mod law;
 pub mod poly;
@@ -102,9 +103,9 @@ pub mod ffi {
         type Handle_Geom_Surface;
         type Handle_Geom_BezierSurface;
         type Handle_Geom_Plane;
-        type HandleGeom2d_Curve;
-        type HandleGeom2d_Ellipse;
-        type HandleGeom2d_TrimmedCurve;
+        type Handle_Geom2d_Curve;
+        type Handle_Geom2d_Ellipse;
+        type Handle_Geom2d_TrimmedCurve;
         type Handle_Geom_CylindricalSurface;
         type Handle_TopTools_HSequenceOfShape;
         type Handle_Law_Function;
@@ -123,9 +124,9 @@ pub mod ffi {
         pub fn IsNull(self: &Handle_Geom_Surface) -> bool;
         pub fn IsNull(self: &Handle_Geom_BezierSurface) -> bool;
         pub fn IsNull(self: &Handle_Geom_Plane) -> bool;
-        pub fn IsNull(self: &HandleGeom2d_Curve) -> bool;
-        pub fn IsNull(self: &HandleGeom2d_Ellipse) -> bool;
-        pub fn IsNull(self: &HandleGeom2d_TrimmedCurve) -> bool;
+        pub fn IsNull(self: &Handle_Geom2d_Curve) -> bool;
+        pub fn IsNull(self: &Handle_Geom2d_Ellipse) -> bool;
+        pub fn IsNull(self: &Handle_Geom2d_TrimmedCurve) -> bool;
         pub fn IsNull(self: &Handle_Geom_CylindricalSurface) -> bool;
         pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
 
@@ -140,30 +141,6 @@ pub mod ffi {
         type TopTools_IndexedDataMapOfShapeListOfShape =
             crate::top_tools::TopTools_IndexedDataMapOfShapeListOfShape;
         type TopTools_HSequenceOfShape = crate::top_tools::TopTools_HSequenceOfShape;
-
-        // Geometry
-        type Geom2d_Ellipse;
-        type Geom2d_Curve;
-        type Geom2d_TrimmedCurve;
-
-        pub fn Geom2d_Ellipse_ctor(
-            axis: &gp_Ax2d,
-            major_radius: f64,
-            minor_radius: f64,
-        ) -> UniquePtr<HandleGeom2d_Ellipse>;
-        pub fn ellipse_to_HandleGeom2d_Curve(
-            ellipse: &HandleGeom2d_Ellipse,
-        ) -> UniquePtr<HandleGeom2d_Curve>;
-        pub fn Geom2d_TrimmedCurve_ctor(
-            curve_handle: &HandleGeom2d_Curve,
-            u1: f64,
-            u2: f64,
-        ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
-        pub fn HandleGeom2d_TrimmedCurve_to_curve(
-            trimmed_curve: &HandleGeom2d_TrimmedCurve,
-        ) -> UniquePtr<HandleGeom2d_Curve>;
-
-        pub fn ellipse_value(ellipse: &HandleGeom2d_Ellipse, u: f64) -> UniquePtr<gp_Pnt2d>;
 
         type gp_Pnt = crate::gp::gp_Pnt;
         type gp_Pnt2d = crate::gp::gp_Pnt2d;
@@ -195,7 +172,7 @@ pub mod ffi {
         pub fn GCE2d_MakeSegment_point_point(
             p1: &gp_Pnt2d,
             p2: &gp_Pnt2d,
-        ) -> UniquePtr<HandleGeom2d_TrimmedCurve>;
+        ) -> UniquePtr<Handle_Geom2d_TrimmedCurve>;
 
         // Arcs
         type GC_MakeArcOfCircle;
@@ -339,7 +316,7 @@ pub mod ffi {
 
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeEdge_CurveSurface2d(
-            curve_handle: &HandleGeom2d_Curve,
+            curve_handle: &Handle_Geom2d_Curve,
             surface_handle: &Handle_Geom_Surface,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
 
@@ -995,6 +972,8 @@ pub mod ffi {
     impl UniquePtr<Handle_Geom_BezierSurface> {}
     impl UniquePtr<Handle_Geom_BezierCurve> {}
     impl UniquePtr<Handle_Geom_Plane> {}
+    impl UniquePtr<Handle_Geom2d_Ellipse> {}
+    impl UniquePtr<Handle_Geom2d_Curve> {}
 }
 
 // Gross, but is this okay?

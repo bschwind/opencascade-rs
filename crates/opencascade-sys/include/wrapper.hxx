@@ -97,9 +97,6 @@ template <typename T> std::unique_ptr<std::vector<T>> list_to_vector(const NColl
 
 // Handles
 typedef opencascade::handle<Standard_Type> HandleStandardType;
-typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
-typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
-typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
 typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
 
 inline std::unique_ptr<Handle_TColgpHArray1OfPnt>
@@ -128,39 +125,14 @@ inline std::unique_ptr<Handle_Geom_BSplineCurve> GeomAPI_Interpolate_Curve(const
   return std::unique_ptr<Handle_Geom_BSplineCurve>(new opencascade::handle<Geom_BSplineCurve>(interpolate.Curve()));
 }
 
-inline std::unique_ptr<HandleGeom2d_Ellipse> Geom2d_Ellipse_ctor(const gp_Ax2d &axis, double major_radius,
-                                                                 double minor_radius) {
-  return std::unique_ptr<HandleGeom2d_Ellipse>(
-      new opencascade::handle<Geom2d_Ellipse>(new Geom2d_Ellipse(axis, major_radius, minor_radius)));
-}
-
-inline std::unique_ptr<HandleGeom2d_Curve> ellipse_to_HandleGeom2d_Curve(const HandleGeom2d_Ellipse &ellipse_handle) {
-  return std::unique_ptr<HandleGeom2d_Curve>(new opencascade::handle<Geom2d_Curve>(ellipse_handle));
-}
-
-inline std::unique_ptr<HandleGeom2d_TrimmedCurve> Geom2d_TrimmedCurve_ctor(const HandleGeom2d_Curve &curve, double u1,
-                                                                           double u2) {
-  return std::unique_ptr<HandleGeom2d_TrimmedCurve>(
-      new opencascade::handle<Geom2d_TrimmedCurve>(new Geom2d_TrimmedCurve(curve, u1, u2)));
-}
-
-inline std::unique_ptr<HandleGeom2d_Curve>
-HandleGeom2d_TrimmedCurve_to_curve(const HandleGeom2d_TrimmedCurve &trimmed_curve) {
-  return std::unique_ptr<HandleGeom2d_Curve>(new opencascade::handle<Geom2d_Curve>(trimmed_curve));
-}
-
-inline std::unique_ptr<gp_Pnt2d> ellipse_value(const HandleGeom2d_Ellipse &ellipse, double u) {
-  return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(ellipse->Value(u)));
-}
-
 // Segment Stuff
 inline std::unique_ptr<Handle_Geom_TrimmedCurve> GC_MakeSegment_Value(const GC_MakeSegment &segment) {
   return std::unique_ptr<Handle_Geom_TrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(segment.Value()));
 }
 
-inline std::unique_ptr<HandleGeom2d_TrimmedCurve> GCE2d_MakeSegment_point_point(const gp_Pnt2d &p1,
-                                                                                const gp_Pnt2d &p2) {
-  return std::unique_ptr<HandleGeom2d_TrimmedCurve>(
+inline std::unique_ptr<Handle_Geom2d_TrimmedCurve> GCE2d_MakeSegment_point_point(const gp_Pnt2d &p1,
+                                                                                 const gp_Pnt2d &p2) {
+  return std::unique_ptr<Handle_Geom2d_TrimmedCurve>(
       new opencascade::handle<Geom2d_TrimmedCurve>(GCE2d_MakeSegment(p1, p2)));
 }
 
