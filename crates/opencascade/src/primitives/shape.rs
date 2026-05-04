@@ -437,7 +437,8 @@ impl Shape {
         radius: f64,
         edges: impl IntoIterator<Item = T>,
     ) -> Self {
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
+        let mut make_fillet =
+            opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet_ctor(&self.inner);
 
         for edge in edges.into_iter() {
             make_fillet.pin_mut().add_edge(radius, &edge.as_ref().inner);
@@ -460,7 +461,8 @@ impl Shape {
             array.pin_mut().SetValue(index as i32 + 1, &make_point2d(dvec2(t, radius)));
         }
 
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(&self.inner);
+        let mut make_fillet =
+            opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet_ctor(&self.inner);
 
         for edge in edges.into_iter() {
             make_fillet.pin_mut().variable_add_edge(&array, &edge.as_ref().inner);
@@ -475,7 +477,8 @@ impl Shape {
         distance: f64,
         edges: impl IntoIterator<Item = T>,
     ) -> Self {
-        let mut make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
+        let mut make_chamfer =
+            opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeChamfer_ctor(&self.inner);
 
         for edge in edges.into_iter() {
             make_chamfer.pin_mut().add_edge(distance, &edge.as_ref().inner);
@@ -830,12 +833,13 @@ pub struct LineFaceHitPoint {
 }
 
 pub struct ChamferMaker {
-    inner: UniquePtr<ffi::BRepFilletAPI_MakeChamfer>,
+    inner: UniquePtr<opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeChamfer>,
 }
 
 impl ChamferMaker {
     pub fn new(shape: &Shape) -> Self {
-        let make_chamfer = ffi::BRepFilletAPI_MakeChamfer_ctor(&shape.inner);
+        let make_chamfer =
+            opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeChamfer_ctor(&shape.inner);
 
         Self { inner: make_chamfer }
     }

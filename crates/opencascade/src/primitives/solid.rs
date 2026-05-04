@@ -31,7 +31,8 @@ impl Solid {
     pub fn fillet_edge(&self, radius: f64, edge: &Edge) -> Compound {
         let inner_shape = ffi::cast_solid_to_shape(&self.inner);
 
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet_ctor(inner_shape);
+        let mut make_fillet =
+            opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet_ctor(inner_shape);
         make_fillet.pin_mut().add_edge(radius, &edge.inner);
 
         let filleted_shape = make_fillet.pin_mut().Shape();

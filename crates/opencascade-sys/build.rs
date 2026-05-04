@@ -56,6 +56,7 @@ fn main() {
         "src/b_rep_bnd_lib.rs",
         "src/b_rep_builder_api.rs",
         "src/b_rep_feat.rs",
+        "src/b_rep_fillet_api.rs",
         "src/b_rep_g_prop.rs",
         "src/b_rep_mesh.rs",
         "src/b_rep_prim_api.rs",

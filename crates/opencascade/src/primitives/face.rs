@@ -147,7 +147,8 @@ impl Face {
     /// Fillets the face edges by a given radius at each vertex
     #[must_use]
     pub fn fillet(&self, radius: f64) -> Self {
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
+        let mut make_fillet =
+            opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
 
         let face_shape = ffi::cast_face_to_shape(&self.inner);
 
@@ -161,7 +162,11 @@ impl Face {
 
         for i in 1..=shape_map.Extent() {
             let vertex = ffi::TopoDS_cast_to_vertex(shape_map.FindKey(i));
-            ffi::BRepFilletAPI_MakeFillet2d_add_fillet(make_fillet.pin_mut(), vertex, radius);
+            opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_add_fillet(
+                make_fillet.pin_mut(),
+                vertex,
+                radius,
+            );
         }
 
         make_fillet.pin_mut().Build(&ffi::Message_ProgressRange_ctor());
@@ -180,7 +185,8 @@ impl Face {
 
         let face_shape = ffi::cast_face_to_shape(&self.inner);
 
-        let mut make_fillet = ffi::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
+        let mut make_fillet =
+            opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
 
         let mut vertex_map = opencascade_sys::top_tools::new_indexed_map_of_shape();
         opencascade_sys::top_tools::map_shapes(
@@ -204,7 +210,7 @@ impl Face {
             let edges = ffi::shape_list_to_vector(data_map.FindFromIndex(i));
             let edge_1 = edges.get(0).expect("Vertex has no edges");
             let edge_2 = edges.get(1).expect("Vertex has only one edge");
-            ffi::BRepFilletAPI_MakeFillet2d_add_chamfer(
+            opencascade_sys::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_add_chamfer(
                 make_fillet.pin_mut(),
                 ffi::TopoDS_cast_to_edge(edge_1),
                 ffi::TopoDS_cast_to_edge(edge_2),

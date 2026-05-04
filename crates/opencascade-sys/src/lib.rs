@@ -3,6 +3,7 @@ pub mod b_rep_adaptor;
 pub mod b_rep_bnd_lib;
 pub mod b_rep_builder_api;
 pub mod b_rep_feat;
+pub mod b_rep_fillet_api;
 pub mod b_rep_g_prop;
 pub mod b_rep_mesh;
 pub mod b_rep_prim_api;
@@ -244,72 +245,6 @@ pub mod ffi {
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
 
-        // Fillets
-        type BRepFilletAPI_MakeFillet;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepFilletAPI_MakeFillet_ctor(
-            shape: &TopoDS_Shape,
-        ) -> UniquePtr<BRepFilletAPI_MakeFillet>;
-
-        #[rust_name = "add_edge"]
-        pub fn Add(self: Pin<&mut BRepFilletAPI_MakeFillet>, radius: f64, edge: &TopoDS_Edge);
-
-        #[rust_name = "variable_add_edge"]
-        pub fn Add(
-            self: Pin<&mut BRepFilletAPI_MakeFillet>,
-            radius_values: &TColgp_Array1OfPnt2d,
-            edge: &TopoDS_Edge,
-        );
-
-        pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepFilletAPI_MakeFillet) -> bool;
-
-        type BRepFilletAPI_MakeFillet2d;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepFilletAPI_MakeFillet2d_ctor(
-            face: &TopoDS_Face,
-        ) -> UniquePtr<BRepFilletAPI_MakeFillet2d>;
-
-        pub fn BRepFilletAPI_MakeFillet2d_add_fillet(
-            make_fillet: Pin<&mut BRepFilletAPI_MakeFillet2d>,
-            vertex: &TopoDS_Vertex,
-            radius: f64,
-        ) -> UniquePtr<TopoDS_Edge>;
-        pub fn BRepFilletAPI_MakeFillet2d_add_chamfer(
-            make_fillet: Pin<&mut BRepFilletAPI_MakeFillet2d>,
-            edge1: &TopoDS_Edge,
-            edge2: &TopoDS_Edge,
-            distance1: f64,
-            distance2: f64,
-        ) -> UniquePtr<TopoDS_Edge>;
-        pub fn BRepFilletAPI_MakeFillet2d_add_chamfer_angle(
-            make_fillet: Pin<&mut BRepFilletAPI_MakeFillet2d>,
-            edge: &TopoDS_Edge,
-            vertex: &TopoDS_Vertex,
-            distance: f64,
-            angle: f64,
-        ) -> UniquePtr<TopoDS_Edge>;
-        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet2d>, progress: &Message_ProgressRange);
-        pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet2d>) -> &TopoDS_Shape;
-        pub fn IsDone(self: &BRepFilletAPI_MakeFillet2d) -> bool;
-
-        // Chamfers
-        type BRepFilletAPI_MakeChamfer;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepFilletAPI_MakeChamfer_ctor(
-            shape: &TopoDS_Shape,
-        ) -> UniquePtr<BRepFilletAPI_MakeChamfer>;
-
-        #[rust_name = "add_edge"]
-        pub fn Add(self: Pin<&mut BRepFilletAPI_MakeChamfer>, distance: f64, edge: &TopoDS_Edge);
-        pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeChamfer>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepFilletAPI_MakeChamfer>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepFilletAPI_MakeChamfer) -> bool;
-
         // Offset
         type BRepOffsetAPI_MakeOffset;
 
@@ -540,5 +475,3 @@ unsafe impl Send for ffi::TopoDS_Shell {}
 unsafe impl Send for ffi::TopoDS_Solid {}
 unsafe impl Send for ffi::TopoDS_Compound {}
 unsafe impl Send for ffi::TopoDS_Shape {}
-
-unsafe impl Send for ffi::BRepFilletAPI_MakeChamfer {}
