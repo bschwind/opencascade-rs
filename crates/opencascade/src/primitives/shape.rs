@@ -442,7 +442,8 @@ impl Shape {
         edges: impl IntoIterator<Item = T>,
     ) -> Self {
         let radius_values: Vec<_> = radius_values.into_iter().collect();
-        let mut array = ffi::TColgp_Array1OfPnt2d_ctor(1, radius_values.len() as i32);
+        let mut array =
+            opencascade_sys::t_col_gp::TColgp_Array1OfPnt2d_ctor(1, radius_values.len() as i32);
 
         for (index, (t, radius)) in radius_values.into_iter().enumerate() {
             array.pin_mut().SetValue(index as i32 + 1, &make_point2d(dvec2(t, radius)));

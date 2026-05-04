@@ -11,6 +11,7 @@ pub mod poly;
 pub mod shape_analysis;
 pub mod shape_upgrade;
 pub mod stl_api;
+pub mod t_col_gp;
 pub mod top_loc;
 
 #[cxx::bridge]
@@ -146,6 +147,11 @@ pub mod ffi {
 
         pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
 
+        // Types from sub-modules
+        type TColgp_Array1OfPnt2d = crate::t_col_gp::TColgp_Array1OfPnt2d;
+        type TColgp_Array2OfPnt = crate::t_col_gp::TColgp_Array2OfPnt;
+        type TColgp_HArray1OfPnt = crate::t_col_gp::TColgp_HArray1OfPnt;
+
         // Collections
         type TopTools_ListOfShape;
 
@@ -207,54 +213,6 @@ pub mod ffi {
             child_type: TopAbs_ShapeEnum,
             shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
         );
-
-        type TColgp_Array1OfDir;
-        #[cxx_name = "construct_unique"]
-        pub fn TColgp_Array1OfDir_ctor(
-            lower_bound: i32,
-            upper_bound: i32,
-        ) -> UniquePtr<TColgp_Array1OfDir>;
-        pub fn Length(self: &TColgp_Array1OfDir) -> i32;
-        pub fn TColgp_Array1OfDir_Value(
-            array: &TColgp_Array1OfDir,
-            index: i32,
-        ) -> UniquePtr<gp_Dir>;
-
-        type TColgp_Array1OfPnt2d;
-        #[cxx_name = "construct_unique"]
-        pub fn TColgp_Array1OfPnt2d_ctor(
-            lower_bound: i32,
-            upper_bound: i32,
-        ) -> UniquePtr<TColgp_Array1OfPnt2d>;
-        pub fn Length(self: &TColgp_Array1OfPnt2d) -> i32;
-        pub fn TColgp_Array1OfPnt2d_Value(
-            array: &TColgp_Array1OfPnt2d,
-            index: i32,
-        ) -> UniquePtr<gp_Pnt2d>;
-        pub fn SetValue(self: Pin<&mut TColgp_Array1OfPnt2d>, index: i32, item: &gp_Pnt2d);
-
-        type TColgp_Array2OfPnt;
-        #[cxx_name = "construct_unique"]
-        pub fn TColgp_Array2OfPnt_ctor(
-            row_lower: i32,
-            row_upper: i32,
-            column_lower: i32,
-            column_upper: i32,
-        ) -> UniquePtr<TColgp_Array2OfPnt>;
-        pub fn SetValue(self: Pin<&mut TColgp_Array2OfPnt>, row: i32, column: i32, item: &gp_Pnt);
-
-        type TColgp_HArray1OfPnt;
-        #[cxx_name = "construct_unique"]
-        pub fn TColgp_HArray1OfPnt_ctor(
-            lower_bound: i32,
-            upper_bound: i32,
-        ) -> UniquePtr<TColgp_HArray1OfPnt>;
-        pub fn Length(self: &TColgp_HArray1OfPnt) -> i32;
-        pub fn TColgp_HArray1OfPnt_Value(
-            array: &TColgp_HArray1OfPnt,
-            index: i32,
-        ) -> UniquePtr<gp_Pnt>;
-        pub fn SetValue(self: Pin<&mut TColgp_HArray1OfPnt>, index: i32, item: &gp_Pnt);
 
         type TopTools_HSequenceOfShape;
 

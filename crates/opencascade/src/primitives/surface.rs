@@ -12,7 +12,7 @@ impl Surface {
         let poles: Vec<Vec<_>> =
             poles.into_iter().map(|poles| poles.into_iter().collect()).collect();
 
-        let mut pole_array = ffi::TColgp_Array2OfPnt_ctor(
+        let mut pole_array = opencascade_sys::t_col_gp::TColgp_Array2OfPnt_ctor(
             0,
             poles.len() as i32 - 1,
             0,

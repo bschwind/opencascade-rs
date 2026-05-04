@@ -385,18 +385,6 @@ inline void map_shapes_and_unique_ancestors(const TopoDS_Shape &S, const TopAbs_
   TopExp::MapShapesAndUniqueAncestors(S, TS, TA, M);
 }
 
-inline std::unique_ptr<gp_Dir> TColgp_Array1OfDir_Value(const TColgp_Array1OfDir &array, Standard_Integer index) {
-  return std::unique_ptr<gp_Dir>(new gp_Dir(array.Value(index)));
-}
-
-inline std::unique_ptr<gp_Pnt2d> TColgp_Array1OfPnt2d_Value(const TColgp_Array1OfPnt2d &array, Standard_Integer index) {
-  return std::unique_ptr<gp_Pnt2d>(new gp_Pnt2d(array.Value(index)));
-}
-
-inline std::unique_ptr<gp_Pnt> TColgp_HArray1OfPnt_Value(const TColgp_HArray1OfPnt &array, Standard_Integer index) {
-  return std::unique_ptr<gp_Pnt>(new gp_Pnt(array.Value(index)));
-}
-
 inline std::unique_ptr<Handle_TopTools_HSequenceOfShape> new_Handle_TopTools_HSequenceOfShape() {
   auto sequence = new TopTools_HSequenceOfShape();
   auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);

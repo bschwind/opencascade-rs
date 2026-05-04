@@ -65,7 +65,7 @@ impl Edge {
 
     pub fn bezier(points: impl IntoIterator<Item = DVec3>) -> Self {
         let points: Vec<_> = points.into_iter().collect();
-        let mut array = ffi::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
+        let mut array = opencascade_sys::t_col_gp::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
         for (index, point) in points.into_iter().enumerate() {
             array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
         }
@@ -95,7 +95,7 @@ impl Edge {
         tangents: Option<(DVec3, DVec3)>,
     ) -> Self {
         let points: Vec<_> = points.into_iter().collect();
-        let mut array = ffi::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
+        let mut array = opencascade_sys::t_col_gp::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
         for (index, point) in points.into_iter().enumerate() {
             array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
         }

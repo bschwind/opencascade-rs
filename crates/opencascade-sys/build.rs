@@ -65,6 +65,7 @@ fn main() {
         "src/shape_analysis.rs",
         "src/shape_upgrade.rs",
         "src/stl_api.rs",
+        "src/t_col_gp.rs",
         "src/top_loc.rs",
     ];
 
