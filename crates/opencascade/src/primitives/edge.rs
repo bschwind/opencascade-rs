@@ -122,7 +122,7 @@ impl Edge {
     }
 
     pub fn arc(p1: DVec3, p2: DVec3, p3: DVec3) -> Self {
-        let make_arc = ffi::GC_MakeArcOfCircle_point_point_point(
+        let make_arc = opencascade_sys::gc::GC_MakeArcOfCircle_point_point_point(
             &make_point(p1),
             &make_point(p2),
             &make_point(p3),
@@ -130,7 +130,7 @@ impl Edge {
 
         let make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
             &opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
-                &ffi::GC_MakeArcOfCircle_Value(&make_arc),
+                &opencascade_sys::gc::GC_MakeArcOfCircle_Value(&make_arc),
             ),
         );
 

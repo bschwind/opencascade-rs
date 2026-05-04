@@ -5,6 +5,7 @@ pub mod b_rep_tools;
 pub mod bin_tools;
 pub mod bnd;
 pub mod g_prop;
+pub mod gc;
 pub mod gc_pnts;
 pub mod geom;
 pub mod geom2d;
@@ -137,33 +138,6 @@ pub mod ffi {
         type gp_Lin = crate::gp::gp_Lin;
         type GeomAbs_CurveType = crate::geom_abs::GeomAbs_CurveType;
         type GeomAbs_JoinType = crate::geom_abs::GeomAbs_JoinType;
-
-        // Segments
-        type GC_MakeSegment;
-        type GCE2d_MakeSegment;
-
-        #[cxx_name = "construct_unique"]
-        pub fn GC_MakeSegment_point_point(p1: &gp_Pnt, p2: &gp_Pnt) -> UniquePtr<GC_MakeSegment>;
-
-        pub fn GC_MakeSegment_Value(arc: &GC_MakeSegment) -> UniquePtr<Handle_Geom_TrimmedCurve>;
-        pub fn GCE2d_MakeSegment_point_point(
-            p1: &gp_Pnt2d,
-            p2: &gp_Pnt2d,
-        ) -> UniquePtr<Handle_Geom2d_TrimmedCurve>;
-
-        // Arcs
-        type GC_MakeArcOfCircle;
-
-        #[cxx_name = "construct_unique"]
-        pub fn GC_MakeArcOfCircle_point_point_point(
-            p1: &gp_Pnt,
-            p2: &gp_Pnt,
-            p3: &gp_Pnt,
-        ) -> UniquePtr<GC_MakeArcOfCircle>;
-
-        pub fn GC_MakeArcOfCircle_Value(
-            arc: &GC_MakeArcOfCircle,
-        ) -> UniquePtr<Handle_Geom_TrimmedCurve>;
 
         // Shapes
         type TopoDS_Vertex;
@@ -917,6 +891,8 @@ pub mod ffi {
     impl UniquePtr<Handle_Geom2d_Ellipse> {}
     impl UniquePtr<Handle_Geom2d_Curve> {}
     impl UniquePtr<Handle_Geom_BSplineCurve> {}
+    impl UniquePtr<Handle_Geom_TrimmedCurve> {}
+    impl UniquePtr<Handle_Geom2d_TrimmedCurve> {}
 }
 
 // Gross, but is this okay?
