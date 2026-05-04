@@ -504,9 +504,12 @@ impl Shape {
     }
 
     pub fn read_step(path: impl AsRef<Path>) -> Result<Self, Error> {
-        let mut reader = ffi::STEPControl_Reader_ctor();
+        let mut reader = opencascade_sys::step_control::STEPControl_Reader_ctor();
 
-        let status = ffi::read_step(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
+        let status = opencascade_sys::step_control::read_step(
+            reader.pin_mut(),
+            path.as_ref().to_string_lossy().to_string(),
+        );
 
         if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::StepReadFailed);
@@ -514,21 +517,24 @@ impl Shape {
 
         reader.pin_mut().TransferRoots(&ffi::Message_ProgressRange_ctor());
 
-        let inner = ffi::one_shape_step(&reader);
+        let inner = opencascade_sys::step_control::one_shape_step(&reader);
 
         Ok(Self { inner })
     }
 
     pub fn write_step(&self, path: impl AsRef<Path>) -> Result<(), Error> {
-        let mut writer = ffi::STEPControl_Writer_ctor();
+        let mut writer = opencascade_sys::step_control::STEPControl_Writer_ctor();
 
-        let status = ffi::transfer_shape(writer.pin_mut(), &self.inner);
+        let status = opencascade_sys::step_control::transfer_shape(writer.pin_mut(), &self.inner);
 
         if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);
         }
 
-        let status = ffi::write_step(writer.pin_mut(), path.as_ref().to_string_lossy().to_string());
+        let status = opencascade_sys::step_control::write_step(
+            writer.pin_mut(),
+            path.as_ref().to_string_lossy().to_string(),
+        );
 
         if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);

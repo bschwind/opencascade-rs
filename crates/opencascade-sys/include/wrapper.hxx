@@ -59,8 +59,6 @@
 #include <NCollection_Array1.hxx>
 #include <NCollection_Array2.hxx>
 #include <Poly_Connect.hxx>
-#include <STEPControl_Reader.hxx>
-#include <STEPControl_Writer.hxx>
 #include <ShapeAnalysis_FreeBounds.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <Standard_Type.hxx>
@@ -183,16 +181,9 @@ inline std::unique_ptr<BRepFeat_MakeCylindricalHole> BRepFeat_MakeCylindricalHol
 }
 
 // Data Import
-inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String theFileName) {
-  return reader.ReadFile(theFileName.c_str());
-}
 
 inline IFSelect_ReturnStatus read_iges(IGESControl_Reader &reader, rust::String theFileName) {
   return reader.ReadFile(theFileName.c_str());
-}
-
-inline std::unique_ptr<TopoDS_Shape> one_shape_step(const STEPControl_Reader &reader) {
-  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
 }
 
 inline std::unique_ptr<TopoDS_Shape> one_shape_iges(const IGESControl_Reader &reader) {
@@ -200,17 +191,9 @@ inline std::unique_ptr<TopoDS_Shape> one_shape_iges(const IGESControl_Reader &re
 }
 
 // Data Export
-inline IFSelect_ReturnStatus transfer_shape(STEPControl_Writer &writer, const TopoDS_Shape &theShape) {
-  return writer.Transfer(theShape, STEPControl_AsIs);
-}
-
 inline void compute_model(IGESControl_Writer &writer) { writer.ComputeModel(); }
 
 inline bool add_shape(IGESControl_Writer &writer, const TopoDS_Shape &theShape) { return writer.AddShape(theShape); }
-
-inline IFSelect_ReturnStatus write_step(STEPControl_Writer &writer, rust::String theFileName) {
-  return writer.Write(theFileName.c_str());
-}
 
 inline bool write_iges(IGESControl_Writer &writer, rust::String theFileName) {
   return writer.Write(theFileName.c_str());
