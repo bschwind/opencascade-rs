@@ -150,7 +150,11 @@ pub struct SphereBuilder {
 impl SphereBuilder {
     pub fn build(self) -> Shape {
         let axis = make_axis_2(self.center, DVec3::Z);
-        let mut make_shere = ffi::BRepPrimAPI_MakeSphere_ctor(&axis, self.radius, self.z_angle);
+        let mut make_shere = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeSphere_ctor(
+            &axis,
+            self.radius,
+            self.z_angle,
+        );
 
         Shape::from_shape(make_shere.pin_mut().Shape())
     }
@@ -177,7 +181,7 @@ pub struct ConeBuilder {
 impl ConeBuilder {
     pub fn build(self) -> Shape {
         let axis = make_axis_2(self.pos, DVec3::Z);
-        let mut make_cone = ffi::BRepPrimAPI_MakeCone_ctor(
+        let mut make_cone = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeCone_ctor(
             &axis,
             self.bottom_radius,
             self.top_radius,
@@ -227,7 +231,7 @@ pub struct TorusBuilder {
 impl TorusBuilder {
     pub fn build(self) -> Shape {
         let axis = make_axis_2(self.pos, self.z_axis);
-        let mut make_torus = ffi::BRepPrimAPI_MakeTorus_ctor(
+        let mut make_torus = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeTorus_ctor(
             &axis,
             self.radius_1,
             self.radius_2,
@@ -307,7 +311,9 @@ impl Shape {
 
         let point = opencascade_sys::gp::new_point(min_corner.x, min_corner.y, min_corner.z);
         let diff = max_corner - min_corner;
-        let mut my_box = ffi::BRepPrimAPI_MakeBox_ctor(&point, diff.x, diff.y, diff.z);
+        let mut my_box = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeBox_ctor(
+            &point, diff.x, diff.y, diff.z,
+        );
 
         Self::from_shape(my_box.pin_mut().Shape())
     }
@@ -347,7 +353,11 @@ impl Shape {
     /// Extends from `p` along axis `dir`.
     pub fn cylinder(p: DVec3, r: f64, dir: DVec3, h: f64) -> Self {
         let cylinder_coord_system = make_axis_2(p, dir);
-        let mut cylinder = ffi::BRepPrimAPI_MakeCylinder_ctor(&cylinder_coord_system, r, h);
+        let mut cylinder = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeCylinder_ctor(
+            &cylinder_coord_system,
+            r,
+            h,
+        );
 
         Self::from_shape(cylinder.pin_mut().Shape())
     }

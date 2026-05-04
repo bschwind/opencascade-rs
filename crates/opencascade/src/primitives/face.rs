@@ -67,8 +67,12 @@ impl Face {
         let canonize = true;
 
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
-        let mut make_solid =
-            ffi::BRepPrimAPI_MakePrism_ctor(inner_shape, &prism_vec, copy, canonize);
+        let mut make_solid = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakePrism_ctor(
+            inner_shape,
+            &prism_vec,
+            copy,
+            canonize,
+        );
         let extruded_shape = make_solid.pin_mut().Shape();
         let solid = ffi::TopoDS_cast_to_solid(extruded_shape);
 
@@ -128,7 +132,12 @@ impl Face {
         let copy = false;
 
         let inner_shape = ffi::cast_face_to_shape(&self.inner);
-        let mut make_solid = ffi::BRepPrimAPI_MakeRevol_ctor(inner_shape, &revol_vec, angle, copy);
+        let mut make_solid = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeRevol_ctor(
+            inner_shape,
+            &revol_vec,
+            angle,
+            copy,
+        );
         let revolved_shape = make_solid.pin_mut().Shape();
         let solid = ffi::TopoDS_cast_to_solid(revolved_shape);
 
@@ -431,8 +440,12 @@ impl CompoundFace {
 
         let inner_shape = ffi::cast_compound_to_shape(&self.inner);
 
-        let mut make_solid =
-            ffi::BRepPrimAPI_MakePrism_ctor(inner_shape, &prism_vec, copy, canonize);
+        let mut make_solid = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakePrism_ctor(
+            inner_shape,
+            &prism_vec,
+            copy,
+            canonize,
+        );
         let extruded_shape = make_solid.pin_mut().Shape();
 
         Shape::from_shape(extruded_shape)
@@ -447,7 +460,12 @@ impl CompoundFace {
 
         let inner_shape = ffi::cast_compound_to_shape(&self.inner);
 
-        let mut make_solid = ffi::BRepPrimAPI_MakeRevol_ctor(inner_shape, &revol_axis, angle, copy);
+        let mut make_solid = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeRevol_ctor(
+            inner_shape,
+            &revol_axis,
+            angle,
+            copy,
+        );
         let revolved_shape = make_solid.pin_mut().Shape();
 
         Shape::from_shape(revolved_shape)

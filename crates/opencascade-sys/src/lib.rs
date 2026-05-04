@@ -4,6 +4,7 @@ pub mod b_rep_builder_api;
 pub mod b_rep_feat;
 pub mod b_rep_g_prop;
 pub mod b_rep_mesh;
+pub mod b_rep_prim_api;
 pub mod b_rep_tools;
 pub mod bin_tools;
 pub mod bnd;
@@ -250,104 +251,6 @@ pub mod ffi {
         pub fn GetType(self: &BRepAdaptor_Curve) -> GeomAbs_CurveType;
 
         // Primitives
-        type BRepPrimAPI_MakePrism;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakePrism_ctor(
-            shape: &TopoDS_Shape,
-            vec: &gp_Vec,
-            copy: bool,
-            canonize: bool,
-        ) -> UniquePtr<BRepPrimAPI_MakePrism>;
-
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakePrism>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakePrism>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakePrism) -> bool;
-
-        type BRepPrimAPI_MakeRevol;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeRevol_ctor(
-            shape: &TopoDS_Shape,
-            axis: &gp_Ax1,
-            angle: f64,
-            copy: bool,
-        ) -> UniquePtr<BRepPrimAPI_MakeRevol>;
-
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeRevol>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeRevol>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeRevol) -> bool;
-
-        type BRepPrimAPI_MakeCylinder;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeCylinder_ctor(
-            coord_system: &gp_Ax2,
-            radius: f64,
-            height: f64,
-        ) -> UniquePtr<BRepPrimAPI_MakeCylinder>;
-
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCylinder>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeCylinder>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeCylinder) -> bool;
-
-        type BRepPrimAPI_MakeBox;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeBox_ctor(
-            point: &gp_Pnt,
-            dx: f64,
-            dy: f64,
-            dz: f64,
-        ) -> UniquePtr<BRepPrimAPI_MakeBox>;
-
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeBox>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeBox>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeBox) -> bool;
-
-        type BRepPrimAPI_MakeSphere;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeSphere_ctor(
-            axis: &gp_Ax2,
-            r: f64,
-            angle_1: f64,
-        ) -> UniquePtr<BRepPrimAPI_MakeSphere>;
-
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeSphere>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeSphere>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeSphere) -> bool;
-
-        type BRepPrimAPI_MakeCone;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeCone_ctor(
-            axis: &gp_Ax2,
-            r1: f64,
-            r2: f64,
-            h: f64,
-            angle: f64,
-        ) -> UniquePtr<BRepPrimAPI_MakeCone>;
-
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeCone>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeCone>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeCone) -> bool;
-
-        type BRepPrimAPI_MakeTorus;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeTorus_ctor(
-            axis: &gp_Ax2,
-            r1: f64,
-            r2: f64,
-            angle_1: f64,
-            angle_2: f64,
-            angle_3: f64,
-        ) -> UniquePtr<BRepPrimAPI_MakeTorus>;
-
-        pub fn Shape(self: Pin<&mut BRepPrimAPI_MakeTorus>) -> &TopoDS_Shape;
-        pub fn Build(self: Pin<&mut BRepPrimAPI_MakeTorus>, progress: &Message_ProgressRange);
-        pub fn IsDone(self: &BRepPrimAPI_MakeTorus) -> bool;
 
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
