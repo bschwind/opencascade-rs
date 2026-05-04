@@ -97,9 +97,6 @@ template <typename T> std::unique_ptr<std::vector<T>> list_to_vector(const NColl
 
 // Handles
 typedef opencascade::handle<Standard_Type> HandleStandardType;
-typedef opencascade::handle<Geom_Curve> HandleGeomCurve;
-typedef opencascade::handle<Geom_BSplineCurve> HandleGeomBSplineCurve;
-typedef opencascade::handle<Geom_TrimmedCurve> HandleGeomTrimmedCurve;
 typedef opencascade::handle<Geom2d_Curve> HandleGeom2d_Curve;
 typedef opencascade::handle<Geom2d_Ellipse> HandleGeom2d_Ellipse;
 typedef opencascade::handle<Geom2d_TrimmedCurve> HandleGeom2d_TrimmedCurve;
@@ -122,11 +119,9 @@ inline const HandleStandardType &DynamicType(const Handle_Geom_Surface &surface)
 
 inline rust::String type_name(const HandleStandardType &handle) { return std::string(handle->Name()); }
 
-inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const HandleGeomCurve &curve, const Standard_Real U) {
+inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const Handle_Geom_Curve &curve, const Standard_Real U) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
 }
-
-// Collections
 
 // Geometry
 inline std::unique_ptr<Handle_Geom_BSplineCurve> GeomAPI_Interpolate_Curve(const GeomAPI_Interpolate &interpolate) {
@@ -159,8 +154,8 @@ inline std::unique_ptr<gp_Pnt2d> ellipse_value(const HandleGeom2d_Ellipse &ellip
 }
 
 // Segment Stuff
-inline std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeSegment_Value(const GC_MakeSegment &segment) {
-  return std::unique_ptr<HandleGeomTrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(segment.Value()));
+inline std::unique_ptr<Handle_Geom_TrimmedCurve> GC_MakeSegment_Value(const GC_MakeSegment &segment) {
+  return std::unique_ptr<Handle_Geom_TrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(segment.Value()));
 }
 
 inline std::unique_ptr<HandleGeom2d_TrimmedCurve> GCE2d_MakeSegment_point_point(const gp_Pnt2d &p1,
@@ -170,8 +165,8 @@ inline std::unique_ptr<HandleGeom2d_TrimmedCurve> GCE2d_MakeSegment_point_point(
 }
 
 // Arc stuff
-inline std::unique_ptr<HandleGeomTrimmedCurve> GC_MakeArcOfCircle_Value(const GC_MakeArcOfCircle &arc) {
-  return std::unique_ptr<HandleGeomTrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(arc.Value()));
+inline std::unique_ptr<Handle_Geom_TrimmedCurve> GC_MakeArcOfCircle_Value(const GC_MakeArcOfCircle &arc) {
+  return std::unique_ptr<Handle_Geom_TrimmedCurve>(new opencascade::handle<Geom_TrimmedCurve>(arc.Value()));
 }
 
 inline std::unique_ptr<gp_Pnt> BRepAdaptor_Curve_value(const BRepAdaptor_Curve &curve, const Standard_Real U) {
@@ -218,9 +213,9 @@ inline std::unique_ptr<Handle_Geom_Surface> BRep_Tool_Surface(const TopoDS_Face 
   return std::unique_ptr<Handle_Geom_Surface>(new opencascade::handle<Geom_Surface>(BRep_Tool::Surface(face)));
 }
 
-inline std::unique_ptr<HandleGeomCurve> BRep_Tool_Curve(const TopoDS_Edge &edge, Standard_Real &first,
-                                                        Standard_Real &last) {
-  return std::unique_ptr<HandleGeomCurve>(new opencascade::handle<Geom_Curve>(BRep_Tool::Curve(edge, first, last)));
+inline std::unique_ptr<Handle_Geom_Curve> BRep_Tool_Curve(const TopoDS_Edge &edge, Standard_Real &first,
+                                                          Standard_Real &last) {
+  return std::unique_ptr<Handle_Geom_Curve>(new opencascade::handle<Geom_Curve>(BRep_Tool::Curve(edge, first, last)));
 }
 
 inline std::unique_ptr<gp_Pnt> BRep_Tool_Pnt(const TopoDS_Vertex &vertex) {

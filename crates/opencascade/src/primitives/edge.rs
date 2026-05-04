@@ -72,7 +72,8 @@ impl Edge {
 
         let bezier = opencascade_sys::geom::Geom_BezierCurve_ctor_points(&array);
         let bezier_handle = opencascade_sys::geom::Geom_BezierCurve_to_handle(bezier);
-        let curve_handle = ffi::new_HandleGeomCurve_from_HandleGeom_BezierCurve(&bezier_handle);
+        let curve_handle =
+            opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_BezierCurve(&bezier_handle);
 
         let mut make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
         let edge = make_edge.pin_mut().Edge();
@@ -110,7 +111,9 @@ impl Edge {
 
         interpolate.pin_mut().Perform();
         let bspline_handle = ffi::GeomAPI_Interpolate_Curve(&interpolate);
-        let curve_handle = ffi::new_HandleGeomCurve_from_HandleGeom_BSplineCurve(&bspline_handle);
+        let curve_handle = opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_BSplineCurve(
+            &bspline_handle,
+        );
 
         let mut make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
         let edge = make_edge.pin_mut().Edge();
@@ -125,9 +128,9 @@ impl Edge {
         );
 
         let make_edge = ffi::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
-            &ffi::new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(&ffi::GC_MakeArcOfCircle_Value(
-                &make_arc,
-            )),
+            &opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
+                &ffi::GC_MakeArcOfCircle_Value(&make_arc),
+            ),
         );
 
         Self::from_make_edge(make_edge)

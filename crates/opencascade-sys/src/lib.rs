@@ -95,10 +95,10 @@ pub mod ffi {
 
         // Handles
         type HandleStandardType;
-        type HandleGeomCurve;
-        type HandleGeomBSplineCurve;
+        type Handle_Geom_Curve;
+        type Handle_Geom_BSplineCurve;
         type Handle_Geom_BezierCurve;
-        type HandleGeomTrimmedCurve;
+        type Handle_Geom_TrimmedCurve;
         type Handle_Geom_Surface;
         type Handle_Geom_BezierSurface;
         type Handle_Geom_Plane;
@@ -117,24 +117,9 @@ pub mod ffi {
         pub fn DynamicType(surface: &Handle_Geom_Surface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
 
-        #[cxx_name = "construct_unique"]
-        pub fn new_HandleGeomCurve_from_HandleGeom_BSplineCurve(
-            bspline_curve_handle: &HandleGeomBSplineCurve,
-        ) -> UniquePtr<HandleGeomCurve>;
-
-        #[cxx_name = "construct_unique"]
-        pub fn new_HandleGeomCurve_from_HandleGeom_BezierCurve(
-            bezier_curve_handle: &Handle_Geom_BezierCurve,
-        ) -> UniquePtr<HandleGeomCurve>;
-
-        #[cxx_name = "construct_unique"]
-        pub fn new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
-            trimmed_curve_handle: &HandleGeomTrimmedCurve,
-        ) -> UniquePtr<HandleGeomCurve>;
-
         pub fn IsNull(self: &HandleStandardType) -> bool;
-        pub fn IsNull(self: &HandleGeomCurve) -> bool;
-        pub fn IsNull(self: &HandleGeomTrimmedCurve) -> bool;
+        pub fn IsNull(self: &Handle_Geom_Curve) -> bool;
+        pub fn IsNull(self: &Handle_Geom_TrimmedCurve) -> bool;
         pub fn IsNull(self: &Handle_Geom_Surface) -> bool;
         pub fn IsNull(self: &Handle_Geom_BezierSurface) -> bool;
         pub fn IsNull(self: &Handle_Geom_Plane) -> bool;
@@ -144,7 +129,7 @@ pub mod ffi {
         pub fn IsNull(self: &Handle_Geom_CylindricalSurface) -> bool;
         pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
 
-        pub fn HandleGeomCurve_Value(curve: &HandleGeomCurve, u: f64) -> UniquePtr<gp_Pnt>;
+        pub fn HandleGeomCurve_Value(curve: &Handle_Geom_Curve, u: f64) -> UniquePtr<gp_Pnt>;
 
         // Types from sub-modules
         type TColgp_Array1OfPnt2d = crate::t_col_gp::TColgp_Array1OfPnt2d;
@@ -206,7 +191,7 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn GC_MakeSegment_point_point(p1: &gp_Pnt, p2: &gp_Pnt) -> UniquePtr<GC_MakeSegment>;
 
-        pub fn GC_MakeSegment_Value(arc: &GC_MakeSegment) -> UniquePtr<HandleGeomTrimmedCurve>;
+        pub fn GC_MakeSegment_Value(arc: &GC_MakeSegment) -> UniquePtr<Handle_Geom_TrimmedCurve>;
         pub fn GCE2d_MakeSegment_point_point(
             p1: &gp_Pnt2d,
             p2: &gp_Pnt2d,
@@ -224,7 +209,7 @@ pub mod ffi {
 
         pub fn GC_MakeArcOfCircle_Value(
             arc: &GC_MakeArcOfCircle,
-        ) -> UniquePtr<HandleGeomTrimmedCurve>;
+        ) -> UniquePtr<Handle_Geom_TrimmedCurve>;
 
         // Shapes
         type TopoDS_Vertex;
@@ -338,7 +323,7 @@ pub mod ffi {
 
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeEdge_HandleGeomCurve(
-            geom_curve_handle: &HandleGeomCurve,
+            geom_curve_handle: &Handle_Geom_Curve,
         ) -> UniquePtr<BRepBuilderAPI_MakeEdge>;
 
         #[cxx_name = "construct_unique"]
@@ -789,7 +774,7 @@ pub mod ffi {
 
         pub fn GeomAPI_Interpolate_Curve(
             interpolate: &GeomAPI_Interpolate,
-        ) -> UniquePtr<HandleGeomBSplineCurve>;
+        ) -> UniquePtr<Handle_Geom_BSplineCurve>;
 
         // Geometry Querying
         type GeomAPI_ProjectPointOnSurf;
@@ -890,7 +875,7 @@ pub mod ffi {
             edge: &TopoDS_Edge,
             first: &mut f64,
             last: &mut f64,
-        ) -> UniquePtr<HandleGeomCurve>;
+        ) -> UniquePtr<Handle_Geom_Curve>;
         pub fn BRep_Tool_Pnt(vertex: &TopoDS_Vertex) -> UniquePtr<gp_Pnt>;
         pub fn BRep_Tool_Triangulation(
             face: &TopoDS_Face,

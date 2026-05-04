@@ -12,6 +12,9 @@ mod inner {
         type Handle_Geom_BezierSurface = crate::ffi::Handle_Geom_BezierSurface;
         type Handle_Geom_BezierCurve = crate::ffi::Handle_Geom_BezierCurve;
         type Handle_Geom_Plane = crate::ffi::Handle_Geom_Plane;
+        type Handle_Geom_BSplineCurve = crate::ffi::Handle_Geom_BSplineCurve;
+        type Handle_Geom_Curve = crate::ffi::Handle_Geom_Curve;
+        type Handle_Geom_TrimmedCurve = crate::ffi::Handle_Geom_TrimmedCurve;
         type TColgp_Array2OfPnt = crate::t_col_gp::TColgp_Array2OfPnt;
         type TColgp_HArray1OfPnt = crate::t_col_gp::TColgp_HArray1OfPnt;
 
@@ -49,5 +52,20 @@ mod inner {
         pub fn new_HandleGeomPlane_from_HandleGeomSurface(
             geom_surface_handle: &Handle_Geom_Surface,
         ) -> UniquePtr<Handle_Geom_Plane>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn new_HandleGeomCurve_from_HandleGeom_BSplineCurve(
+            bspline_curve_handle: &Handle_Geom_BSplineCurve,
+        ) -> UniquePtr<Handle_Geom_Curve>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn new_HandleGeomCurve_from_HandleGeom_BezierCurve(
+            bezier_curve_handle: &Handle_Geom_BezierCurve,
+        ) -> UniquePtr<Handle_Geom_Curve>;
+
+        #[cxx_name = "construct_unique"]
+        pub fn new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
+            trimmed_curve_handle: &Handle_Geom_TrimmedCurve,
+        ) -> UniquePtr<Handle_Geom_Curve>;
     }
 }
