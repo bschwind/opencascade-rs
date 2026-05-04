@@ -272,7 +272,8 @@ impl Face {
 
     pub fn normal_at(&self, pos: DVec3) -> DVec3 {
         let surface = ffi::BRep_Tool_Surface(&self.inner);
-        let projector = ffi::GeomAPI_ProjectPointOnSurf_ctor(&make_point(pos), &surface);
+        let projector =
+            opencascade_sys::geom_api::GeomAPI_ProjectPointOnSurf_ctor(&make_point(pos), &surface);
         let mut u: f64 = 0.0;
         let mut v: f64 = 0.0;
 

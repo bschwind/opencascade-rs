@@ -104,13 +104,14 @@ impl Edge {
 
         let periodic = false;
         let tolerance = 1.0e-7;
-        let mut interpolate = ffi::GeomAPI_Interpolate_ctor(&array_handle, periodic, tolerance);
+        let mut interpolate =
+            opencascade_sys::geom_api::GeomAPI_Interpolate_ctor(&array_handle, periodic, tolerance);
         if let Some((t_start, t_end)) = tangents {
             interpolate.pin_mut().Load(&make_vec(t_start), &make_vec(t_end), true);
         }
 
         interpolate.pin_mut().Perform();
-        let bspline_handle = ffi::GeomAPI_Interpolate_Curve(&interpolate);
+        let bspline_handle = opencascade_sys::geom_api::GeomAPI_Interpolate_Curve(&interpolate);
         let curve_handle = opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_BSplineCurve(
             &bspline_handle,
         );

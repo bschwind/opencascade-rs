@@ -8,6 +8,7 @@ pub mod g_prop;
 pub mod gc_pnts;
 pub mod geom;
 pub mod geom2d;
+pub mod geom_api;
 pub mod gp;
 pub mod law;
 pub mod poly;
@@ -110,10 +111,10 @@ pub mod ffi {
         type Handle_TopTools_HSequenceOfShape;
         type Handle_Law_Function;
 
-        type Handle_TColgpHArray1OfPnt;
+        type Handle_TColgp_HArray1OfPnt;
         pub fn new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(
             array: UniquePtr<TColgp_HArray1OfPnt>,
-        ) -> UniquePtr<Handle_TColgpHArray1OfPnt>;
+        ) -> UniquePtr<Handle_TColgp_HArray1OfPnt>;
 
         pub fn DynamicType(surface: &Handle_Geom_Surface) -> &HandleStandardType;
         pub fn type_name(handle: &HandleStandardType) -> String;
@@ -730,39 +731,6 @@ pub mod ffi {
             section: UniquePtr<BRepAlgoAPI_Section>,
         ) -> UniquePtr<BRepAlgoAPI_BuilderAlgo>;
 
-        // Geometry Interpolation
-        type GeomAPI_Interpolate;
-
-        #[cxx_name = "construct_unique"]
-        pub fn GeomAPI_Interpolate_ctor(
-            points: &Handle_TColgpHArray1OfPnt,
-            periodic: bool,
-            tolerance: f64,
-        ) -> UniquePtr<GeomAPI_Interpolate>;
-
-        pub fn Load(
-            self: Pin<&mut GeomAPI_Interpolate>,
-            initial_tangent: &gp_Vec,
-            final_tangent: &gp_Vec,
-            scale: bool,
-        );
-
-        pub fn Perform(self: Pin<&mut GeomAPI_Interpolate>);
-
-        pub fn GeomAPI_Interpolate_Curve(
-            interpolate: &GeomAPI_Interpolate,
-        ) -> UniquePtr<Handle_Geom_BSplineCurve>;
-
-        // Geometry Querying
-        type GeomAPI_ProjectPointOnSurf;
-
-        #[cxx_name = "construct_unique"]
-        pub fn GeomAPI_ProjectPointOnSurf_ctor(
-            origin: &gp_Pnt,
-            surface: &Handle_Geom_Surface,
-        ) -> UniquePtr<GeomAPI_ProjectPointOnSurf>;
-        pub fn LowerDistanceParameters(self: &GeomAPI_ProjectPointOnSurf, u: &mut f64, v: &mut f64);
-
         type BRepBuilderAPI_MakeSolid;
 
         #[cxx_name = "construct_unique"]
@@ -974,6 +942,7 @@ pub mod ffi {
     impl UniquePtr<Handle_Geom_Plane> {}
     impl UniquePtr<Handle_Geom2d_Ellipse> {}
     impl UniquePtr<Handle_Geom2d_Curve> {}
+    impl UniquePtr<Handle_Geom_BSplineCurve> {}
 }
 
 // Gross, but is this okay?

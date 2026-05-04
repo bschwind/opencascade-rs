@@ -97,11 +97,10 @@ template <typename T> std::unique_ptr<std::vector<T>> list_to_vector(const NColl
 
 // Handles
 typedef opencascade::handle<Standard_Type> HandleStandardType;
-typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
 
-inline std::unique_ptr<Handle_TColgpHArray1OfPnt>
+inline std::unique_ptr<Handle_TColgp_HArray1OfPnt>
 new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(std::unique_ptr<TColgp_HArray1OfPnt> array) {
-  return std::unique_ptr<Handle_TColgpHArray1OfPnt>(new Handle_TColgpHArray1OfPnt(array.release()));
+  return std::unique_ptr<Handle_TColgp_HArray1OfPnt>(new Handle_TColgp_HArray1OfPnt(array.release()));
 }
 
 // Handle stuff
@@ -118,11 +117,6 @@ inline rust::String type_name(const HandleStandardType &handle) { return std::st
 
 inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const Handle_Geom_Curve &curve, const Standard_Real U) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
-}
-
-// Geometry
-inline std::unique_ptr<Handle_Geom_BSplineCurve> GeomAPI_Interpolate_Curve(const GeomAPI_Interpolate &interpolate) {
-  return std::unique_ptr<Handle_Geom_BSplineCurve>(new opencascade::handle<Geom_BSplineCurve>(interpolate.Curve()));
 }
 
 // Segment Stuff
