@@ -1,6 +1,5 @@
 #include "rust/cxx.h"
 #include <BOPAlgo_GlueEnum.hxx>
-#include <BRepAdaptor_Curve.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
@@ -96,10 +95,6 @@ inline rust::String type_name(const HandleStandardType &handle) { return std::st
 
 inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const Handle_Geom_Curve &curve, const Standard_Real U) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
-}
-
-inline std::unique_ptr<gp_Pnt> BRepAdaptor_Curve_value(const BRepAdaptor_Curve &curve, const Standard_Real U) {
-  return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve.Value(U)));
 }
 
 // BRepLib

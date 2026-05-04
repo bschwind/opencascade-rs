@@ -7,7 +7,7 @@ mod inner {
         include!("opencascade-sys/include/gc_pnts.hxx");
 
         type gp_Pnt = crate::ffi::gp_Pnt;
-        type BRepAdaptor_Curve = crate::ffi::BRepAdaptor_Curve;
+        type BRepAdaptor_Curve = crate::b_rep_adaptor::BRepAdaptor_Curve;
 
         type GCPnts_TangentialDeflection;
 

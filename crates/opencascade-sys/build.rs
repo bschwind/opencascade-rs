@@ -52,6 +52,7 @@ fn main() {
     // TODO(bschwind) - Iterate over the src/ directory to populate this.
     let rust_bridges = [
         "src/b_rep.rs",
+        "src/b_rep_adaptor.rs",
         "src/b_rep_bnd_lib.rs",
         "src/b_rep_builder_api.rs",
         "src/b_rep_feat.rs",

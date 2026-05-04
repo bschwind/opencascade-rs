@@ -1,4 +1,5 @@
 pub mod b_rep;
+pub mod b_rep_adaptor;
 pub mod b_rep_bnd_lib;
 pub mod b_rep_builder_api;
 pub mod b_rep_feat;
@@ -239,18 +240,6 @@ pub mod ffi {
         pub fn MakeCompound(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Compound>);
         pub fn MakeShell(self: &TopoDS_Builder, compound: Pin<&mut TopoDS_Shell>);
         pub fn Add(self: &TopoDS_Builder, shape: Pin<&mut TopoDS_Shape>, compound: &TopoDS_Shape);
-
-        // BRepAdaptor
-        type BRepAdaptor_Curve;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepAdaptor_Curve_ctor(edge: &TopoDS_Edge) -> UniquePtr<BRepAdaptor_Curve>;
-        pub fn FirstParameter(self: &BRepAdaptor_Curve) -> f64;
-        pub fn LastParameter(self: &BRepAdaptor_Curve) -> f64;
-        pub fn BRepAdaptor_Curve_value(curve: &BRepAdaptor_Curve, u: f64) -> UniquePtr<gp_Pnt>;
-        pub fn GetType(self: &BRepAdaptor_Curve) -> GeomAbs_CurveType;
-
-        // Primitives
 
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;

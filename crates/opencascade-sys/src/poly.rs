@@ -10,7 +10,7 @@ mod inner {
         type gp_Pnt2d = crate::gp::gp_Pnt2d;
         type Handle_Poly_Triangulation = crate::ffi::Handle_Poly_Triangulation;
         type gp_Dir = crate::gp::gp_Dir;
-        type BRepAdaptor_Curve = crate::ffi::BRepAdaptor_Curve;
+        type BRepAdaptor_Curve = crate::b_rep_adaptor::BRepAdaptor_Curve;
 
         type Poly_Triangulation;
         #[cxx_name = "construct_unique"]

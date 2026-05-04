@@ -149,23 +149,23 @@ impl Edge {
     }
 
     pub fn start_point(&self) -> DVec3 {
-        let curve = ffi::BRepAdaptor_Curve_ctor(&self.inner);
+        let curve = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
         let start_param = curve.FirstParameter();
-        let point = ffi::BRepAdaptor_Curve_value(&curve, start_param);
+        let point = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_value(&curve, start_param);
 
         dvec3(point.X(), point.Y(), point.Z())
     }
 
     pub fn end_point(&self) -> DVec3 {
-        let curve = ffi::BRepAdaptor_Curve_ctor(&self.inner);
+        let curve = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
         let last_param = curve.LastParameter();
-        let point = ffi::BRepAdaptor_Curve_value(&curve, last_param);
+        let point = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_value(&curve, last_param);
 
         dvec3(point.X(), point.Y(), point.Z())
     }
 
     pub fn approximation_segments(&self) -> ApproximationSegmentIterator {
-        let adaptor_curve = ffi::BRepAdaptor_Curve_ctor(&self.inner);
+        let adaptor_curve = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
         let approximator = GCPnts_TangentialDeflection::new(&adaptor_curve, 0.1, 0.1);
 
         ApproximationSegmentIterator { count: 1, approximator }
@@ -174,7 +174,7 @@ impl Edge {
     pub fn tangent_arc(_p1: DVec3, _tangent: DVec3, _p3: DVec3) {}
 
     pub fn edge_type(&self) -> EdgeType {
-        let curve = ffi::BRepAdaptor_Curve_ctor(&self.inner);
+        let curve = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
 
         EdgeType::from(curve.GetType())
     }
