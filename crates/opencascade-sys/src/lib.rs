@@ -12,6 +12,7 @@ pub mod geom2d;
 pub mod geom_abs;
 pub mod geom_api;
 pub mod gp;
+pub mod iges_control;
 pub mod law;
 pub mod poly;
 pub mod shape_analysis;
@@ -780,37 +781,7 @@ pub mod ffi {
         pub fn Perform(self: Pin<&mut BRepFeat_MakeCylindricalHole>, radius: f64);
         pub fn Build(self: Pin<&mut BRepFeat_MakeCylindricalHole>);
         pub fn Shape(self: &BRepFeat_MakeCylindricalHole) -> &TopoDS_Shape;
-
-        // Data Import
-        type IGESControl_Reader;
         type IFSelect_ReturnStatus;
-
-        #[cxx_name = "construct_unique"]
-        pub fn IGESControl_Reader_ctor() -> UniquePtr<IGESControl_Reader>;
-
-        pub fn read_iges(
-            reader: Pin<&mut IGESControl_Reader>,
-            filename: String,
-        ) -> IFSelect_ReturnStatus;
-
-        pub fn TransferRoots(
-            self: Pin<&mut IGESControl_Reader>,
-            progress: &Message_ProgressRange,
-        ) -> i32;
-
-        pub fn one_shape_iges(reader: &IGESControl_Reader) -> UniquePtr<TopoDS_Shape>;
-
-        // Data Export
-
-        type IGESControl_Writer;
-
-        #[cxx_name = "construct_unique"]
-        pub fn IGESControl_Writer_ctor() -> UniquePtr<IGESControl_Writer>;
-
-        pub fn add_shape(writer: Pin<&mut IGESControl_Writer>, shape: &TopoDS_Shape) -> bool;
-        pub fn compute_model(writer: Pin<&mut IGESControl_Writer>);
-
-        pub fn write_iges(writer: Pin<&mut IGESControl_Writer>, filename: String) -> bool;
 
         type TopLoc_Location = crate::top_loc::TopLoc_Location;
 

@@ -544,9 +544,12 @@ impl Shape {
     }
 
     pub fn read_iges(path: impl AsRef<Path>) -> Result<Self, Error> {
-        let mut reader = ffi::IGESControl_Reader_ctor();
+        let mut reader = opencascade_sys::iges_control::IGESControl_Reader_ctor();
 
-        let status = ffi::read_iges(reader.pin_mut(), path.as_ref().to_string_lossy().to_string());
+        let status = opencascade_sys::iges_control::read_iges(
+            reader.pin_mut(),
+            path.as_ref().to_string_lossy().to_string(),
+        );
 
         reader.pin_mut().TransferRoots(&ffi::Message_ProgressRange_ctor());
 
@@ -554,23 +557,25 @@ impl Shape {
             return Err(Error::IgesReadFailed);
         }
 
-        let inner = ffi::one_shape_iges(&reader);
+        let inner = opencascade_sys::iges_control::one_shape_iges(&reader);
 
         Ok(Self { inner })
     }
 
     pub fn write_iges(&self, path: impl AsRef<Path>) -> Result<(), Error> {
-        let mut writer = ffi::IGESControl_Writer_ctor();
+        let mut writer = opencascade_sys::iges_control::IGESControl_Writer_ctor();
 
-        let success = ffi::add_shape(writer.pin_mut(), &self.inner);
+        let success = opencascade_sys::iges_control::add_shape(writer.pin_mut(), &self.inner);
 
         if !success {
             return Err(Error::IgesWriteFailed);
         }
 
-        ffi::compute_model(writer.pin_mut());
-        let success =
-            ffi::write_iges(writer.pin_mut(), path.as_ref().to_string_lossy().to_string());
+        opencascade_sys::iges_control::compute_model(writer.pin_mut());
+        let success = opencascade_sys::iges_control::write_iges(
+            writer.pin_mut(),
+            path.as_ref().to_string_lossy().to_string(),
+        );
 
         if success {
             Ok(())

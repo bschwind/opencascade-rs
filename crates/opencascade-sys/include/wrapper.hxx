@@ -52,8 +52,7 @@
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
-#include <IGESControl_Reader.hxx>
-#include <IGESControl_Writer.hxx>
+#include <IFSelect_ReturnStatus.hxx>
 #include <Law_Function.hxx>
 #include <Law_Interpol.hxx>
 #include <NCollection_Array1.hxx>
@@ -178,25 +177,6 @@ inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurv
 // BRepFeat
 inline std::unique_ptr<BRepFeat_MakeCylindricalHole> BRepFeat_MakeCylindricalHole_ctor() {
   return std::unique_ptr<BRepFeat_MakeCylindricalHole>(new BRepFeat_MakeCylindricalHole());
-}
-
-// Data Import
-
-inline IFSelect_ReturnStatus read_iges(IGESControl_Reader &reader, rust::String theFileName) {
-  return reader.ReadFile(theFileName.c_str());
-}
-
-inline std::unique_ptr<TopoDS_Shape> one_shape_iges(const IGESControl_Reader &reader) {
-  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(reader.OneShape()));
-}
-
-// Data Export
-inline void compute_model(IGESControl_Writer &writer) { writer.ComputeModel(); }
-
-inline bool add_shape(IGESControl_Writer &writer, const TopoDS_Shape &theShape) { return writer.AddShape(theShape); }
-
-inline bool write_iges(IGESControl_Writer &writer, rust::String theFileName) {
-  return writer.Write(theFileName.c_str());
 }
 
 // Fillets

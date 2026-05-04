@@ -65,6 +65,7 @@ fn main() {
         "src/gc.rs",
         "src/gc_pnts.rs",
         "src/gp.rs",
+        "src/iges_control.rs",
         "src/law.rs",
         "src/lib.rs",
         "src/poly.rs",
