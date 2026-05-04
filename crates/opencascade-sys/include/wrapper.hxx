@@ -142,7 +142,7 @@ inline std::unique_ptr<HandleGeomPlane> new_HandleGeomPlane_from_HandleGeomSurfa
 }
 
 // Collections
-inline void shape_list_append_face(TopTools_ListOfShape &list, const TopoDS_Face &face) { list.Append(face); }
+
 
 // Geometry
 inline const gp_Pnt &handle_geom_plane_location(const HandleGeomPlane &plane) { return plane->Location(); }
@@ -368,41 +368,6 @@ BRepFilletAPI_MakeFillet2d_add_chamfer_angle(BRepFilletAPI_MakeFillet2d &make_fi
                                              const TopoDS_Vertex &vertex, const Standard_Real dist,
                                              const Standard_Real angle) {
   return std::unique_ptr<TopoDS_Edge>(new TopoDS_Edge(make_fillet.AddChamfer(edge, vertex, dist, angle)));
-}
-
-// Collections
-inline void map_shapes(const TopoDS_Shape &S, const TopAbs_ShapeEnum T, TopTools_IndexedMapOfShape &M) {
-  TopExp::MapShapes(S, T, M);
-}
-
-inline void map_shapes_and_ancestors(const TopoDS_Shape &S, const TopAbs_ShapeEnum TS, const TopAbs_ShapeEnum TA,
-                                     TopTools_IndexedDataMapOfShapeListOfShape &M) {
-  TopExp::MapShapesAndAncestors(S, TS, TA, M);
-}
-
-inline void map_shapes_and_unique_ancestors(const TopoDS_Shape &S, const TopAbs_ShapeEnum TS, const TopAbs_ShapeEnum TA,
-                                            TopTools_IndexedDataMapOfShapeListOfShape &M) {
-  TopExp::MapShapesAndUniqueAncestors(S, TS, TA, M);
-}
-
-inline std::unique_ptr<Handle_TopTools_HSequenceOfShape> new_Handle_TopTools_HSequenceOfShape() {
-  auto sequence = new TopTools_HSequenceOfShape();
-  auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);
-
-  return std::unique_ptr<Handle_TopTools_HSequenceOfShape>(handle);
-}
-
-inline void TopTools_HSequenceOfShape_append(Handle_TopTools_HSequenceOfShape &handle, const TopoDS_Shape &shape) {
-  handle->Append(shape);
-}
-
-inline Standard_Integer TopTools_HSequenceOfShape_length(const Handle_TopTools_HSequenceOfShape &handle) {
-  return handle->Length();
-}
-
-inline const TopoDS_Shape &TopTools_HSequenceOfShape_value(const Handle_TopTools_HSequenceOfShape &handle,
-                                                           Standard_Integer index) {
-  return handle->Value(index);
 }
 
 inline std::unique_ptr<Handle_Poly_Triangulation> BRep_Tool_Triangulation(const TopoDS_Face &face,

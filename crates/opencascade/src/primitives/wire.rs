@@ -82,14 +82,17 @@ impl Wire {
         unordered_edges: impl IntoIterator<Item = T>,
         edge_connection: EdgeConnection,
     ) -> Self {
-        let mut edges = ffi::new_Handle_TopTools_HSequenceOfShape();
+        let mut edges = opencascade_sys::top_tools::new_Handle_TopTools_HSequenceOfShape();
 
         for edge in unordered_edges {
             let edge_shape = ffi::cast_edge_to_shape(&edge.as_ref().inner);
-            ffi::TopTools_HSequenceOfShape_append(edges.pin_mut(), edge_shape);
+            opencascade_sys::top_tools::TopTools_HSequenceOfShape_append(
+                edges.pin_mut(),
+                edge_shape,
+            );
         }
 
-        let mut wires = ffi::new_Handle_TopTools_HSequenceOfShape();
+        let mut wires = opencascade_sys::top_tools::new_Handle_TopTools_HSequenceOfShape();
 
         let (tolerance, shared) = match edge_connection {
             EdgeConnection::Exact => (0.0, true),
@@ -105,10 +108,11 @@ impl Wire {
 
         let mut make_wire = ffi::BRepBuilderAPI_MakeWire_ctor();
 
-        let wire_len = ffi::TopTools_HSequenceOfShape_length(&wires);
+        let wire_len = opencascade_sys::top_tools::TopTools_HSequenceOfShape_length(&wires);
 
         for index in 1..=wire_len {
-            let wire_shape = ffi::TopTools_HSequenceOfShape_value(&wires, index);
+            let wire_shape =
+                opencascade_sys::top_tools::TopTools_HSequenceOfShape_value(&wires, index);
             let wire = ffi::TopoDS_cast_to_wire(wire_shape);
 
             make_wire.pin_mut().add_wire(wire);

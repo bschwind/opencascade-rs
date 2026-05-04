@@ -135,8 +135,12 @@ impl Face {
         let face_shape = ffi::cast_face_to_shape(&self.inner);
 
         // We use a shape map here to avoid duplicates.
-        let mut shape_map = ffi::new_indexed_map_of_shape();
-        ffi::map_shapes(face_shape, ffi::TopAbs_ShapeEnum::TopAbs_VERTEX, shape_map.pin_mut());
+        let mut shape_map = opencascade_sys::top_tools::new_indexed_map_of_shape();
+        opencascade_sys::top_tools::map_shapes(
+            face_shape,
+            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX,
+            shape_map.pin_mut(),
+        );
 
         for i in 1..=shape_map.Extent() {
             let vertex = ffi::TopoDS_cast_to_vertex(shape_map.FindKey(i));
@@ -161,12 +165,17 @@ impl Face {
 
         let mut make_fillet = ffi::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
 
-        let mut vertex_map = ffi::new_indexed_map_of_shape();
-        ffi::map_shapes(face_shape, ffi::TopAbs_ShapeEnum::TopAbs_VERTEX, vertex_map.pin_mut());
+        let mut vertex_map = opencascade_sys::top_tools::new_indexed_map_of_shape();
+        opencascade_sys::top_tools::map_shapes(
+            face_shape,
+            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX,
+            vertex_map.pin_mut(),
+        );
 
         // Get map of vertices to edges so we can find the edges connected to each vertex.
-        let mut data_map = ffi::new_indexed_data_map_of_shape_list_of_shape();
-        ffi::map_shapes_and_ancestors(
+        let mut data_map =
+            opencascade_sys::top_tools::new_indexed_data_map_of_shape_list_of_shape();
+        opencascade_sys::top_tools::map_shapes_and_ancestors(
             face_shape,
             ffi::TopAbs_ShapeEnum::TopAbs_VERTEX,
             ffi::TopAbs_ShapeEnum::TopAbs_EDGE,

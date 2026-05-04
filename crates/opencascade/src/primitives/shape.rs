@@ -750,10 +750,13 @@ impl Shape {
         offset: f64,
         faces_to_remove: impl IntoIterator<Item = T>,
     ) -> Self {
-        let mut faces_list = ffi::new_list_of_shape();
+        let mut faces_list = opencascade_sys::top_tools::new_list_of_shape();
 
         for face in faces_to_remove.into_iter() {
-            ffi::shape_list_append_face(faces_list.pin_mut(), &face.as_ref().inner);
+            opencascade_sys::top_tools::shape_list_append_face(
+                faces_list.pin_mut(),
+                &face.as_ref().inner,
+            );
         }
 
         let mut solid_maker = ffi::BRepOffsetAPI_MakeThickSolid_ctor();

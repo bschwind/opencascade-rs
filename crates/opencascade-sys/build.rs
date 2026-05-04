@@ -67,6 +67,7 @@ fn main() {
         "src/stl_api.rs",
         "src/t_col_gp.rs",
         "src/top_loc.rs",
+        "src/top_tools.rs",
     ];
 
     let mut build = cxx_build::bridges(rust_bridges);

@@ -13,6 +13,7 @@ pub mod shape_upgrade;
 pub mod stl_api;
 pub mod t_col_gp;
 pub mod top_loc;
+pub mod top_tools;
 
 #[cxx::bridge]
 pub mod ffi {
@@ -151,89 +152,11 @@ pub mod ffi {
         type TColgp_Array1OfPnt2d = crate::t_col_gp::TColgp_Array1OfPnt2d;
         type TColgp_Array2OfPnt = crate::t_col_gp::TColgp_Array2OfPnt;
         type TColgp_HArray1OfPnt = crate::t_col_gp::TColgp_HArray1OfPnt;
-
-        // Collections
-        type TopTools_ListOfShape;
-
-        #[cxx_name = "construct_unique"]
-        pub fn new_list_of_shape() -> UniquePtr<TopTools_ListOfShape>;
-        pub fn shape_list_append_face(list: Pin<&mut TopTools_ListOfShape>, face: &TopoDS_Face);
-        pub fn Size(self: &TopTools_ListOfShape) -> i32;
-
-        #[cxx_name = "list_to_vector"]
-        pub fn shape_list_to_vector(
-            list: &TopTools_ListOfShape,
-        ) -> UniquePtr<CxxVector<TopoDS_Shape>>;
-
-        type TopTools_IndexedMapOfShape;
-
-        #[cxx_name = "construct_unique"]
-        pub fn new_indexed_map_of_shape() -> UniquePtr<TopTools_IndexedMapOfShape>;
-        pub fn Extent(self: &TopTools_IndexedMapOfShape) -> i32;
-        pub fn FindKey(self: &TopTools_IndexedMapOfShape, index: i32) -> &TopoDS_Shape;
-
-        pub fn map_shapes(
-            shape: &TopoDS_Shape,
-            shape_type: TopAbs_ShapeEnum,
-            shape_map: Pin<&mut TopTools_IndexedMapOfShape>,
-        );
-
-        type TopTools_IndexedDataMapOfShapeListOfShape;
-
-        #[cxx_name = "construct_unique"]
-        pub fn new_indexed_data_map_of_shape_list_of_shape(
-        ) -> UniquePtr<TopTools_IndexedDataMapOfShapeListOfShape>;
-        pub fn Extent(self: &TopTools_IndexedDataMapOfShapeListOfShape) -> i32;
-        pub fn FindKey(
-            self: &TopTools_IndexedDataMapOfShapeListOfShape,
-            index: i32,
-        ) -> &TopoDS_Shape;
-        pub fn FindFromIndex(
-            self: &TopTools_IndexedDataMapOfShapeListOfShape,
-            index: i32,
-        ) -> &TopTools_ListOfShape;
-        pub fn FindIndex(
-            self: &TopTools_IndexedDataMapOfShapeListOfShape,
-            shape: &TopoDS_Shape,
-        ) -> i32;
-        pub fn FindFromKey<'a>(
-            self: &'a TopTools_IndexedDataMapOfShapeListOfShape,
-            shape: &'a TopoDS_Shape,
-        ) -> &'a TopTools_ListOfShape;
-
-        pub fn map_shapes_and_ancestors(
-            shape: &TopoDS_Shape,
-            parent_type: TopAbs_ShapeEnum,
-            child_type: TopAbs_ShapeEnum,
-            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
-        );
-        pub fn map_shapes_and_unique_ancestors(
-            shape: &TopoDS_Shape,
-            parent_type: TopAbs_ShapeEnum,
-            child_type: TopAbs_ShapeEnum,
-            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
-        );
-
-        type TopTools_HSequenceOfShape;
-
-        pub fn Length(self: &TopTools_HSequenceOfShape) -> i32;
-
-        pub fn new_Handle_TopTools_HSequenceOfShape() -> UniquePtr<Handle_TopTools_HSequenceOfShape>;
-        pub fn TopTools_HSequenceOfShape_append(
-            handle: Pin<&mut Handle_TopTools_HSequenceOfShape>,
-            shape: &TopoDS_Shape,
-        );
-
-        pub fn TopTools_HSequenceOfShape_length(handle: &Handle_TopTools_HSequenceOfShape) -> i32;
-        pub fn TopTools_HSequenceOfShape_value(
-            handle: &Handle_TopTools_HSequenceOfShape,
-            index: i32,
-        ) -> &TopoDS_Shape;
-
-        #[cxx_name = "handle_try_deref"]
-        pub fn HandleTopTools_HSequenceOfShape_Get(
-            handle: &Handle_TopTools_HSequenceOfShape,
-        ) -> Result<&TopTools_HSequenceOfShape>;
+        type TopTools_ListOfShape = crate::top_tools::TopTools_ListOfShape;
+        type TopTools_IndexedMapOfShape = crate::top_tools::TopTools_IndexedMapOfShape;
+        type TopTools_IndexedDataMapOfShapeListOfShape =
+            crate::top_tools::TopTools_IndexedDataMapOfShapeListOfShape;
+        type TopTools_HSequenceOfShape = crate::top_tools::TopTools_HSequenceOfShape;
 
         // Law Function
         type Law_Function;
@@ -1123,7 +1046,16 @@ pub mod ffi {
         ) -> Result<&Poly_Triangulation>;
 
         pub fn compute_normals(face: &TopoDS_Face, triangulation: &Handle_Poly_Triangulation);
+
+        // This is dumb:
+        // https://cxx.rs/extern-c++.html#explicit-shim-trait-impls
+        #[cxx_name = "list_to_vector"]
+        pub fn shape_list_to_vector(
+            list: &TopTools_ListOfShape,
+        ) -> UniquePtr<CxxVector<TopoDS_Shape>>;
     }
+
+    impl UniquePtr<Handle_TopTools_HSequenceOfShape> {}
 }
 
 // Gross, but is this okay?
