@@ -526,7 +526,7 @@ impl Shape {
             path.as_ref().to_string_lossy().to_string(),
         );
 
-        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != opencascade_sys::if_select::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::StepReadFailed);
         }
 
@@ -542,7 +542,7 @@ impl Shape {
 
         let status = opencascade_sys::step_control::transfer_shape(writer.pin_mut(), &self.inner);
 
-        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != opencascade_sys::if_select::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);
         }
 
@@ -551,7 +551,7 @@ impl Shape {
             path.as_ref().to_string_lossy().to_string(),
         );
 
-        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != opencascade_sys::if_select::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::StepWriteFailed);
         }
 
@@ -568,7 +568,7 @@ impl Shape {
 
         reader.pin_mut().TransferRoots(&opencascade_sys::message::Message_ProgressRange_ctor());
 
-        if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
+        if status != opencascade_sys::if_select::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::IgesReadFailed);
         }
 

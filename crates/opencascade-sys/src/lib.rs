@@ -21,6 +21,7 @@ pub mod geom2d;
 pub mod geom_abs;
 pub mod geom_api;
 pub mod gp;
+pub mod if_select;
 pub mod iges_control;
 pub mod law;
 pub mod message;
@@ -38,16 +39,6 @@ pub mod topo_ds;
 
 #[cxx::bridge]
 pub mod ffi {
-    #[derive(Debug)]
-    #[repr(u32)]
-    pub enum IFSelect_ReturnStatus {
-        IFSelect_RetVoid,
-        IFSelect_RetDone,
-        IFSelect_RetError,
-        IFSelect_RetFail,
-        IFSelect_RetStop,
-    }
-
     #[derive(Debug)]
     #[repr(u32)]
     pub enum BOPAlgo_GlueEnum {
@@ -119,8 +110,6 @@ pub mod ffi {
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
 
         type BOPAlgo_GlueEnum;
-
-        type IFSelect_ReturnStatus;
 
         pub fn compute_normals(face: &TopoDS_Face, triangulation: &Handle_Poly_Triangulation);
     }

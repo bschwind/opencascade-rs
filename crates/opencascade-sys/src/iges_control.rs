@@ -6,7 +6,7 @@ mod inner {
         include!("opencascade-sys/include/iges_control.hxx");
 
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
-        type IFSelect_ReturnStatus = crate::ffi::IFSelect_ReturnStatus;
+        type IFSelect_ReturnStatus = crate::if_select::IFSelect_ReturnStatus;
         type Message_ProgressRange = crate::message::Message_ProgressRange;
 
         type IGESControl_Reader;

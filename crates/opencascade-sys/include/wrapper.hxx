@@ -20,7 +20,6 @@
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
-#include <IFSelect_ReturnStatus.hxx>
 #include <Law_Function.hxx>
 #include <Law_Interpol.hxx>
 #include <NCollection_Array1.hxx>
