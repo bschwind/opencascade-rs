@@ -14,6 +14,7 @@ pub mod b_rep_prim_api;
 pub mod b_rep_tools;
 pub mod bin_tools;
 pub mod bnd;
+pub mod bop_algo;
 pub mod g_prop;
 pub mod gc;
 pub mod gc_pnts;
@@ -40,14 +41,6 @@ pub mod topo_ds;
 
 #[cxx::bridge]
 pub mod ffi {
-    #[derive(Debug)]
-    #[repr(u32)]
-    pub enum BOPAlgo_GlueEnum {
-        BOPAlgo_GlueOff,
-        BOPAlgo_GlueShift,
-        BOPAlgo_GlueFull,
-    }
-
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -106,8 +99,6 @@ pub mod ffi {
         type Poly_Triangulation = crate::poly::Poly_Triangulation;
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
-
-        type BOPAlgo_GlueEnum;
     }
 
     impl UniquePtr<Handle_TopTools_HSequenceOfShape> {}

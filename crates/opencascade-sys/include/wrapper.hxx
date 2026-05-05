@@ -1,5 +1,4 @@
 #include "rust/cxx.h"
-#include <BOPAlgo_GlueEnum.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepGProp.hxx>
 #include <BRepGProp_Face.hxx>

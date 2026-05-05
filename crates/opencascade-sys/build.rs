@@ -67,6 +67,7 @@ fn main() {
         "src/b_rep_tools.rs",
         "src/bin_tools.rs",
         "src/bnd.rs",
+        "src/bop_algo.rs",
         "src/geom.rs",
         "src/geom2d.rs",
         "src/geom_abs.rs",
