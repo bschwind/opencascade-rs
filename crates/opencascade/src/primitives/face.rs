@@ -156,7 +156,7 @@ impl Face {
         let mut shape_map = opencascade_sys::top_tools::new_indexed_map_of_shape();
         opencascade_sys::top_tools::map_shapes(
             face_shape,
-            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX,
             shape_map.pin_mut(),
         );
 
@@ -191,7 +191,7 @@ impl Face {
         let mut vertex_map = opencascade_sys::top_tools::new_indexed_map_of_shape();
         opencascade_sys::top_tools::map_shapes(
             face_shape,
-            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX,
             vertex_map.pin_mut(),
         );
 
@@ -200,8 +200,8 @@ impl Face {
             opencascade_sys::top_tools::new_indexed_data_map_of_shape_list_of_shape();
         opencascade_sys::top_tools::map_shapes_and_ancestors(
             face_shape,
-            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX,
-            ffi::TopAbs_ShapeEnum::TopAbs_EDGE,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE,
             data_map.pin_mut(),
         );
 
@@ -281,7 +281,7 @@ impl Face {
     pub fn edges(&self) -> EdgeIterator {
         let explorer = opencascade_sys::top_exp::TopExp_Explorer_ctor(
             opencascade_sys::topo_ds::cast_face_to_shape(&self.inner),
-            ffi::TopAbs_ShapeEnum::TopAbs_EDGE,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE,
         );
 
         EdgeIterator { explorer }
@@ -553,14 +553,14 @@ pub enum FaceOrientation {
     External,
 }
 
-impl From<ffi::TopAbs_Orientation> for FaceOrientation {
-    fn from(orientation: ffi::TopAbs_Orientation) -> Self {
+impl From<opencascade_sys::top_abs::TopAbs_Orientation> for FaceOrientation {
+    fn from(orientation: opencascade_sys::top_abs::TopAbs_Orientation) -> Self {
         match orientation {
-            ffi::TopAbs_Orientation::TopAbs_FORWARD => Self::Forward,
-            ffi::TopAbs_Orientation::TopAbs_REVERSED => Self::Reversed,
-            ffi::TopAbs_Orientation::TopAbs_INTERNAL => Self::Internal,
-            ffi::TopAbs_Orientation::TopAbs_EXTERNAL => Self::External,
-            ffi::TopAbs_Orientation { repr } => {
+            opencascade_sys::top_abs::TopAbs_Orientation::TopAbs_FORWARD => Self::Forward,
+            opencascade_sys::top_abs::TopAbs_Orientation::TopAbs_REVERSED => Self::Reversed,
+            opencascade_sys::top_abs::TopAbs_Orientation::TopAbs_INTERNAL => Self::Internal,
+            opencascade_sys::top_abs::TopAbs_Orientation::TopAbs_EXTERNAL => Self::External,
+            opencascade_sys::top_abs::TopAbs_Orientation { repr } => {
                 panic!("TopAbs_Orientation had an unrepresentable value: {repr}")
             },
         }

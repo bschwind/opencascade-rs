@@ -32,7 +32,6 @@
 #include <StlAPI_Writer.hxx>
 #include <TColgp_Array1OfDir.hxx>
 #include <TColgp_HArray1OfPnt.hxx>
-#include <TopAbs_ShapeEnum.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Builder.hxx>

@@ -9,7 +9,7 @@ mod inner {
         type TopoDS_Edge = crate::topo_ds::TopoDS_Edge;
         type TopoDS_Vertex = crate::topo_ds::TopoDS_Vertex;
         type TopoDS_Wire = crate::topo_ds::TopoDS_Wire;
-        type TopAbs_ShapeEnum = crate::ffi::TopAbs_ShapeEnum;
+        type TopAbs_ShapeEnum = crate::top_abs::TopAbs_ShapeEnum;
 
         type TopExp_Explorer;
         #[cxx_name = "construct_unique"]

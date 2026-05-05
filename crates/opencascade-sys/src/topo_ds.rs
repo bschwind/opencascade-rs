@@ -6,8 +6,8 @@ mod inner {
         include!("opencascade-sys/include/topo_ds.hxx");
 
         type TopLoc_Location = crate::top_loc::TopLoc_Location;
-        type TopAbs_ShapeEnum = crate::ffi::TopAbs_ShapeEnum;
-        type TopAbs_Orientation = crate::ffi::TopAbs_Orientation;
+        type TopAbs_ShapeEnum = crate::top_abs::TopAbs_ShapeEnum;
+        type TopAbs_Orientation = crate::top_abs::TopAbs_Orientation;
         type TopTools_ListOfShape = crate::top_tools::TopTools_ListOfShape;
 
         type TopoDS_Vertex;

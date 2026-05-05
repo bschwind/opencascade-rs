@@ -734,7 +734,7 @@ impl Shape {
     pub fn edges(&self) -> EdgeIterator {
         let explorer = opencascade_sys::top_exp::TopExp_Explorer_ctor(
             &self.inner,
-            ffi::TopAbs_ShapeEnum::TopAbs_EDGE,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE,
         );
         EdgeIterator { explorer }
     }
@@ -742,7 +742,7 @@ impl Shape {
     pub fn faces(&self) -> FaceIterator {
         let explorer = opencascade_sys::top_exp::TopExp_Explorer_ctor(
             &self.inner,
-            ffi::TopAbs_ShapeEnum::TopAbs_FACE,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_FACE,
         );
         FaceIterator { explorer }
     }

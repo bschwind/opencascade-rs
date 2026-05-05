@@ -30,6 +30,7 @@ pub mod shape_upgrade;
 pub mod step_control;
 pub mod stl_api;
 pub mod t_col_gp;
+pub mod top_abs;
 pub mod top_exp;
 pub mod top_loc;
 pub mod top_tools;
@@ -37,28 +38,6 @@ pub mod topo_ds;
 
 #[cxx::bridge]
 pub mod ffi {
-    #[repr(u32)]
-    #[derive(Debug)]
-    pub enum TopAbs_ShapeEnum {
-        TopAbs_COMPOUND,
-        TopAbs_COMPSOLID,
-        TopAbs_SOLID,
-        TopAbs_SHELL,
-        TopAbs_FACE,
-        TopAbs_WIRE,
-        TopAbs_EDGE,
-        TopAbs_VERTEX,
-        TopAbs_SHAPE,
-    }
-
-    #[repr(u32)]
-    pub enum TopAbs_Orientation {
-        TopAbs_FORWARD,
-        TopAbs_REVERSED,
-        TopAbs_INTERNAL,
-        TopAbs_EXTERNAL,
-    }
-
     #[derive(Debug)]
     #[repr(u32)]
     pub enum IFSelect_ReturnStatus {
@@ -136,14 +115,10 @@ pub mod ffi {
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
 
-        type TopAbs_Orientation;
-
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
 
         type BOPAlgo_GlueEnum;
-
-        type TopAbs_ShapeEnum;
 
         type IFSelect_ReturnStatus;
 

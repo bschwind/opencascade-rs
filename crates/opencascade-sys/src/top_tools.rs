@@ -6,7 +6,7 @@ mod inner {
         include!("opencascade-sys/include/top_tools.hxx");
 
         type Handle_TopTools_HSequenceOfShape = crate::ffi::Handle_TopTools_HSequenceOfShape;
-        type TopAbs_ShapeEnum = crate::ffi::TopAbs_ShapeEnum;
+        type TopAbs_ShapeEnum = crate::top_abs::TopAbs_ShapeEnum;
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
 

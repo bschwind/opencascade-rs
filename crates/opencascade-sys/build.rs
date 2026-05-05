@@ -84,6 +84,7 @@ fn main() {
         "src/step_control.rs",
         "src/stl_api.rs",
         "src/t_col_gp.rs",
+        "src/top_abs.rs",
         "src/top_exp.rs",
         "src/top_loc.rs",
         "src/top_tools.rs",

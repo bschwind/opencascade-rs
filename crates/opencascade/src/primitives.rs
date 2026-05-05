@@ -1,6 +1,5 @@
 use cxx::UniquePtr;
 use glam::{DVec2, DVec3};
-use opencascade_sys::ffi;
 
 mod boolean_shape;
 mod compound;
@@ -60,19 +59,23 @@ pub enum ShapeType {
     Compound,
 }
 
-impl From<ffi::TopAbs_ShapeEnum> for ShapeType {
-    fn from(shape_enum: ffi::TopAbs_ShapeEnum) -> Self {
+impl From<opencascade_sys::top_abs::TopAbs_ShapeEnum> for ShapeType {
+    fn from(shape_enum: opencascade_sys::top_abs::TopAbs_ShapeEnum) -> Self {
         match shape_enum {
-            ffi::TopAbs_ShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
-            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
-            ffi::TopAbs_ShapeEnum::TopAbs_EDGE => ShapeType::Edge,
-            ffi::TopAbs_ShapeEnum::TopAbs_WIRE => ShapeType::Wire,
-            ffi::TopAbs_ShapeEnum::TopAbs_FACE => ShapeType::Face,
-            ffi::TopAbs_ShapeEnum::TopAbs_SHELL => ShapeType::Shell,
-            ffi::TopAbs_ShapeEnum::TopAbs_SOLID => ShapeType::Solid,
-            ffi::TopAbs_ShapeEnum::TopAbs_COMPSOLID => ShapeType::CompoundSolid,
-            ffi::TopAbs_ShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
-            ffi::TopAbs_ShapeEnum { repr } => panic!("Unexpected shape type: {repr}"),
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE => ShapeType::Edge,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_WIRE => ShapeType::Wire,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_FACE => ShapeType::Face,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_SHELL => ShapeType::Shell,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_SOLID => ShapeType::Solid,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_COMPSOLID => {
+                ShapeType::CompoundSolid
+            },
+            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
+            opencascade_sys::top_abs::TopAbs_ShapeEnum { repr } => {
+                panic!("Unexpected shape type: {repr}")
+            },
         }
     }
 }
