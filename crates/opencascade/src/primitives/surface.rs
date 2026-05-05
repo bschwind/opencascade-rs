@@ -1,10 +1,9 @@
 use crate::primitives::make_point;
 use cxx::UniquePtr;
 use glam::DVec3;
-use opencascade_sys::ffi;
 
 pub struct Surface {
-    pub(crate) inner: UniquePtr<ffi::Handle_Geom_Surface>,
+    pub(crate) inner: UniquePtr<opencascade_sys::geom::Handle_Geom_Surface>,
 }
 
 impl Surface {

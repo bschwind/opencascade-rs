@@ -37,3 +37,9 @@ new_HandleGeomPlane_from_HandleGeomSurface(const Handle_Geom_Surface &surface) {
   Handle_Geom_Plane plane_handle = opencascade::handle<Geom_Plane>::DownCast(surface);
   return std::unique_ptr<Handle_Geom_Plane>(new opencascade::handle<Geom_Plane>(plane_handle));
 }
+
+inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const Handle_Geom_Curve &curve, const Standard_Real U) {
+  return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
+}
+
+inline const Handle_Standard_Type &DynamicType(const Handle_Geom_Surface &surface) { return surface->DynamicType(); }

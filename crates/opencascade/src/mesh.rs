@@ -4,7 +4,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
-use opencascade_sys::{b_rep_mesh::BRepMesh_IncrementalMesh, ffi, top_loc::TopLoc_Location};
+use opencascade_sys::{b_rep_mesh::BRepMesh_IncrementalMesh, top_loc::TopLoc_Location};
 
 #[derive(Debug)]
 pub struct Mesh {
@@ -43,8 +43,9 @@ impl Mesher {
             let triangulation_handle =
                 opencascade_sys::b_rep::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
 
-            let triangulation = ffi::Handle_Poly_Triangulation_Get(&triangulation_handle)
-                .map_err(|_| Error::UntriangulatedFace)?;
+            let triangulation =
+                opencascade_sys::poly::Handle_Poly_Triangulation_Get(&triangulation_handle)
+                    .map_err(|_| Error::UntriangulatedFace)?;
 
             let index_offset = vertices.len();
             let face_point_count = triangulation.NbNodes();

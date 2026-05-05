@@ -9,6 +9,14 @@ mod inner {
         type gp_Dir = crate::gp::gp_Dir;
         type gp_Pnt2d = crate::gp::gp_Pnt2d;
 
+        // Handles
+        type Handle_TColgp_HArray1OfPnt;
+
+        pub fn new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(
+            array: UniquePtr<TColgp_HArray1OfPnt>,
+        ) -> UniquePtr<Handle_TColgp_HArray1OfPnt>;
+        // End Handles
+
         type TColgp_Array1OfDir;
         #[cxx_name = "construct_unique"]
         pub fn TColgp_Array1OfDir_ctor(

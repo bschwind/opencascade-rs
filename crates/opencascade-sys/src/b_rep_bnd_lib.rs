@@ -6,7 +6,7 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/b_rep_bnd_lib.hxx");
 
-        type gp_Pnt = crate::ffi::gp_Pnt;
+        type gp_Pnt = crate::gp::gp_Pnt;
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type Bnd_Box = crate::bnd::Bnd_Box;
 

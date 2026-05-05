@@ -79,7 +79,6 @@ fn main() {
         "src/if_select.rs",
         "src/iges_control.rs",
         "src/law.rs",
-        "src/lib.rs",
         "src/message.rs",
         "src/poly.rs",
         "src/shape_analysis.rs",
@@ -112,15 +111,13 @@ fn main() {
         .define("_USE_MATH_DEFINES", "TRUE")
         .include(occt_config.include_dir)
         .include("include")
-        .compile("wrapper");
+        .compile("rust-occt");
 
-    println!("cargo:rustc-link-lib=static=wrapper");
+    println!("cargo:rustc-link-lib=static=rust-occt");
 
     for bridge in rust_bridges {
         println!("cargo:rerun-if-changed={bridge}");
     }
-
-    println!("cargo:rerun-if-changed=include/wrapper.hxx");
 }
 
 struct OcctConfig {

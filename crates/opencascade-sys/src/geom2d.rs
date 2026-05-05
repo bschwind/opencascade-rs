@@ -7,9 +7,17 @@ mod inner {
 
         type gp_Ax2d = crate::gp::gp_Ax2d;
         type gp_Pnt2d = crate::gp::gp_Pnt2d;
-        type Handle_Geom2d_Ellipse = crate::ffi::Handle_Geom2d_Ellipse;
-        type Handle_Geom2d_Curve = crate::ffi::Handle_Geom2d_Curve;
-        type Handle_Geom2d_TrimmedCurve = crate::ffi::Handle_Geom2d_TrimmedCurve;
+
+        // Handles
+        type Handle_Geom2d_Curve;
+        pub fn IsNull(self: &Handle_Geom2d_Curve) -> bool;
+
+        type Handle_Geom2d_Ellipse;
+        pub fn IsNull(self: &Handle_Geom2d_Ellipse) -> bool;
+
+        type Handle_Geom2d_TrimmedCurve;
+        pub fn IsNull(self: &Handle_Geom2d_TrimmedCurve) -> bool;
+        // End Handles
 
         type Geom2d_Ellipse;
         pub fn Geom2d_Ellipse_ctor(
@@ -33,4 +41,8 @@ mod inner {
             trimmed_curve: &Handle_Geom2d_TrimmedCurve,
         ) -> UniquePtr<Handle_Geom2d_Curve>;
     }
+
+    impl UniquePtr<Handle_Geom2d_Ellipse> {}
+    impl UniquePtr<Handle_Geom2d_Curve> {}
+    impl UniquePtr<Handle_Geom2d_TrimmedCurve> {}
 }

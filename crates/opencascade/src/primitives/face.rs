@@ -11,12 +11,12 @@ use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys::{
     b_rep_g_prop::{self, BRepGProp, BRepGProp_SurfaceProperties},
-    b_rep_tools, ffi,
+    b_rep_tools,
     g_prop::GProp_GProps,
 };
 
 pub struct Face {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Face>,
+    pub(crate) inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Face>,
 }
 
 impl AsRef<Face> for Face {
@@ -26,7 +26,7 @@ impl AsRef<Face> for Face {
 }
 
 impl Face {
-    pub(crate) fn from_face(face: &ffi::TopoDS_Face) -> Self {
+    pub(crate) fn from_face(face: &opencascade_sys::topo_ds::TopoDS_Face) -> Self {
         let inner = opencascade_sys::topo_ds::TopoDS_Face_to_owned(face);
 
         Self { inner }

@@ -9,12 +9,12 @@ use crate::{
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec3};
 use opencascade_sys::{
-    ffi, shape_upgrade::ShapeUpgrade_UnifySameDomain, stl_api, top_loc::TopLoc_Location,
+    shape_upgrade::ShapeUpgrade_UnifySameDomain, stl_api, top_loc::TopLoc_Location,
 };
 use std::path::Path;
 
 pub struct Shape {
-    pub(crate) inner: UniquePtr<ffi::TopoDS_Shape>,
+    pub(crate) inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Shape>,
 }
 
 impl AsRef<Shape> for Shape {
@@ -280,7 +280,7 @@ impl TorusBuilder {
 }
 
 impl Shape {
-    pub(crate) fn from_shape(shape: &ffi::TopoDS_Shape) -> Self {
+    pub(crate) fn from_shape(shape: &opencascade_sys::topo_ds::TopoDS_Shape) -> Self {
         let inner = opencascade_sys::topo_ds::TopoDS_Shape_to_owned(shape);
 
         Self { inner }

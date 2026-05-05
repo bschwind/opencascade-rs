@@ -11,7 +11,7 @@ mod inner {
         type GeomAbs_JoinType = crate::geom_abs::GeomAbs_JoinType;
         type TopTools_ListOfShape = crate::top_tools::TopTools_ListOfShape;
         type Message_ProgressRange = crate::message::Message_ProgressRange;
-        type Handle_Law_Function = crate::ffi::Handle_Law_Function;
+        type Handle_Law_Function = crate::law::Handle_Law_Function;
 
         type BRepOffsetAPI_MakeOffset;
         #[cxx_name = "construct_unique"]

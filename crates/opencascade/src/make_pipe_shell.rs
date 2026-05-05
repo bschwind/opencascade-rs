@@ -1,11 +1,10 @@
 use cxx::UniquePtr;
-use opencascade_sys::ffi;
 
 #[must_use]
 pub(crate) fn make_pipe_shell_with_law_function(
     profile: &opencascade_sys::topo_ds::TopoDS_Wire,
     spine: &opencascade_sys::topo_ds::TopoDS_Wire,
-    law_function: &ffi::Handle_Law_Function,
+    law_function: &opencascade_sys::law::Handle_Law_Function,
 ) -> UniquePtr<opencascade_sys::b_rep_offset_api::BRepOffsetAPI_MakePipeShell> {
     let mut make_pipe_shell =
         opencascade_sys::b_rep_offset_api::BRepOffsetAPI_MakePipeShell_ctor(spine);

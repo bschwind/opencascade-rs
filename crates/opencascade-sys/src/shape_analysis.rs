@@ -6,7 +6,7 @@ mod inner {
         include!("opencascade-sys/include/shape_analysis.hxx");
 
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
-        type Handle_TopTools_HSequenceOfShape = crate::ffi::Handle_TopTools_HSequenceOfShape;
+        type Handle_TopTools_HSequenceOfShape = crate::top_tools::Handle_TopTools_HSequenceOfShape;
 
         type ShapeAnalysis_FreeBounds;
 

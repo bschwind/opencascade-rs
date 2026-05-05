@@ -1,7 +1,7 @@
 use crate::primitives::{make_axis_2, make_point};
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::{ffi, gc_pnts::GCPnts_TangentialDeflection};
+use opencascade_sys::gc_pnts::GCPnts_TangentialDeflection;
 
 use super::make_vec;
 
@@ -112,7 +112,8 @@ impl Edge {
         for (index, point) in points.into_iter().enumerate() {
             array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
         }
-        let array_handle = ffi::new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(array);
+        let array_handle =
+            opencascade_sys::t_col_gp::new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(array);
 
         let periodic = false;
         let tolerance = 1.0e-7;

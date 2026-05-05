@@ -5,8 +5,12 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/law.hxx");
 
-        type Handle_Law_Function = crate::ffi::Handle_Law_Function;
         type TColgp_Array1OfPnt2d = crate::t_col_gp::TColgp_Array1OfPnt2d;
+
+        // Handles
+        type Handle_Law_Function;
+        pub fn IsNull(self: &Handle_Law_Function) -> bool;
+        // End Handles
 
         type Law_Function;
         pub fn Law_Function_to_handle(
@@ -21,4 +25,6 @@ mod inner {
         ) -> UniquePtr<Law_Function>;
         pub fn Set(self: Pin<&mut Law_Interpol>, array: &TColgp_Array1OfPnt2d, periodic: bool);
     }
+
+    impl UniquePtr<Handle_Law_Function> {}
 }

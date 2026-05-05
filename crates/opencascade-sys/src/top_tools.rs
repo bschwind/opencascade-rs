@@ -5,10 +5,14 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/top_tools.hxx");
 
-        type Handle_TopTools_HSequenceOfShape = crate::ffi::Handle_TopTools_HSequenceOfShape;
         type TopAbs_ShapeEnum = crate::top_abs::TopAbs_ShapeEnum;
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
+
+        // Handles
+        type Handle_TopTools_HSequenceOfShape;
+        pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
+        // End Handles
 
         type TopTools_ListOfShape;
         #[cxx_name = "construct_unique"]
@@ -83,4 +87,6 @@ mod inner {
             handle: &Handle_TopTools_HSequenceOfShape,
         ) -> Result<&TopTools_HSequenceOfShape>;
     }
+
+    impl UniquePtr<Handle_TopTools_HSequenceOfShape> {}
 }

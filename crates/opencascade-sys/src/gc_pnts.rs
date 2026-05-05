@@ -6,7 +6,7 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/gc_pnts.hxx");
 
-        type gp_Pnt = crate::ffi::gp_Pnt;
+        type gp_Pnt = crate::gp::gp_Pnt;
         type BRepAdaptor_Curve = crate::b_rep_adaptor::BRepAdaptor_Curve;
 
         type GCPnts_TangentialDeflection;

@@ -6,7 +6,7 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/bnd.hxx");
 
-        type gp_Pnt = crate::ffi::gp_Pnt;
+        type gp_Pnt = crate::gp::gp_Pnt;
 
         // Describes a bounding box in 3D space.
         type Bnd_Box;

@@ -6,13 +6,13 @@ mod inner {
         include!("opencascade-sys/include/b_rep.hxx");
 
         type TopoDS_Builder = crate::topo_ds::TopoDS_Builder;
-        type gp_Pnt = crate::ffi::gp_Pnt;
+        type gp_Pnt = crate::gp::gp_Pnt;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
         type TopoDS_Edge = crate::topo_ds::TopoDS_Edge;
         type TopoDS_Vertex = crate::topo_ds::TopoDS_Vertex;
-        type Handle_Geom_Surface = crate::ffi::Handle_Geom_Surface;
-        type Handle_Geom_Curve = crate::ffi::Handle_Geom_Curve;
-        type Handle_Poly_Triangulation = crate::ffi::Handle_Poly_Triangulation;
+        type Handle_Geom_Surface = crate::geom::Handle_Geom_Surface;
+        type Handle_Geom_Curve = crate::geom::Handle_Geom_Curve;
+        type Handle_Poly_Triangulation = crate::poly::Handle_Poly_Triangulation;
         type TopLoc_Location = crate::top_loc::TopLoc_Location;
 
         type BRep_Builder;

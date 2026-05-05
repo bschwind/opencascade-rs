@@ -7,9 +7,9 @@ mod inner {
 
         type gp_Pnt = crate::gp::gp_Pnt;
         type gp_Vec = crate::gp::gp_Vec;
-        type Handle_TColgp_HArray1OfPnt = crate::ffi::Handle_TColgp_HArray1OfPnt;
-        type Handle_Geom_BSplineCurve = crate::ffi::Handle_Geom_BSplineCurve;
-        type Handle_Geom_Surface = crate::ffi::Handle_Geom_Surface;
+        type Handle_TColgp_HArray1OfPnt = crate::t_col_gp::Handle_TColgp_HArray1OfPnt;
+        type Handle_Geom_BSplineCurve = crate::geom::Handle_Geom_BSplineCurve;
+        type Handle_Geom_Surface = crate::geom::Handle_Geom_Surface;
 
         type GeomAPI_Interpolate;
         #[cxx_name = "construct_unique"]

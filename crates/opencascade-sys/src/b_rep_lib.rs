@@ -7,7 +7,7 @@ mod inner {
 
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
-        type Handle_Poly_Triangulation = crate::ffi::Handle_Poly_Triangulation;
+        type Handle_Poly_Triangulation = crate::poly::Handle_Poly_Triangulation;
 
         type BRepLib;
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;

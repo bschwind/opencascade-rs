@@ -8,9 +8,17 @@ mod inner {
 
         type gp_Pnt = crate::gp::gp_Pnt;
         type gp_Pnt2d = crate::gp::gp_Pnt2d;
-        type Handle_Poly_Triangulation = crate::ffi::Handle_Poly_Triangulation;
         type gp_Dir = crate::gp::gp_Dir;
         type BRepAdaptor_Curve = crate::b_rep_adaptor::BRepAdaptor_Curve;
+
+        // Handles
+        type Handle_Poly_Triangulation;
+        pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
+        #[cxx_name = "handle_try_deref"]
+        pub fn Handle_Poly_Triangulation_Get(
+            handle: &Handle_Poly_Triangulation,
+        ) -> Result<&Poly_Triangulation>;
+        // End Handles
 
         type Poly_Triangulation;
         #[cxx_name = "construct_unique"]
@@ -55,6 +63,8 @@ mod inner {
             triangulation: UniquePtr<Poly_Triangulation>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
     }
+
+    impl UniquePtr<Handle_Poly_Triangulation> {}
 }
 
 impl Poly_Triangulation {
