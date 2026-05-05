@@ -59,6 +59,7 @@ fn main() {
         "src/b_rep_feat.rs",
         "src/b_rep_fillet_api.rs",
         "src/b_rep_g_prop.rs",
+        "src/b_rep_int_curve_surface.rs",
         "src/b_rep_mesh.rs",
         "src/b_rep_offset_api.rs",
         "src/b_rep_prim_api.rs",

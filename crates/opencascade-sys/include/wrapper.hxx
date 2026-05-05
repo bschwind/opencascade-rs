@@ -3,7 +3,6 @@
 #include <BRepBndLib.hxx>
 #include <BRepGProp.hxx>
 #include <BRepGProp_Face.hxx>
-#include <BRepIntCurveSurface_Inter.hxx>
 #include <BRepLib.hxx>
 #include <BRepLib_ToolTriangulatedShape.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
@@ -87,15 +86,6 @@ inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const Handle_Geom_Curve &cu
 
 // BRepLib
 inline bool BRepLibBuildCurves3d(const TopoDS_Shape &shape) { return BRepLib::BuildCurves3d(shape); }
-
-// Transforms
-inline std::unique_ptr<TopoDS_Face> BRepIntCurveSurface_Inter_face(const BRepIntCurveSurface_Inter &intersector) {
-  return std::unique_ptr<TopoDS_Face>(new TopoDS_Face(intersector.Face()));
-}
-
-inline std::unique_ptr<gp_Pnt> BRepIntCurveSurface_Inter_point(const BRepIntCurveSurface_Inter &intersector) {
-  return std::unique_ptr<gp_Pnt>(new gp_Pnt(intersector.Pnt()));
-}
 
 inline void compute_normals(const TopoDS_Face &face, const Handle(Poly_Triangulation) & triangulation) {
   BRepLib_ToolTriangulatedShape::ComputeNormals(face, triangulation);

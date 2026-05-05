@@ -6,6 +6,7 @@ pub mod b_rep_builder_api;
 pub mod b_rep_feat;
 pub mod b_rep_fillet_api;
 pub mod b_rep_g_prop;
+pub mod b_rep_int_curve_surface;
 pub mod b_rep_mesh;
 pub mod b_rep_offset_api;
 pub mod b_rep_prim_api;
@@ -170,28 +171,6 @@ pub mod ffi {
         type BOPAlgo_GlueEnum;
 
         type TopAbs_ShapeEnum;
-
-        type BRepIntCurveSurface_Inter;
-
-        #[cxx_name = "construct_unique"]
-        pub fn BRepIntCurveSurface_Inter_ctor() -> UniquePtr<BRepIntCurveSurface_Inter>;
-        pub fn Init(
-            self: Pin<&mut BRepIntCurveSurface_Inter>,
-            shape: &TopoDS_Shape,
-            line: &gp_Lin,
-            tolerance: f64,
-        );
-        pub fn More(self: &BRepIntCurveSurface_Inter) -> bool;
-        pub fn Next(self: Pin<&mut BRepIntCurveSurface_Inter>);
-        pub fn BRepIntCurveSurface_Inter_face(
-            intersector: &BRepIntCurveSurface_Inter,
-        ) -> UniquePtr<TopoDS_Face>;
-        pub fn BRepIntCurveSurface_Inter_point(
-            intersector: &BRepIntCurveSurface_Inter,
-        ) -> UniquePtr<gp_Pnt>;
-        pub fn U(self: &BRepIntCurveSurface_Inter) -> f64;
-        pub fn V(self: &BRepIntCurveSurface_Inter) -> f64;
-        pub fn W(self: &BRepIntCurveSurface_Inter) -> f64;
 
         type IFSelect_ReturnStatus;
 
