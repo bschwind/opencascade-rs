@@ -9,8 +9,8 @@ mod inner {
 
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
-        type gp_Pnt = crate::ffi::gp_Pnt;
-        type gp_Vec = crate::ffi::gp_Vec;
+        type gp_Pnt = crate::gp::gp_Pnt;
+        type gp_Vec = crate::gp::gp_Vec;
         type GProp_GProps = crate::g_prop::GProp_GProps;
 
         fn BRepGProp_LinearProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);

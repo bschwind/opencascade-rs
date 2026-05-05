@@ -7,8 +7,8 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/g_prop.hxx");
 
-        type gp_Ax1 = crate::ffi::gp_Ax1;
-        type gp_Pnt = crate::ffi::gp_Pnt;
+        type gp_Ax1 = crate::gp::gp_Ax1;
+        type gp_Pnt = crate::gp::gp_Pnt;
 
         type GProp_GProps;
         #[cxx_name = "construct_unique"]

@@ -7,7 +7,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::{b_rep_tools, ffi, top_loc::TopLoc_Location};
+use opencascade_sys::{b_rep_tools, top_loc::TopLoc_Location};
 use std::iter::once;
 
 pub struct Wire {

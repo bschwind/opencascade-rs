@@ -18,19 +18,23 @@ pub enum EdgeType {
     OtherCurve,
 }
 
-impl From<ffi::GeomAbs_CurveType> for EdgeType {
-    fn from(curve_type: ffi::GeomAbs_CurveType) -> Self {
+impl From<opencascade_sys::geom_abs::GeomAbs_CurveType> for EdgeType {
+    fn from(curve_type: opencascade_sys::geom_abs::GeomAbs_CurveType) -> Self {
         match curve_type {
-            ffi::GeomAbs_CurveType::GeomAbs_Line => Self::Line,
-            ffi::GeomAbs_CurveType::GeomAbs_Circle => Self::Circle,
-            ffi::GeomAbs_CurveType::GeomAbs_Ellipse => Self::Ellipse,
-            ffi::GeomAbs_CurveType::GeomAbs_Hyperbola => Self::Hyperbola,
-            ffi::GeomAbs_CurveType::GeomAbs_Parabola => Self::Parabola,
-            ffi::GeomAbs_CurveType::GeomAbs_BezierCurve => Self::BezierCurve,
-            ffi::GeomAbs_CurveType::GeomAbs_BSplineCurve => Self::BSplineCurve,
-            ffi::GeomAbs_CurveType::GeomAbs_OffsetCurve => Self::OffsetCurve,
-            ffi::GeomAbs_CurveType::GeomAbs_OtherCurve => Self::OtherCurve,
-            ffi::GeomAbs_CurveType { repr } => panic!("Unexpected curve type: {repr}"),
+            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Line => Self::Line,
+            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Circle => Self::Circle,
+            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Ellipse => Self::Ellipse,
+            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Hyperbola => Self::Hyperbola,
+            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Parabola => Self::Parabola,
+            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_BezierCurve => Self::BezierCurve,
+            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_BSplineCurve => {
+                Self::BSplineCurve
+            },
+            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_OffsetCurve => Self::OffsetCurve,
+            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_OtherCurve => Self::OtherCurve,
+            opencascade_sys::geom_abs::GeomAbs_CurveType { repr } => {
+                panic!("Unexpected curve type: {repr}")
+            },
         }
     }
 }

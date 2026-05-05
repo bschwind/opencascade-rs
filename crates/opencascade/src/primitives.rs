@@ -87,27 +87,27 @@ impl<T: Into<Shape>> IntoShape for T {
     }
 }
 
-pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
+pub fn make_point(p: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Pnt> {
     opencascade_sys::gp::new_point(p.x, p.y, p.z)
 }
 
-pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::gp_Pnt2d> {
+pub fn make_point2d(p: DVec2) -> UniquePtr<opencascade_sys::gp::gp_Pnt2d> {
     opencascade_sys::gp::new_point_2d(p.x, p.y)
 }
 
-fn make_dir(p: DVec3) -> UniquePtr<ffi::gp_Dir> {
+fn make_dir(p: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Dir> {
     opencascade_sys::gp::gp_Dir_ctor(p.x, p.y, p.z)
 }
 
-fn make_vec(vec: DVec3) -> UniquePtr<ffi::gp_Vec> {
+fn make_vec(vec: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Vec> {
     opencascade_sys::gp::new_vec(vec.x, vec.y, vec.z)
 }
 
-fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax1> {
+fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Ax1> {
     opencascade_sys::gp::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
 }
 
-pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
+pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Ax2> {
     opencascade_sys::gp::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
 }
 
@@ -243,23 +243,27 @@ pub enum JoinType {
     Intersection,
 }
 
-impl From<ffi::GeomAbs_JoinType> for JoinType {
-    fn from(value: ffi::GeomAbs_JoinType) -> Self {
+impl From<opencascade_sys::geom_abs::GeomAbs_JoinType> for JoinType {
+    fn from(value: opencascade_sys::geom_abs::GeomAbs_JoinType) -> Self {
         match value {
-            ffi::GeomAbs_JoinType::GeomAbs_Arc => Self::Arc,
-            //ffi::GeomAbs_JoinType::GeomAbs_Tangent => Self::Tangent,
-            ffi::GeomAbs_JoinType::GeomAbs_Intersection => Self::Intersection,
-            ffi::GeomAbs_JoinType { repr } => panic!("Unexpected join type: {repr}"),
+            opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Arc => Self::Arc,
+            //opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Tangent => Self::Tangent,
+            opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Intersection => Self::Intersection,
+            opencascade_sys::geom_abs::GeomAbs_JoinType { repr } => {
+                panic!("Unexpected join type: {repr}")
+            },
         }
     }
 }
 
-impl From<JoinType> for ffi::GeomAbs_JoinType {
+impl From<JoinType> for opencascade_sys::geom_abs::GeomAbs_JoinType {
     fn from(value: JoinType) -> Self {
         match value {
-            JoinType::Arc => ffi::GeomAbs_JoinType::GeomAbs_Arc,
-            //JoinType::Tangent => ffi::GeomAbs_JoinType::GeomAbs_Tangent,
-            JoinType::Intersection => ffi::GeomAbs_JoinType::GeomAbs_Intersection,
+            JoinType::Arc => opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Arc,
+            //JoinType::Tangent => opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Tangent,
+            JoinType::Intersection => {
+                opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Intersection
+            },
         }
     }
 }

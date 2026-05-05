@@ -6,7 +6,7 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/top_loc.hxx");
 
-        type gp_Trsf = crate::ffi::gp_Trsf;
+        type gp_Trsf = crate::gp::gp_Trsf;
 
         type TopLoc_Location;
         #[cxx_name = "construct_unique"]

@@ -134,31 +134,9 @@ pub mod ffi {
         ) -> Result<&Poly_Triangulation>;
 
         // Types from sub-modules
-        type TColgp_Array1OfPnt2d = crate::t_col_gp::TColgp_Array1OfPnt2d;
-        type TColgp_Array2OfPnt = crate::t_col_gp::TColgp_Array2OfPnt;
         type TColgp_HArray1OfPnt = crate::t_col_gp::TColgp_HArray1OfPnt;
-        type TopTools_ListOfShape = crate::top_tools::TopTools_ListOfShape;
-        type TopTools_IndexedMapOfShape = crate::top_tools::TopTools_IndexedMapOfShape;
-        type TopTools_IndexedDataMapOfShapeListOfShape =
-            crate::top_tools::TopTools_IndexedDataMapOfShapeListOfShape;
         type TopTools_HSequenceOfShape = crate::top_tools::TopTools_HSequenceOfShape;
-
         type gp_Pnt = crate::gp::gp_Pnt;
-        type gp_Pnt2d = crate::gp::gp_Pnt2d;
-        type gp_Vec = crate::gp::gp_Vec;
-        type gp_Dir = crate::gp::gp_Dir;
-        type gp_Ax1 = crate::gp::gp_Ax1;
-        type gp_Ax2 = crate::gp::gp_Ax2;
-        type gp_Ax3 = crate::gp::gp_Ax3;
-        type gp_Dir2d = crate::gp::gp_Dir2d;
-        type gp_Ax2d = crate::gp::gp_Ax2d;
-        type gp_Trsf = crate::gp::gp_Trsf;
-        type gp_GTrsf = crate::gp::gp_GTrsf;
-        type gp_Circ = crate::gp::gp_Circ;
-        type gp_Lin = crate::gp::gp_Lin;
-        type GeomAbs_CurveType = crate::geom_abs::GeomAbs_CurveType;
-        type GeomAbs_JoinType = crate::geom_abs::GeomAbs_JoinType;
-        type TopLoc_Location = crate::top_loc::TopLoc_Location;
         type Poly_Triangulation = crate::poly::Poly_Triangulation;
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;

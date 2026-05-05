@@ -13,7 +13,7 @@ mod inner {
         type Handle_Geom_Surface = crate::ffi::Handle_Geom_Surface;
         type Handle_Geom_Curve = crate::ffi::Handle_Geom_Curve;
         type Handle_Poly_Triangulation = crate::ffi::Handle_Poly_Triangulation;
-        type TopLoc_Location = crate::ffi::TopLoc_Location;
+        type TopLoc_Location = crate::top_loc::TopLoc_Location;
 
         type BRep_Builder;
         #[cxx_name = "construct_unique"]

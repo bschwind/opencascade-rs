@@ -1,7 +1,5 @@
-use cxx::UniquePtr;
-use opencascade_sys::ffi;
-
 use crate::primitives::Wire;
+use cxx::UniquePtr;
 
 pub struct Shell {
     pub(crate) inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Shell>,

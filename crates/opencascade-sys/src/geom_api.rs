@@ -5,8 +5,8 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/geom_api.hxx");
 
-        type gp_Pnt = crate::ffi::gp_Pnt;
-        type gp_Vec = crate::ffi::gp_Vec;
+        type gp_Pnt = crate::gp::gp_Pnt;
+        type gp_Vec = crate::gp::gp_Vec;
         type Handle_TColgp_HArray1OfPnt = crate::ffi::Handle_TColgp_HArray1OfPnt;
         type Handle_Geom_BSplineCurve = crate::ffi::Handle_Geom_BSplineCurve;
         type Handle_Geom_Surface = crate::ffi::Handle_Geom_Surface;
