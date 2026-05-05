@@ -4,7 +4,7 @@ use crate::{
 };
 use cxx::UniquePtr;
 use glam::{dvec2, dvec3, DVec2, DVec3};
-use opencascade_sys::{b_rep_mesh::BRepMesh_IncrementalMesh, top_loc::TopLoc_Location};
+use opencascade_sys as ffi;
 
 #[derive(Debug)]
 pub struct Mesh {
@@ -15,12 +15,13 @@ pub struct Mesh {
 }
 
 pub struct Mesher {
-    pub(crate) inner: UniquePtr<BRepMesh_IncrementalMesh>,
+    pub(crate) inner: UniquePtr<ffi::b_rep_mesh::BRepMesh_IncrementalMesh>,
 }
 
 impl Mesher {
     pub fn try_new(shape: &Shape, triangulation_tolerance: f64) -> Result<Self, Error> {
-        let inner = BRepMesh_IncrementalMesh::new(&shape.inner, triangulation_tolerance);
+        let inner =
+            ffi::b_rep_mesh::BRepMesh_IncrementalMesh::new(&shape.inner, triangulation_tolerance);
 
         if inner.IsDone() {
             Ok(Self { inner })
@@ -38,14 +39,13 @@ impl Mesher {
         let triangulated_shape = Shape::from_shape(self.inner.pin_mut().Shape());
 
         for face in triangulated_shape.faces() {
-            let mut location = TopLoc_Location::new();
+            let mut location = ffi::top_loc::TopLoc_Location::new();
 
             let triangulation_handle =
-                opencascade_sys::b_rep::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
+                ffi::b_rep::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
 
-            let triangulation =
-                opencascade_sys::poly::Handle_Poly_Triangulation_Get(&triangulation_handle)
-                    .map_err(|_| Error::UntriangulatedFace)?;
+            let triangulation = ffi::poly::Handle_Poly_Triangulation_Get(&triangulation_handle)
+                .map_err(|_| Error::UntriangulatedFace)?;
 
             let index_offset = vertices.len();
             let face_point_count = triangulation.NbNodes();
@@ -87,10 +87,9 @@ impl Mesher {
 
             // Add in the normals.
             // TODO(bschwind) - Use `location` to transform the normals.
-            let normal_array =
-                opencascade_sys::t_col_gp::TColgp_Array1OfDir_ctor(0, face_point_count);
+            let normal_array = ffi::t_col_gp::TColgp_Array1OfDir_ctor(0, face_point_count);
 
-            opencascade_sys::b_rep_lib::compute_normals(&face.inner, &triangulation_handle);
+            ffi::b_rep_lib::compute_normals(&face.inner, &triangulation_handle);
 
             // TODO(bschwind) - Why do we start at 1 here?
             for i in 1..(normal_array.Length() as usize) {

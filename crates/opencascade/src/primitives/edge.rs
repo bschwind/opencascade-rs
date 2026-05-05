@@ -1,9 +1,8 @@
+use super::make_vec;
 use crate::primitives::{make_axis_2, make_point};
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
-use opencascade_sys::gc_pnts::GCPnts_TangentialDeflection;
-
-use super::make_vec;
+use opencascade_sys as ffi;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum EdgeType {
@@ -18,21 +17,19 @@ pub enum EdgeType {
     OtherCurve,
 }
 
-impl From<opencascade_sys::geom_abs::GeomAbs_CurveType> for EdgeType {
-    fn from(curve_type: opencascade_sys::geom_abs::GeomAbs_CurveType) -> Self {
+impl From<ffi::geom_abs::GeomAbs_CurveType> for EdgeType {
+    fn from(curve_type: ffi::geom_abs::GeomAbs_CurveType) -> Self {
         match curve_type {
-            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Line => Self::Line,
-            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Circle => Self::Circle,
-            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Ellipse => Self::Ellipse,
-            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Hyperbola => Self::Hyperbola,
-            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_Parabola => Self::Parabola,
-            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_BezierCurve => Self::BezierCurve,
-            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_BSplineCurve => {
-                Self::BSplineCurve
-            },
-            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_OffsetCurve => Self::OffsetCurve,
-            opencascade_sys::geom_abs::GeomAbs_CurveType::GeomAbs_OtherCurve => Self::OtherCurve,
-            opencascade_sys::geom_abs::GeomAbs_CurveType { repr } => {
+            ffi::geom_abs::GeomAbs_CurveType::GeomAbs_Line => Self::Line,
+            ffi::geom_abs::GeomAbs_CurveType::GeomAbs_Circle => Self::Circle,
+            ffi::geom_abs::GeomAbs_CurveType::GeomAbs_Ellipse => Self::Ellipse,
+            ffi::geom_abs::GeomAbs_CurveType::GeomAbs_Hyperbola => Self::Hyperbola,
+            ffi::geom_abs::GeomAbs_CurveType::GeomAbs_Parabola => Self::Parabola,
+            ffi::geom_abs::GeomAbs_CurveType::GeomAbs_BezierCurve => Self::BezierCurve,
+            ffi::geom_abs::GeomAbs_CurveType::GeomAbs_BSplineCurve => Self::BSplineCurve,
+            ffi::geom_abs::GeomAbs_CurveType::GeomAbs_OffsetCurve => Self::OffsetCurve,
+            ffi::geom_abs::GeomAbs_CurveType::GeomAbs_OtherCurve => Self::OtherCurve,
+            ffi::geom_abs::GeomAbs_CurveType { repr } => {
                 panic!("Unexpected curve type: {repr}")
             },
         }
@@ -40,7 +37,7 @@ impl From<opencascade_sys::geom_abs::GeomAbs_CurveType> for EdgeType {
 }
 
 pub struct Edge {
-    pub(crate) inner: UniquePtr<opencascade_sys::topo_ds::TopoDS_Edge>,
+    pub(crate) inner: UniquePtr<ffi::topo_ds::TopoDS_Edge>,
 }
 
 impl AsRef<Edge> for Edge {
@@ -50,20 +47,20 @@ impl AsRef<Edge> for Edge {
 }
 
 impl Edge {
-    pub(crate) fn from_edge(edge: &opencascade_sys::topo_ds::TopoDS_Edge) -> Self {
-        let inner = opencascade_sys::topo_ds::TopoDS_Edge_to_owned(edge);
+    pub(crate) fn from_edge(edge: &ffi::topo_ds::TopoDS_Edge) -> Self {
+        let inner = ffi::topo_ds::TopoDS_Edge_to_owned(edge);
 
         Self { inner }
     }
 
     fn from_make_edge(
-        mut make_edge: UniquePtr<opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge>,
+        mut make_edge: UniquePtr<ffi::b_rep_builder_api::BRepBuilderAPI_MakeEdge>,
     ) -> Self {
         Self::from_edge(make_edge.pin_mut().Edge())
     }
 
     pub fn segment(p1: DVec3, p2: DVec3) -> Self {
-        let make_edge = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt(
+        let make_edge = ffi::b_rep_builder_api::BRepBuilderAPI_MakeEdge_gp_Pnt_gp_Pnt(
             &make_point(p1),
             &make_point(p2),
         );
@@ -73,20 +70,18 @@ impl Edge {
 
     pub fn bezier(points: impl IntoIterator<Item = DVec3>) -> Self {
         let points: Vec<_> = points.into_iter().collect();
-        let mut array = opencascade_sys::t_col_gp::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
+        let mut array = ffi::t_col_gp::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
         for (index, point) in points.into_iter().enumerate() {
             array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
         }
 
-        let bezier = opencascade_sys::geom::Geom_BezierCurve_ctor_points(&array);
-        let bezier_handle = opencascade_sys::geom::Geom_BezierCurve_to_handle(bezier);
+        let bezier = ffi::geom::Geom_BezierCurve_ctor_points(&array);
+        let bezier_handle = ffi::geom::Geom_BezierCurve_to_handle(bezier);
         let curve_handle =
-            opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_BezierCurve(&bezier_handle);
+            ffi::geom::new_HandleGeomCurve_from_HandleGeom_BezierCurve(&bezier_handle);
 
         let mut make_edge =
-            opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
-                &curve_handle,
-            );
+            ffi::b_rep_builder_api::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
         let edge = make_edge.pin_mut().Edge();
         Self::from_edge(edge)
     }
@@ -94,9 +89,8 @@ impl Edge {
     pub fn circle(center: DVec3, normal: DVec3, radius: f64) -> Self {
         let axis = make_axis_2(center, normal);
 
-        let make_circle = opencascade_sys::gp::gp_Circ_ctor(&axis, radius);
-        let make_edge =
-            opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_circle(&make_circle);
+        let make_circle = ffi::gp::gp_Circ_ctor(&axis, radius);
+        let make_edge = ffi::b_rep_builder_api::BRepBuilderAPI_MakeEdge_circle(&make_circle);
 
         Self::from_make_edge(make_edge)
     }
@@ -108,45 +102,42 @@ impl Edge {
         tangents: Option<(DVec3, DVec3)>,
     ) -> Self {
         let points: Vec<_> = points.into_iter().collect();
-        let mut array = opencascade_sys::t_col_gp::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
+        let mut array = ffi::t_col_gp::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
         for (index, point) in points.into_iter().enumerate() {
             array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
         }
         let array_handle =
-            opencascade_sys::t_col_gp::new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(array);
+            ffi::t_col_gp::new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(array);
 
         let periodic = false;
         let tolerance = 1.0e-7;
         let mut interpolate =
-            opencascade_sys::geom_api::GeomAPI_Interpolate_ctor(&array_handle, periodic, tolerance);
+            ffi::geom_api::GeomAPI_Interpolate_ctor(&array_handle, periodic, tolerance);
         if let Some((t_start, t_end)) = tangents {
             interpolate.pin_mut().Load(&make_vec(t_start), &make_vec(t_end), true);
         }
 
         interpolate.pin_mut().Perform();
-        let bspline_handle = opencascade_sys::geom_api::GeomAPI_Interpolate_Curve(&interpolate);
-        let curve_handle = opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_BSplineCurve(
-            &bspline_handle,
-        );
+        let bspline_handle = ffi::geom_api::GeomAPI_Interpolate_Curve(&interpolate);
+        let curve_handle =
+            ffi::geom::new_HandleGeomCurve_from_HandleGeom_BSplineCurve(&bspline_handle);
 
         let mut make_edge =
-            opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
-                &curve_handle,
-            );
+            ffi::b_rep_builder_api::BRepBuilderAPI_MakeEdge_HandleGeomCurve(&curve_handle);
         let edge = make_edge.pin_mut().Edge();
         Self::from_edge(edge)
     }
 
     pub fn arc(p1: DVec3, p2: DVec3, p3: DVec3) -> Self {
-        let make_arc = opencascade_sys::gc::GC_MakeArcOfCircle_point_point_point(
+        let make_arc = ffi::gc::GC_MakeArcOfCircle_point_point_point(
             &make_point(p1),
             &make_point(p2),
             &make_point(p3),
         );
 
-        let make_edge = opencascade_sys::b_rep_builder_api::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
-            &opencascade_sys::geom::new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
-                &opencascade_sys::gc::GC_MakeArcOfCircle_Value(&make_arc),
+        let make_edge = ffi::b_rep_builder_api::BRepBuilderAPI_MakeEdge_HandleGeomCurve(
+            &ffi::geom::new_HandleGeomCurve_from_HandleGeom_TrimmedCurve(
+                &ffi::gc::GC_MakeArcOfCircle_Value(&make_arc),
             ),
         );
 
@@ -154,24 +145,24 @@ impl Edge {
     }
 
     pub fn start_point(&self) -> DVec3 {
-        let curve = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
+        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
         let start_param = curve.FirstParameter();
-        let point = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_value(&curve, start_param);
+        let point = ffi::b_rep_adaptor::BRepAdaptor_Curve_value(&curve, start_param);
 
         dvec3(point.X(), point.Y(), point.Z())
     }
 
     pub fn end_point(&self) -> DVec3 {
-        let curve = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
+        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
         let last_param = curve.LastParameter();
-        let point = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_value(&curve, last_param);
+        let point = ffi::b_rep_adaptor::BRepAdaptor_Curve_value(&curve, last_param);
 
         dvec3(point.X(), point.Y(), point.Z())
     }
 
     pub fn approximation_segments(&self) -> ApproximationSegmentIterator {
-        let adaptor_curve = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
-        let approximator = GCPnts_TangentialDeflection::new(&adaptor_curve, 0.1, 0.1);
+        let adaptor_curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
+        let approximator = ffi::gc_pnts::GCPnts_TangentialDeflection::new(&adaptor_curve, 0.1, 0.1);
 
         ApproximationSegmentIterator { count: 1, approximator }
     }
@@ -179,7 +170,7 @@ impl Edge {
     pub fn tangent_arc(_p1: DVec3, _tangent: DVec3, _p3: DVec3) {}
 
     pub fn edge_type(&self) -> EdgeType {
-        let curve = opencascade_sys::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
+        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
 
         EdgeType::from(curve.GetType())
     }
@@ -187,7 +178,7 @@ impl Edge {
 
 pub struct ApproximationSegmentIterator {
     count: usize,
-    approximator: UniquePtr<GCPnts_TangentialDeflection>,
+    approximator: UniquePtr<ffi::gc_pnts::GCPnts_TangentialDeflection>,
 }
 
 impl Iterator for ApproximationSegmentIterator {

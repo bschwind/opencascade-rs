@@ -1,9 +1,10 @@
 use crate::primitives::make_point;
 use cxx::UniquePtr;
 use glam::DVec3;
+use opencascade_sys as ffi;
 
 pub struct Surface {
-    pub(crate) inner: UniquePtr<opencascade_sys::geom::Handle_Geom_Surface>,
+    pub(crate) inner: UniquePtr<ffi::geom::Handle_Geom_Surface>,
 }
 
 impl Surface {
@@ -11,7 +12,7 @@ impl Surface {
         let poles: Vec<Vec<_>> =
             poles.into_iter().map(|poles| poles.into_iter().collect()).collect();
 
-        let mut pole_array = opencascade_sys::t_col_gp::TColgp_Array2OfPnt_ctor(
+        let mut pole_array = ffi::t_col_gp::TColgp_Array2OfPnt_ctor(
             0,
             poles.len() as i32 - 1,
             0,
@@ -25,8 +26,8 @@ impl Surface {
             }
         }
 
-        let bezier = opencascade_sys::geom::Geom_BezierSurface_ctor(&pole_array);
-        let inner = opencascade_sys::geom::bezier_to_surface(&bezier);
+        let bezier = ffi::geom::Geom_BezierSurface_ctor(&pole_array);
+        let inner = ffi::geom::bezier_to_surface(&bezier);
 
         Self { inner }
     }

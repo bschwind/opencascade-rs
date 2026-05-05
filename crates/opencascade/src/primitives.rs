@@ -1,5 +1,6 @@
 use cxx::UniquePtr;
 use glam::{DVec2, DVec3};
+use opencascade_sys as ffi;
 
 mod boolean_shape;
 mod compound;
@@ -59,21 +60,19 @@ pub enum ShapeType {
     Compound,
 }
 
-impl From<opencascade_sys::top_abs::TopAbs_ShapeEnum> for ShapeType {
-    fn from(shape_enum: opencascade_sys::top_abs::TopAbs_ShapeEnum) -> Self {
+impl From<ffi::top_abs::TopAbs_ShapeEnum> for ShapeType {
+    fn from(shape_enum: ffi::top_abs::TopAbs_ShapeEnum) -> Self {
         match shape_enum {
-            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
-            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
-            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE => ShapeType::Edge,
-            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_WIRE => ShapeType::Wire,
-            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_FACE => ShapeType::Face,
-            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_SHELL => ShapeType::Shell,
-            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_SOLID => ShapeType::Solid,
-            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_COMPSOLID => {
-                ShapeType::CompoundSolid
-            },
-            opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
-            opencascade_sys::top_abs::TopAbs_ShapeEnum { repr } => {
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE => ShapeType::Edge,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_WIRE => ShapeType::Wire,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_FACE => ShapeType::Face,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_SHELL => ShapeType::Shell,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_SOLID => ShapeType::Solid,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_COMPSOLID => ShapeType::CompoundSolid,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
+            ffi::top_abs::TopAbs_ShapeEnum { repr } => {
                 panic!("Unexpected shape type: {repr}")
             },
         }
@@ -90,32 +89,32 @@ impl<T: Into<Shape>> IntoShape for T {
     }
 }
 
-pub fn make_point(p: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Pnt> {
-    opencascade_sys::gp::new_point(p.x, p.y, p.z)
+pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp::gp_Pnt> {
+    ffi::gp::new_point(p.x, p.y, p.z)
 }
 
-pub fn make_point2d(p: DVec2) -> UniquePtr<opencascade_sys::gp::gp_Pnt2d> {
-    opencascade_sys::gp::new_point_2d(p.x, p.y)
+pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::gp::gp_Pnt2d> {
+    ffi::gp::new_point_2d(p.x, p.y)
 }
 
-fn make_dir(p: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Dir> {
-    opencascade_sys::gp::gp_Dir_ctor(p.x, p.y, p.z)
+fn make_dir(p: DVec3) -> UniquePtr<ffi::gp::gp_Dir> {
+    ffi::gp::gp_Dir_ctor(p.x, p.y, p.z)
 }
 
-fn make_vec(vec: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Vec> {
-    opencascade_sys::gp::new_vec(vec.x, vec.y, vec.z)
+fn make_vec(vec: DVec3) -> UniquePtr<ffi::gp::gp_Vec> {
+    ffi::gp::new_vec(vec.x, vec.y, vec.z)
 }
 
-fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Ax1> {
-    opencascade_sys::gp::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
+fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp::gp_Ax1> {
+    ffi::gp::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
 }
 
-pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<opencascade_sys::gp::gp_Ax2> {
-    opencascade_sys::gp::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
+pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp::gp_Ax2> {
+    ffi::gp::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
 }
 
 pub struct EdgeIterator {
-    explorer: UniquePtr<opencascade_sys::top_exp::TopExp_Explorer>,
+    explorer: UniquePtr<ffi::top_exp::TopExp_Explorer>,
 }
 
 impl Iterator for EdgeIterator {
@@ -123,7 +122,7 @@ impl Iterator for EdgeIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.explorer.More() {
-            let edge = opencascade_sys::topo_ds::TopoDS_cast_to_edge(self.explorer.Current());
+            let edge = ffi::topo_ds::TopoDS_cast_to_edge(self.explorer.Current());
             let edge = Edge::from_edge(edge);
 
             self.explorer.pin_mut().Next();
@@ -152,7 +151,7 @@ impl EdgeIterator {
 }
 
 pub struct FaceIterator {
-    explorer: UniquePtr<opencascade_sys::top_exp::TopExp_Explorer>,
+    explorer: UniquePtr<ffi::top_exp::TopExp_Explorer>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -203,7 +202,7 @@ impl Iterator for FaceIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.explorer.More() {
-            let face = opencascade_sys::topo_ds::TopoDS_cast_to_face(self.explorer.Current());
+            let face = ffi::topo_ds::TopoDS_cast_to_face(self.explorer.Current());
             let face = Face::from_face(face);
 
             self.explorer.pin_mut().Next();
@@ -246,27 +245,25 @@ pub enum JoinType {
     Intersection,
 }
 
-impl From<opencascade_sys::geom_abs::GeomAbs_JoinType> for JoinType {
-    fn from(value: opencascade_sys::geom_abs::GeomAbs_JoinType) -> Self {
+impl From<ffi::geom_abs::GeomAbs_JoinType> for JoinType {
+    fn from(value: ffi::geom_abs::GeomAbs_JoinType) -> Self {
         match value {
-            opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Arc => Self::Arc,
-            //opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Tangent => Self::Tangent,
-            opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Intersection => Self::Intersection,
-            opencascade_sys::geom_abs::GeomAbs_JoinType { repr } => {
+            ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Arc => Self::Arc,
+            //ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Tangent => Self::Tangent,
+            ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Intersection => Self::Intersection,
+            ffi::geom_abs::GeomAbs_JoinType { repr } => {
                 panic!("Unexpected join type: {repr}")
             },
         }
     }
 }
 
-impl From<JoinType> for opencascade_sys::geom_abs::GeomAbs_JoinType {
+impl From<JoinType> for ffi::geom_abs::GeomAbs_JoinType {
     fn from(value: JoinType) -> Self {
         match value {
-            JoinType::Arc => opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Arc,
-            //JoinType::Tangent => opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Tangent,
-            JoinType::Intersection => {
-                opencascade_sys::geom_abs::GeomAbs_JoinType::GeomAbs_Intersection
-            },
+            JoinType::Arc => ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Arc,
+            //JoinType::Tangent => ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Tangent,
+            JoinType::Intersection => ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Intersection,
         }
     }
 }

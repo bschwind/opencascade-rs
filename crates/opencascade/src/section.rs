@@ -1,25 +1,21 @@
 use crate::primitives::Shape;
 use cxx::UniquePtr;
+use opencascade_sys as ffi;
 
 /// A wrapper around the `BRepAlgoAPI_Section` class.
 pub struct Section {
-    pub(crate) inner: UniquePtr<opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Section>,
+    pub(crate) inner: UniquePtr<ffi::b_rep_algo_api::BRepAlgoAPI_Section>,
 }
 impl Section {
     /// Create a new `Section` to intersect `target` by `tool`.
     pub fn new(target: &Shape, tool: &Shape) -> Section {
-        Section {
-            inner: opencascade_sys::b_rep_algo_api::BRepAlgoAPI_Section_ctor(
-                &target.inner,
-                &tool.inner,
-            ),
-        }
+        Section { inner: ffi::b_rep_algo_api::BRepAlgoAPI_Section_ctor(&target.inner, &tool.inner) }
     }
 
     /// Get the edges of the resulting intersection.
     pub fn section_edges(self) -> Vec<Shape> {
-        let mut ba = opencascade_sys::b_rep_algo_api::cast_section_to_builderalgo(self.inner);
-        let edges = opencascade_sys::topo_ds::shape_list_to_vector(ba.pin_mut().SectionEdges());
+        let mut ba = ffi::b_rep_algo_api::cast_section_to_builderalgo(self.inner);
+        let edges = ffi::topo_ds::shape_list_to_vector(ba.pin_mut().SectionEdges());
 
         let mut vec = vec![];
 

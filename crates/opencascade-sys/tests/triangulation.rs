@@ -1,29 +1,27 @@
-use opencascade_sys::{
-    b_rep_mesh::IncrementalMesh,
-    ffi::{
-        new_point, BRepPrimAPI_MakeBox_ctor, BRep_Tool_Triangulation, HandlePoly_Triangulation_Get,
-        TopAbs_ShapeEnum, TopExp_Explorer_ctor, TopoDS_cast_to_face,
-    },
-    top_loc::Location,
-};
-
 #[test]
 fn it_can_access_mesh_triangulation() {
-    let origin = new_point(0., 0., 0.);
-    let mut cube = BRepPrimAPI_MakeBox_ctor(&origin, 10., 10., 10.);
+    let origin = opencascade_sys::gp::new_point(0., 0., 0.);
+    let mut cube =
+        opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeBox_ctor(&origin, 10., 10., 10.);
 
-    let mut mesh = IncrementalMesh::new(cube.pin_mut().Shape(), 0.01);
+    let mut mesh =
+        opencascade_sys::b_rep_mesh::BRepMesh_IncrementalMesh::new(cube.pin_mut().Shape(), 0.01);
 
     let mut triangle_corners = 0;
 
-    let mut edge_explorer =
-        TopExp_Explorer_ctor(mesh.pin_mut().Shape(), TopAbs_ShapeEnum::TopAbs_FACE);
+    let mut edge_explorer = opencascade_sys::top_exp::TopExp_Explorer_ctor(
+        mesh.pin_mut().Shape(),
+        opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_FACE,
+    );
     while edge_explorer.More() {
-        let face = TopoDS_cast_to_face(edge_explorer.Current());
-        let mut location = Location::new();
+        let face = opencascade_sys::topo_ds::TopoDS_cast_to_face(edge_explorer.Current());
+        let mut location = opencascade_sys::top_loc::TopLoc_Location::new();
 
-        let triangulation_handle = BRep_Tool_Triangulation(face, location.pin_mut());
-        if let Ok(triangulation) = HandlePoly_Triangulation_Get(&triangulation_handle) {
+        let triangulation_handle =
+            opencascade_sys::b_rep::BRep_Tool_Triangulation(face, location.pin_mut());
+        if let Ok(triangulation) =
+            opencascade_sys::poly::Handle_Poly_Triangulation_Get(&triangulation_handle)
+        {
             for index in 0..triangulation.NbTriangles() {
                 let triangle = triangulation.Triangle(index + 1);
 
