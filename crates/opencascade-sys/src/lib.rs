@@ -7,6 +7,7 @@ pub mod b_rep_feat;
 pub mod b_rep_fillet_api;
 pub mod b_rep_g_prop;
 pub mod b_rep_int_curve_surface;
+pub mod b_rep_lib;
 pub mod b_rep_mesh;
 pub mod b_rep_offset_api;
 pub mod b_rep_prim_api;
@@ -106,12 +107,7 @@ pub mod ffi {
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
 
-        // BRepLib
-        pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
-
         type BOPAlgo_GlueEnum;
-
-        pub fn compute_normals(face: &TopoDS_Face, triangulation: &Handle_Poly_Triangulation);
     }
 
     impl UniquePtr<Handle_TopTools_HSequenceOfShape> {}

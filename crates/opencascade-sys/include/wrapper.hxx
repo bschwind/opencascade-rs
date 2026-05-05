@@ -81,10 +81,3 @@ inline rust::String type_name(const HandleStandardType &handle) { return std::st
 inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const Handle_Geom_Curve &curve, const Standard_Real U) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));
 }
-
-// BRepLib
-inline bool BRepLibBuildCurves3d(const TopoDS_Shape &shape) { return BRepLib::BuildCurves3d(shape); }
-
-inline void compute_normals(const TopoDS_Face &face, const Handle(Poly_Triangulation) & triangulation) {
-  BRepLib_ToolTriangulatedShape::ComputeNormals(face, triangulation);
-}

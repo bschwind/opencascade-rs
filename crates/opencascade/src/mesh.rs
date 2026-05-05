@@ -89,7 +89,7 @@ impl Mesher {
             let normal_array =
                 opencascade_sys::t_col_gp::TColgp_Array1OfDir_ctor(0, face_point_count);
 
-            ffi::compute_normals(&face.inner, &triangulation_handle);
+            opencascade_sys::b_rep_lib::compute_normals(&face.inner, &triangulation_handle);
 
             // TODO(bschwind) - Why do we start at 1 here?
             for i in 1..(normal_array.Length() as usize) {
