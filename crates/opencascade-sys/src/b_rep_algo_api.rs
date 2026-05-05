@@ -7,7 +7,7 @@ mod inner {
 
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopTools_ListOfShape = crate::top_tools::TopTools_ListOfShape;
-        type Message_ProgressRange = crate::ffi::Message_ProgressRange;
+        type Message_ProgressRange = crate::message::Message_ProgressRange;
         type BOPAlgo_GlueEnum = crate::ffi::BOPAlgo_GlueEnum;
 
         pub type BRepAlgoAPI_BuilderAlgo;

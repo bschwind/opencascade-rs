@@ -77,6 +77,7 @@ fn main() {
         "src/iges_control.rs",
         "src/law.rs",
         "src/lib.rs",
+        "src/message.rs",
         "src/poly.rs",
         "src/shape_analysis.rs",
         "src/shape_upgrade.rs",

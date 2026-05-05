@@ -10,7 +10,7 @@ mod inner {
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
         type TopoDS_Vertex = crate::topo_ds::TopoDS_Vertex;
         type TColgp_Array1OfPnt2d = crate::t_col_gp::TColgp_Array1OfPnt2d;
-        type Message_ProgressRange = crate::ffi::Message_ProgressRange;
+        type Message_ProgressRange = crate::message::Message_ProgressRange;
 
         type BRepFilletAPI_MakeFillet;
         #[cxx_name = "construct_unique"]

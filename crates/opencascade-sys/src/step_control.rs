@@ -7,7 +7,7 @@ mod inner {
 
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type IFSelect_ReturnStatus = crate::ffi::IFSelect_ReturnStatus;
-        type Message_ProgressRange = crate::ffi::Message_ProgressRange;
+        type Message_ProgressRange = crate::message::Message_ProgressRange;
 
         type STEPControl_Reader;
         #[cxx_name = "construct_unique"]

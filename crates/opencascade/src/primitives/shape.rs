@@ -530,7 +530,7 @@ impl Shape {
             return Err(Error::StepReadFailed);
         }
 
-        reader.pin_mut().TransferRoots(&ffi::Message_ProgressRange_ctor());
+        reader.pin_mut().TransferRoots(&opencascade_sys::message::Message_ProgressRange_ctor());
 
         let inner = opencascade_sys::step_control::one_shape_step(&reader);
 
@@ -566,7 +566,7 @@ impl Shape {
             path.as_ref().to_string_lossy().to_string(),
         );
 
-        reader.pin_mut().TransferRoots(&ffi::Message_ProgressRange_ctor());
+        reader.pin_mut().TransferRoots(&opencascade_sys::message::Message_ProgressRange_ctor());
 
         if status != ffi::IFSelect_ReturnStatus::IFSelect_RetDone {
             return Err(Error::IgesReadFailed);

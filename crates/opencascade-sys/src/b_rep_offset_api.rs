@@ -10,7 +10,7 @@ mod inner {
         type TopoDS_Wire = crate::topo_ds::TopoDS_Wire;
         type GeomAbs_JoinType = crate::geom_abs::GeomAbs_JoinType;
         type TopTools_ListOfShape = crate::top_tools::TopTools_ListOfShape;
-        type Message_ProgressRange = crate::ffi::Message_ProgressRange;
+        type Message_ProgressRange = crate::message::Message_ProgressRange;
         type Handle_Law_Function = crate::ffi::Handle_Law_Function;
 
         type BRepOffsetAPI_MakeOffset;

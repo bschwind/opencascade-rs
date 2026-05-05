@@ -23,6 +23,7 @@ pub mod geom_api;
 pub mod gp;
 pub mod iges_control;
 pub mod law;
+pub mod message;
 pub mod poly;
 pub mod shape_analysis;
 pub mod shape_upgrade;
@@ -81,12 +82,6 @@ pub mod ffi {
 
         // OCCT Includes
         include!("opencascade-sys/include/wrapper.hxx");
-
-        // Runtime
-        type Message_ProgressRange;
-
-        #[cxx_name = "construct_unique"]
-        pub fn Message_ProgressRange_ctor() -> UniquePtr<Message_ProgressRange>;
 
         // Handles
         type HandleStandardType;

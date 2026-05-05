@@ -9,7 +9,7 @@ mod inner {
         type gp_Circ = crate::gp::gp_Circ;
         type gp_Trsf = crate::gp::gp_Trsf;
         type gp_GTrsf = crate::gp::gp_GTrsf;
-        type Message_ProgressRange = crate::ffi::Message_ProgressRange;
+        type Message_ProgressRange = crate::message::Message_ProgressRange;
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Vertex = crate::topo_ds::TopoDS_Vertex;
         type TopoDS_Edge = crate::topo_ds::TopoDS_Edge;
