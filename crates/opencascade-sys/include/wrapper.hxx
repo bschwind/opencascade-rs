@@ -47,16 +47,6 @@
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
 
-// Generic template constructor
-template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
-  return std::unique_ptr<T>(new T(args...));
-}
-
-// Generic List
-template <typename T> std::unique_ptr<std::vector<T>> list_to_vector(const NCollection_List<T> &list) {
-  return std::unique_ptr<std::vector<T>>(new std::vector<T>(list.begin(), list.end()));
-}
-
 // Handles
 typedef opencascade::handle<Standard_Type> HandleStandardType;
 
@@ -74,8 +64,6 @@ template <typename T> const T &handle_try_deref(const opencascade::handle<T> &ha
 }
 
 inline const HandleStandardType &DynamicType(const Handle_Geom_Surface &surface) { return surface->DynamicType(); }
-
-inline rust::String type_name(const HandleStandardType &handle) { return std::string(handle->Name()); }
 
 inline std::unique_ptr<gp_Pnt> HandleGeomCurve_Value(const Handle_Geom_Curve &curve, const Standard_Real U) {
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(curve->Value(U)));

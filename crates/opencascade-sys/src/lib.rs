@@ -30,6 +30,7 @@ pub mod message;
 pub mod poly;
 pub mod shape_analysis;
 pub mod shape_upgrade;
+pub mod standard;
 pub mod step_control;
 pub mod stl_api;
 pub mod t_col_gp;
@@ -48,7 +49,6 @@ pub mod ffi {
         include!("opencascade-sys/include/wrapper.hxx");
 
         // Handles
-        type HandleStandardType;
         type Handle_Geom_Curve;
         type Handle_Geom_BSplineCurve;
         type Handle_Geom_BezierCurve;
@@ -69,10 +69,8 @@ pub mod ffi {
             array: UniquePtr<TColgp_HArray1OfPnt>,
         ) -> UniquePtr<Handle_TColgp_HArray1OfPnt>;
 
-        pub fn DynamicType(surface: &Handle_Geom_Surface) -> &HandleStandardType;
-        pub fn type_name(handle: &HandleStandardType) -> String;
+        pub fn DynamicType(surface: &Handle_Geom_Surface) -> &Handle_Standard_Type;
 
-        pub fn IsNull(self: &HandleStandardType) -> bool;
         pub fn IsNull(self: &Handle_Geom_Curve) -> bool;
         pub fn IsNull(self: &Handle_Geom_TrimmedCurve) -> bool;
         pub fn IsNull(self: &Handle_Geom_Surface) -> bool;
@@ -99,6 +97,7 @@ pub mod ffi {
         type Poly_Triangulation = crate::poly::Poly_Triangulation;
         type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
+        type Handle_Standard_Type = crate::standard::Handle_Standard_Type;
     }
 
     impl UniquePtr<Handle_TopTools_HSequenceOfShape> {}

@@ -84,6 +84,7 @@ fn main() {
         "src/poly.rs",
         "src/shape_analysis.rs",
         "src/shape_upgrade.rs",
+        "src/standard.rs",
         "src/step_control.rs",
         "src/stl_api.rs",
         "src/t_col_gp.rs",
