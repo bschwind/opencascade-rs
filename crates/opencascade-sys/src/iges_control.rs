@@ -25,8 +25,12 @@ mod inner {
         type IGESControl_Writer;
         #[cxx_name = "construct_unique"]
         pub fn IGESControl_Writer_ctor() -> UniquePtr<IGESControl_Writer>;
-        pub fn add_shape(writer: Pin<&mut IGESControl_Writer>, shape: &TopoDS_Shape) -> bool;
-        pub fn compute_model(writer: Pin<&mut IGESControl_Writer>);
+        pub fn AddShape(
+            self: Pin<&mut IGESControl_Writer>,
+            shape: &TopoDS_Shape,
+            progress: &Message_ProgressRange,
+        ) -> bool;
+        pub fn ComputeModel(self: Pin<&mut IGESControl_Writer>);
         pub fn write_iges(writer: Pin<&mut IGESControl_Writer>, filename: String) -> bool;
     }
 }

@@ -566,13 +566,14 @@ impl Shape {
     pub fn write_iges(&self, path: impl AsRef<Path>) -> Result<(), Error> {
         let mut writer = ffi::iges_control::IGESControl_Writer_ctor();
 
-        let success = ffi::iges_control::add_shape(writer.pin_mut(), &self.inner);
+        let success =
+            writer.pin_mut().AddShape(&self.inner, &ffi::message::Message_ProgressRange_ctor());
 
         if !success {
             return Err(Error::IgesWriteFailed);
         }
 
-        ffi::iges_control::compute_model(writer.pin_mut());
+        writer.pin_mut().ComputeModel();
         let success = ffi::iges_control::write_iges(
             writer.pin_mut(),
             path.as_ref().to_string_lossy().to_string(),
@@ -770,7 +771,9 @@ impl Shape {
         let mut faces_list = ffi::top_tools::new_list_of_shape();
 
         for face in faces_to_remove.into_iter() {
-            ffi::top_tools::shape_list_append_face(faces_list.pin_mut(), &face.as_ref().inner);
+            let face = face.as_ref();
+            let shape = Shape::from(face);
+            faces_list.pin_mut().Append(&shape.inner);
         }
 
         let mut solid_maker = ffi::b_rep_offset_api::BRepOffsetAPI_MakeThickSolid_ctor();

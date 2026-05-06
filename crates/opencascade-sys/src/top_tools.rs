@@ -17,7 +17,10 @@ mod inner {
         type TopTools_ListOfShape;
         #[cxx_name = "construct_unique"]
         pub fn new_list_of_shape() -> UniquePtr<TopTools_ListOfShape>;
-        pub fn shape_list_append_face(list: Pin<&mut TopTools_ListOfShape>, face: &TopoDS_Face);
+        pub fn Append(
+            self: Pin<&mut TopTools_ListOfShape>,
+            face: &TopoDS_Shape,
+        ) -> Pin<&mut TopoDS_Shape>;
         pub fn Size(self: &TopTools_ListOfShape) -> i32;
 
         type TopTools_IndexedMapOfShape;

@@ -25,17 +25,25 @@ mod inner {
 
         pub fn TopExp_FirstVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
         pub fn TopExp_LastVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
-        pub fn TopExp_EdgeVertices(
+
+        type TopExp;
+        #[Self = "TopExp"]
+        #[cxx_name = "Vertices"]
+        pub fn EdgeVertices(
             edge: &TopoDS_Edge,
             vertex_first: Pin<&mut TopoDS_Vertex>,
             vertex_last: Pin<&mut TopoDS_Vertex>,
+            with_orientation: bool,
         );
+        #[Self = "TopExp"]
+        #[cxx_name = "Vertices"]
         pub fn TopExp_WireVertices(
             wire: &TopoDS_Wire,
             vertex_first: Pin<&mut TopoDS_Vertex>,
             vertex_last: Pin<&mut TopoDS_Vertex>,
         );
-        pub fn TopExp_CommonVertex(
+        #[Self = "TopExp"]
+        pub fn CommonVertex(
             edge_1: &TopoDS_Edge,
             edge_2: &TopoDS_Edge,
             vertex: Pin<&mut TopoDS_Vertex>,

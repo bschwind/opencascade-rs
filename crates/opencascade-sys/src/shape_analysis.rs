@@ -10,7 +10,8 @@ mod inner {
 
         type ShapeAnalysis_FreeBounds;
 
-        pub fn connect_edges_to_wires(
+        #[Self = "ShapeAnalysis_FreeBounds"]
+        pub fn ConnectEdgesToWires(
             edges: Pin<&mut Handle_TopTools_HSequenceOfShape>,
             tolerance: f64,
             shared: bool,

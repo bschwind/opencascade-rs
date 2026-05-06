@@ -5,8 +5,6 @@
 #include <TopoDS_Face.hxx>
 #include <bindings_common.hxx>
 
-inline void shape_list_append_face(TopTools_ListOfShape &list, const TopoDS_Face &face) { list.Append(face); }
-
 inline void map_shapes(const TopoDS_Shape &S, const TopAbs_ShapeEnum T, TopTools_IndexedMapOfShape &M) {
   TopExp::MapShapes(S, T, M);
 }

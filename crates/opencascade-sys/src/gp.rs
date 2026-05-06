@@ -5,6 +5,16 @@ mod inner {
     unsafe extern "C++" {
         include!("opencascade-sys/include/gp.hxx");
 
+        type gp;
+        #[Self = "gp"]
+        pub fn OX() -> &'static gp_Ax1;
+        #[Self = "gp"]
+        pub fn OY() -> &'static gp_Ax1;
+        #[Self = "gp"]
+        pub fn OZ() -> &'static gp_Ax1;
+        #[Self = "gp"]
+        pub fn DZ() -> &'static gp_Dir;
+
         type gp_Pnt;
 
         #[cxx_name = "construct_unique"]
@@ -52,10 +62,6 @@ mod inner {
 
         type gp_Dir2d;
         type gp_Ax2d;
-        pub fn gp_OX() -> &'static gp_Ax1;
-        pub fn gp_OY() -> &'static gp_Ax1;
-        pub fn gp_OZ() -> &'static gp_Ax1;
-        pub fn gp_DZ() -> &'static gp_Dir;
 
         pub fn Transform(self: Pin<&mut gp_Dir>, transform: &gp_Trsf);
 

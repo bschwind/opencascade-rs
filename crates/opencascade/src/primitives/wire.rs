@@ -98,7 +98,7 @@ impl Wire {
             EdgeConnection::Fuzzy { tolerance } => (tolerance, false),
         };
 
-        ffi::shape_analysis::connect_edges_to_wires(
+        ffi::shape_analysis::ShapeAnalysis_FreeBounds::ConnectEdgesToWires(
             edges.pin_mut(),
             tolerance,
             shared,
