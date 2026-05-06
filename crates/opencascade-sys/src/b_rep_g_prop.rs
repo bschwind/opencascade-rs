@@ -36,7 +36,6 @@ mod inner {
         );
 
         type BRepGProp_Face;
-
         #[cxx_name = "construct_unique"]
         fn BRepGProp_Face_new(face: &TopoDS_Face) -> UniquePtr<BRepGProp_Face>;
         fn Normal(

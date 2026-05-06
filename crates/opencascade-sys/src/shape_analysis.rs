@@ -9,7 +9,6 @@ mod inner {
         type Handle_TopTools_HSequenceOfShape = crate::top_tools::Handle_TopTools_HSequenceOfShape;
 
         type ShapeAnalysis_FreeBounds;
-
         #[Self = "ShapeAnalysis_FreeBounds"]
         pub fn ConnectEdgesToWires(
             edges: Pin<&mut Handle_TopTools_HSequenceOfShape>,

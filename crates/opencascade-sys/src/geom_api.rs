@@ -18,16 +18,13 @@ mod inner {
             periodic: bool,
             tolerance: f64,
         ) -> UniquePtr<GeomAPI_Interpolate>;
-
         pub fn Load(
             self: Pin<&mut GeomAPI_Interpolate>,
             initial_tangent: &gp_Vec,
             final_tangent: &gp_Vec,
             scale: bool,
         );
-
         pub fn Perform(self: Pin<&mut GeomAPI_Interpolate>);
-
         pub fn GeomAPI_Interpolate_Curve(
             interpolate: &GeomAPI_Interpolate,
         ) -> UniquePtr<Handle_Geom_BSplineCurve>;

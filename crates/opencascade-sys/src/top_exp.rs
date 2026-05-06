@@ -20,7 +20,6 @@ mod inner {
             shape: &TopoDS_Shape,
             to_find: TopAbs_ShapeEnum,
         ) -> UniquePtr<TopExp_Explorer>;
-
         pub fn More(self: &TopExp_Explorer) -> bool;
         pub fn Next(self: Pin<&mut TopExp_Explorer>);
         pub fn ExplorerCurrentShape(explorer: &TopExp_Explorer) -> UniquePtr<TopoDS_Shape>;

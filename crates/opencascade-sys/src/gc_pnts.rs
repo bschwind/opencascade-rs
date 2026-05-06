@@ -10,7 +10,6 @@ mod inner {
         type BRepAdaptor_Curve = crate::b_rep_adaptor::BRepAdaptor_Curve;
 
         type GCPnts_TangentialDeflection;
-
         #[cxx_name = "construct_unique"]
         fn TangentialDeflection_new(
             curve: &BRepAdaptor_Curve,
