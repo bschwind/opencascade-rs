@@ -141,7 +141,7 @@ impl Face {
 
         // We use a shape map here to avoid duplicates.
         let mut shape_map = ffi::top_tools::new_indexed_map_of_shape();
-        ffi::top_tools::map_shapes(
+        ffi::top_exp::TopExp::MapShapes(
             face_shape,
             ffi::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX,
             shape_map.pin_mut(),
@@ -175,7 +175,7 @@ impl Face {
         let mut make_fillet = ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
 
         let mut vertex_map = ffi::top_tools::new_indexed_map_of_shape();
-        ffi::top_tools::map_shapes(
+        ffi::top_exp::TopExp::MapShapes(
             face_shape,
             ffi::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX,
             vertex_map.pin_mut(),
@@ -183,7 +183,7 @@ impl Face {
 
         // Get map of vertices to edges so we can find the edges connected to each vertex.
         let mut data_map = ffi::top_tools::new_indexed_data_map_of_shape_list_of_shape();
-        ffi::top_tools::map_shapes_and_ancestors(
+        ffi::top_exp::TopExp::MapShapesAndAncestors(
             face_shape,
             ffi::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX,
             ffi::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE,

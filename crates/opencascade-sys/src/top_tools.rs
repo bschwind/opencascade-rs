@@ -29,12 +29,6 @@ mod inner {
         pub fn Extent(self: &TopTools_IndexedMapOfShape) -> i32;
         pub fn FindKey(self: &TopTools_IndexedMapOfShape, index: i32) -> &TopoDS_Shape;
 
-        pub fn map_shapes(
-            shape: &TopoDS_Shape,
-            shape_type: TopAbs_ShapeEnum,
-            shape_map: Pin<&mut TopTools_IndexedMapOfShape>,
-        );
-
         type TopTools_IndexedDataMapOfShapeListOfShape;
         #[cxx_name = "construct_unique"]
         pub fn new_indexed_data_map_of_shape_list_of_shape(
@@ -56,19 +50,6 @@ mod inner {
             self: &'a TopTools_IndexedDataMapOfShapeListOfShape,
             shape: &'a TopoDS_Shape,
         ) -> &'a TopTools_ListOfShape;
-
-        pub fn map_shapes_and_ancestors(
-            shape: &TopoDS_Shape,
-            parent_type: TopAbs_ShapeEnum,
-            child_type: TopAbs_ShapeEnum,
-            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
-        );
-        pub fn map_shapes_and_unique_ancestors(
-            shape: &TopoDS_Shape,
-            parent_type: TopAbs_ShapeEnum,
-            child_type: TopAbs_ShapeEnum,
-            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
-        );
 
         type TopTools_HSequenceOfShape;
         pub fn Length(self: &TopTools_HSequenceOfShape) -> i32;

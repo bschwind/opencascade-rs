@@ -10,6 +10,9 @@ mod inner {
         type TopoDS_Vertex = crate::topo_ds::TopoDS_Vertex;
         type TopoDS_Wire = crate::topo_ds::TopoDS_Wire;
         type TopAbs_ShapeEnum = crate::top_abs::TopAbs_ShapeEnum;
+        type TopTools_IndexedMapOfShape = crate::top_tools::TopTools_IndexedMapOfShape;
+        type TopTools_IndexedDataMapOfShapeListOfShape =
+            crate::top_tools::TopTools_IndexedDataMapOfShapeListOfShape;
 
         type TopExp_Explorer;
         #[cxx_name = "construct_unique"]
@@ -48,6 +51,27 @@ mod inner {
             edge_2: &TopoDS_Edge,
             vertex: Pin<&mut TopoDS_Vertex>,
         ) -> bool;
+        #[Self = "TopExp"]
+        pub fn MapShapes(
+            shape: &TopoDS_Shape,
+            shape_type: TopAbs_ShapeEnum,
+            shape_map: Pin<&mut TopTools_IndexedMapOfShape>,
+        );
+        #[Self = "TopExp"]
+        pub fn MapShapesAndAncestors(
+            shape: &TopoDS_Shape,
+            parent_type: TopAbs_ShapeEnum,
+            child_type: TopAbs_ShapeEnum,
+            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
+        );
+        #[Self = "TopExp"]
+        pub fn MapShapesAndUniqueAncestors(
+            shape: &TopoDS_Shape,
+            parent_type: TopAbs_ShapeEnum,
+            child_type: TopAbs_ShapeEnum,
+            shape_data_map: Pin<&mut TopTools_IndexedDataMapOfShapeListOfShape>,
+            use_orientation: bool,
+        );
     }
 }
 
