@@ -10,22 +10,42 @@ mod inner {
         type TopAbs_Orientation = crate::top_abs::TopAbs_Orientation;
         type TopTools_ListOfShape = crate::top_tools::TopTools_ListOfShape;
 
+        type TopoDS;
+        #[Self = "TopoDS"]
+        pub fn Vertex(shape: &TopoDS_Shape) -> &TopoDS_Vertex;
+        #[Self = "TopoDS"]
+        pub fn Edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
+        #[Self = "TopoDS"]
+        pub fn Wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
+        #[Self = "TopoDS"]
+        pub fn Face(shape: &TopoDS_Shape) -> &TopoDS_Face;
+        #[Self = "TopoDS"]
+        pub fn Shell(shape: &TopoDS_Shape) -> &TopoDS_Shell;
+        #[Self = "TopoDS"]
+        pub fn Solid(shape: &TopoDS_Shape) -> &TopoDS_Solid;
+        #[Self = "TopoDS"]
+        pub fn Compound(shape: &TopoDS_Shape) -> &TopoDS_Compound;
+
         type TopoDS_Vertex;
+        #[cxx_name = "upcast_ref"]
         pub fn cast_vertex_to_shape(wire: &TopoDS_Vertex) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Vertex_to_owned(shape: &TopoDS_Vertex) -> UniquePtr<TopoDS_Vertex>;
 
         type TopoDS_Edge;
+        #[cxx_name = "upcast_ref"]
         pub fn cast_edge_to_shape(wire: &TopoDS_Edge) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Edge_to_owned(shape: &TopoDS_Edge) -> UniquePtr<TopoDS_Edge>;
 
         type TopoDS_Wire;
+        #[cxx_name = "upcast_ref"]
         pub fn cast_wire_to_shape(wire: &TopoDS_Wire) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Wire_to_owned(shape: &TopoDS_Wire) -> UniquePtr<TopoDS_Wire>;
 
         type TopoDS_Face;
+        #[cxx_name = "upcast_ref"]
         pub fn cast_face_to_shape(wire: &TopoDS_Face) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Face_ctor() -> UniquePtr<TopoDS_Face>;
@@ -34,26 +54,22 @@ mod inner {
         pub fn Orientation(self: &TopoDS_Face) -> TopAbs_Orientation;
 
         type TopoDS_Shell;
+        #[cxx_name = "upcast_ref"]
         pub fn cast_shell_to_shape(wire: &TopoDS_Shell) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Shell_ctor() -> UniquePtr<TopoDS_Shell>;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Shell_to_owned(shape: &TopoDS_Shell) -> UniquePtr<TopoDS_Shell>;
+        #[cxx_name = "upcast"]
         pub fn TopoDS_Shell_as_shape(shell: UniquePtr<TopoDS_Shell>) -> UniquePtr<TopoDS_Shape>;
 
         type TopoDS_Solid;
+        #[cxx_name = "upcast_ref"]
         pub fn cast_solid_to_shape(wire: &TopoDS_Solid) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Solid_to_owned(shape: &TopoDS_Solid) -> UniquePtr<TopoDS_Solid>;
 
         type TopoDS_Shape;
-        pub fn TopoDS_cast_to_vertex(shape: &TopoDS_Shape) -> &TopoDS_Vertex;
-        pub fn TopoDS_cast_to_wire(shape: &TopoDS_Shape) -> &TopoDS_Wire;
-        pub fn TopoDS_cast_to_edge(shape: &TopoDS_Shape) -> &TopoDS_Edge;
-        pub fn TopoDS_cast_to_face(shape: &TopoDS_Shape) -> &TopoDS_Face;
-        pub fn TopoDS_cast_to_shell(shape: &TopoDS_Shape) -> &TopoDS_Shell;
-        pub fn TopoDS_cast_to_solid(shape: &TopoDS_Shape) -> &TopoDS_Solid;
-        pub fn TopoDS_cast_to_compound(shape: &TopoDS_Shape) -> &TopoDS_Compound;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Shape_to_owned(shape: &TopoDS_Shape) -> UniquePtr<TopoDS_Shape>;
         #[cxx_name = "Move"]
@@ -74,11 +90,13 @@ mod inner {
         pub fn Orientation(self: &TopoDS_Shape) -> TopAbs_Orientation;
 
         type TopoDS_Compound;
+        #[cxx_name = "upcast_ref"]
         pub fn cast_compound_to_shape(wire: &TopoDS_Compound) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Compound_ctor() -> UniquePtr<TopoDS_Compound>;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Compound_to_owned(shape: &TopoDS_Compound) -> UniquePtr<TopoDS_Compound>;
+        #[cxx_name = "upcast"]
         pub fn TopoDS_Compound_as_shape(
             compound: UniquePtr<TopoDS_Compound>,
         ) -> UniquePtr<TopoDS_Shape>;

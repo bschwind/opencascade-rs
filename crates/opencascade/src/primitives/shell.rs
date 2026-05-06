@@ -31,7 +31,7 @@ impl Shell {
         make_loft.pin_mut().CheckCompatibility(true);
 
         let shape = make_loft.pin_mut().Shape();
-        let shell = ffi::topo_ds::TopoDS_cast_to_shell(shape);
+        let shell = ffi::topo_ds::TopoDS::Shell(shape);
 
         Self::from_shell(shell)
     }

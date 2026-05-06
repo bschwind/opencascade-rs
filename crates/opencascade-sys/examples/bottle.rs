@@ -16,8 +16,9 @@ use opencascade_sys::{
         GC_MakeArcOfCircle_point_point_point, GC_MakeSegment_Value, GC_MakeSegment_point_point,
         Geom2d_Ellipse_ctor, Geom2d_TrimmedCurve_ctor, Geom_CylindricalSurface_ctor,
         HandleGeom2d_TrimmedCurve_to_curve, MakeThickSolidByJoin, TopAbs_ShapeEnum,
-        TopExp_Explorer_ctor, TopoDS_Compound_as_shape, TopoDS_Compound_ctor, TopoDS_Face,
-        TopoDS_Face_to_owned, TopoDS_cast_to_edge, TopoDS_cast_to_face, TopoDS_cast_to_wire,
+        TopExp_Explorer_ctor,
+        TopoDS::{Edge, Face, Wire},
+        TopoDS_Compound_as_shape, TopoDS_Compound_ctor, TopoDS_Face, TopoDS_Face_to_owned,
     },
     gp::{
         gp_Ax2_ctor, gp_Ax2d_ctor, gp_Ax3_from_gp_Ax2, gp_DZ, gp_Dir2d_ctor, gp_OX, new_point,
@@ -71,7 +72,7 @@ pub fn main() {
     let mut brep_transform =
         BRepBuilderAPI_Transform_ctor(wire.pin_mut().Shape(), &transform, false);
     let mirrored_shape = brep_transform.pin_mut().Shape();
-    let mirrored_wire = TopoDS_cast_to_wire(mirrored_shape);
+    let mirrored_wire = TopoDS::Wire(mirrored_shape);
 
     let mut make_wire = BRepBuilderAPI_MakeWire_ctor();
     make_wire.pin_mut().add_wire(wire.pin_mut().Wire());
@@ -90,7 +91,7 @@ pub fn main() {
         TopExp_Explorer_ctor(body.pin_mut().Shape(), TopAbs_ShapeEnum::TopAbs_EDGE);
 
     while edge_explorer.More() {
-        let edge = TopoDS_cast_to_edge(edge_explorer.Current());
+        let edge = TopoDS::Edge(edge_explorer.Current());
         make_fillet.pin_mut().add_edge(thickness / 12.0, edge);
         edge_explorer.pin_mut().Next();
     }
@@ -118,7 +119,7 @@ pub fn main() {
 
     while face_explorer.More() {
         let shape = ExplorerCurrentShape(&face_explorer);
-        let face = TopoDS_cast_to_face(&shape);
+        let face = TopoDS::Face(&shape);
 
         let surface = BRep_Tool_Surface(face);
         let dynamic_type = DynamicType(&surface);

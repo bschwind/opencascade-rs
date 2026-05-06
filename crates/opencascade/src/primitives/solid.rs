@@ -36,7 +36,7 @@ impl Solid {
 
         let filleted_shape = make_fillet.pin_mut().Shape();
 
-        let compound = ffi::topo_ds::TopoDS_cast_to_compound(filleted_shape);
+        let compound = ffi::topo_ds::TopoDS::Compound(filleted_shape);
 
         Compound::from_compound(compound)
     }
@@ -53,7 +53,7 @@ impl Solid {
         make_loft.pin_mut().CheckCompatibility(true);
 
         let shape = make_loft.pin_mut().Shape();
-        let solid = ffi::topo_ds::TopoDS_cast_to_solid(shape);
+        let solid = ffi::topo_ds::TopoDS::Solid(shape);
 
         Self::from_solid(solid)
     }
@@ -71,7 +71,7 @@ impl Solid {
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::topo_ds::TopoDS_cast_to_edge(shape);
+            let edge = ffi::topo_ds::TopoDS::Edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 
@@ -92,7 +92,7 @@ impl Solid {
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::topo_ds::TopoDS_cast_to_edge(shape);
+            let edge = ffi::topo_ds::TopoDS::Edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 
@@ -113,7 +113,7 @@ impl Solid {
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::topo_ds::TopoDS_cast_to_edge(shape);
+            let edge = ffi::topo_ds::TopoDS::Edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 

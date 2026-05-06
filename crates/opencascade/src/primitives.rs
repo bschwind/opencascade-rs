@@ -122,7 +122,7 @@ impl Iterator for EdgeIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.explorer.More() {
-            let edge = ffi::topo_ds::TopoDS_cast_to_edge(self.explorer.Current());
+            let edge = ffi::topo_ds::TopoDS::Edge(self.explorer.Current());
             let edge = Edge::from_edge(edge);
 
             self.explorer.pin_mut().Next();
@@ -202,7 +202,7 @@ impl Iterator for FaceIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.explorer.More() {
-            let face = ffi::topo_ds::TopoDS_cast_to_face(self.explorer.Current());
+            let face = ffi::topo_ds::TopoDS::Face(self.explorer.Current());
             let face = Face::from_face(face);
 
             self.explorer.pin_mut().Next();

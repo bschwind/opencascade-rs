@@ -495,7 +495,7 @@ impl Shape {
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::topo_ds::TopoDS_cast_to_edge(shape);
+            let edge = ffi::topo_ds::TopoDS::Edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 
@@ -637,7 +637,7 @@ impl Shape {
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::topo_ds::TopoDS_cast_to_edge(shape);
+            let edge = ffi::topo_ds::TopoDS::Edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 
@@ -655,7 +655,7 @@ impl Shape {
 
         let mut new_edges = vec![];
         for shape in vec.iter() {
-            let edge = ffi::topo_ds::TopoDS_cast_to_edge(shape);
+            let edge = ffi::topo_ds::TopoDS::Edge(shape);
             new_edges.push(Edge::from_edge(edge));
         }
 

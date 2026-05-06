@@ -14,7 +14,7 @@ fn it_can_access_mesh_triangulation() {
         opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_FACE,
     );
     while edge_explorer.More() {
-        let face = opencascade_sys::topo_ds::TopoDS_cast_to_face(edge_explorer.Current());
+        let face = opencascade_sys::topo_ds::TopoDS::Face(edge_explorer.Current());
         let mut location = opencascade_sys::top_loc::TopLoc_Location::new();
 
         let triangulation_handle =
