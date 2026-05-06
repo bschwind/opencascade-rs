@@ -274,7 +274,14 @@ impl Face {
         let mut props = ffi::g_prop::GProp_GProps::new();
 
         let inner_shape = ffi::topo_ds::cast_face_to_shape(&self.inner);
-        ffi::b_rep_g_prop::BRepGProp_SurfaceProperties(inner_shape, props.pin_mut());
+        let skip_shared = false;
+        let use_triangulation = false;
+        ffi::b_rep_g_prop::BRepGProp::SurfaceProperties(
+            inner_shape,
+            props.pin_mut(),
+            skip_shared,
+            use_triangulation,
+        );
 
         let center = props.center_of_mass();
 
@@ -292,7 +299,7 @@ impl Face {
         let mut p = ffi::gp::new_point(0.0, 0.0, 0.0);
         let mut normal = ffi::gp::new_vec(0.0, 1.0, 0.0);
 
-        let face = ffi::b_rep_g_prop::BRepGProp_Face::new(&self.inner);
+        let face = ffi::b_rep_g_prop::BRepGProp_Face_new(&self.inner);
         face.Normal(u, v, p.pin_mut(), normal.pin_mut());
 
         dvec3(normal.X(), normal.Y(), normal.Z())
@@ -368,7 +375,15 @@ impl Face {
         let mut props = ffi::g_prop::GProp_GProps::new();
 
         let inner_shape = ffi::topo_ds::cast_face_to_shape(&self.inner);
-        ffi::b_rep_g_prop::BRepGProp::surface_properties(inner_shape, props.pin_mut());
+
+        let skip_shared = false;
+        let use_triangulation = false;
+        ffi::b_rep_g_prop::BRepGProp::SurfaceProperties(
+            inner_shape,
+            props.pin_mut(),
+            skip_shared,
+            use_triangulation,
+        );
 
         // Returns surface area, obviously.
         props.Mass()

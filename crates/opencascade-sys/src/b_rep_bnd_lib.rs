@@ -1,5 +1,4 @@
 pub use inner::*;
-use std::pin::Pin;
 
 #[cxx::bridge]
 mod inner {
@@ -11,10 +10,7 @@ mod inner {
         type Bnd_Box = crate::bnd::Bnd_Box;
 
         type BRepBndLib;
-        pub fn BRepBndLib_Add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool);
+        #[Self = "BRepBndLib"]
+        pub fn Add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool);
     }
-}
-
-pub fn add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool) {
-    BRepBndLib_Add(shape, bb, use_triangulation)
 }

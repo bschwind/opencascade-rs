@@ -27,6 +27,7 @@ mod inner {
         pub fn Shape(self: Pin<&mut BRepFeat_MakeDPrism>) -> &TopoDS_Shape;
 
         type BRepFeat_MakeCylindricalHole;
+        #[cxx_name = "construct_unique"]
         pub fn BRepFeat_MakeCylindricalHole_ctor() -> UniquePtr<BRepFeat_MakeCylindricalHole>;
         pub fn Init(
             self: Pin<&mut BRepFeat_MakeCylindricalHole>,

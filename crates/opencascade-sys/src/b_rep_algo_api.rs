@@ -60,8 +60,6 @@ mod inner {
         pub fn Shape(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopoDS_Shape;
         pub fn Build(self: Pin<&mut BRepAlgoAPI_Section>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepAlgoAPI_Section) -> bool;
-        pub fn cast_section_to_builderalgo(
-            section: UniquePtr<BRepAlgoAPI_Section>,
-        ) -> UniquePtr<BRepAlgoAPI_BuilderAlgo>;
+        pub fn SectionEdges(self: Pin<&mut BRepAlgoAPI_Section>) -> &TopTools_ListOfShape;
     }
 }

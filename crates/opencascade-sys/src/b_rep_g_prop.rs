@@ -1,5 +1,3 @@
-use std::pin::Pin;
-
 pub use inner::*;
 
 #[cxx::bridge]
@@ -13,11 +11,30 @@ mod inner {
         type gp_Vec = crate::gp::gp_Vec;
         type GProp_GProps = crate::g_prop::GProp_GProps;
 
-        fn BRepGProp_LinearProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
-        fn BRepGProp_SurfaceProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
-        fn BRepGProp_VolumeProperties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>);
-
         type BRepGProp;
+        #[Self = "BRepGProp"]
+        fn LinearProperties(
+            shape: &TopoDS_Shape,
+            props: Pin<&mut GProp_GProps>,
+            skip_shared: bool,
+            use_triangulation: bool,
+        );
+        #[Self = "BRepGProp"]
+        fn SurfaceProperties(
+            shape: &TopoDS_Shape,
+            props: Pin<&mut GProp_GProps>,
+            skip_shared: bool,
+            use_triangulation: bool,
+        );
+        #[Self = "BRepGProp"]
+        fn VolumeProperties(
+            shape: &TopoDS_Shape,
+            props: Pin<&mut GProp_GProps>,
+            only_closed: bool,
+            skip_shared: bool,
+            use_triangulation: bool,
+        );
+
         type BRepGProp_Face;
 
         #[cxx_name = "construct_unique"]
@@ -29,29 +46,5 @@ mod inner {
             point: Pin<&mut gp_Pnt>,
             normal: Pin<&mut gp_Vec>,
         );
-    }
-}
-
-impl BRepGProp {
-    pub fn linear_properties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>) {
-        inner::BRepGProp_LinearProperties(shape, props)
-    }
-
-    pub fn surface_properties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>) {
-        inner::BRepGProp_SurfaceProperties(shape, props)
-    }
-
-    pub fn volume_properties(shape: &TopoDS_Shape, props: Pin<&mut GProp_GProps>) {
-        inner::BRepGProp_VolumeProperties(shape, props)
-    }
-}
-
-impl BRepGProp_Face {
-    pub fn new(face: &TopoDS_Face) -> cxx::UniquePtr<BRepGProp_Face> {
-        BRepGProp_Face_new(face)
-    }
-
-    pub fn normal(&self, u: f64, v: f64, point: Pin<&mut gp_Pnt>, normal: Pin<&mut gp_Vec>) {
-        self.Normal(u, v, point, normal);
     }
 }

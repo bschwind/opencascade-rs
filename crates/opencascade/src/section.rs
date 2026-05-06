@@ -13,9 +13,8 @@ impl Section {
     }
 
     /// Get the edges of the resulting intersection.
-    pub fn section_edges(self) -> Vec<Shape> {
-        let mut ba = ffi::b_rep_algo_api::cast_section_to_builderalgo(self.inner);
-        let edges = ffi::topo_ds::shape_list_to_vector(ba.pin_mut().SectionEdges());
+    pub fn section_edges(mut self) -> Vec<Shape> {
+        let edges = ffi::topo_ds::shape_list_to_vector(self.inner.pin_mut().SectionEdges());
 
         let mut vec = vec![];
 

@@ -44,7 +44,7 @@ impl BoundingBox {
 /// package.
 pub fn aabb(shape: &Shape) -> BoundingBox {
     let mut bb = BoundingBox::void();
-    ffi::b_rep_bnd_lib::add(
+    ffi::b_rep_bnd_lib::BRepBndLib::Add(
         shape.inner.as_ref().expect("Input shape ref was null"),
         bb.inner.pin_mut(),
         true,

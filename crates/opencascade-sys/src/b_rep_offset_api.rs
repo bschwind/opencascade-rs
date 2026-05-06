@@ -2,6 +2,14 @@ pub use inner::*;
 
 #[cxx::bridge]
 mod inner {
+    #[derive(Debug)]
+    #[repr(u32)]
+    pub enum BRepOffset_Mode {
+        BRepOffset_Skin,
+        BRepOffset_Pipe,
+        BRepOffset_RectoVerso,
+    }
+
     unsafe extern "C++" {
         include!("opencascade-sys/include/b_rep_offset_api.hxx");
 
@@ -12,6 +20,8 @@ mod inner {
         type TopTools_ListOfShape = crate::top_tools::TopTools_ListOfShape;
         type Message_ProgressRange = crate::message::Message_ProgressRange;
         type Handle_Law_Function = crate::law::Handle_Law_Function;
+
+        type BRepOffset_Mode;
 
         type BRepOffsetAPI_MakeOffset;
         #[cxx_name = "construct_unique"]
@@ -32,13 +42,21 @@ mod inner {
         type BRepOffsetAPI_MakeThickSolid;
         #[cxx_name = "construct_unique"]
         pub fn BRepOffsetAPI_MakeThickSolid_ctor() -> UniquePtr<BRepOffsetAPI_MakeThickSolid>;
+        #[allow(clippy::too_many_arguments)]
         pub fn MakeThickSolidByJoin(
-            make_thick_solid: Pin<&mut BRepOffsetAPI_MakeThickSolid>,
+            self: Pin<&mut BRepOffsetAPI_MakeThickSolid>,
             shape: &TopoDS_Shape,
             closing_faces: &TopTools_ListOfShape,
             offset: f64,
             tolerance: f64,
+            offset_mode: BRepOffset_Mode,
+            intersection: bool,
+            self_intersection: bool,
+            join_type: GeomAbs_JoinType,
+            remove_intersecting_edges: bool,
+            progress: &Message_ProgressRange,
         );
+
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeThickSolid>) -> &TopoDS_Shape;
         pub fn Build(
             self: Pin<&mut BRepOffsetAPI_MakeThickSolid>,

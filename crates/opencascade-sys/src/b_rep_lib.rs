@@ -10,10 +10,11 @@ mod inner {
         type Handle_Poly_Triangulation = crate::poly::Handle_Poly_Triangulation;
 
         type BRepLib;
-        pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
+        #[Self = "BRepLib"]
+        pub fn BuildCurves3d(shape: &TopoDS_Shape) -> bool;
 
         type BRepLib_ToolTriangulatedShape;
-
-        pub fn compute_normals(face: &TopoDS_Face, triangulation: &Handle_Poly_Triangulation);
+        #[Self = "BRepLib_ToolTriangulatedShape"]
+        pub fn ComputeNormals(face: &TopoDS_Face, triangulation: &Handle_Poly_Triangulation);
     }
 }

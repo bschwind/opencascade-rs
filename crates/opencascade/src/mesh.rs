@@ -89,7 +89,10 @@ impl Mesher {
             // TODO(bschwind) - Use `location` to transform the normals.
             let normal_array = ffi::t_col_gp::TColgp_Array1OfDir_ctor(0, face_point_count);
 
-            ffi::b_rep_lib::compute_normals(&face.inner, &triangulation_handle);
+            ffi::b_rep_lib::BRepLib_ToolTriangulatedShape::ComputeNormals(
+                &face.inner,
+                &triangulation_handle,
+            );
 
             // TODO(bschwind) - Why do we start at 1 here?
             for i in 1..(normal_array.Length() as usize) {

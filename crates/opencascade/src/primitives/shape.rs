@@ -774,12 +774,24 @@ impl Shape {
         }
 
         let mut solid_maker = ffi::b_rep_offset_api::BRepOffsetAPI_MakeThickSolid_ctor();
-        ffi::b_rep_offset_api::MakeThickSolidByJoin(
-            solid_maker.pin_mut(),
+
+        let offset_mode = ffi::b_rep_offset_api::BRepOffset_Mode::BRepOffset_Skin;
+        let intersection = false;
+        let self_intersection = false;
+        let join_type = ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Arc;
+        let remove_intersecting_edges = false;
+
+        solid_maker.pin_mut().MakeThickSolidByJoin(
             &self.inner,
             &faces_list,
             offset,
             0.001,
+            offset_mode,
+            intersection,
+            self_intersection,
+            join_type,
+            remove_intersecting_edges,
+            &ffi::message::Message_ProgressRange_ctor(),
         );
 
         Self::from_shape(solid_maker.pin_mut().Shape())
