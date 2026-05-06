@@ -1,5 +1,7 @@
+#pragma once
 #include "rust/cxx.h"
 #include <NCollection_List.hxx>
+#include <memory>
 
 // Generic template constructor
 template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
