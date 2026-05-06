@@ -771,9 +771,8 @@ impl Shape {
         let mut faces_list = ffi::top_tools::new_list_of_shape();
 
         for face in faces_to_remove.into_iter() {
-            let face = face.as_ref();
-            let shape = Shape::from(face);
-            faces_list.pin_mut().Append(&shape.inner);
+            let shape = ffi::topo_ds::cast_face_to_shape(&face.as_ref().inner);
+            faces_list.pin_mut().Append(shape);
         }
 
         let mut solid_maker = ffi::b_rep_offset_api::BRepOffsetAPI_MakeThickSolid_ctor();
