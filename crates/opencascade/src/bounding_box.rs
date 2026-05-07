@@ -13,7 +13,7 @@ pub struct BoundingBox {
 impl BoundingBox {
     /// Create a new void box. A void box in OCC is defined as a box that contains no points.
     pub fn void() -> BoundingBox {
-        Self { inner: ffi::bnd::Bnd_Box::new() }
+        Self { inner: ffi::bnd::Bnd_Box_new() }
     }
 
     pub fn is_void(&self) -> bool {
@@ -25,12 +25,12 @@ impl BoundingBox {
     }
 
     pub fn min(&self) -> DVec3 {
-        let p = self.inner.corner_min();
+        let p = ffi::bnd::Bnd_Box_CornerMin(&self.inner);
         glam::dvec3(p.X(), p.Y(), p.Z())
     }
 
     pub fn max(&self) -> DVec3 {
-        let p = self.inner.corner_max();
+        let p = ffi::bnd::Bnd_Box_CornerMax(&self.inner);
         glam::dvec3(p.X(), p.Y(), p.Z())
     }
 

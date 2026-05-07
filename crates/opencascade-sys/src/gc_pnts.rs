@@ -1,4 +1,3 @@
-use cxx::UniquePtr;
 pub use inner::*;
 
 #[cxx::bridge]
@@ -21,23 +20,5 @@ mod inner {
             approximator: &GCPnts_TangentialDeflection,
             index: i32,
         ) -> UniquePtr<gp_Pnt>;
-    }
-}
-
-impl GCPnts_TangentialDeflection {
-    pub fn new(
-        curve: &BRepAdaptor_Curve,
-        angular_deflection: f64,
-        curvature_deflection: f64,
-    ) -> cxx::UniquePtr<Self> {
-        TangentialDeflection_new(curve, angular_deflection, curvature_deflection)
-    }
-
-    pub fn num_points(&self) -> i32 {
-        self.NbPoints()
-    }
-
-    pub fn value(&self, index: i32) -> UniquePtr<gp_Pnt> {
-        GCPnts_TangentialDeflection_Value(self, index)
     }
 }

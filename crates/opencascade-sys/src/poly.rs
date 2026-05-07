@@ -1,4 +1,3 @@
-use cxx::UniquePtr;
 pub use inner::*;
 
 #[cxx::bridge]
@@ -65,35 +64,4 @@ mod inner {
     }
 
     impl UniquePtr<Handle_Poly_Triangulation> {}
-}
-
-impl Poly_Triangulation {
-    pub fn new(
-        nb_nodes: i32,
-        nb_triangles: i32,
-        has_uv: bool,
-        has_normals: bool,
-    ) -> UniquePtr<Self> {
-        Triangulation_new(nb_nodes, nb_triangles, has_uv, has_normals)
-    }
-
-    pub fn num_nodes(&self) -> i32 {
-        self.NbNodes()
-    }
-
-    pub fn num_triangles(&self) -> i32 {
-        self.NbTriangles()
-    }
-
-    pub fn node(&self, index: i32) -> UniquePtr<gp_Pnt> {
-        Poly_Triangulation_Node(self, index)
-    }
-
-    pub fn uv(&self, index: i32) -> UniquePtr<gp_Pnt2d> {
-        Poly_Triangulation_UV(self, index)
-    }
-
-    pub fn normal(&self, index: i32) -> UniquePtr<gp_Dir> {
-        Poly_Triangulation_Normal(self, index)
-    }
 }

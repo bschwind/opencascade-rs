@@ -271,7 +271,7 @@ impl Face {
     }
 
     pub fn center_of_mass(&self) -> DVec3 {
-        let mut props = ffi::g_prop::GProp_GProps::new();
+        let mut props = ffi::g_prop::GProps_new();
 
         let inner_shape = ffi::topo_ds::cast_face_to_shape(&self.inner);
         let skip_shared = false;
@@ -283,7 +283,7 @@ impl Face {
             use_triangulation,
         );
 
-        let center = props.center_of_mass();
+        let center = ffi::g_prop::GProp_GProps_CentreOfMass(&props);
 
         dvec3(center.X(), center.Y(), center.Z())
     }
@@ -372,7 +372,7 @@ impl Face {
     }
 
     pub fn surface_area(&self) -> f64 {
-        let mut props = ffi::g_prop::GProp_GProps::new();
+        let mut props = ffi::g_prop::GProps_new();
 
         let inner_shape = ffi::topo_ds::cast_face_to_shape(&self.inner);
 

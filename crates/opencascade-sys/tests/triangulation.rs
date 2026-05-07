@@ -26,7 +26,10 @@ fn it_can_access_mesh_triangulation() {
                 let triangle = triangulation.Triangle(index + 1);
 
                 for corner_index in 1..=3 {
-                    let _point = triangulation.node(triangle.Value(corner_index));
+                    let _point = ffi::poly::Poly_Triangulation_Node(
+                        triangulation,
+                        triangle.Value(corner_index),
+                    );
                     triangle_corners += 1;
                 }
             }

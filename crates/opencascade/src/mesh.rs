@@ -51,7 +51,7 @@ impl Mesher {
             let face_point_count = triangulation.NbNodes();
 
             for i in 1..=face_point_count {
-                let mut point = triangulation.node(i);
+                let mut point = ffi::poly::Poly_Triangulation_Node(triangulation, i);
                 point.pin_mut().Transform(&location.transform());
                 vertices.push(dvec3(point.X(), point.Y(), point.Z()));
             }
@@ -63,7 +63,7 @@ impl Mesher {
             let mut v_max = f64::NEG_INFINITY;
 
             for i in 1..=(face_point_count) {
-                let uv = triangulation.uv(i);
+                let uv = ffi::poly::Poly_Triangulation_UV(triangulation, i);
                 let (u, v) = (uv.X(), uv.Y());
 
                 u_min = u_min.min(u);
@@ -96,7 +96,7 @@ impl Mesher {
 
             // TODO(bschwind) - Why do we start at 1 here?
             for i in 1..(normal_array.Length() as usize) {
-                let normal = triangulation.normal(i as i32);
+                let normal = ffi::poly::Poly_Triangulation_Normal(triangulation, i as i32);
                 normals.push(dvec3(normal.X(), normal.Y(), normal.Z()));
             }
 

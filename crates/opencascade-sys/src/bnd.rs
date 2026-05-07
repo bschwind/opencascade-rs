@@ -1,5 +1,4 @@
 pub use inner::*;
-use std::pin::Pin;
 
 #[cxx::bridge]
 mod inner {
@@ -27,27 +26,5 @@ mod inner {
         fn GetGap(self: &Bnd_Box) -> f64;
         fn Set(self: Pin<&mut Bnd_Box>, p: &gp_Pnt);
         fn SetGap(self: Pin<&mut Bnd_Box>, gap: f64);
-    }
-}
-
-impl Bnd_Box {
-    pub fn new() -> cxx::UniquePtr<Self> {
-        Bnd_Box_new()
-    }
-
-    pub fn corner_min(&self) -> cxx::UniquePtr<gp_Pnt> {
-        Bnd_Box_CornerMin(self)
-    }
-
-    pub fn corner_max(&self) -> cxx::UniquePtr<gp_Pnt> {
-        Bnd_Box_CornerMax(self)
-    }
-
-    pub fn gap(&self) -> f64 {
-        self.GetGap()
-    }
-
-    pub fn set_gap(self: Pin<&mut Bnd_Box>, gap: f64) {
-        self.SetGap(gap);
     }
 }
