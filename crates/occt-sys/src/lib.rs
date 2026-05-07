@@ -18,6 +18,10 @@ pub fn occt_path() -> PathBuf {
 
 /// Build the OCCT library.
 pub fn build_occt() {
+    // Get the Cargo profile and map it to CMake build type
+    let profile = var("PROFILE").unwrap_or_else(|_| "debug".to_string());
+    let cmake_profile = if profile == "release" { "Release" } else { "Debug" };
+    
     cmake::Config::new(Path::new(env!("OCCT_SRC_DIR")))
         .define("BUILD_PATCH", Path::new(env!("OCCT_PATCH_DIR")))
         .define("BUILD_LIBRARY_TYPE", "Static")
@@ -40,7 +44,7 @@ pub fn build_occt() {
         .define("USE_XLIB", "FALSE")
         .define("INSTALL_DIR_LIB", LIB_DIR)
         .define("INSTALL_DIR_INCLUDE", INCLUDE_DIR)
-        .profile("Release")
+        .profile(cmake_profile)
         .out_dir(occt_path())
         .build();
 }
