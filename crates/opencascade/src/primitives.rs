@@ -1,6 +1,6 @@
 use cxx::UniquePtr;
 use glam::{DVec2, DVec3};
-use opencascade_sys::ffi;
+use opencascade_sys as ffi;
 
 mod boolean_shape;
 mod compound;
@@ -60,19 +60,21 @@ pub enum ShapeType {
     Compound,
 }
 
-impl From<ffi::TopAbs_ShapeEnum> for ShapeType {
-    fn from(shape_enum: ffi::TopAbs_ShapeEnum) -> Self {
+impl From<ffi::top_abs::TopAbs_ShapeEnum> for ShapeType {
+    fn from(shape_enum: ffi::top_abs::TopAbs_ShapeEnum) -> Self {
         match shape_enum {
-            ffi::TopAbs_ShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
-            ffi::TopAbs_ShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
-            ffi::TopAbs_ShapeEnum::TopAbs_EDGE => ShapeType::Edge,
-            ffi::TopAbs_ShapeEnum::TopAbs_WIRE => ShapeType::Wire,
-            ffi::TopAbs_ShapeEnum::TopAbs_FACE => ShapeType::Face,
-            ffi::TopAbs_ShapeEnum::TopAbs_SHELL => ShapeType::Shell,
-            ffi::TopAbs_ShapeEnum::TopAbs_SOLID => ShapeType::Solid,
-            ffi::TopAbs_ShapeEnum::TopAbs_COMPSOLID => ShapeType::CompoundSolid,
-            ffi::TopAbs_ShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
-            ffi::TopAbs_ShapeEnum { repr } => panic!("Unexpected shape type: {repr}"),
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_SHAPE => ShapeType::Shape,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_VERTEX => ShapeType::Vertex,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE => ShapeType::Edge,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_WIRE => ShapeType::Wire,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_FACE => ShapeType::Face,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_SHELL => ShapeType::Shell,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_SOLID => ShapeType::Solid,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_COMPSOLID => ShapeType::CompoundSolid,
+            ffi::top_abs::TopAbs_ShapeEnum::TopAbs_COMPOUND => ShapeType::Compound,
+            ffi::top_abs::TopAbs_ShapeEnum { repr } => {
+                panic!("Unexpected shape type: {repr}")
+            },
         }
     }
 }
@@ -87,32 +89,32 @@ impl<T: Into<Shape>> IntoShape for T {
     }
 }
 
-pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp_Pnt> {
-    ffi::new_point(p.x, p.y, p.z)
+pub fn make_point(p: DVec3) -> UniquePtr<ffi::gp::gp_Pnt> {
+    ffi::gp::new_point(p.x, p.y, p.z)
 }
 
-pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::gp_Pnt2d> {
-    ffi::new_point_2d(p.x, p.y)
+pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::gp::gp_Pnt2d> {
+    ffi::gp::new_point_2d(p.x, p.y)
 }
 
-fn make_dir(p: DVec3) -> UniquePtr<ffi::gp_Dir> {
-    ffi::gp_Dir_ctor(p.x, p.y, p.z)
+fn make_dir(p: DVec3) -> UniquePtr<ffi::gp::gp_Dir> {
+    ffi::gp::gp_Dir_new(p.x, p.y, p.z)
 }
 
-fn make_vec(vec: DVec3) -> UniquePtr<ffi::gp_Vec> {
-    ffi::new_vec(vec.x, vec.y, vec.z)
+fn make_vec(vec: DVec3) -> UniquePtr<ffi::gp::gp_Vec> {
+    ffi::gp::new_vec(vec.x, vec.y, vec.z)
 }
 
-fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax1> {
-    ffi::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
+fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp::gp_Ax1> {
+    ffi::gp::gp_Ax1_new(&make_point(origin), &make_dir(dir))
 }
 
-pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp_Ax2> {
-    ffi::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
+pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp::gp_Ax2> {
+    ffi::gp::gp_Ax2_new(&make_point(origin), &make_dir(dir))
 }
 
 pub struct EdgeIterator {
-    explorer: UniquePtr<ffi::TopExp_Explorer>,
+    explorer: UniquePtr<ffi::top_exp::TopExp_Explorer>,
 }
 
 impl Iterator for EdgeIterator {
@@ -120,7 +122,7 @@ impl Iterator for EdgeIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.explorer.More() {
-            let edge = ffi::TopoDS_cast_to_edge(self.explorer.Current());
+            let edge = ffi::topo_ds::TopoDS::Edge(self.explorer.Current());
             let edge = Edge::from_edge(edge);
 
             self.explorer.pin_mut().Next();
@@ -149,7 +151,7 @@ impl EdgeIterator {
 }
 
 pub struct FaceIterator {
-    explorer: UniquePtr<ffi::TopExp_Explorer>,
+    explorer: UniquePtr<ffi::top_exp::TopExp_Explorer>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -200,7 +202,7 @@ impl Iterator for FaceIterator {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.explorer.More() {
-            let face = ffi::TopoDS_cast_to_face(self.explorer.Current());
+            let face = ffi::topo_ds::TopoDS::Face(self.explorer.Current());
             let face = Face::from_face(face);
 
             self.explorer.pin_mut().Next();
@@ -243,23 +245,25 @@ pub enum JoinType {
     Intersection,
 }
 
-impl From<ffi::GeomAbs_JoinType> for JoinType {
-    fn from(value: ffi::GeomAbs_JoinType) -> Self {
+impl From<ffi::geom_abs::GeomAbs_JoinType> for JoinType {
+    fn from(value: ffi::geom_abs::GeomAbs_JoinType) -> Self {
         match value {
-            ffi::GeomAbs_JoinType::GeomAbs_Arc => Self::Arc,
-            //ffi::GeomAbs_JoinType::GeomAbs_Tangent => Self::Tangent,
-            ffi::GeomAbs_JoinType::GeomAbs_Intersection => Self::Intersection,
-            ffi::GeomAbs_JoinType { repr } => panic!("Unexpected join type: {repr}"),
+            ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Arc => Self::Arc,
+            //ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Tangent => Self::Tangent,
+            ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Intersection => Self::Intersection,
+            ffi::geom_abs::GeomAbs_JoinType { repr } => {
+                panic!("Unexpected join type: {repr}")
+            },
         }
     }
 }
 
-impl From<JoinType> for ffi::GeomAbs_JoinType {
+impl From<JoinType> for ffi::geom_abs::GeomAbs_JoinType {
     fn from(value: JoinType) -> Self {
         match value {
-            JoinType::Arc => ffi::GeomAbs_JoinType::GeomAbs_Arc,
-            //JoinType::Tangent => ffi::GeomAbs_JoinType::GeomAbs_Tangent,
-            JoinType::Intersection => ffi::GeomAbs_JoinType::GeomAbs_Intersection,
+            JoinType::Arc => ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Arc,
+            //JoinType::Tangent => ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Tangent,
+            JoinType::Intersection => ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Intersection,
         }
     }
 }

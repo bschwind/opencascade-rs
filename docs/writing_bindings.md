@@ -14,15 +14,25 @@ At the very bottom, we have the [occt-sys crate](../crates/occt-sys/), which bui
 
 Right above this is [opencascade-sys crate](../crates/opencascade-sys), which has a [build.rs](../crates/opencascade-sys/build.rs) file with necessary `cxx` infrastructure to compile its wrapper and C++ bindings to OpenCascade.
 
-In the theme of keeping it minimal, the OpenCascade libraries we statically link to are all explicitly laid out with `cargo:rustc-link-lib=static=LIB_NAME_HERE` cargo directives.
+In the theme of keeping it minimal, the OpenCascade libraries we statically link to are all explicitly laid out with `cargo:rustc-link-lib=static=LIB_NAME_HERE` cargo directives in `opencascade-sys`' build.rs file.
 
 ### C++/Rust Bridge File
 
-In order to expose C++ types to Rust, and vice-versa, we need to write what cxx.rs calls a "bridge" file or module. This project currently has [one giant bridge file](../crates/opencascade-sys/src/lib.rs), but in the interest of organization this will eventually be broken up into sensible modules.
+In order to expose C++ types to Rust, and vice-versa, we need to write what cxx.rs calls a "bridge" file or module. For this project, there is one bridge file per OpenCascade "module" (basically each child directory of OpenCascade's `src/` directory).
 
-At the very top of the bridge module we can define types that are visible to both C++ and Rust, such as simple enums which can be represented as `u32`, for example.
+At the very top of each bridge module we can define types that are visible to both C++ and Rust, such as simple enums which can be represented as `u32`, for example.
 
-Pretty much everything else goes inside of an `unsafe extern "C++" {}` block. Inside of this block, we declare opaque C++ types that we want Rust to know about. It is enough to simply state `type SOME_CPP_TYPE_HERE;` to make this declaration. `cxx` will then search included headers and make sure that type exists in the C++ world. With just the type, you can't really do anything, so you also need to start declaring functions that _should_ exist in the C++ world which you want to use.
+Pretty much everything else goes inside of an `unsafe extern "C++" {}` block. Inside of this block, we declare opaque C++ types that we want Rust to know about. It is enough to simply state `type SOME_CPP_TYPE_HERE;` to make this declaration. `cxx` will then search included headers and make sure that type exists in the C++ world.
+
+Sometimes APIs for one module refer to types from another module. You can "forward declare" them like so:
+
+```rust
+type TopoDS_Shape = crate::topo_ds::TopoDS_Shape;
+```
+
+Reference: https://cxx.rs/extern-c++.html#reusing-existing-binding-types
+
+With just the type, you can't really do anything, so you also need to start declaring functions that _should_ exist in the C++ world which you want to use.
 
 There are some rules to how we define these functions in our code:
 
@@ -34,6 +44,27 @@ There are some rules to how we define these functions in our code:
 * If you're binding to a free-floating function, then avoid using the special `self` keyword as the name for a function argument, and just use `&T` and `Pin<&mut T>` as appropriate.
 * From what I can tell, generics don't work from Rust to C++ templates. If you have a C++ type called `Handle<Edge>`, you'll need to declare your own C++ type called `HandleEdge` or whatever you want, and alias it to the full type (ex:`typedef opencascade::handle<Edge> HandleEdge;`
 * You can use `#[cxx_name = "SomeCPPFunctionName"]` to tell `cxx` the _real_ name of the C++ function you want to use, and `#[rust_name = "some_rust_fn_name"]` to control what the name of the function is exposed to the Rust side of things. If you don't use these attributes, the exported Rust function is exactly the same as the C++ function name.
+
+If you want to bind to a static class function, you can use a `Self` attribute to bind to it. For example, if you had this C++ function:
+
+```c++
+Standard_EXPORT static void ConnectEdgesToWires (Handle(TopTools_HSequenceOfShape)& edges, const Standard_Real toler, const Standard_Boolean shared, Handle(TopTools_HSequenceOfShape)& wires);
+```
+
+the binding would be:
+
+```rust
+type ShapeAnalysis_FreeBounds;
+#[Self = "ShapeAnalysis_FreeBounds"]
+pub fn ConnectEdgesToWires(
+    edges: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+    tolerance: f64,
+    shared: bool,
+    wires: Pin<&mut Handle_TopTools_HSequenceOfShape>,
+);
+```
+
+and it can then be called with `ShapeAnalysis_FreeBounds::ConnectEdgesToWires(...)`.
 
 #### Getting a `Pin<&mut T>`
 
@@ -56,7 +87,7 @@ Here is an example of binding to the constructor of `BRepPrimAPI_MakeBox`, which
 
 ```rust
 #[cxx_name = "construct_unique"]
-pub fn BRepPrimAPI_MakeBox_ctor(
+pub fn BRepPrimAPI_MakeBox_new(
     point: &gp_Pnt,
     dx: f64,
     dy: f64,
@@ -64,9 +95,9 @@ pub fn BRepPrimAPI_MakeBox_ctor(
 ) -> UniquePtr<BRepPrimAPI_MakeBox>;
 ```
 
-With this declaration, we can bind to a C++ constructor and name it `BRepPrimAPI_MakeBox_ctor` on the Rust side without having to write any extra C++ code.
+With this declaration, we can bind to a C++ constructor and name it `BRepPrimAPI_MakeBox_new` on the Rust side without having to write any extra C++ code.
 
-### wrapper.hxx
+### Wrapper header files
 
 Sometimes automatic bindings with cxx just doesn't work out - you could be trying to access a static member of a class, cxx can't see through the polymorphism for a parent class method you're trying to call, or the constructor or function you're trying to call doesn't quite follow the `construct_unique` pattern shown above.
 
@@ -80,7 +111,7 @@ To work around this, I define a Rust function in the cxx bridge like so:
 pub fn BRepAdaptor_Curve_value(curve: &BRepAdaptor_Curve, u: f64) -> UniquePtr<gp_Pnt>;
 ```
 
-Then I add a C++ function with the same name in `wrapper.hxx`:
+Then I add a C++ function with the same name in `b_rep_adaptor.hxx`:
 
 ```c++
 inline std::unique_ptr<gp_Pnt> BRepAdaptor_Curve_value(const BRepAdaptor_Curve &curve, const Standard_Real U) {
@@ -103,8 +134,40 @@ reader.TransferRoots();
 TopoDS_Shape shape = reader.OneShape();
 ```
 
+### Step 1 - Create the boilerplate files
 
-### Step 1 - Declare the C++ types and functions in the bridge file
+STEP functionality exists in the OpenCascade `src/STEPControl` module. So if this module doesn't already exist in the Rust bindings, we'll create one in `opencascade-sys/src/step_control.rs`.
+
+OpenCascade uses one file per C++ class, but we'll keep it at one Rust file per OpenCascade _module_ to keep things manageable.
+
+Immediately add your Rust file to:
+
+* `opencascade-sys/build.rs`, which has a list of Rust bridge source files
+* `opencascade-sys/build.rs` as a module (`pub mod step_control;`)
+
+Next, populate your `opencascade-sys/src/step_control.rs` bridge file with:
+
+```rust
+// `opencascade-sys/src/step_control.rs`
+pub use inner::*;
+
+#[cxx::bridge]
+mod inner {
+    unsafe extern "C++" {
+        include!("opencascade-sys/include/step_control.hxx");
+    }
+}
+```
+
+You will also need to create `opencascade-sys/include/step_control.hxx`, which starts like this:
+
+```c++
+#include <bindings_common.hxx>
+```
+
+In `step_control.hxx` you will eventually need to add `#include` directives to include the various OpenCascade headers for types you'll be using/referencing in your bridge file.
+
+### Step 2 - Declare the C++ types and functions in the bridge file
 First we need to make the cxx bridge aware of the STEPControl_Reader type, and define a constructor function:
 
 ```rust
@@ -114,7 +177,7 @@ type STEPControl_Reader;
 pub fn STEPControl_Reader_ctor() -> UniquePtr<STEPControl_Reader>;
 ```
 
-Mercifully, the reader constructor requires zero parameters. But the next step, reading from a file, requires us to pass a String argument for the file name. cxx provides some facilities for converting between Rust strings and C++ strings, but now we'll have to define a function manually in `wrapper.hxx`.
+Mercifully, the reader constructor requires zero parameters. But the next step, reading from a file, requires us to pass a String argument for the file name. cxx provides some facilities for converting between Rust strings and C++ strings, but now we'll have to define a function manually in `step_control.hxx`.
 
 ```rust
 pub fn read_step(
@@ -126,10 +189,10 @@ pub fn read_step(
 This returns a `IFSelect_ReturnStatus` so we also need to declare that type in the bridge file:
 
 ```rust
-type IFSelect_ReturnStatus;
+type IFSelect_ReturnStatus = crate::if_select::IFSelect_ReturnStatus;
 ```
 
-The cool part here is that `IFSelect_ReturnStatus` is just a simple enum, so we can actually declare a Rust enum of the same name inside of the bridge `ffi` module, but outside of the `unsafe extern "C++" {}` block:
+Aside: a cool part here is that `IFSelect_ReturnStatus` is just a simple enum, so we can actually declare a Rust enum of the same name inside of the bridge `inner` module, but outside of the `unsafe extern "C++" {}` block:
 
 ```rust
 #[derive(Debug)]
@@ -145,9 +208,9 @@ pub enum IFSelect_ReturnStatus {
 
 This means we can have functions which return `IFSelect_ReturnStatus` directly instead of dealing with it behind a reference or smart pointer.
 
-### Step 2 - Write the wrapper C++ code
+### Step 3 - Write the wrapper C++ code
 
-The wrapper functions usually end up being trivial, they usually just have an easy-to-bind signature from Rust and then do whatever translation is required. In this case, we're returning an enum that is declared.
+The wrapper functions usually end up being trivial, they usually just have an easy-to-bind signature from Rust and then do whatever translation is required. In this case, we're calling `c_str` in the C++ code in order to allow Rust to pass its own String type in directly.
 
 ```c++
 inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String theFileName) {
@@ -155,15 +218,15 @@ inline IFSelect_ReturnStatus read_step(STEPControl_Reader &reader, rust::String 
 }
 ```
 
-### Step 3 - Include the proper files in wrapper.hxx
+### Step 4 - Include the proper files in step_control.hxx
 
-In our case, we need to throw this include at the top of `wrapper.hxx`
+In our case, we need to throw this include at the top of `step_control.hxx`
 
 ```c++
 #include <STEPControl_Reader.hxx>
 ```
 
-### Step 4 - Declare the rest of the C++ functions
+### Step 5 - Declare the rest of the C++ functions
 
 The next function to bind is `reader.TransferRoots()`. Its C++ definition looks like this:
 
@@ -202,11 +265,11 @@ inline std::unique_ptr<TopoDS_Shape> one_shape_step(const STEPControl_Reader &re
 }
 ```
 
-### Step 5 - Link to the OpenCascade libraries in `build.rs`
+### Step 6 - Link to the OpenCascade libraries in `build.rs`
 
 OpenCascade is split up into lots of smaller libraries, and sometimes if you're bringing in new functionality for the first time, you may need to link to a new library. Otherwise you'll run into huge amounts of linker errors if you try to build a binary based on this new code.
 
-In the case of adding STEP file support, we need to link to five (!) different libraries. We'll add them in `build.rs`:
+In the case of adding STEP file support, we need to link to five (!) different libraries. We'll add them in `opencascade-sys/build.rs`:
 
 ```rust
 println!("cargo:rustc-link-lib=static=TKSTEP");
@@ -222,7 +285,11 @@ How do you know which libraries to link? If you look up `STEPControl_Reader` you
 
 The rest of the libraries were found through trial and error. The linker will complain that symbols are missing, so copy-paste those symbols into a search engine, find them on OpenCascade's documentation site, and note which library they came from. Alternatively, you could poke through the project's CMake and other build files to determine which libraries you need to link to.
 
-### Step 6 - Give it a nicer Rust API
+Update - The STEP module has now been moved to be `TKDESTEP`, but the general flow above still applies. Also check `OCCT/adm/MODULES` for a list of all modules. Keep in mind this project also maintains a patch directory (`occt-sys/patch`) which uses a minimized `MODULES` and `RESOURCES` file to reduce code size and build times, as we don't need things like visualization code or test files.
+
+If you want to search purely by the OpenCascade codebase, find your module in a `PACAKGES` file. For example, the `STEPControl` module is listed in `TKDESTEP/PACKAGES`. If OpenCascade ever changes module layout, this may change so double check what you find.
+
+### Step 7 - Give it a nicer Rust API
 
 Finally, we can create a higher level Rust function which reads a STEP file and returns a `Shape` primitive:
 
