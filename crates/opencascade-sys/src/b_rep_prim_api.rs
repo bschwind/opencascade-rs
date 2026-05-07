@@ -14,7 +14,7 @@ mod inner {
 
         type BRepPrimAPI_MakePrism;
         #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakePrism_ctor(
+        pub fn BRepPrimAPI_MakePrism_new(
             shape: &TopoDS_Shape,
             vec: &gp_Vec,
             copy: bool,
@@ -26,7 +26,7 @@ mod inner {
 
         type BRepPrimAPI_MakeRevol;
         #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeRevol_ctor(
+        pub fn BRepPrimAPI_MakeRevol_new(
             shape: &TopoDS_Shape,
             axis: &gp_Ax1,
             angle: f64,
@@ -38,7 +38,7 @@ mod inner {
 
         type BRepPrimAPI_MakeCylinder;
         #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeCylinder_ctor(
+        pub fn BRepPrimAPI_MakeCylinder_new(
             coord_system: &gp_Ax2,
             radius: f64,
             height: f64,
@@ -49,7 +49,7 @@ mod inner {
 
         type BRepPrimAPI_MakeBox;
         #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeBox_ctor(
+        pub fn BRepPrimAPI_MakeBox_new(
             point: &gp_Pnt,
             dx: f64,
             dy: f64,
@@ -61,7 +61,7 @@ mod inner {
 
         type BRepPrimAPI_MakeSphere;
         #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeSphere_ctor(
+        pub fn BRepPrimAPI_MakeSphere_new(
             axis: &gp_Ax2,
             r: f64,
             angle_1: f64,
@@ -72,7 +72,7 @@ mod inner {
 
         type BRepPrimAPI_MakeCone;
         #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeCone_ctor(
+        pub fn BRepPrimAPI_MakeCone_new(
             axis: &gp_Ax2,
             r1: f64,
             r2: f64,
@@ -85,7 +85,7 @@ mod inner {
 
         type BRepPrimAPI_MakeTorus;
         #[cxx_name = "construct_unique"]
-        pub fn BRepPrimAPI_MakeTorus_ctor(
+        pub fn BRepPrimAPI_MakeTorus_new(
             axis: &gp_Ax2,
             r1: f64,
             r2: f64,

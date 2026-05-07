@@ -20,7 +20,7 @@ mod inner {
         // End Handles
 
         type Geom2d_Ellipse;
-        pub fn Geom2d_Ellipse_ctor(
+        pub fn Geom2d_Ellipse_new(
             axis: &gp_Ax2d,
             major_radius: f64,
             minor_radius: f64,
@@ -32,7 +32,7 @@ mod inner {
 
         type Geom2d_Curve;
         type Geom2d_TrimmedCurve;
-        pub fn Geom2d_TrimmedCurve_ctor(
+        pub fn Geom2d_TrimmedCurve_new(
             curve_handle: &Handle_Geom2d_Curve,
             u1: f64,
             u2: f64,

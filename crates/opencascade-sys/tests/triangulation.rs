@@ -3,14 +3,13 @@ use opencascade_sys as ffi;
 #[test]
 fn it_can_access_mesh_triangulation() {
     let origin = opencascade_sys::gp::new_point(0., 0., 0.);
-    let mut cube =
-        opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeBox_ctor(&origin, 10., 10., 10.);
+    let mut cube = opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeBox_new(&origin, 10., 10., 10.);
 
     let mut mesh = opencascade_sys::b_rep_mesh::IncrementalMesh_new(cube.pin_mut().Shape(), 0.01);
 
     let mut triangle_corners = 0;
 
-    let mut edge_explorer = opencascade_sys::top_exp::TopExp_Explorer_ctor(
+    let mut edge_explorer = opencascade_sys::top_exp::TopExp_Explorer_new(
         mesh.pin_mut().Shape(),
         opencascade_sys::top_abs::TopAbs_ShapeEnum::TopAbs_FACE,
     );

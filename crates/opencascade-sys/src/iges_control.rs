@@ -11,7 +11,7 @@ mod inner {
 
         type IGESControl_Reader;
         #[cxx_name = "construct_unique"]
-        pub fn IGESControl_Reader_ctor() -> UniquePtr<IGESControl_Reader>;
+        pub fn IGESControl_Reader_new() -> UniquePtr<IGESControl_Reader>;
         pub fn read_iges(
             reader: Pin<&mut IGESControl_Reader>,
             filename: String,
@@ -24,7 +24,7 @@ mod inner {
 
         type IGESControl_Writer;
         #[cxx_name = "construct_unique"]
-        pub fn IGESControl_Writer_ctor() -> UniquePtr<IGESControl_Writer>;
+        pub fn IGESControl_Writer_new() -> UniquePtr<IGESControl_Writer>;
         pub fn AddShape(
             self: Pin<&mut IGESControl_Writer>,
             shape: &TopoDS_Shape,

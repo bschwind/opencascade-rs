@@ -58,7 +58,7 @@ mod inner {
         #[cxx_name = "construct_unique"]
         fn Connect_new(triangulation: &Handle_Poly_Triangulation) -> UniquePtr<Poly_Connect>;
 
-        pub fn Handle_Poly_Triangulation_ctor(
+        pub fn Handle_Poly_Triangulation_new(
             triangulation: UniquePtr<Poly_Triangulation>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
     }

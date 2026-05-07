@@ -14,7 +14,7 @@ mod inner {
 
         type BRepFilletAPI_MakeFillet;
         #[cxx_name = "construct_unique"]
-        pub fn BRepFilletAPI_MakeFillet_ctor(
+        pub fn BRepFilletAPI_MakeFillet_new(
             shape: &TopoDS_Shape,
         ) -> UniquePtr<BRepFilletAPI_MakeFillet>;
         #[rust_name = "add_edge"]
@@ -31,7 +31,7 @@ mod inner {
 
         type BRepFilletAPI_MakeFillet2d;
         #[cxx_name = "construct_unique"]
-        pub fn BRepFilletAPI_MakeFillet2d_ctor(
+        pub fn BRepFilletAPI_MakeFillet2d_new(
             face: &TopoDS_Face,
         ) -> UniquePtr<BRepFilletAPI_MakeFillet2d>;
         pub fn BRepFilletAPI_MakeFillet2d_add_fillet(
@@ -59,7 +59,7 @@ mod inner {
 
         type BRepFilletAPI_MakeChamfer;
         #[cxx_name = "construct_unique"]
-        pub fn BRepFilletAPI_MakeChamfer_ctor(
+        pub fn BRepFilletAPI_MakeChamfer_new(
             shape: &TopoDS_Shape,
         ) -> UniquePtr<BRepFilletAPI_MakeChamfer>;
         #[rust_name = "add_edge"]

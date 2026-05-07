@@ -59,12 +59,8 @@ impl Face {
         let canonize = true;
 
         let inner_shape = ffi::topo_ds::cast_face_to_shape(&self.inner);
-        let mut make_solid = ffi::b_rep_prim_api::BRepPrimAPI_MakePrism_ctor(
-            inner_shape,
-            &prism_vec,
-            copy,
-            canonize,
-        );
+        let mut make_solid =
+            ffi::b_rep_prim_api::BRepPrimAPI_MakePrism_new(inner_shape, &prism_vec, copy, canonize);
         let extruded_shape = make_solid.pin_mut().Shape();
         let solid = ffi::topo_ds::TopoDS::Solid(extruded_shape);
 
@@ -74,12 +70,12 @@ impl Face {
     #[must_use]
     pub fn extrude_to_face(&self, shape_with_face: &Shape, face: &Face) -> Shape {
         let profile_base = &self.inner;
-        let sketch_base = ffi::topo_ds::TopoDS_Face_ctor();
+        let sketch_base = ffi::topo_ds::TopoDS_Face_new();
         let angle = 0.0;
         let fuse = 1; // 0 = subtractive, 1 = additive
         let modify = false;
 
-        let mut make_prism = ffi::b_rep_feat::BRepFeat_MakeDPrism_ctor(
+        let mut make_prism = ffi::b_rep_feat::BRepFeat_MakeDPrism_new(
             &shape_with_face.inner,
             profile_base,
             &sketch_base,
@@ -97,12 +93,12 @@ impl Face {
     #[must_use]
     pub fn subtractive_extrude(&self, shape_with_face: &Shape, height: f64) -> Shape {
         let profile_base = &self.inner;
-        let sketch_base = ffi::topo_ds::TopoDS_Face_ctor();
+        let sketch_base = ffi::topo_ds::TopoDS_Face_new();
         let angle = 0.0;
         let fuse = 0; // 0 = subtractive, 1 = additive
         let modify = false;
 
-        let mut make_prism = ffi::b_rep_feat::BRepFeat_MakeDPrism_ctor(
+        let mut make_prism = ffi::b_rep_feat::BRepFeat_MakeDPrism_new(
             &shape_with_face.inner,
             profile_base,
             &sketch_base,
@@ -125,7 +121,7 @@ impl Face {
 
         let inner_shape = ffi::topo_ds::cast_face_to_shape(&self.inner);
         let mut make_solid =
-            ffi::b_rep_prim_api::BRepPrimAPI_MakeRevol_ctor(inner_shape, &revol_vec, angle, copy);
+            ffi::b_rep_prim_api::BRepPrimAPI_MakeRevol_new(inner_shape, &revol_vec, angle, copy);
         let revolved_shape = make_solid.pin_mut().Shape();
         let solid = ffi::topo_ds::TopoDS::Solid(revolved_shape);
 
@@ -135,7 +131,7 @@ impl Face {
     /// Fillets the face edges by a given radius at each vertex
     #[must_use]
     pub fn fillet(&self, radius: f64) -> Self {
-        let mut make_fillet = ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
+        let mut make_fillet = ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_new(&self.inner);
 
         let face_shape = ffi::topo_ds::cast_face_to_shape(&self.inner);
 
@@ -156,7 +152,7 @@ impl Face {
             );
         }
 
-        make_fillet.pin_mut().Build(&ffi::message::Message_ProgressRange_ctor());
+        make_fillet.pin_mut().Build(&ffi::message::Message_ProgressRange_new());
 
         let result_shape = make_fillet.pin_mut().Shape();
         let result_face = ffi::topo_ds::TopoDS::Face(result_shape);
@@ -172,7 +168,7 @@ impl Face {
 
         let face_shape = ffi::topo_ds::cast_face_to_shape(&self.inner);
 
-        let mut make_fillet = ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_ctor(&self.inner);
+        let mut make_fillet = ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet2d_new(&self.inner);
 
         let mut vertex_map = ffi::top_tools::new_indexed_map_of_shape();
         ffi::top_exp::TopExp::MapShapes(
@@ -213,10 +209,8 @@ impl Face {
     /// Offset the face by a given distance and join settings
     #[must_use]
     pub fn offset(&self, distance: f64, join_type: JoinType) -> Self {
-        let mut make_offset = ffi::b_rep_offset_api::BRepOffsetAPI_MakeOffset_face_ctor(
-            &self.inner,
-            join_type.into(),
-        );
+        let mut make_offset =
+            ffi::b_rep_offset_api::BRepOffsetAPI_MakeOffset_face_new(&self.inner, join_type.into());
         make_offset.pin_mut().Perform(distance, 0.0);
 
         let offset_shape = make_offset.pin_mut().Shape();
@@ -231,7 +225,7 @@ impl Face {
     pub fn sweep_along(&self, path: &Wire) -> Solid {
         let profile_shape = ffi::topo_ds::cast_face_to_shape(&self.inner);
         let mut make_pipe =
-            ffi::b_rep_offset_api::BRepOffsetAPI_MakePipe_ctor(&path.inner, profile_shape);
+            ffi::b_rep_offset_api::BRepOffsetAPI_MakePipe_new(&path.inner, profile_shape);
 
         let pipe_shape = make_pipe.pin_mut().Shape();
         let result_solid = ffi::topo_ds::TopoDS::Solid(pipe_shape);
@@ -253,7 +247,7 @@ impl Face {
         let mut make_pipe_shell =
             make_pipe_shell_with_law_function(&profile_wire, &path.inner, &law_handle);
 
-        make_pipe_shell.pin_mut().Build(&ffi::message::Message_ProgressRange_ctor());
+        make_pipe_shell.pin_mut().Build(&ffi::message::Message_ProgressRange_new());
         make_pipe_shell.pin_mut().MakeSolid();
         let pipe_shape = make_pipe_shell.pin_mut().Shape();
         let result_solid = ffi::topo_ds::TopoDS::Solid(pipe_shape);
@@ -262,7 +256,7 @@ impl Face {
     }
 
     pub fn edges(&self) -> EdgeIterator {
-        let explorer = ffi::top_exp::TopExp_Explorer_ctor(
+        let explorer = ffi::top_exp::TopExp_Explorer_new(
             ffi::topo_ds::cast_face_to_shape(&self.inner),
             ffi::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE,
         );
@@ -290,7 +284,7 @@ impl Face {
 
     pub fn normal_at(&self, pos: DVec3) -> DVec3 {
         let surface = ffi::b_rep::BRep_Tool_Surface(&self.inner);
-        let projector = ffi::geom_api::GeomAPI_ProjectPointOnSurf_ctor(&make_point(pos), &surface);
+        let projector = ffi::geom_api::GeomAPI_ProjectPointOnSurf_new(&make_point(pos), &surface);
         let mut u: f64 = 0.0;
         let mut v: f64 = 0.0;
 
@@ -333,7 +327,7 @@ impl Face {
         let other_inner_shape = ffi::topo_ds::cast_face_to_shape(&other.inner);
 
         let mut fuse_operation =
-            ffi::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
+            ffi::b_rep_algo_api::BRepAlgoAPI_Fuse_new(inner_shape, other_inner_shape);
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
 
@@ -348,7 +342,7 @@ impl Face {
         let other_inner_shape = ffi::topo_ds::cast_face_to_shape(&other.inner);
 
         let mut common_operation =
-            ffi::b_rep_algo_api::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+            ffi::b_rep_algo_api::BRepAlgoAPI_Common_new(inner_shape, other_inner_shape);
 
         let common_shape = common_operation.pin_mut().Shape();
 
@@ -362,7 +356,7 @@ impl Face {
         let other_inner_shape = ffi::topo_ds::cast_face_to_shape(&other.inner);
 
         let mut fuse_operation =
-            ffi::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+            ffi::b_rep_algo_api::BRepAlgoAPI_Cut_new(inner_shape, other_inner_shape);
 
         let cut_shape = fuse_operation.pin_mut().Shape();
 
@@ -414,8 +408,8 @@ impl AsRef<CompoundFace> for CompoundFace {
 impl From<Face> for CompoundFace {
     fn from(face: Face) -> Self {
         let face = ffi::topo_ds::cast_face_to_shape(&face.inner);
-        let mut compound = ffi::topo_ds::TopoDS_Compound_ctor();
-        let brep_builder = ffi::b_rep::BRep_Builder_ctor();
+        let mut compound = ffi::topo_ds::TopoDS_Compound_new();
+        let brep_builder = ffi::b_rep::BRep_Builder_new();
         let topo_builder = ffi::b_rep::BRep_Builder_upcast_to_topods_builder(&brep_builder);
         topo_builder.MakeCompound(compound.pin_mut());
         let mut compound_shape = ffi::topo_ds::TopoDS_Compound_as_shape(compound);
@@ -450,12 +444,8 @@ impl CompoundFace {
 
         let inner_shape = ffi::topo_ds::cast_compound_to_shape(&self.inner);
 
-        let mut make_solid = ffi::b_rep_prim_api::BRepPrimAPI_MakePrism_ctor(
-            inner_shape,
-            &prism_vec,
-            copy,
-            canonize,
-        );
+        let mut make_solid =
+            ffi::b_rep_prim_api::BRepPrimAPI_MakePrism_new(inner_shape, &prism_vec, copy, canonize);
         let extruded_shape = make_solid.pin_mut().Shape();
 
         Shape::from_shape(extruded_shape)
@@ -471,7 +461,7 @@ impl CompoundFace {
         let inner_shape = ffi::topo_ds::cast_compound_to_shape(&self.inner);
 
         let mut make_solid =
-            ffi::b_rep_prim_api::BRepPrimAPI_MakeRevol_ctor(inner_shape, &revol_axis, angle, copy);
+            ffi::b_rep_prim_api::BRepPrimAPI_MakeRevol_new(inner_shape, &revol_axis, angle, copy);
         let revolved_shape = make_solid.pin_mut().Shape();
 
         Shape::from_shape(revolved_shape)
@@ -483,7 +473,7 @@ impl CompoundFace {
         let other_inner_shape = ffi::topo_ds::cast_compound_to_shape(&other.inner);
 
         let mut fuse_operation =
-            ffi::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
+            ffi::b_rep_algo_api::BRepAlgoAPI_Fuse_new(inner_shape, other_inner_shape);
 
         let fuse_shape = fuse_operation.pin_mut().Shape();
 
@@ -498,7 +488,7 @@ impl CompoundFace {
         let other_inner_shape = ffi::topo_ds::cast_compound_to_shape(&other.inner);
 
         let mut common_operation =
-            ffi::b_rep_algo_api::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+            ffi::b_rep_algo_api::BRepAlgoAPI_Common_new(inner_shape, other_inner_shape);
 
         let common_shape = common_operation.pin_mut().Shape();
 
@@ -513,7 +503,7 @@ impl CompoundFace {
         let other_inner_shape = ffi::topo_ds::cast_compound_to_shape(&other.inner);
 
         let mut fuse_operation =
-            ffi::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+            ffi::b_rep_algo_api::BRepAlgoAPI_Cut_new(inner_shape, other_inner_shape);
 
         let cut_shape = fuse_operation.pin_mut().Shape();
 

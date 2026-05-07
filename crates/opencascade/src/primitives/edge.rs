@@ -70,12 +70,12 @@ impl Edge {
 
     pub fn bezier(points: impl IntoIterator<Item = DVec3>) -> Self {
         let points: Vec<_> = points.into_iter().collect();
-        let mut array = ffi::t_col_gp::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
+        let mut array = ffi::t_col_gp::TColgp_HArray1OfPnt_new(1, points.len() as i32);
         for (index, point) in points.into_iter().enumerate() {
             array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
         }
 
-        let bezier = ffi::geom::Geom_BezierCurve_ctor_points(&array);
+        let bezier = ffi::geom::Geom_BezierCurve_new_points(&array);
         let bezier_handle = ffi::geom::Geom_BezierCurve_to_handle(bezier);
         let curve_handle =
             ffi::geom::new_HandleGeomCurve_from_HandleGeom_BezierCurve(&bezier_handle);
@@ -89,7 +89,7 @@ impl Edge {
     pub fn circle(center: DVec3, normal: DVec3, radius: f64) -> Self {
         let axis = make_axis_2(center, normal);
 
-        let make_circle = ffi::gp::gp_Circ_ctor(&axis, radius);
+        let make_circle = ffi::gp::gp_Circ_new(&axis, radius);
         let make_edge = ffi::b_rep_builder_api::BRepBuilderAPI_MakeEdge_circle(&make_circle);
 
         Self::from_make_edge(make_edge)
@@ -102,7 +102,7 @@ impl Edge {
         tangents: Option<(DVec3, DVec3)>,
     ) -> Self {
         let points: Vec<_> = points.into_iter().collect();
-        let mut array = ffi::t_col_gp::TColgp_HArray1OfPnt_ctor(1, points.len() as i32);
+        let mut array = ffi::t_col_gp::TColgp_HArray1OfPnt_new(1, points.len() as i32);
         for (index, point) in points.into_iter().enumerate() {
             array.pin_mut().SetValue(index as i32 + 1, &make_point(point));
         }
@@ -112,7 +112,7 @@ impl Edge {
         let periodic = false;
         let tolerance = 1.0e-7;
         let mut interpolate =
-            ffi::geom_api::GeomAPI_Interpolate_ctor(&array_handle, periodic, tolerance);
+            ffi::geom_api::GeomAPI_Interpolate_new(&array_handle, periodic, tolerance);
         if let Some((t_start, t_end)) = tangents {
             interpolate.pin_mut().Load(&make_vec(t_start), &make_vec(t_end), true);
         }
@@ -145,7 +145,7 @@ impl Edge {
     }
 
     pub fn start_point(&self) -> DVec3 {
-        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
+        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_new(&self.inner);
         let start_param = curve.FirstParameter();
         let point = ffi::b_rep_adaptor::BRepAdaptor_Curve_value(&curve, start_param);
 
@@ -153,7 +153,7 @@ impl Edge {
     }
 
     pub fn end_point(&self) -> DVec3 {
-        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
+        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_new(&self.inner);
         let last_param = curve.LastParameter();
         let point = ffi::b_rep_adaptor::BRepAdaptor_Curve_value(&curve, last_param);
 
@@ -161,7 +161,7 @@ impl Edge {
     }
 
     pub fn approximation_segments(&self) -> ApproximationSegmentIterator {
-        let adaptor_curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
+        let adaptor_curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_new(&self.inner);
         let approximator = ffi::gc_pnts::TangentialDeflection_new(&adaptor_curve, 0.1, 0.1);
 
         ApproximationSegmentIterator { count: 1, approximator }
@@ -170,7 +170,7 @@ impl Edge {
     pub fn tangent_arc(_p1: DVec3, _tangent: DVec3, _p3: DVec3) {}
 
     pub fn edge_type(&self) -> EdgeType {
-        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_ctor(&self.inner);
+        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_new(&self.inner);
 
         EdgeType::from(curve.GetType())
     }

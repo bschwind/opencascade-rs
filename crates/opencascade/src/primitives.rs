@@ -98,7 +98,7 @@ pub fn make_point2d(p: DVec2) -> UniquePtr<ffi::gp::gp_Pnt2d> {
 }
 
 fn make_dir(p: DVec3) -> UniquePtr<ffi::gp::gp_Dir> {
-    ffi::gp::gp_Dir_ctor(p.x, p.y, p.z)
+    ffi::gp::gp_Dir_new(p.x, p.y, p.z)
 }
 
 fn make_vec(vec: DVec3) -> UniquePtr<ffi::gp::gp_Vec> {
@@ -106,11 +106,11 @@ fn make_vec(vec: DVec3) -> UniquePtr<ffi::gp::gp_Vec> {
 }
 
 fn make_axis_1(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp::gp_Ax1> {
-    ffi::gp::gp_Ax1_ctor(&make_point(origin), &make_dir(dir))
+    ffi::gp::gp_Ax1_new(&make_point(origin), &make_dir(dir))
 }
 
 pub fn make_axis_2(origin: DVec3, dir: DVec3) -> UniquePtr<ffi::gp::gp_Ax2> {
-    ffi::gp::gp_Ax2_ctor(&make_point(origin), &make_dir(dir))
+    ffi::gp::gp_Ax2_new(&make_point(origin), &make_dir(dir))
 }
 
 pub struct EdgeIterator {

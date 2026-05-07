@@ -21,7 +21,7 @@ impl Shell {
 
     pub fn loft<T: AsRef<Wire>>(wires: impl IntoIterator<Item = T>) -> Self {
         let is_solid = false;
-        let mut make_loft = ffi::b_rep_offset_api::BRepOffsetAPI_ThruSections_ctor(is_solid);
+        let mut make_loft = ffi::b_rep_offset_api::BRepOffsetAPI_ThruSections_new(is_solid);
 
         for wire in wires.into_iter() {
             make_loft.pin_mut().AddWire(&wire.as_ref().inner);

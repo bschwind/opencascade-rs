@@ -31,7 +31,7 @@ impl Solid {
     pub fn fillet_edge(&self, radius: f64, edge: &Edge) -> Compound {
         let inner_shape = ffi::topo_ds::cast_solid_to_shape(&self.inner);
 
-        let mut make_fillet = ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet_ctor(inner_shape);
+        let mut make_fillet = ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet_new(inner_shape);
         make_fillet.pin_mut().add_edge(radius, &edge.inner);
 
         let filleted_shape = make_fillet.pin_mut().Shape();
@@ -43,7 +43,7 @@ impl Solid {
 
     pub fn loft<T: AsRef<Wire>>(wires: impl IntoIterator<Item = T>) -> Self {
         let is_solid = true;
-        let mut make_loft = ffi::b_rep_offset_api::BRepOffsetAPI_ThruSections_ctor(is_solid);
+        let mut make_loft = ffi::b_rep_offset_api::BRepOffsetAPI_ThruSections_new(is_solid);
 
         for wire in wires.into_iter() {
             make_loft.pin_mut().AddWire(&wire.as_ref().inner);
@@ -64,7 +64,7 @@ impl Solid {
         let other_inner_shape = ffi::topo_ds::cast_solid_to_shape(&other.inner);
 
         let mut cut_operation =
-            ffi::b_rep_algo_api::BRepAlgoAPI_Cut_ctor(inner_shape, other_inner_shape);
+            ffi::b_rep_algo_api::BRepAlgoAPI_Cut_new(inner_shape, other_inner_shape);
 
         let edge_list = cut_operation.pin_mut().SectionEdges();
         let vec = ffi::topo_ds::shape_list_to_vector(edge_list);
@@ -86,7 +86,7 @@ impl Solid {
         let other_inner_shape = ffi::topo_ds::cast_solid_to_shape(&other.inner);
 
         let mut fuse_operation =
-            ffi::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(inner_shape, other_inner_shape);
+            ffi::b_rep_algo_api::BRepAlgoAPI_Fuse_new(inner_shape, other_inner_shape);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::topo_ds::shape_list_to_vector(edge_list);
 
@@ -107,7 +107,7 @@ impl Solid {
         let other_inner_shape = ffi::topo_ds::cast_solid_to_shape(&other.inner);
 
         let mut fuse_operation =
-            ffi::b_rep_algo_api::BRepAlgoAPI_Common_ctor(inner_shape, other_inner_shape);
+            ffi::b_rep_algo_api::BRepAlgoAPI_Common_new(inner_shape, other_inner_shape);
         let edge_list = fuse_operation.pin_mut().SectionEdges();
         let vec = ffi::topo_ds::shape_list_to_vector(edge_list);
 

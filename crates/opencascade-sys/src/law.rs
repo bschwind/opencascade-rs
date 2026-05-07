@@ -19,7 +19,7 @@ mod inner {
 
         type Law_Interpol;
         #[cxx_name = "construct_unique"]
-        pub fn Law_Interpol_ctor() -> UniquePtr<Law_Interpol>;
+        pub fn Law_Interpol_new() -> UniquePtr<Law_Interpol>;
         pub fn Law_Interpol_into_Law_Function(
             interpol: UniquePtr<Law_Interpol>,
         ) -> UniquePtr<Law_Function>;

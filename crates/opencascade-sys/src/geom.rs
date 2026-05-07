@@ -42,7 +42,7 @@ mod inner {
         type Geom_TrimmedCurve;
 
         type Geom_CylindricalSurface;
-        pub fn Geom_CylindricalSurface_ctor(
+        pub fn Geom_CylindricalSurface_new(
             axis: &gp_Ax3,
             radius: f64,
         ) -> UniquePtr<Handle_Geom_CylindricalSurface>;
@@ -51,7 +51,7 @@ mod inner {
         ) -> UniquePtr<Handle_Geom_Surface>;
 
         type Geom_BezierSurface;
-        pub fn Geom_BezierSurface_ctor(
+        pub fn Geom_BezierSurface_new(
             poles: &TColgp_Array2OfPnt,
         ) -> UniquePtr<Handle_Geom_BezierSurface>;
         pub fn bezier_to_surface(
@@ -60,7 +60,7 @@ mod inner {
 
         type Geom_BezierCurve;
         #[cxx_name = "construct_unique"]
-        pub fn Geom_BezierCurve_ctor_points(
+        pub fn Geom_BezierCurve_new_points(
             poles: &TColgp_HArray1OfPnt,
         ) -> UniquePtr<Geom_BezierCurve>;
 

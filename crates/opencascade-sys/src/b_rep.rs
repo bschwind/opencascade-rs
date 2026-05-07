@@ -17,7 +17,7 @@ mod inner {
 
         type BRep_Builder;
         #[cxx_name = "construct_unique"]
-        pub fn BRep_Builder_ctor() -> UniquePtr<BRep_Builder>;
+        pub fn BRep_Builder_new() -> UniquePtr<BRep_Builder>;
         pub fn BRep_Builder_upcast_to_topods_builder(builder: &BRep_Builder) -> &TopoDS_Builder;
 
         type BRep_Tool;

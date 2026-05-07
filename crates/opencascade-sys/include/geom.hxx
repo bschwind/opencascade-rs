@@ -7,7 +7,7 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <bindings_common.hxx>
 
-inline std::unique_ptr<Handle_Geom_CylindricalSurface> Geom_CylindricalSurface_ctor(const gp_Ax3 &axis, double radius) {
+inline std::unique_ptr<Handle_Geom_CylindricalSurface> Geom_CylindricalSurface_new(const gp_Ax3 &axis, double radius) {
   return std::unique_ptr<Handle_Geom_CylindricalSurface>(
       new opencascade::handle<Geom_CylindricalSurface>(new Geom_CylindricalSurface(axis, radius)));
 }
@@ -16,7 +16,7 @@ inline std::unique_ptr<Handle_Geom_Surface> cylinder_to_surface(const Handle_Geo
   return std::unique_ptr<Handle_Geom_Surface>(new opencascade::handle<Geom_Surface>(cylinder_handle));
 }
 
-inline std::unique_ptr<Handle_Geom_BezierSurface> Geom_BezierSurface_ctor(const TColgp_Array2OfPnt &poles) {
+inline std::unique_ptr<Handle_Geom_BezierSurface> Geom_BezierSurface_new(const TColgp_Array2OfPnt &poles) {
   return std::unique_ptr<Handle_Geom_BezierSurface>(
       new opencascade::handle<Geom_BezierSurface>(new Geom_BezierSurface(poles)));
 }

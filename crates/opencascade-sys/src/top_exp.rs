@@ -16,7 +16,7 @@ mod inner {
 
         type TopExp_Explorer;
         #[cxx_name = "construct_unique"]
-        pub fn TopExp_Explorer_ctor(
+        pub fn TopExp_Explorer_new(
             shape: &TopoDS_Shape,
             to_find: TopAbs_ShapeEnum,
         ) -> UniquePtr<TopExp_Explorer>;

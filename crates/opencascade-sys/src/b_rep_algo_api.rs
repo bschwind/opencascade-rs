@@ -15,7 +15,7 @@ mod inner {
 
         pub type BRepAlgoAPI_Fuse;
         #[cxx_name = "construct_unique"]
-        pub fn BRepAlgoAPI_Fuse_ctor(
+        pub fn BRepAlgoAPI_Fuse_new(
             shape_1: &TopoDS_Shape,
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Fuse>;
@@ -27,7 +27,7 @@ mod inner {
 
         type BRepAlgoAPI_Cut;
         #[cxx_name = "construct_unique"]
-        pub fn BRepAlgoAPI_Cut_ctor(
+        pub fn BRepAlgoAPI_Cut_new(
             shape_1: &TopoDS_Shape,
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Cut>;
@@ -42,7 +42,7 @@ mod inner {
 
         type BRepAlgoAPI_Common;
         #[cxx_name = "construct_unique"]
-        pub fn BRepAlgoAPI_Common_ctor(
+        pub fn BRepAlgoAPI_Common_new(
             shape_1: &TopoDS_Shape,
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Common>;
@@ -53,7 +53,7 @@ mod inner {
 
         type BRepAlgoAPI_Section;
         #[cxx_name = "construct_unique"]
-        pub fn BRepAlgoAPI_Section_ctor(
+        pub fn BRepAlgoAPI_Section_new(
             shape_1: &TopoDS_Shape,
             shape_2: &TopoDS_Shape,
         ) -> UniquePtr<BRepAlgoAPI_Section>;

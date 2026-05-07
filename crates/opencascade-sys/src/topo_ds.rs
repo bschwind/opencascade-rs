@@ -48,7 +48,7 @@ mod inner {
         #[cxx_name = "upcast_ref"]
         pub fn cast_face_to_shape(wire: &TopoDS_Face) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
-        pub fn TopoDS_Face_ctor() -> UniquePtr<TopoDS_Face>;
+        pub fn TopoDS_Face_new() -> UniquePtr<TopoDS_Face>;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Face_to_owned(shape: &TopoDS_Face) -> UniquePtr<TopoDS_Face>;
         pub fn Orientation(self: &TopoDS_Face) -> TopAbs_Orientation;
@@ -57,7 +57,7 @@ mod inner {
         #[cxx_name = "upcast_ref"]
         pub fn cast_shell_to_shape(wire: &TopoDS_Shell) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
-        pub fn TopoDS_Shell_ctor() -> UniquePtr<TopoDS_Shell>;
+        pub fn TopoDS_Shell_new() -> UniquePtr<TopoDS_Shell>;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Shell_to_owned(shape: &TopoDS_Shell) -> UniquePtr<TopoDS_Shell>;
         #[cxx_name = "upcast"]
@@ -93,7 +93,7 @@ mod inner {
         #[cxx_name = "upcast_ref"]
         pub fn cast_compound_to_shape(wire: &TopoDS_Compound) -> &TopoDS_Shape;
         #[cxx_name = "construct_unique"]
-        pub fn TopoDS_Compound_ctor() -> UniquePtr<TopoDS_Compound>;
+        pub fn TopoDS_Compound_new() -> UniquePtr<TopoDS_Compound>;
         #[cxx_name = "construct_unique"]
         pub fn TopoDS_Compound_to_owned(shape: &TopoDS_Compound) -> UniquePtr<TopoDS_Compound>;
         #[cxx_name = "upcast"]

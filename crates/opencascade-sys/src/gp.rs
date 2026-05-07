@@ -40,19 +40,19 @@ mod inner {
 
         type gp_Lin;
         #[cxx_name = "construct_unique"]
-        pub fn gp_Lin_ctor(point: &gp_Pnt, dir: &gp_Dir) -> UniquePtr<gp_Lin>;
+        pub fn gp_Lin_new(point: &gp_Pnt, dir: &gp_Dir) -> UniquePtr<gp_Lin>;
 
         type gp_Circ;
         #[cxx_name = "construct_unique"]
-        pub fn gp_Circ_ctor(axis: &gp_Ax2, radius: f64) -> UniquePtr<gp_Circ>;
+        pub fn gp_Circ_new(axis: &gp_Ax2, radius: f64) -> UniquePtr<gp_Circ>;
 
         type gp_Ax1;
         #[cxx_name = "construct_unique"]
-        pub fn gp_Ax1_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax1>;
+        pub fn gp_Ax1_new(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax1>;
 
         type gp_Ax2;
         #[cxx_name = "construct_unique"]
-        pub fn gp_Ax2_ctor(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
+        pub fn gp_Ax2_new(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
 
         type gp_Ax3;
         #[cxx_name = "construct_unique"]
@@ -60,15 +60,15 @@ mod inner {
 
         type gp_Dir2d;
         #[cxx_name = "construct_unique"]
-        pub fn gp_Dir2d_ctor(x: f64, y: f64) -> UniquePtr<gp_Dir2d>;
+        pub fn gp_Dir2d_new(x: f64, y: f64) -> UniquePtr<gp_Dir2d>;
 
         type gp_Ax2d;
         #[cxx_name = "construct_unique"]
-        pub fn gp_Ax2d_ctor(point: &gp_Pnt2d, dir: &gp_Dir2d) -> UniquePtr<gp_Ax2d>;
+        pub fn gp_Ax2d_new(point: &gp_Pnt2d, dir: &gp_Dir2d) -> UniquePtr<gp_Ax2d>;
 
         type gp_Dir;
         #[cxx_name = "construct_unique"]
-        pub fn gp_Dir_ctor(x: f64, y: f64, z: f64) -> UniquePtr<gp_Dir>;
+        pub fn gp_Dir_new(x: f64, y: f64, z: f64) -> UniquePtr<gp_Dir>;
         pub fn Transform(self: Pin<&mut gp_Dir>, transform: &gp_Trsf);
         pub fn X(self: &gp_Dir) -> f64;
         pub fn Y(self: &gp_Dir) -> f64;

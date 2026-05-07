@@ -49,7 +49,7 @@ pub fn main() {
     transform.pin_mut().set_mirror_axis(x_axis);
 
     // We're calling Shape() here instead of Wire(), hope that's okay.
-    let mut brep_transform = ffi::b_rep_builder_api::BRepBuilderAPI_Transform_ctor(
+    let mut brep_transform = ffi::b_rep_builder_api::BRepBuilderAPI_Transform_new(
         wire.pin_mut().Shape(),
         &transform,
         false,
@@ -57,7 +57,7 @@ pub fn main() {
     let mirrored_shape = brep_transform.pin_mut().Shape();
     let mirrored_wire = ffi::topo_ds::TopoDS::Wire(mirrored_shape);
 
-    let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
+    let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_new();
     make_wire.pin_mut().add_wire(wire.pin_mut().Wire());
     make_wire.pin_mut().add_wire(mirrored_wire);
 
@@ -67,7 +67,7 @@ pub fn main() {
         ffi::b_rep_builder_api::BRepBuilderAPI_MakeFace_wire(wire_profile, false);
     let prism_vec = ffi::gp::new_vec(0.0, 0.0, height);
     // We're calling Shape here instead of Face(), hope that's also okay.
-    let mut body = ffi::b_rep_prim_api::BRepPrimAPI_MakePrism_ctor(
+    let mut body = ffi::b_rep_prim_api::BRepPrimAPI_MakePrism_new(
         face_profile.pin_mut().Shape(),
         &prism_vec,
         false,
@@ -75,8 +75,8 @@ pub fn main() {
     );
 
     let mut make_fillet =
-        ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet_ctor(body.pin_mut().Shape());
-    let mut edge_explorer = ffi::top_exp::TopExp_Explorer_ctor(
+        ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet_new(body.pin_mut().Shape());
+    let mut edge_explorer = ffi::top_exp::TopExp_Explorer_new(
         body.pin_mut().Shape(),
         ffi::top_abs::TopAbs_ShapeEnum::TopAbs_EDGE,
     );
@@ -92,24 +92,24 @@ pub fn main() {
     // Make the bottle neck
     let neck_location = ffi::gp::new_point(0.0, 0.0, height);
     let neck_axis = ffi::gp::gp::DZ();
-    let neck_coord_system = ffi::gp::gp_Ax2_ctor(&neck_location, neck_axis);
+    let neck_coord_system = ffi::gp::gp_Ax2_new(&neck_location, neck_axis);
 
     let neck_radius = thickness / 4.0;
     let neck_height = height / 10.0;
 
-    let mut cylinder = ffi::b_rep_prim_api::BRepPrimAPI_MakeCylinder_ctor(
+    let mut cylinder = ffi::b_rep_prim_api::BRepPrimAPI_MakeCylinder_new(
         &neck_coord_system,
         neck_radius,
         neck_height,
     );
     let cylinder_shape = cylinder.pin_mut().Shape();
 
-    let mut fuse_neck = ffi::b_rep_algo_api::BRepAlgoAPI_Fuse_ctor(body_shape, cylinder_shape);
+    let mut fuse_neck = ffi::b_rep_algo_api::BRepAlgoAPI_Fuse_new(body_shape, cylinder_shape);
     let body_shape = fuse_neck.pin_mut().Shape();
 
     // Make the bottle hollow
     let mut face_explorer =
-        ffi::top_exp::TopExp_Explorer_ctor(body_shape, ffi::top_abs::TopAbs_ShapeEnum::TopAbs_FACE);
+        ffi::top_exp::TopExp_Explorer_new(body_shape, ffi::top_abs::TopAbs_ShapeEnum::TopAbs_FACE);
     let mut z_max = -1.0;
     let mut top_face: Option<UniquePtr<ffi::topo_ds::TopoDS_Face>> = None;
 
@@ -140,7 +140,7 @@ pub fn main() {
     let mut faces_to_remove = ffi::top_tools::new_list_of_shape();
     faces_to_remove.pin_mut().Append(ffi::topo_ds::cast_face_to_shape(&top_face));
 
-    let mut solid_maker = ffi::b_rep_offset_api::BRepOffsetAPI_MakeThickSolid_ctor();
+    let mut solid_maker = ffi::b_rep_offset_api::BRepOffsetAPI_MakeThickSolid_new();
 
     let offset_mode = ffi::b_rep_offset_api::BRepOffset_Mode::BRepOffset_Skin;
     let intersection = false;
@@ -158,32 +158,32 @@ pub fn main() {
         self_intersection,
         join_type,
         remove_intersecting_edges,
-        &ffi::message::Message_ProgressRange_ctor(),
+        &ffi::message::Message_ProgressRange_new(),
     );
 
     let body_shape = solid_maker.pin_mut().Shape();
 
     // Create the threading
     let cylinder_axis = ffi::gp::gp_Ax3_from_gp_Ax2(&neck_coord_system);
-    let cylinder_1 = ffi::geom::Geom_CylindricalSurface_ctor(&cylinder_axis, neck_radius * 0.99);
+    let cylinder_1 = ffi::geom::Geom_CylindricalSurface_new(&cylinder_axis, neck_radius * 0.99);
     let cylinder_1 = ffi::geom::cylinder_to_surface(&cylinder_1);
-    let cylinder_2 = ffi::geom::Geom_CylindricalSurface_ctor(&cylinder_axis, neck_radius * 1.05);
+    let cylinder_2 = ffi::geom::Geom_CylindricalSurface_new(&cylinder_axis, neck_radius * 1.05);
     let cylinder_2 = ffi::geom::cylinder_to_surface(&cylinder_2);
 
     let a_pnt = ffi::gp::new_point_2d(std::f64::consts::TAU, neck_height / 2.0);
-    let a_dir = ffi::gp::gp_Dir2d_ctor(std::f64::consts::TAU, neck_height / 4.0);
-    let thread_axis = ffi::gp::gp_Ax2d_ctor(&a_pnt, &a_dir);
+    let a_dir = ffi::gp::gp_Dir2d_new(std::f64::consts::TAU, neck_height / 4.0);
+    let thread_axis = ffi::gp::gp_Ax2d_new(&a_pnt, &a_dir);
 
     let a_major = std::f64::consts::TAU;
     let a_minor = neck_height / 10.0;
 
-    let ellipse_1 = ffi::geom2d::Geom2d_Ellipse_ctor(&thread_axis, a_major, a_minor);
+    let ellipse_1 = ffi::geom2d::Geom2d_Ellipse_new(&thread_axis, a_major, a_minor);
     let ellipse_1_handle = ffi::geom2d::ellipse_to_HandleGeom2d_Curve(&ellipse_1);
-    let ellipse_2 = ffi::geom2d::Geom2d_Ellipse_ctor(&thread_axis, a_major, a_minor / 4.0);
+    let ellipse_2 = ffi::geom2d::Geom2d_Ellipse_new(&thread_axis, a_major, a_minor / 4.0);
     let ellipse_2_handle = ffi::geom2d::ellipse_to_HandleGeom2d_Curve(&ellipse_2);
-    let arc_1 = ffi::geom2d::Geom2d_TrimmedCurve_ctor(&ellipse_1_handle, 0.0, std::f64::consts::PI);
+    let arc_1 = ffi::geom2d::Geom2d_TrimmedCurve_new(&ellipse_1_handle, 0.0, std::f64::consts::PI);
     let arc_1 = ffi::geom2d::HandleGeom2d_TrimmedCurve_to_curve(&arc_1);
-    let arc_2 = ffi::geom2d::Geom2d_TrimmedCurve_ctor(&ellipse_2_handle, 0.0, std::f64::consts::PI);
+    let arc_2 = ffi::geom2d::Geom2d_TrimmedCurve_new(&ellipse_2_handle, 0.0, std::f64::consts::PI);
     let arc_2 = ffi::geom2d::HandleGeom2d_TrimmedCurve_to_curve(&arc_2);
 
     let ellipse_point_1 = ffi::geom2d::ellipse_value(&ellipse_1, 0.0);
@@ -218,7 +218,7 @@ pub fn main() {
     ffi::b_rep_lib::BRepLib::BuildCurves3d(threading_wire_2.pin_mut().Shape());
 
     let is_solid = true;
-    let mut threading_loft = ffi::b_rep_offset_api::BRepOffsetAPI_ThruSections_ctor(is_solid);
+    let mut threading_loft = ffi::b_rep_offset_api::BRepOffsetAPI_ThruSections_new(is_solid);
     threading_loft.pin_mut().AddWire(threading_wire_1.pin_mut().Wire());
     threading_loft.pin_mut().AddWire(threading_wire_2.pin_mut().Wire());
     threading_loft.pin_mut().CheckCompatibility(false);
@@ -226,8 +226,8 @@ pub fn main() {
     let threading_shape = threading_loft.pin_mut().Shape();
 
     // Build the resulting compound
-    let mut compound = ffi::topo_ds::TopoDS_Compound_ctor();
-    let builder = ffi::b_rep::BRep_Builder_ctor();
+    let mut compound = ffi::topo_ds::TopoDS_Compound_new();
+    let builder = ffi::b_rep::BRep_Builder_new();
     let builder = ffi::b_rep::BRep_Builder_upcast_to_topods_builder(&builder);
     builder.MakeCompound(compound.pin_mut());
 

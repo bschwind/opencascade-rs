@@ -11,7 +11,7 @@ mod inner {
 
         type BRepAdaptor_Curve;
         #[cxx_name = "construct_unique"]
-        pub fn BRepAdaptor_Curve_ctor(edge: &TopoDS_Edge) -> UniquePtr<BRepAdaptor_Curve>;
+        pub fn BRepAdaptor_Curve_new(edge: &TopoDS_Edge) -> UniquePtr<BRepAdaptor_Curve>;
         pub fn FirstParameter(self: &BRepAdaptor_Curve) -> f64;
         pub fn LastParameter(self: &BRepAdaptor_Curve) -> f64;
         pub fn BRepAdaptor_Curve_value(curve: &BRepAdaptor_Curve, u: f64) -> UniquePtr<gp_Pnt>;

@@ -13,7 +13,7 @@ mod inner {
 
         type BRepIntCurveSurface_Inter;
         #[cxx_name = "construct_unique"]
-        pub fn BRepIntCurveSurface_Inter_ctor() -> UniquePtr<BRepIntCurveSurface_Inter>;
+        pub fn BRepIntCurveSurface_Inter_new() -> UniquePtr<BRepIntCurveSurface_Inter>;
         pub fn Init(
             self: Pin<&mut BRepIntCurveSurface_Inter>,
             shape: &TopoDS_Shape,

@@ -56,7 +56,7 @@ impl Wire {
         }
 
         let (first, last) = (points.first().unwrap(), points.last().unwrap());
-        let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
+        let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_new();
 
         if points.len() == 2 {
             make_wire.pin_mut().add_edge(&Edge::segment(*first, *last).inner);
@@ -71,7 +71,7 @@ impl Wire {
     }
 
     pub fn from_edges<'a>(edges: impl IntoIterator<Item = &'a Edge>) -> Self {
-        let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
+        let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_new();
 
         for edge in edges.into_iter() {
             make_wire.pin_mut().add_edge(&edge.inner);
@@ -105,7 +105,7 @@ impl Wire {
             wires.pin_mut(),
         );
 
-        let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
+        let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_new();
 
         let wire_len = ffi::top_tools::TopTools_HSequenceOfShape_length(&wires);
 
@@ -120,7 +120,7 @@ impl Wire {
     }
 
     pub fn from_wires<'a>(wires: impl IntoIterator<Item = &'a Wire>) -> Self {
-        let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
+        let mut make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_new();
 
         for wire in wires.into_iter() {
             make_wire.pin_mut().add_wire(&wire.inner);
@@ -132,7 +132,7 @@ impl Wire {
     #[must_use]
     pub fn mirror_along_axis(&self, axis_origin: DVec3, axis_dir: DVec3) -> Self {
         let axis_dir = make_dir(axis_dir);
-        let axis = ffi::gp::gp_Ax1_ctor(&make_point(axis_origin), &axis_dir);
+        let axis = ffi::gp::gp_Ax1_new(&make_point(axis_origin), &axis_dir);
 
         let mut transform = ffi::gp::new_transform();
 
@@ -141,7 +141,7 @@ impl Wire {
         let wire_shape = ffi::topo_ds::cast_wire_to_shape(&self.inner);
 
         let mut brep_transform =
-            ffi::b_rep_builder_api::BRepBuilderAPI_Transform_ctor(wire_shape, &transform, false);
+            ffi::b_rep_builder_api::BRepBuilderAPI_Transform_new(wire_shape, &transform, false);
 
         let mirrored_shape = brep_transform.pin_mut().Shape();
         let mirrored_wire = ffi::topo_ds::TopoDS::Wire(mirrored_shape);
@@ -187,10 +187,8 @@ impl Wire {
     /// Offset the wire by a given distance and join settings
     #[must_use]
     pub fn offset(&self, distance: f64, join_type: JoinType) -> Self {
-        let mut make_offset = ffi::b_rep_offset_api::BRepOffsetAPI_MakeOffset_wire_ctor(
-            &self.inner,
-            join_type.into(),
-        );
+        let mut make_offset =
+            ffi::b_rep_offset_api::BRepOffsetAPI_MakeOffset_wire_new(&self.inner, join_type.into());
         make_offset.pin_mut().Perform(distance, 0.0);
 
         let offset_shape = make_offset.pin_mut().Shape();
@@ -204,7 +202,7 @@ impl Wire {
     pub fn sweep_along(&self, path: &Wire) -> Shell {
         let profile_shape = ffi::topo_ds::cast_wire_to_shape(&self.inner);
         let mut make_pipe =
-            ffi::b_rep_offset_api::BRepOffsetAPI_MakePipe_ctor(&path.inner, profile_shape);
+            ffi::b_rep_offset_api::BRepOffsetAPI_MakePipe_new(&path.inner, profile_shape);
 
         let pipe_shape = make_pipe.pin_mut().Shape();
         let result_shell = ffi::topo_ds::TopoDS::Shell(pipe_shape);
@@ -239,7 +237,7 @@ impl Wire {
     pub fn transform(&self, translation: DVec3, rotation_axis: DVec3, angle: Angle) -> Self {
         let mut transform = ffi::gp::new_transform();
         let rotation_axis_vec =
-            ffi::gp::gp_Ax1_ctor(&make_point(DVec3::ZERO), &make_dir(rotation_axis));
+            ffi::gp::gp_Ax1_new(&make_point(DVec3::ZERO), &make_dir(rotation_axis));
         let translation_vec = make_vec(translation);
 
         transform.pin_mut().SetRotation(&rotation_axis_vec, angle.radians());
@@ -281,7 +279,7 @@ impl Default for WireBuilder {
 
 impl WireBuilder {
     pub fn new() -> Self {
-        let make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_ctor();
+        let make_wire = ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire_new();
 
         Self { inner: make_wire }
     }

@@ -19,7 +19,7 @@ mod inner {
 
         type TColgp_Array1OfDir;
         #[cxx_name = "construct_unique"]
-        pub fn TColgp_Array1OfDir_ctor(
+        pub fn TColgp_Array1OfDir_new(
             lower_bound: i32,
             upper_bound: i32,
         ) -> UniquePtr<TColgp_Array1OfDir>;
@@ -31,7 +31,7 @@ mod inner {
 
         type TColgp_Array1OfPnt2d;
         #[cxx_name = "construct_unique"]
-        pub fn TColgp_Array1OfPnt2d_ctor(
+        pub fn TColgp_Array1OfPnt2d_new(
             lower_bound: i32,
             upper_bound: i32,
         ) -> UniquePtr<TColgp_Array1OfPnt2d>;
@@ -44,7 +44,7 @@ mod inner {
 
         type TColgp_Array2OfPnt;
         #[cxx_name = "construct_unique"]
-        pub fn TColgp_Array2OfPnt_ctor(
+        pub fn TColgp_Array2OfPnt_new(
             row_lower: i32,
             row_upper: i32,
             column_lower: i32,
@@ -54,7 +54,7 @@ mod inner {
 
         type TColgp_HArray1OfPnt;
         #[cxx_name = "construct_unique"]
-        pub fn TColgp_HArray1OfPnt_ctor(
+        pub fn TColgp_HArray1OfPnt_new(
             lower_bound: i32,
             upper_bound: i32,
         ) -> UniquePtr<TColgp_HArray1OfPnt>;

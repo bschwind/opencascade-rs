@@ -12,7 +12,7 @@ impl Surface {
         let poles: Vec<Vec<_>> =
             poles.into_iter().map(|poles| poles.into_iter().collect()).collect();
 
-        let mut pole_array = ffi::t_col_gp::TColgp_Array2OfPnt_ctor(
+        let mut pole_array = ffi::t_col_gp::TColgp_Array2OfPnt_new(
             0,
             poles.len() as i32 - 1,
             0,
@@ -26,7 +26,7 @@ impl Surface {
             }
         }
 
-        let bezier = ffi::geom::Geom_BezierSurface_ctor(&pole_array);
+        let bezier = ffi::geom::Geom_BezierSurface_new(&pole_array);
         let inner = ffi::geom::bezier_to_surface(&bezier);
 
         Self { inner }

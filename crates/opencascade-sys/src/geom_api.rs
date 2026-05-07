@@ -13,7 +13,7 @@ mod inner {
 
         type GeomAPI_Interpolate;
         #[cxx_name = "construct_unique"]
-        pub fn GeomAPI_Interpolate_ctor(
+        pub fn GeomAPI_Interpolate_new(
             points: &Handle_TColgp_HArray1OfPnt,
             periodic: bool,
             tolerance: f64,
@@ -31,7 +31,7 @@ mod inner {
 
         type GeomAPI_ProjectPointOnSurf;
         #[cxx_name = "construct_unique"]
-        pub fn GeomAPI_ProjectPointOnSurf_ctor(
+        pub fn GeomAPI_ProjectPointOnSurf_new(
             origin: &gp_Pnt,
             surface: &Handle_Geom_Surface,
         ) -> UniquePtr<GeomAPI_ProjectPointOnSurf>;

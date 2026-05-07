@@ -25,12 +25,12 @@ mod inner {
 
         type BRepOffsetAPI_MakeOffset;
         #[cxx_name = "construct_unique"]
-        pub fn BRepOffsetAPI_MakeOffset_face_ctor(
+        pub fn BRepOffsetAPI_MakeOffset_face_new(
             face: &TopoDS_Face,
             join: GeomAbs_JoinType,
         ) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
         #[cxx_name = "construct_unique"]
-        pub fn BRepOffsetAPI_MakeOffset_wire_ctor(
+        pub fn BRepOffsetAPI_MakeOffset_wire_new(
             wire: &TopoDS_Wire,
             join: GeomAbs_JoinType,
         ) -> UniquePtr<BRepOffsetAPI_MakeOffset>;
@@ -41,7 +41,7 @@ mod inner {
 
         type BRepOffsetAPI_MakeThickSolid;
         #[cxx_name = "construct_unique"]
-        pub fn BRepOffsetAPI_MakeThickSolid_ctor() -> UniquePtr<BRepOffsetAPI_MakeThickSolid>;
+        pub fn BRepOffsetAPI_MakeThickSolid_new() -> UniquePtr<BRepOffsetAPI_MakeThickSolid>;
         #[allow(clippy::too_many_arguments)]
         pub fn MakeThickSolidByJoin(
             self: Pin<&mut BRepOffsetAPI_MakeThickSolid>,
@@ -65,7 +65,7 @@ mod inner {
 
         type BRepOffsetAPI_MakePipe;
         #[cxx_name = "construct_unique"]
-        pub fn BRepOffsetAPI_MakePipe_ctor(
+        pub fn BRepOffsetAPI_MakePipe_new(
             spine: &TopoDS_Wire,
             profile: &TopoDS_Shape,
         ) -> UniquePtr<BRepOffsetAPI_MakePipe>;
@@ -73,7 +73,7 @@ mod inner {
 
         type BRepOffsetAPI_MakePipeShell;
         #[cxx_name = "construct_unique"]
-        pub fn BRepOffsetAPI_MakePipeShell_ctor(
+        pub fn BRepOffsetAPI_MakePipeShell_new(
             spine: &TopoDS_Wire,
         ) -> UniquePtr<BRepOffsetAPI_MakePipeShell>;
         pub fn SetMode(self: Pin<&mut BRepOffsetAPI_MakePipeShell>, is_frenet: bool);
@@ -96,7 +96,7 @@ mod inner {
 
         type BRepOffsetAPI_ThruSections;
         #[cxx_name = "construct_unique"]
-        pub fn BRepOffsetAPI_ThruSections_ctor(
+        pub fn BRepOffsetAPI_ThruSections_new(
             is_solid: bool,
         ) -> UniquePtr<BRepOffsetAPI_ThruSections>;
         pub fn AddWire(self: Pin<&mut BRepOffsetAPI_ThruSections>, wire: &TopoDS_Wire);

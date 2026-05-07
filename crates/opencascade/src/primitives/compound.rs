@@ -27,8 +27,8 @@ impl Compound {
     }
 
     pub fn from_shapes<T: AsRef<Shape>>(shapes: impl IntoIterator<Item = T>) -> Self {
-        let mut compound = ffi::topo_ds::TopoDS_Compound_ctor();
-        let builder = ffi::b_rep::BRep_Builder_ctor();
+        let mut compound = ffi::topo_ds::TopoDS_Compound_new();
+        let builder = ffi::b_rep::BRep_Builder_new();
         let builder = ffi::b_rep::BRep_Builder_upcast_to_topods_builder(&builder);
         builder.MakeCompound(compound.pin_mut());
         let mut compound_shape = ffi::topo_ds::TopoDS_Compound_as_shape(compound);

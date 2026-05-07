@@ -54,7 +54,7 @@ mod inner {
 
         type BRepBuilderAPI_MakeWire;
         #[cxx_name = "construct_unique"]
-        pub fn BRepBuilderAPI_MakeWire_ctor() -> UniquePtr<BRepBuilderAPI_MakeWire>;
+        pub fn BRepBuilderAPI_MakeWire_new() -> UniquePtr<BRepBuilderAPI_MakeWire>;
         #[cxx_name = "construct_unique"]
         pub fn BRepBuilderAPI_MakeWire_edge_edge(
             edge_1: &TopoDS_Edge,
@@ -93,7 +93,7 @@ mod inner {
 
         type BRepBuilderAPI_MakeSolid;
         #[cxx_name = "construct_unique"]
-        pub fn BRepBuilderAPI_MakeSolid_ctor(
+        pub fn BRepBuilderAPI_MakeSolid_new(
             shell: &TopoDS_Shell,
         ) -> UniquePtr<BRepBuilderAPI_MakeSolid>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeSolid>) -> &TopoDS_Shape;
@@ -102,7 +102,7 @@ mod inner {
 
         type BRepBuilderAPI_MakeShapeOnMesh;
         #[cxx_name = "construct_unique"]
-        pub fn BRepBuilderAPI_MakeShapeOnMesh_ctor(
+        pub fn BRepBuilderAPI_MakeShapeOnMesh_new(
             mesh: &Handle_Poly_Triangulation,
         ) -> UniquePtr<BRepBuilderAPI_MakeShapeOnMesh>;
         pub fn Shape(self: Pin<&mut BRepBuilderAPI_MakeShapeOnMesh>) -> &TopoDS_Shape;
@@ -114,7 +114,7 @@ mod inner {
 
         type BRepBuilderAPI_Transform;
         #[cxx_name = "construct_unique"]
-        pub fn BRepBuilderAPI_Transform_ctor(
+        pub fn BRepBuilderAPI_Transform_new(
             shape: &TopoDS_Shape,
             transform: &gp_Trsf,
             copy: bool,
@@ -125,7 +125,7 @@ mod inner {
 
         type BRepBuilderAPI_GTransform;
         #[cxx_name = "construct_unique"]
-        pub fn BRepBuilderAPI_GTransform_ctor(
+        pub fn BRepBuilderAPI_GTransform_new(
             shape: &TopoDS_Shape,
             transform: &gp_GTrsf,
             copy: bool,

@@ -11,7 +11,7 @@ mod inner {
 
         type BRepFeat_MakeDPrism;
         #[cxx_name = "construct_unique"]
-        pub fn BRepFeat_MakeDPrism_ctor(
+        pub fn BRepFeat_MakeDPrism_new(
             shape: &TopoDS_Shape,
             profile_base: &TopoDS_Face,
             sketch_base: &TopoDS_Face,
@@ -28,7 +28,7 @@ mod inner {
 
         type BRepFeat_MakeCylindricalHole;
         #[cxx_name = "construct_unique"]
-        pub fn BRepFeat_MakeCylindricalHole_ctor() -> UniquePtr<BRepFeat_MakeCylindricalHole>;
+        pub fn BRepFeat_MakeCylindricalHole_new() -> UniquePtr<BRepFeat_MakeCylindricalHole>;
         pub fn Init(
             self: Pin<&mut BRepFeat_MakeCylindricalHole>,
             shape: &TopoDS_Shape,

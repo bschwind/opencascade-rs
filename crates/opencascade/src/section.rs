@@ -9,7 +9,7 @@ pub struct Section {
 impl Section {
     /// Create a new `Section` to intersect `target` by `tool`.
     pub fn new(target: &Shape, tool: &Shape) -> Section {
-        Section { inner: ffi::b_rep_algo_api::BRepAlgoAPI_Section_ctor(&target.inner, &tool.inner) }
+        Section { inner: ffi::b_rep_algo_api::BRepAlgoAPI_Section_new(&target.inner, &tool.inner) }
     }
 
     /// Get the edges of the resulting intersection.

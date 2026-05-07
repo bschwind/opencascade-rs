@@ -7,6 +7,6 @@ mod inner {
 
         type Message_ProgressRange;
         #[cxx_name = "construct_unique"]
-        pub fn Message_ProgressRange_ctor() -> UniquePtr<Message_ProgressRange>;
+        pub fn Message_ProgressRange_new() -> UniquePtr<Message_ProgressRange>;
     }
 }
