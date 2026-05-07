@@ -25,9 +25,6 @@ mod inner {
         pub fn ExplorerCurrentShape(explorer: &TopExp_Explorer) -> UniquePtr<TopoDS_Shape>;
         pub fn Current(self: &TopExp_Explorer) -> &TopoDS_Shape;
 
-        pub fn TopExp_FirstVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
-        pub fn TopExp_LastVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
-
         type TopExp;
         #[Self = "TopExp"]
         #[cxx_name = "Vertices"]
@@ -44,6 +41,8 @@ mod inner {
             vertex_first: Pin<&mut TopoDS_Vertex>,
             vertex_last: Pin<&mut TopoDS_Vertex>,
         );
+        pub fn TopExp_FirstVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
+        pub fn TopExp_LastVertex(edge: &TopoDS_Edge) -> UniquePtr<TopoDS_Vertex>;
         #[Self = "TopExp"]
         pub fn CommonVertex(
             edge_1: &TopoDS_Edge,

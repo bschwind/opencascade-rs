@@ -1,11 +1,12 @@
+use opencascade_sys as ffi;
+
 #[test]
 fn it_can_access_mesh_triangulation() {
     let origin = opencascade_sys::gp::new_point(0., 0., 0.);
     let mut cube =
         opencascade_sys::b_rep_prim_api::BRepPrimAPI_MakeBox_ctor(&origin, 10., 10., 10.);
 
-    let mut mesh =
-        opencascade_sys::b_rep_mesh::BRepMesh_IncrementalMesh::new(cube.pin_mut().Shape(), 0.01);
+    let mut mesh = opencascade_sys::b_rep_mesh::IncrementalMesh_new(cube.pin_mut().Shape(), 0.01);
 
     let mut triangle_corners = 0;
 
@@ -15,7 +16,7 @@ fn it_can_access_mesh_triangulation() {
     );
     while edge_explorer.More() {
         let face = opencascade_sys::topo_ds::TopoDS::Face(edge_explorer.Current());
-        let mut location = opencascade_sys::top_loc::TopLoc_Location::new();
+        let mut location = opencascade_sys::top_loc::Location_new();
 
         let triangulation_handle =
             opencascade_sys::b_rep::BRep_Tool_Triangulation(face, location.pin_mut());

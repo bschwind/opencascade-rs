@@ -673,11 +673,13 @@ impl Shape {
         path: P,
         triangulation_tolerance: f64,
     ) -> Result<(), Error> {
-        let mut stl_writer = ffi::stl_api::StlAPI_Writer::new();
+        let mut stl_writer = ffi::stl_api::StlAPI_Writer_new();
         let mesher = Mesher::try_new(self, triangulation_tolerance)?;
-        let success = stl_writer
-            .pin_mut()
-            .write_stl(mesher.inner.Shape(), path.as_ref().to_string_lossy().to_string());
+        let success = ffi::stl_api::write_stl(
+            stl_writer.pin_mut(),
+            mesher.inner.Shape(),
+            path.as_ref().to_string_lossy().to_string(),
+        );
 
         if success {
             Ok(())
@@ -688,8 +690,7 @@ impl Shape {
 
     #[must_use]
     pub fn clean(&self) -> Self {
-        let mut upgrader =
-            ffi::shape_upgrade::ShapeUpgrade_UnifySameDomain::new(&self.inner, true, true, true);
+        let mut upgrader = ffi::shape_upgrade::UnifySameDomain_new(&self.inner, true, true, true);
         upgrader.pin_mut().allow_internal_edges(false);
         upgrader.pin_mut().build();
 
@@ -701,7 +702,7 @@ impl Shape {
         let translation_vec = make_vec(translation);
         transform.pin_mut().set_translation_vec(&translation_vec);
 
-        let location = ffi::top_loc::TopLoc_Location::from_transform(&transform);
+        let location = ffi::top_loc::Location_from_transform(&transform);
 
         self.inner.pin_mut().set_global_translation(&location, false);
     }

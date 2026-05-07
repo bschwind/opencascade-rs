@@ -1,6 +1,4 @@
-use cxx::UniquePtr;
 pub use inner::*;
-use std::pin::Pin;
 
 #[cxx::bridge]
 mod inner {
@@ -17,19 +15,5 @@ mod inner {
             shape: &TopoDS_Shape,
             filename: String,
         ) -> bool;
-    }
-}
-
-impl StlAPI_Writer {
-    pub fn new() -> UniquePtr<Self> {
-        StlAPI_Writer_new()
-    }
-
-    pub fn write_stl(
-        self: Pin<&mut StlAPI_Writer>,
-        shape: &TopoDS_Shape,
-        filename: String,
-    ) -> bool {
-        write_stl(self, shape, filename)
     }
 }

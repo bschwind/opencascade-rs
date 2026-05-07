@@ -23,14 +23,3 @@ mod inner {
         pub fn shape(self: &ShapeUpgrade_UnifySameDomain) -> &TopoDS_Shape;
     }
 }
-
-impl ShapeUpgrade_UnifySameDomain {
-    pub fn new(
-        shape: &TopoDS_Shape,
-        unify_edges: bool,
-        unify_faces: bool,
-        concat_b_splines: bool,
-    ) -> cxx::UniquePtr<Self> {
-        UnifySameDomain_new(shape, unify_edges, unify_faces, concat_b_splines)
-    }
-}

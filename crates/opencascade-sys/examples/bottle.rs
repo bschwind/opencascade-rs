@@ -1,6 +1,5 @@
 use cxx::UniquePtr;
 use opencascade_sys as ffi;
-use opencascade_sys::{b_rep_mesh::BRepMesh_IncrementalMesh, stl_api};
 
 // All dimensions are in millimeters.
 pub fn main() {
@@ -239,9 +238,14 @@ pub fn main() {
     let final_shape = compound_shape;
 
     // Export to an STL file
-    let mut stl_writer = stl_api::StlAPI_Writer::new();
-    let triangulation = BRepMesh_IncrementalMesh::new(&final_shape, 0.01);
-    let success = stl_writer.pin_mut().write_stl(triangulation.Shape(), "bottle.stl".to_owned());
+    let mut stl_writer = ffi::stl_api::StlAPI_Writer_new();
+    let triangulation = ffi::b_rep_mesh::IncrementalMesh_new(&final_shape, 0.01);
+    let success = ffi::stl_api::write_stl(
+        stl_writer.pin_mut(),
+        triangulation.Shape(),
+        "bottle.stl".to_owned(),
+    );
+    // let success = stl_writer.pin_mut().write_stl(triangulation.Shape(), "bottle.stl".to_owned());
 
     println!("Done! Success = {success}");
 }

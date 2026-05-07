@@ -20,8 +20,7 @@ pub struct Mesher {
 
 impl Mesher {
     pub fn try_new(shape: &Shape, triangulation_tolerance: f64) -> Result<Self, Error> {
-        let inner =
-            ffi::b_rep_mesh::BRepMesh_IncrementalMesh::new(&shape.inner, triangulation_tolerance);
+        let inner = ffi::b_rep_mesh::IncrementalMesh_new(&shape.inner, triangulation_tolerance);
 
         if inner.IsDone() {
             Ok(Self { inner })
@@ -39,7 +38,7 @@ impl Mesher {
         let triangulated_shape = Shape::from_shape(self.inner.pin_mut().Shape());
 
         for face in triangulated_shape.faces() {
-            let mut location = ffi::top_loc::TopLoc_Location::new();
+            let mut location = ffi::top_loc::Location_new();
 
             let triangulation_handle =
                 ffi::b_rep::BRep_Tool_Triangulation(&face.inner, location.pin_mut());
@@ -52,7 +51,7 @@ impl Mesher {
 
             for i in 1..=face_point_count {
                 let mut point = ffi::poly::Poly_Triangulation_Node(triangulation, i);
-                point.pin_mut().Transform(&location.transform());
+                point.pin_mut().Transform(&ffi::top_loc::TopLoc_Location_Transformation(&location));
                 vertices.push(dvec3(point.X(), point.Y(), point.Z()));
             }
 

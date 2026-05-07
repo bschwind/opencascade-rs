@@ -244,7 +244,7 @@ impl Wire {
 
         transform.pin_mut().SetRotation(&rotation_axis_vec, angle.radians());
         transform.pin_mut().set_translation_vec(&translation_vec);
-        let location = ffi::top_loc::TopLoc_Location::from_transform(&transform);
+        let location = ffi::top_loc::Location_from_transform(&transform);
 
         let wire_shape = ffi::topo_ds::cast_wire_to_shape(&self.inner);
         let mut wire_shape = Shape::from_shape(wire_shape).inner;

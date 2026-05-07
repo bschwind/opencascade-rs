@@ -56,7 +56,6 @@ mod inner {
             remove_intersecting_edges: bool,
             progress: &Message_ProgressRange,
         );
-
         pub fn Shape(self: Pin<&mut BRepOffsetAPI_MakeThickSolid>) -> &TopoDS_Shape;
         pub fn Build(
             self: Pin<&mut BRepOffsetAPI_MakeThickSolid>,
