@@ -2,34 +2,6 @@ use cxx::UniquePtr;
 use glam::{DVec2, DVec3};
 use opencascade_sys as ffi;
 
-/// Generate `as_<ty>() -> Option<T>` and `expect_<ty>() -> T` on `Shape`.
-///
-/// Each method checks `shape_type()` before performing the OCCT static downcast.
-/// Returns `None` / panics on type mismatch.
-#[macro_export]
-macro_rules! impl_downcast {
-    ($ty:ident) => {
-        paste::paste! {
-            #[must_use]
-            pub fn [<as_ $ty:snake>](&self) -> Option<$ty> {
-                if self.shape_type() == $crate::primitives::ShapeType::$ty {
-                    let inner = opencascade_sys::topo_ds::TopoDS::$ty(&self.inner);
-                    Some($ty::[<from_ $ty:snake>](inner))
-                } else {
-                    None
-                }
-            }
-
-            #[must_use]
-            pub fn [<expect_ $ty:snake>](&self) -> $ty {
-                let expected = stringify!($ty);
-                self.[<as_ $ty:snake>]()
-                    .unwrap_or_else(|| panic!("expected {expected}, got {:?}", self.shape_type()))
-            }
-        }
-    };
-}
-
 mod boolean_shape;
 mod compound;
 mod edge;

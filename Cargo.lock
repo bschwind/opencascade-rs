@@ -2199,7 +2199,6 @@ dependencies = [
  "glam 0.24.2",
  "kicad-parser",
  "opencascade-sys",
- "paste",
  "thiserror 1.0.64",
 ]
 
