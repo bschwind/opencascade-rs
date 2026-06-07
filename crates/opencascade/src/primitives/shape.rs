@@ -1051,7 +1051,7 @@ mod tests {
     fn test_write_all_step_one_shape() {
         let shape = solid_shape();
         let path = std::env::temp_dir().join("test_write_all_step_one.step");
-        let result = Shape::write_all_step(&[&shape], &path);
+        let result = Shape::write_all_step([&shape], &path);
         assert!(result.is_ok());
         assert!(path.exists());
         assert!(path.metadata().unwrap().len() > 0);
@@ -1064,7 +1064,7 @@ mod tests {
         let s2 = Shape::sphere(5.0).at(glam::DVec3::new(20.0, 0.0, 0.0)).build();
         let s3 = Shape::cylinder_radius_height(3.0, 15.0);
         let path = std::env::temp_dir().join("test_write_all_step_multi.step");
-        let result = Shape::write_all_step(&[&s1, &s2, &s3], &path);
+        let result = Shape::write_all_step([&s1, &s2, &s3], &path);
         assert!(result.is_ok());
         assert!(path.exists());
         assert!(path.metadata().unwrap().len() > 0);
