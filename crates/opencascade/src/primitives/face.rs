@@ -42,6 +42,17 @@ impl Face {
         Self::from_make_face(make_face)
     }
 
+    pub fn from_wire_with_holes(outer: &Wire, holes: &[Wire]) -> Self {
+        let only_plane = true;
+        let mut make_face =
+            ffi::b_rep_builder_api::BRepBuilderAPI_MakeFace_wire(&outer.inner, only_plane);
+        for hole in holes {
+            make_face.pin_mut().add_wire(&hole.inner);
+        }
+        make_face.pin_mut().Build(&ffi::message::Message_ProgressRange_new());
+        Self::from_make_face(make_face)
+    }
+
     pub fn from_surface(surface: &Surface) -> Self {
         const EDGE_TOLERANCE: f64 = 0.0001;
 
@@ -555,6 +566,44 @@ mod tests {
         assert!(
             (face.surface_area() - 35.0).abs() <= 0.00001,
             "Expected surface_area() to be ~35.0, was actually {}",
+            face.surface_area()
+        );
+    }
+
+    #[test]
+    fn test_from_wire_with_no_holes() {
+        let outer = Workplane::xy().rect(10.0, 10.0);
+        let face = Face::from_wire_with_holes(&outer, &[]);
+        assert!(
+            (face.surface_area() - 100.0).abs() <= 0.00001,
+            "Expected surface_area() to be ~100.0, was actually {}",
+            face.surface_area()
+        );
+    }
+
+    #[test]
+    fn test_from_wire_with_holes() {
+        let outer = Workplane::xy().rect(10.0, 10.0);
+        let hole = Workplane::xy().circle(0.0, 0.0, 2.0);
+        let face = Face::from_wire_with_holes(&outer, &[hole]);
+        let expected = 100.0 - std::f64::consts::PI * 4.0;
+        assert!(
+            (face.surface_area() - expected).abs() <= 0.01,
+            "Expected surface_area() to be ~{expected}, was actually {}",
+            face.surface_area()
+        );
+    }
+
+    #[test]
+    fn test_from_wire_with_multiple_holes() {
+        let outer = Workplane::xy().rect(10.0, 10.0);
+        let hole1 = Workplane::xy().circle(-2.0, -2.0, 2.0);
+        let hole2 = Workplane::xy().circle(3.0, 3.0, 1.0);
+        let face = Face::from_wire_with_holes(&outer, &[hole1, hole2]);
+        let expected = 100.0 - std::f64::consts::PI * (4.0 + 1.0);
+        assert!(
+            (face.surface_area() - expected).abs() <= 0.01,
+            "Expected surface_area() to be ~{expected}, was actually {}",
             face.surface_area()
         );
     }
