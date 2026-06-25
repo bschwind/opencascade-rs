@@ -568,12 +568,28 @@ impl Shape {
     }
 
     pub fn write_step(&self, path: impl AsRef<Path>) -> Result<(), Error> {
+        Self::write_all_step(std::iter::once(self), path)
+    }
+
+    pub fn write_all_step<T: AsRef<Shape>>(
+        shapes: impl IntoIterator<Item = T>,
+        path: impl AsRef<Path>,
+    ) -> Result<(), Error> {
         let mut writer = ffi::step_control::STEPControl_Writer_new();
+        let mut count = 0;
 
-        let status = ffi::step_control::transfer_shape(writer.pin_mut(), &self.inner);
+        for shape in shapes {
+            let status = ffi::step_control::transfer_shape(writer.pin_mut(), &shape.as_ref().inner);
 
-        if status != ffi::if_select::IFSelect_ReturnStatus::IFSelect_RetDone {
-            return Err(Error::StepWriteFailed);
+            if status != ffi::if_select::IFSelect_ReturnStatus::IFSelect_RetDone {
+                return Err(Error::StepWriteTransferFailed);
+            }
+
+            count += 1;
+        }
+
+        if count == 0 {
+            return Err(Error::StepWriteNoShapes);
         }
 
         let status = ffi::step_control::write_step(
@@ -1018,5 +1034,48 @@ mod tests {
     fn test_expect_solid_panics_on_face() {
         let shape = face_shape();
         let _solid = shape.expect_solid();
+    }
+
+    #[test]
+    fn test_write_step() {
+        let shape = solid_shape();
+        let path = std::env::temp_dir().join("test_write_step.step");
+        let result = shape.write_step(&path);
+        assert!(result.is_ok());
+        assert!(path.exists());
+        assert!(path.metadata().unwrap().len() > 0);
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn test_write_all_step_one_shape() {
+        let shape = solid_shape();
+        let path = std::env::temp_dir().join("test_write_all_step_one.step");
+        let result = Shape::write_all_step([&shape], &path);
+        assert!(result.is_ok());
+        assert!(path.exists());
+        assert!(path.metadata().unwrap().len() > 0);
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn test_write_all_step_multiple_shapes() {
+        let s1 = Shape::box_centered(10.0, 10.0, 10.0);
+        let s2 = Shape::sphere(5.0).at(glam::DVec3::new(20.0, 0.0, 0.0)).build();
+        let s3 = Shape::cylinder_radius_height(3.0, 15.0);
+        let path = std::env::temp_dir().join("test_write_all_step_multi.step");
+        let result = Shape::write_all_step([&s1, &s2, &s3], &path);
+        assert!(result.is_ok());
+        assert!(path.exists());
+        assert!(path.metadata().unwrap().len() > 0);
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn test_write_all_step_empty() {
+        let path = std::env::temp_dir().join("test_write_all_step_empty.step");
+        let result = Shape::write_all_step(std::iter::empty::<&Shape>(), &path);
+        assert!(result.is_err());
+        assert!(!path.exists());
     }
 }

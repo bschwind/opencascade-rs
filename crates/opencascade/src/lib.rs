@@ -21,6 +21,10 @@ pub enum Error {
     IgesReadFailed,
     #[error("failed to read KiCAD PCB file: {0}")]
     KicadReadFailed(#[from] kicad_parser::Error),
+    #[error("at least one shape is required to write a STEP file")]
+    StepWriteNoShapes,
+    #[error("failed to transfer shape to STEP writer")]
+    StepWriteTransferFailed,
     #[error("failed to write STEP file")]
     StepWriteFailed,
     #[error("failed to write IGES file")]
