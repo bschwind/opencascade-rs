@@ -15,6 +15,7 @@ pub mod keycap;
 pub mod letter_a;
 pub mod offset_2d;
 pub mod pentafoil;
+pub mod power_brick_bracket;
 pub mod rounded_chamfer;
 pub mod section;
 pub mod swept_face;
@@ -41,6 +42,7 @@ pub enum Example {
     LetterA,
     Offset2d,
     Pentafoil,
+    PowerBrickBracket,
     RoundedChamfer,
     Section,
     SweptFace,
@@ -69,6 +71,7 @@ impl Example {
             Example::LetterA => letter_a::shape(),
             Example::Offset2d => offset_2d::shape(),
             Example::Pentafoil => pentafoil::shape(),
+            Example::PowerBrickBracket => power_brick_bracket::shape(),
             Example::RoundedChamfer => rounded_chamfer::shape(),
             Example::Section => section::shape(),
             Example::SweptFace => swept_face::shape(),
