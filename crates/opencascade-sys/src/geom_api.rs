@@ -7,8 +7,11 @@ mod inner {
 
         type gp_Pnt = crate::gp::gp_Pnt;
         type gp_Vec = crate::gp::gp_Vec;
+        #[cxx_name = "RustHandle_TColgp_HArray1OfPnt"]
         type Handle_TColgp_HArray1OfPnt = crate::t_col_gp::Handle_TColgp_HArray1OfPnt;
+        #[cxx_name = "RustHandle_Geom_BSplineCurve"]
         type Handle_Geom_BSplineCurve = crate::geom::Handle_Geom_BSplineCurve;
+        #[cxx_name = "RustHandle_Geom_Surface"]
         type Handle_Geom_Surface = crate::geom::Handle_Geom_Surface;
 
         type GeomAPI_Interpolate;

@@ -10,6 +10,7 @@ mod inner {
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
 
         // Handles
+        #[cxx_name = "RustHandle_TopTools_HSequenceOfShape"]
         type Handle_TopTools_HSequenceOfShape;
         pub fn IsNull(self: &Handle_TopTools_HSequenceOfShape) -> bool;
         // End Handles

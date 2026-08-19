@@ -11,6 +11,7 @@ mod inner {
         type BRepAdaptor_Curve = crate::b_rep_adaptor::BRepAdaptor_Curve;
 
         // Handles
+        #[cxx_name = "RustHandle_Poly_Triangulation"]
         type Handle_Poly_Triangulation;
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
         #[cxx_name = "handle_try_deref"]

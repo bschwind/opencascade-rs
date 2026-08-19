@@ -7,7 +7,9 @@ mod inner {
 
         type gp_Pnt = crate::gp::gp_Pnt;
         type gp_Pnt2d = crate::gp::gp_Pnt2d;
+        #[cxx_name = "RustHandle_Geom_TrimmedCurve"]
         type Handle_Geom_TrimmedCurve = crate::geom::Handle_Geom_TrimmedCurve;
+        #[cxx_name = "RustHandle_Geom2d_TrimmedCurve"]
         type Handle_Geom2d_TrimmedCurve = crate::geom2d::Handle_Geom2d_TrimmedCurve;
 
         type GC_MakeSegment;

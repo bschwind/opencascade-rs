@@ -16,9 +16,13 @@ mod inner {
         type TopoDS_Wire = crate::topo_ds::TopoDS_Wire;
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
         type TopoDS_Shell = crate::topo_ds::TopoDS_Shell;
+        #[cxx_name = "RustHandle_Geom_Curve"]
         type Handle_Geom_Curve = crate::geom::Handle_Geom_Curve;
+        #[cxx_name = "RustHandle_Geom_Surface"]
         type Handle_Geom_Surface = crate::geom::Handle_Geom_Surface;
+        #[cxx_name = "RustHandle_Geom2d_Curve"]
         type Handle_Geom2d_Curve = crate::geom2d::Handle_Geom2d_Curve;
+        #[cxx_name = "RustHandle_Poly_Triangulation"]
         type Handle_Poly_Triangulation = crate::poly::Handle_Poly_Triangulation;
 
         type BRepBuilderAPI_MakeVertex;

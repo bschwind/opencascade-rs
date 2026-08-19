@@ -9,12 +9,15 @@ mod inner {
         type gp_Pnt2d = crate::gp::gp_Pnt2d;
 
         // Handles
+        #[cxx_name = "RustHandle_Geom2d_Curve"]
         type Handle_Geom2d_Curve;
         pub fn IsNull(self: &Handle_Geom2d_Curve) -> bool;
 
+        #[cxx_name = "RustHandle_Geom2d_Ellipse"]
         type Handle_Geom2d_Ellipse;
         pub fn IsNull(self: &Handle_Geom2d_Ellipse) -> bool;
 
+        #[cxx_name = "RustHandle_Geom2d_TrimmedCurve"]
         type Handle_Geom2d_TrimmedCurve;
         pub fn IsNull(self: &Handle_Geom2d_TrimmedCurve) -> bool;
         // End Handles
