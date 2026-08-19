@@ -20,3 +20,19 @@ jobs:
       - name: Cache Rust Dependencies
         uses: Swatinem/rust-cache@v2
       - run: cargo test --all-targets
+
+  windows:
+    name: Windows MSVC Check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+      - uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+      - name: Cache Rust Dependencies
+        uses: Swatinem/rust-cache@v2
+      - run: cargo check -p opencascade
+        env:
+          CMAKE_POLICY_VERSION_MINIMUM: "3.5"

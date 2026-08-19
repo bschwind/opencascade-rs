@@ -8,6 +8,7 @@ mod inner {
         type TColgp_Array1OfPnt2d = crate::t_col_gp::TColgp_Array1OfPnt2d;
 
         // Handles
+        #[cxx_name = "RustHandle_Law_Function"]
         type Handle_Law_Function;
         pub fn IsNull(self: &Handle_Law_Function) -> bool;
         // End Handles

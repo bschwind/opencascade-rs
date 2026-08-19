@@ -16,7 +16,7 @@ inline std::unique_ptr<gp_Pnt> TColgp_HArray1OfPnt_Value(const TColgp_HArray1OfP
   return std::unique_ptr<gp_Pnt>(new gp_Pnt(array.Value(index)));
 }
 
-inline std::unique_ptr<Handle_TColgp_HArray1OfPnt>
+inline std::unique_ptr<RustHandle_TColgp_HArray1OfPnt>
 new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(std::unique_ptr<TColgp_HArray1OfPnt> array) {
-  return std::unique_ptr<Handle_TColgp_HArray1OfPnt>(new Handle_TColgp_HArray1OfPnt(array.release()));
+  return std::unique_ptr<RustHandle_TColgp_HArray1OfPnt>(new RustHandle_TColgp_HArray1OfPnt(array.release()));
 }

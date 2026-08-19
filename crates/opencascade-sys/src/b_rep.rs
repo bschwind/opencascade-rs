@@ -10,8 +10,11 @@ mod inner {
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
         type TopoDS_Edge = crate::topo_ds::TopoDS_Edge;
         type TopoDS_Vertex = crate::topo_ds::TopoDS_Vertex;
+        #[cxx_name = "RustHandle_Geom_Surface"]
         type Handle_Geom_Surface = crate::geom::Handle_Geom_Surface;
+        #[cxx_name = "RustHandle_Geom_Curve"]
         type Handle_Geom_Curve = crate::geom::Handle_Geom_Curve;
+        #[cxx_name = "RustHandle_Poly_Triangulation"]
         type Handle_Poly_Triangulation = crate::poly::Handle_Poly_Triangulation;
         type TopLoc_Location = crate::top_loc::TopLoc_Location;
 

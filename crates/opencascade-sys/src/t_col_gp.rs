@@ -10,6 +10,7 @@ mod inner {
         type gp_Pnt2d = crate::gp::gp_Pnt2d;
 
         // Handles
+        #[cxx_name = "RustHandle_TColgp_HArray1OfPnt"]
         type Handle_TColgp_HArray1OfPnt;
 
         pub fn new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(

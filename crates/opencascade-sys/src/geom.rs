@@ -9,32 +9,41 @@ mod inner {
         type gp_Pnt = crate::gp::gp_Pnt;
         type TColgp_Array2OfPnt = crate::t_col_gp::TColgp_Array2OfPnt;
         type TColgp_HArray1OfPnt = crate::t_col_gp::TColgp_HArray1OfPnt;
+        #[cxx_name = "RustHandle_Standard_Type"]
         type Handle_Standard_Type = crate::standard::Handle_Standard_Type;
 
         // Handles
+        #[cxx_name = "RustHandle_Geom_Curve"]
         type Handle_Geom_Curve;
         pub fn IsNull(self: &Handle_Geom_Curve) -> bool;
         pub fn HandleGeomCurve_Value(curve: &Handle_Geom_Curve, u: f64) -> UniquePtr<gp_Pnt>;
 
+        #[cxx_name = "RustHandle_Geom_BSplineCurve"]
         type Handle_Geom_BSplineCurve;
         pub fn IsNull(self: &Handle_Geom_BSplineCurve) -> bool;
 
+        #[cxx_name = "RustHandle_Geom_BezierCurve"]
         type Handle_Geom_BezierCurve;
         pub fn IsNull(self: &Handle_Geom_BezierCurve) -> bool;
 
+        #[cxx_name = "RustHandle_Geom_TrimmedCurve"]
         type Handle_Geom_TrimmedCurve;
         pub fn IsNull(self: &Handle_Geom_TrimmedCurve) -> bool;
 
+        #[cxx_name = "RustHandle_Geom_Surface"]
         type Handle_Geom_Surface;
         pub fn IsNull(self: &Handle_Geom_Surface) -> bool;
         pub fn DynamicType(surface: &Handle_Geom_Surface) -> &Handle_Standard_Type;
 
+        #[cxx_name = "RustHandle_Geom_BezierSurface"]
         type Handle_Geom_BezierSurface;
         pub fn IsNull(self: &Handle_Geom_BezierSurface) -> bool;
 
+        #[cxx_name = "RustHandle_Geom_Plane"]
         type Handle_Geom_Plane;
         pub fn IsNull(self: &Handle_Geom_Plane) -> bool;
 
+        #[cxx_name = "RustHandle_Geom_CylindricalSurface"]
         type Handle_Geom_CylindricalSurface;
         pub fn IsNull(self: &Handle_Geom_CylindricalSurface) -> bool;
         // End Handles
