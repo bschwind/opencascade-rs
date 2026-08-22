@@ -3,7 +3,7 @@ name = "opencascade-sys"
 description = "Rust bindings to the OpenCascade CAD Kernel"
 authors = ["Brian Schwind <brianmschwind@gmail.com>"]
 license = "LGPL-2.1"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 repository = "https://github.com/bschwind/opencascade-rs"
 
@@ -13,7 +13,7 @@ cxx = "1"
 [build-dependencies]
 cmake = "0.1"
 cxx-build = "1"
-occt-sys = { version = "0.6", optional = true }
+occt-sys = { version = "7.8.1", optional = true }
 
 [features]
 builtin = ["occt-sys"]
