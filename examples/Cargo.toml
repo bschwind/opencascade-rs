@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
-opencascade = { version = "0.2", path = "../crates/opencascade", default-features = false }
+opencascade = { version = "0.3", path = "../crates/opencascade", default-features = false }
 glam = { version = "0.24", features = ["bytemuck"] }
 
 [features]

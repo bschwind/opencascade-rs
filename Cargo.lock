@@ -2193,7 +2193,7 @@ checksum = "d75b0bedcc4fe52caa0e03d9f1151a323e4aa5e2d78ba3580400cd3c9e2bc4bc"
 
 [[package]]
 name = "opencascade"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cxx",
  "glam 0.24.2",
@@ -2204,7 +2204,7 @@ dependencies = [
 
 [[package]]
 name = "opencascade-sys"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "cmake",
  "cxx",

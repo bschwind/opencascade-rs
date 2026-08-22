@@ -11,7 +11,7 @@ examples = { path = "../../examples", default-features = false }
 glam = { version = "0.24", features = ["bytemuck"] }
 kicad-parser = { path = "../kicad-parser" }
 notify = "6"
-opencascade = { version = "0.2", path = "../opencascade", default-features = false }
+opencascade = { version = "0.3", path = "../opencascade", default-features = false }
 simple-game = { git = "https://github.com/bschwind/simple-game.git", rev = "19f800cf5c29a41e44caaab2baf62b5cbddb5ce2" }
 smaa = "0.16"
 wasmtime = "32"
