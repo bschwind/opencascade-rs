@@ -74,7 +74,8 @@ impl KicadPcb {
             let translate = DVec2::from(footprint.location);
 
             footprint
-                .lines()
+                .graphic_lines
+                .iter()
                 .filter(|line| line.layer == *layer)
                 .map(move |line| {
                     let start = line.start_point;
@@ -87,20 +88,22 @@ impl KicadPcb {
 
                     Edge::segment(start.extend(0.0), end.extend(0.0))
                 })
-                .chain(footprint.arcs().filter(|arc| arc.layer == *layer).map(move |arc| {
-                    let start = arc.start_point;
-                    let mid = arc.mid_point;
-                    let end = arc.end_point;
-                    let start = DVec2::from(start);
-                    let mid = DVec2::from(mid);
-                    let end = DVec2::from(end);
+                .chain(footprint.graphic_arcs.iter().filter(|arc| arc.layer == *layer).map(
+                    move |arc| {
+                        let start = arc.start_point;
+                        let mid = arc.mid_point;
+                        let end = arc.end_point;
+                        let start = DVec2::from(start);
+                        let mid = DVec2::from(mid);
+                        let end = DVec2::from(end);
 
-                    let start = translate + angle_vec.rotate(start);
-                    let mid = translate + angle_vec.rotate(mid);
-                    let end = translate + angle_vec.rotate(end);
+                        let start = translate + angle_vec.rotate(start);
+                        let mid = translate + angle_vec.rotate(mid);
+                        let end = translate + angle_vec.rotate(end);
 
-                    Edge::arc(start.extend(0.0), mid.extend(0.0), end.extend(0.0))
-                }))
+                        Edge::arc(start.extend(0.0), mid.extend(0.0), end.extend(0.0))
+                    },
+                ))
         });
 
         self.board
