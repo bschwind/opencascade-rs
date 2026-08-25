@@ -132,4 +132,99 @@ impl Solid {
         let wire = Wire::from_ordered_points(points)?;
         Ok(Face::from_wire(&wire).extrude(dvec3(0.0, 0.0, h)))
     }
+
+    #[must_use]
+    pub fn volume(&self) -> f64 {
+        let mut props = ffi::g_prop::GProps_new();
+        let inner_shape = ffi::topo_ds::cast_solid_to_shape(&self.inner);
+        ffi::b_rep_g_prop::BRepGProp::VolumeProperties(
+            inner_shape,
+            props.pin_mut(),
+            true,
+            false,
+            false,
+        );
+        props.Mass()
+    }
+
+    #[must_use]
+    pub fn center_of_mass(&self) -> DVec3 {
+        let mut props = ffi::g_prop::GProps_new();
+        let inner_shape = ffi::topo_ds::cast_solid_to_shape(&self.inner);
+        ffi::b_rep_g_prop::BRepGProp::VolumeProperties(
+            inner_shape,
+            props.pin_mut(),
+            true,
+            false,
+            false,
+        );
+        let center = ffi::g_prop::GProp_GProps_CentreOfMass(&props);
+        dvec3(center.X(), center.Y(), center.Z())
+    }
+
+    #[must_use]
+    pub fn surface_area(&self) -> f64 {
+        let mut props = ffi::g_prop::GProps_new();
+        let inner_shape = ffi::topo_ds::cast_solid_to_shape(&self.inner);
+        ffi::b_rep_g_prop::BRepGProp::SurfaceProperties(inner_shape, props.pin_mut(), false, false);
+        props.Mass()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_volume_of_box() {
+        let shape = Shape::box_centered(10.0, 10.0, 10.0);
+        let solid = shape.expect_solid();
+        let volume = solid.volume();
+        assert!((volume - 1000.0).abs() <= 0.00001, "Expected volume ~1000.0, got {volume}",);
+    }
+
+    #[test]
+    fn test_volume_of_cylinder() {
+        let shape = Shape::cylinder_radius_height(3.0, 15.0);
+        let solid = shape.expect_solid();
+        let volume = solid.volume();
+        let expected = std::f64::consts::PI * 9.0 * 15.0;
+        assert!((volume - expected).abs() <= 0.001, "Expected volume ~{expected}, got {volume}",);
+    }
+
+    #[test]
+    fn test_center_of_mass_of_centered_box() {
+        let shape = Shape::box_centered(10.0, 10.0, 10.0);
+        let solid = shape.expect_solid();
+        let com = solid.center_of_mass();
+        assert!(
+            com.distance_squared(dvec3(0.0, 0.0, 0.0)) <= 0.00001,
+            "Expected center of mass at (0, 0, 0), got ({}, {}, {})",
+            com.x,
+            com.y,
+            com.z,
+        );
+    }
+
+    #[test]
+    fn test_center_of_mass_of_translated_box() {
+        let shape = Shape::box_with_dimensions(10.0, 10.0, 10.0).translated(dvec3(5.0, 5.0, 5.0));
+        let solid = shape.expect_solid();
+        let com = solid.center_of_mass();
+        assert!(
+            com.distance_squared(dvec3(10.0, 10.0, 10.0)) <= 0.00001,
+            "Expected center of mass at (10, 10, 10), got ({}, {}, {})",
+            com.x,
+            com.y,
+            com.z,
+        );
+    }
+
+    #[test]
+    fn test_surface_area_of_box() {
+        let shape = Shape::box_centered(10.0, 10.0, 10.0);
+        let solid = shape.expect_solid();
+        let area = solid.surface_area();
+        assert!((area - 600.0).abs() <= 0.00001, "Expected surface area ~600.0, got {area}",);
+    }
 }

@@ -45,6 +45,8 @@ mod inner {
         type gp_Circ;
         #[cxx_name = "construct_unique"]
         pub fn gp_Circ_new(axis: &gp_Ax2, radius: f64) -> UniquePtr<gp_Circ>;
+        pub fn Radius(self: &gp_Circ) -> f64;
+        pub fn Position(self: &gp_Circ) -> &gp_Ax2;
 
         type gp_Ax1;
         #[cxx_name = "construct_unique"]
@@ -53,10 +55,14 @@ mod inner {
         type gp_Ax2;
         #[cxx_name = "construct_unique"]
         pub fn gp_Ax2_new(origin: &gp_Pnt, main_dir: &gp_Dir) -> UniquePtr<gp_Ax2>;
+        pub fn Location(self: &gp_Ax2) -> &gp_Pnt;
+        pub fn Direction(self: &gp_Ax2) -> &gp_Dir;
 
         type gp_Ax3;
         #[cxx_name = "construct_unique"]
         pub fn gp_Ax3_from_gp_Ax2(axis: &gp_Ax2) -> UniquePtr<gp_Ax3>;
+        pub fn Location(self: &gp_Ax3) -> &gp_Pnt;
+        pub fn Direction(self: &gp_Ax3) -> &gp_Dir;
 
         type gp_Dir2d;
         #[cxx_name = "construct_unique"]

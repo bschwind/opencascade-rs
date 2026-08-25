@@ -263,6 +263,21 @@ impl Wire {
         Face::from_face(make_face.Face())
     }
 
+    pub fn length(&self) -> f64 {
+        let mut props = ffi::g_prop::GProps_new();
+        ffi::b_rep_g_prop::BRepGProp::LinearProperties(
+            ffi::topo_ds::cast_wire_to_shape(&self.inner),
+            props.pin_mut(),
+            false,
+            false,
+        );
+        props.Mass()
+    }
+
+    pub fn is_closed(&self) -> bool {
+        ffi::b_rep::BRep_Tool_IsClosed(&self.inner)
+    }
+
     // Create a closure-based API
     pub fn freeform() {}
 }

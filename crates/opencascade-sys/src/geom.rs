@@ -7,6 +7,7 @@ mod inner {
 
         type gp_Ax3 = crate::gp::gp_Ax3;
         type gp_Pnt = crate::gp::gp_Pnt;
+        type gp_Circ = crate::gp::gp_Circ;
         type TColgp_Array2OfPnt = crate::t_col_gp::TColgp_Array2OfPnt;
         type TColgp_HArray1OfPnt = crate::t_col_gp::TColgp_HArray1OfPnt;
         type Handle_Standard_Type = crate::standard::Handle_Standard_Type;
@@ -34,6 +35,18 @@ mod inner {
 
         type Handle_Geom_Plane;
         pub fn IsNull(self: &Handle_Geom_Plane) -> bool;
+
+        type Handle_Geom_SphericalSurface;
+        pub fn IsNull(self: &Handle_Geom_SphericalSurface) -> bool;
+
+        type Handle_Geom_ConicalSurface;
+        pub fn IsNull(self: &Handle_Geom_ConicalSurface) -> bool;
+
+        type Handle_Geom_ToroidalSurface;
+        pub fn IsNull(self: &Handle_Geom_ToroidalSurface) -> bool;
+
+        type Handle_Geom_Circle;
+        pub fn IsNull(self: &Handle_Geom_Circle) -> bool;
 
         type Handle_Geom_CylindricalSurface;
         pub fn IsNull(self: &Handle_Geom_CylindricalSurface) -> bool;
@@ -74,6 +87,41 @@ mod inner {
             geom_surface_handle: &Handle_Geom_Surface,
         ) -> UniquePtr<Handle_Geom_Plane>;
 
+        pub fn new_HandleGeomCylindricalSurface_from_HandleGeomSurface(
+            geom_surface_handle: &Handle_Geom_Surface,
+        ) -> UniquePtr<Handle_Geom_CylindricalSurface>;
+        pub fn HandleGeomCylindricalSurface_Radius(cyl: &Handle_Geom_CylindricalSurface) -> f64;
+        pub fn HandleGeomCylindricalSurface_Position(
+            cyl: &Handle_Geom_CylindricalSurface,
+        ) -> &gp_Ax3;
+
+        pub fn new_HandleGeomSphericalSurface_from_HandleGeomSurface(
+            geom_surface_handle: &Handle_Geom_Surface,
+        ) -> UniquePtr<Handle_Geom_SphericalSurface>;
+        pub fn HandleGeomSphericalSurface_Radius(sphere: &Handle_Geom_SphericalSurface) -> f64;
+        pub fn HandleGeomSphericalSurface_Position(
+            sphere: &Handle_Geom_SphericalSurface,
+        ) -> &gp_Ax3;
+
+        pub fn new_HandleGeomConicalSurface_from_HandleGeomSurface(
+            geom_surface_handle: &Handle_Geom_Surface,
+        ) -> UniquePtr<Handle_Geom_ConicalSurface>;
+        pub fn HandleGeomConicalSurface_RefRadius(cone: &Handle_Geom_ConicalSurface) -> f64;
+        pub fn HandleGeomConicalSurface_SemiAngle(cone: &Handle_Geom_ConicalSurface) -> f64;
+        pub fn HandleGeomConicalSurface_Position(cone: &Handle_Geom_ConicalSurface) -> &gp_Ax3;
+
+        pub fn new_HandleGeomToroidalSurface_from_HandleGeomSurface(
+            geom_surface_handle: &Handle_Geom_Surface,
+        ) -> UniquePtr<Handle_Geom_ToroidalSurface>;
+        pub fn HandleGeomToroidalSurface_MajorRadius(torus: &Handle_Geom_ToroidalSurface) -> f64;
+        pub fn HandleGeomToroidalSurface_MinorRadius(torus: &Handle_Geom_ToroidalSurface) -> f64;
+        pub fn HandleGeomToroidalSurface_Position(torus: &Handle_Geom_ToroidalSurface) -> &gp_Ax3;
+
+        pub fn new_HandleGeomCircle_from_HandleGeomCurve(
+            curve: &Handle_Geom_Curve,
+        ) -> UniquePtr<Handle_Geom_Circle>;
+        pub fn HandleGeomCircle_Circ(circle: &Handle_Geom_Circle) -> UniquePtr<gp_Circ>;
+
         #[cxx_name = "construct_unique"]
         pub fn new_HandleGeomCurve_from_HandleGeom_BSplineCurve(
             bspline_curve_handle: &Handle_Geom_BSplineCurve,
@@ -90,7 +138,11 @@ mod inner {
         ) -> UniquePtr<Handle_Geom_Curve>;
     }
 
+    impl UniquePtr<Handle_Geom_Circle> {}
     impl UniquePtr<Handle_Geom_CylindricalSurface> {}
+    impl UniquePtr<Handle_Geom_SphericalSurface> {}
+    impl UniquePtr<Handle_Geom_ConicalSurface> {}
+    impl UniquePtr<Handle_Geom_ToroidalSurface> {}
     impl UniquePtr<Handle_Geom_BezierSurface> {}
     impl UniquePtr<Handle_Geom_BezierCurve> {}
     impl UniquePtr<Handle_Geom_Plane> {}

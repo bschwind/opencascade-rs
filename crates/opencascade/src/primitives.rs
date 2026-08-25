@@ -25,6 +25,12 @@ pub use vertex::*;
 pub use wire::*;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
+pub enum PositionMode {
+    Parameter,
+    Length,
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum ShapeType {
     /// Abstract topological data structure describes a basic entity.
     Shape,
@@ -264,6 +270,39 @@ impl From<JoinType> for ffi::geom_abs::GeomAbs_JoinType {
             JoinType::Arc => ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Arc,
             //JoinType::Tangent => ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Tangent,
             JoinType::Intersection => ffi::geom_abs::GeomAbs_JoinType::GeomAbs_Intersection,
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum SurfaceType {
+    Plane,
+    Cylinder,
+    Cone,
+    Sphere,
+    Torus,
+    BezierSurface,
+    BSplineSurface,
+    SurfaceOfRevolution,
+    SurfaceOfExtrusion,
+    OffsetSurface,
+    OtherSurface,
+}
+
+impl std::fmt::Display for SurfaceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SurfaceType::Plane => write!(f, "Plane"),
+            SurfaceType::Cylinder => write!(f, "Cylinder"),
+            SurfaceType::Cone => write!(f, "Cone"),
+            SurfaceType::Sphere => write!(f, "Sphere"),
+            SurfaceType::Torus => write!(f, "Torus"),
+            SurfaceType::BezierSurface => write!(f, "BezierSurface"),
+            SurfaceType::BSplineSurface => write!(f, "BSplineSurface"),
+            SurfaceType::SurfaceOfRevolution => write!(f, "SurfaceOfRevolution"),
+            SurfaceType::SurfaceOfExtrusion => write!(f, "SurfaceOfExtrusion"),
+            SurfaceType::OffsetSurface => write!(f, "OffsetSurface"),
+            SurfaceType::OtherSurface => write!(f, "OtherSurface"),
         }
     }
 }
