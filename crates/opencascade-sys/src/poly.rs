@@ -13,7 +13,7 @@ mod inner {
         // Handles
         type Handle_Poly_Triangulation;
         pub fn IsNull(self: &Handle_Poly_Triangulation) -> bool;
-        #[cxx_name = "handle_try_deref"]
+        #[cxx_name = "Handle_Poly_Triangulation_deref"]
         pub fn Handle_Poly_Triangulation_Get(
             handle: &Handle_Poly_Triangulation,
         ) -> Result<&Poly_Triangulation>;
