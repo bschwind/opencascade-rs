@@ -5,9 +5,16 @@
 #include <TopoDS_Face.hxx>
 #include <bindings_common.hxx>
 
+// MSVC only: same reasoning
+// as Handle_Poly_Triangulation_deref in poly.hxx.
+inline const TopTools_HSequenceOfShape &
+Handle_TopTools_HSequenceOfShape_deref(const Handle_TopTools_HSequenceOfShape &handle) {
+  return handle_try_deref<TopTools_HSequenceOfShape>(handle);
+}
+
 inline std::unique_ptr<Handle_TopTools_HSequenceOfShape> new_Handle_TopTools_HSequenceOfShape() {
   auto sequence = new TopTools_HSequenceOfShape();
-  auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);
+  auto handle = new Handle_TopTools_HSequenceOfShape(sequence);
 
   return std::unique_ptr<Handle_TopTools_HSequenceOfShape>(handle);
 }

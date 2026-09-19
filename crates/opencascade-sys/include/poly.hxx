@@ -2,6 +2,16 @@
 #include <Poly_Triangulation.hxx>
 #include <bindings_common.hxx>
 
+// MSVC only: `handle_try_deref<T>`
+// can't be bound directly by function pointer against `Handle_Poly_Triangulation`
+// (a distinct subclass of `opencascade::handle<Poly_Triangulation>` under MSVC).
+// A thin, exactly-typed wrapper sidesteps the pointer-type binding; the call to
+// the template itself is fine since ordinary calls allow the derived-to-base
+// reference conversion that function-pointer binding doesn't.
+inline const Poly_Triangulation &Handle_Poly_Triangulation_deref(const Handle_Poly_Triangulation &handle) {
+  return handle_try_deref<Poly_Triangulation>(handle);
+}
+
 inline std::unique_ptr<Handle_Poly_Triangulation>
 Handle_Poly_Triangulation_new(std::unique_ptr<Poly_Triangulation> triangulation) {
   return std::unique_ptr<Handle_Poly_Triangulation>(new Handle_Poly_Triangulation(triangulation.release()));
