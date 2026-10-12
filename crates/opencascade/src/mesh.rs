@@ -12,6 +12,11 @@ pub struct Mesh {
     pub uvs: Vec<DVec2>,
     pub normals: Vec<DVec3>,
     pub indices: Vec<usize>,
+    /// The number of triangles each face contributed, in the order the faces
+    /// are yielded by [`Shape::faces`]. The triangles of face `i` directly follow
+    /// those of faces `0..i` in `indices`, so a triangle can be mapped back to
+    /// the face it came from.
+    pub face_triangles: Vec<usize>,
 }
 
 pub struct Mesher {
@@ -34,6 +39,7 @@ impl Mesher {
         let mut uvs = vec![];
         let mut normals = vec![];
         let mut indices = vec![];
+        let mut face_triangles = vec![];
 
         let triangulated_shape = Shape::from_shape(self.inner.pin_mut().Shape());
 
@@ -99,6 +105,8 @@ impl Mesher {
                 normals.push(dvec3(normal.X(), normal.Y(), normal.Z()));
             }
 
+            face_triangles.push(triangulation.NbTriangles() as usize);
+
             for i in 1..=triangulation.NbTriangles() {
                 let triangle = triangulation.Triangle(i);
 
@@ -114,6 +122,69 @@ impl Mesher {
             }
         }
 
-        Ok(Mesh { vertices, uvs, normals, indices })
+        Ok(Mesh { vertices, uvs, normals, indices, face_triangles })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn face_triangles_map_triangles_to_faces() {
+        let shape = Shape::box_centered(10.0, 20.0, 30.0);
+        let mesh = shape.mesh().unwrap();
+
+        assert_eq!(mesh.face_triangles.len(), shape.faces().count());
+        assert_eq!(mesh.face_triangles.iter().sum::<usize>(), mesh.indices.len() / 3);
+
+        // Every triangle attributed to a face should lie in that face's plane.
+        let mut triangles = mesh.indices.chunks_exact(3);
+
+        for (face, &triangle_count) in shape.faces().zip(&mesh.face_triangles) {
+            assert!(triangle_count > 0);
+
+            let center = face.center_of_mass();
+            let normal = face.normal_at_center().normalize();
+
+            for triangle in triangles.by_ref().take(triangle_count) {
+                for &index in triangle {
+                    let distance = (mesh.vertices[index] - center).dot(normal);
+                    assert!(distance.abs() < 1e-9, "vertex is {distance} away from its face");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn face_triangles_of_curved_shape() {
+        let (radius, height) = (5.0, 10.0);
+        let shape = Shape::cylinder_radius_height(radius, height);
+        let mesh = shape.mesh().unwrap();
+
+        assert_eq!(mesh.face_triangles.len(), shape.faces().count());
+        assert_eq!(mesh.face_triangles.iter().sum::<usize>(), mesh.indices.len() / 3);
+
+        // The caps' triangles should lie in their planes, and the side's on the cylinder.
+        let mut triangles = mesh.indices.chunks_exact(3);
+
+        for (face, &triangle_count) in shape.faces().zip(&mesh.face_triangles) {
+            assert!(triangle_count > 0);
+
+            let center = face.center_of_mass();
+            let is_cap = center.z.abs() < 1e-9 || (center.z - height).abs() < 1e-9;
+
+            for triangle in triangles.by_ref().take(triangle_count) {
+                for &index in triangle {
+                    let vertex = mesh.vertices[index];
+
+                    if is_cap {
+                        assert!((vertex.z - center.z).abs() < 1e-9);
+                    } else {
+                        assert!((vertex.truncate().length() - radius).abs() < 1e-9);
+                    }
+                }
+            }
+        }
     }
 }
