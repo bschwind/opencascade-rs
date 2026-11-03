@@ -12,6 +12,12 @@ pub(crate) fn make_pipe_shell_with_law_function(
     let profile_shape = ffi::topo_ds::cast_wire_to_shape(profile);
     let with_contact = false;
     let with_correction = true;
-    make_pipe_shell.pin_mut().SetLaw(profile_shape, law_function, with_contact, with_correction);
+    ffi::b_rep_offset_api::BRepOffsetAPI_MakePipeShell_SetLaw(
+        make_pipe_shell.pin_mut(),
+        profile_shape,
+        law_function,
+        with_contact,
+        with_correction,
+    );
     make_pipe_shell
 }

@@ -47,6 +47,13 @@ fn main() {
 
     if is_windows {
         println!("cargo:rustc-link-lib=dylib=user32");
+        // MSVC only: TKernel's
+        // OSD_* (file protection, process user name, registry-based debug
+        // flags) needs the Win32 security/registry API, which isn't pulled in
+        // by anything else here. Without it, linking any binary against
+        // opencascade-sys fails with ~23 unresolved externals (SetFileSecurityW,
+        // OpenProcessToken, GetTokenInformation, RegOpenKeyExW, ...).
+        println!("cargo:rustc-link-lib=dylib=advapi32");
     }
 
     // TODO(bschwind) - Iterate over the src/ directory to populate this.

@@ -66,7 +66,7 @@ mod inner {
             index: i32,
         ) -> &TopoDS_Shape;
 
-        #[cxx_name = "handle_try_deref"]
+        #[cxx_name = "Handle_TopTools_HSequenceOfShape_deref"]
         pub fn HandleTopTools_HSequenceOfShape_Get(
             handle: &Handle_TopTools_HSequenceOfShape,
         ) -> Result<&TopTools_HSequenceOfShape>;
