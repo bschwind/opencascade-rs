@@ -8,7 +8,7 @@
 // exact-match `Handle_TopTools_HSequenceOfShape` against OCCT's own
 // `Handle(TopTools_HSequenceOfShape)&`-typed parameters.
 inline void ShapeAnalysis_FreeBounds_ConnectEdgesToWires(Handle_TopTools_HSequenceOfShape &edges,
-                                                          Standard_Real tolerance, Standard_Boolean shared,
-                                                          Handle_TopTools_HSequenceOfShape &wires) {
+                                                         Standard_Real tolerance, Standard_Boolean shared,
+                                                         Handle_TopTools_HSequenceOfShape &wires) {
   ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, tolerance, shared, wires);
 }

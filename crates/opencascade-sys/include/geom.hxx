@@ -17,8 +17,7 @@ inline std::unique_ptr<Handle_Geom_Surface> cylinder_to_surface(const Handle_Geo
 }
 
 inline std::unique_ptr<Handle_Geom_BezierSurface> Geom_BezierSurface_new(const TColgp_Array2OfPnt &poles) {
-  return std::unique_ptr<Handle_Geom_BezierSurface>(
-      new Handle_Geom_BezierSurface(new Geom_BezierSurface(poles)));
+  return std::unique_ptr<Handle_Geom_BezierSurface>(new Handle_Geom_BezierSurface(new Geom_BezierSurface(poles)));
 }
 
 inline const gp_Pnt &handle_geom_plane_location(const Handle_Geom_Plane &plane) { return plane->Location(); }
