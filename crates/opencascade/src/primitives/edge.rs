@@ -1,5 +1,5 @@
 use super::make_vec;
-use crate::primitives::{make_axis_2, make_point};
+use crate::primitives::{make_axis_2, make_point, PositionMode};
 use cxx::UniquePtr;
 use glam::{dvec3, DVec3};
 use opencascade_sys as ffi;
@@ -173,6 +173,55 @@ impl Edge {
         let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_new(&self.inner);
 
         EdgeType::from(curve.GetType())
+    }
+
+    pub fn length(&self) -> f64 {
+        let mut props = ffi::g_prop::GProps_new();
+        ffi::b_rep_g_prop::BRepGProp::LinearProperties(
+            ffi::topo_ds::cast_edge_to_shape(&self.inner),
+            props.pin_mut(),
+            false,
+            false,
+        );
+        props.Mass()
+    }
+
+    pub fn tangent_at(&self, position: f64, mode: PositionMode) -> DVec3 {
+        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_new(&self.inner);
+        let param = match mode {
+            PositionMode::Parameter => position,
+            PositionMode::Length => {
+                let first = curve.FirstParameter();
+                let last = curve.LastParameter();
+                first + position * (last - first)
+            },
+        };
+
+        let mut point = ffi::gp::new_point(0.0, 0.0, 0.0);
+        let mut vec = ffi::gp::new_vec(0.0, 0.0, 0.0);
+        ffi::b_rep_adaptor::BRepAdaptor_Curve_D1(&curve, param, point.pin_mut(), vec.pin_mut());
+
+        dvec3(vec.X(), vec.Y(), vec.Z()).normalize()
+    }
+
+    pub fn arc_center(&self) -> Option<DVec3> {
+        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_new(&self.inner);
+        if curve.GetType() != ffi::geom_abs::GeomAbs_CurveType::GeomAbs_Circle {
+            return None;
+        }
+        let circ = ffi::b_rep_adaptor::BRepAdaptor_Curve_Circle(&curve);
+        let pos = circ.Position();
+        let loc = pos.Location();
+        Some(dvec3(loc.X(), loc.Y(), loc.Z()))
+    }
+
+    pub fn radius(&self) -> Option<f64> {
+        let curve = ffi::b_rep_adaptor::BRepAdaptor_Curve_new(&self.inner);
+        if curve.GetType() != ffi::geom_abs::GeomAbs_CurveType::GeomAbs_Circle {
+            return None;
+        }
+        let circ = ffi::b_rep_adaptor::BRepAdaptor_Curve_Circle(&curve);
+        Some(circ.Radius())
     }
 }
 

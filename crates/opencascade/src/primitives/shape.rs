@@ -832,6 +832,36 @@ impl Shape {
         Self::from_shape(brep.pin_mut().Shape())
     }
 
+    pub fn center_of_mass(&self) -> DVec3 {
+        let mut props = ffi::g_prop::GProps_new();
+
+        match self.shape_type() {
+            ShapeType::Face => ffi::b_rep_g_prop::BRepGProp::SurfaceProperties(
+                &self.inner,
+                props.pin_mut(),
+                false,
+                false,
+            ),
+            ShapeType::Solid => ffi::b_rep_g_prop::BRepGProp::VolumeProperties(
+                &self.inner,
+                props.pin_mut(),
+                true,
+                false,
+                false,
+            ),
+            _ => ffi::b_rep_g_prop::BRepGProp::VolumeProperties(
+                &self.inner,
+                props.pin_mut(),
+                true,
+                false,
+                false,
+            ),
+        }
+
+        let center = ffi::g_prop::GProp_GProps_CentreOfMass(&props);
+        dvec3(center.X(), center.Y(), center.Z())
+    }
+
     /// Create a translated copy of this shape.
     #[must_use]
     pub fn translated(&self, offset: DVec3) -> Self {
@@ -999,6 +1029,32 @@ mod tests {
         assert!(shape.as_solid().is_some());
         assert!(shape.as_wire().is_none());
         assert!(shape.as_face().is_none());
+    }
+
+    #[test]
+    fn test_center_of_mass_face() {
+        let shape = Shape::from(&Face::from_wire(&Wire::rect(7.0, 5.0)));
+        let com = shape.center_of_mass();
+        assert!(
+            com.distance_squared(dvec3(0.0, 0.0, 0.0)) <= 0.00001,
+            "Expected center of mass at (0, 0, 0), got ({}, {}, {})",
+            com.x,
+            com.y,
+            com.z,
+        );
+    }
+
+    #[test]
+    fn test_center_of_mass_solid() {
+        let shape = Shape::box_centered(10.0, 10.0, 10.0);
+        let com = shape.center_of_mass();
+        assert!(
+            com.distance_squared(dvec3(0.0, 0.0, 0.0)) <= 0.00001,
+            "Expected center of mass at (0, 0, 0), got ({}, {}, {})",
+            com.x,
+            com.y,
+            com.z,
+        );
     }
 
     #[test]

@@ -10,6 +10,7 @@ mod inner {
         type TopoDS_Face = crate::topo_ds::TopoDS_Face;
         type TopoDS_Edge = crate::topo_ds::TopoDS_Edge;
         type TopoDS_Vertex = crate::topo_ds::TopoDS_Vertex;
+        type TopoDS_Wire = crate::topo_ds::TopoDS_Wire;
         type Handle_Geom_Surface = crate::geom::Handle_Geom_Surface;
         type Handle_Geom_Curve = crate::geom::Handle_Geom_Curve;
         type Handle_Poly_Triangulation = crate::poly::Handle_Poly_Triangulation;
@@ -32,5 +33,6 @@ mod inner {
             face: &TopoDS_Face,
             location: Pin<&mut TopLoc_Location>,
         ) -> UniquePtr<Handle_Poly_Triangulation>;
+        pub fn BRep_Tool_IsClosed(wire: &TopoDS_Wire) -> bool;
     }
 }
