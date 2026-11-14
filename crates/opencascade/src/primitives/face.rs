@@ -31,6 +31,10 @@ impl Face {
     fn from_make_face(
         make_face: UniquePtr<ffi::b_rep_builder_api::BRepBuilderAPI_MakeFace>,
     ) -> Self {
+        // Face() throws (and so aborts) when the face couldn't be made.
+        if !make_face.IsDone() {
+            panic!("face could not be made from the wire");
+        }
         Self::from_face(make_face.Face())
     }
 

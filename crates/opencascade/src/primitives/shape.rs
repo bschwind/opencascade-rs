@@ -478,7 +478,10 @@ impl Shape {
             make_fillet.pin_mut().add_edge(radius, &edge.as_ref().inner);
         }
 
-        Self::from_shape(make_fillet.pin_mut().Shape())
+        Self::from_shape(
+            ffi::b_rep_fillet_api::BRepFilletAPI_MakeFillet_checked_shape(make_fillet.pin_mut())
+                .unwrap_or_else(|e| panic!("fillet could not be built: {e}")),
+        )
     }
 
     #[must_use]
@@ -515,7 +518,10 @@ impl Shape {
             make_chamfer.pin_mut().add_edge(distance, &edge.as_ref().inner);
         }
 
-        Self::from_shape(make_chamfer.pin_mut().Shape())
+        Self::from_shape(
+            ffi::b_rep_fillet_api::BRepFilletAPI_MakeChamfer_checked_shape(make_chamfer.pin_mut())
+                .unwrap_or_else(|e| panic!("chamfer could not be built: {e}")),
+        )
     }
 
     /// Performs fillet of `radius` on all edges of the shape
@@ -543,7 +549,10 @@ impl Shape {
             new_edges.push(Edge::from_edge(edge));
         }
 
-        let shape = Self::from_shape(cut_operation.pin_mut().Shape());
+        let shape = Self::from_shape(
+            ffi::b_rep_algo_api::BRepAlgoAPI_Cut_checked_shape(cut_operation.pin_mut())
+                .unwrap_or_else(|e| panic!("subtract failed: {e}")),
+        );
 
         BooleanShape { shape, new_edges }
     }
@@ -701,7 +710,10 @@ impl Shape {
             new_edges.push(Edge::from_edge(edge));
         }
 
-        let shape = Self::from_shape(fuse_operation.pin_mut().Shape());
+        let shape = Self::from_shape(
+            ffi::b_rep_algo_api::BRepAlgoAPI_Fuse_checked_shape(fuse_operation.pin_mut())
+                .unwrap_or_else(|e| panic!("union failed: {e}")),
+        );
 
         BooleanShape { shape, new_edges }
     }
@@ -719,7 +731,10 @@ impl Shape {
             new_edges.push(Edge::from_edge(edge));
         }
 
-        let shape = Self::from_shape(fuse_operation.pin_mut().Shape());
+        let shape = Self::from_shape(
+            ffi::b_rep_algo_api::BRepAlgoAPI_Common_checked_shape(fuse_operation.pin_mut())
+                .unwrap_or_else(|e| panic!("intersect failed: {e}")),
+        );
 
         BooleanShape { shape, new_edges }
     }
