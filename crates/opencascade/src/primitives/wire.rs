@@ -46,6 +46,10 @@ impl Wire {
     fn from_make_wire(
         mut make_wire: UniquePtr<ffi::b_rep_builder_api::BRepBuilderAPI_MakeWire>,
     ) -> Self {
+        // Wire() throws (and so aborts) when the wire couldn't be made.
+        if !make_wire.IsDone() {
+            panic!("wire could not be made from the edges");
+        }
         Self::from_wire(make_wire.pin_mut().Wire())
     }
 

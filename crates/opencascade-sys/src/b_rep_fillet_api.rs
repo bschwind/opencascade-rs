@@ -26,6 +26,10 @@ mod inner {
             edge: &TopoDS_Edge,
         );
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeFillet>) -> &TopoDS_Shape;
+        #[cxx_name = "checked_shape"]
+        pub fn BRepFilletAPI_MakeFillet_checked_shape(
+            builder: Pin<&mut BRepFilletAPI_MakeFillet>,
+        ) -> Result<&TopoDS_Shape>;
         pub fn Build(self: Pin<&mut BRepFilletAPI_MakeFillet>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepFilletAPI_MakeFillet) -> bool;
 
@@ -65,6 +69,10 @@ mod inner {
         #[rust_name = "add_edge"]
         pub fn Add(self: Pin<&mut BRepFilletAPI_MakeChamfer>, distance: f64, edge: &TopoDS_Edge);
         pub fn Shape(self: Pin<&mut BRepFilletAPI_MakeChamfer>) -> &TopoDS_Shape;
+        #[cxx_name = "checked_shape"]
+        pub fn BRepFilletAPI_MakeChamfer_checked_shape(
+            builder: Pin<&mut BRepFilletAPI_MakeChamfer>,
+        ) -> Result<&TopoDS_Shape>;
         pub fn Build(self: Pin<&mut BRepFilletAPI_MakeChamfer>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepFilletAPI_MakeChamfer) -> bool;
     }

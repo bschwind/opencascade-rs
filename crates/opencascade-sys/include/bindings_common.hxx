@@ -23,3 +23,19 @@ template <typename T> const T &handle_try_deref(const opencascade::handle<T> &ha
   }
   return *handle;
 }
+
+#include <Standard_Failure.hxx>
+#include <TopoDS_Shape.hxx>
+#include <stdexcept>
+
+// OCCT's exceptions don't derive from std::exception, the only kind cxx can catch, so a
+// failed operation used to terminate the process. Shape() builds the result if needed and
+// throws when that fails: rethrow as std::runtime_error so cxx can return an Err.
+template <typename T> const TopoDS_Shape &checked_shape(T &builder) {
+  try {
+    return builder.Shape();
+  } catch (const Standard_Failure &e) {
+    const char *msg = e.GetMessageString();
+    throw std::runtime_error(msg && *msg ? msg : e.DynamicType()->Name());
+  }
+}
